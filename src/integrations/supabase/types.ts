@@ -57,10 +57,12 @@ export type Database = {
           customer_phone: string | null
           delivered_at: string | null
           id: string
+          marketer_confirmed_at: string | null
           marketer_id: string
           platform_fee: number
           product_id: string
           qty: number
+          receipt_url: string | null
           size: string | null
           status: string
           unit_price: number
@@ -78,10 +80,12 @@ export type Database = {
           customer_phone?: string | null
           delivered_at?: string | null
           id?: string
+          marketer_confirmed_at?: string | null
           marketer_id: string
           platform_fee?: number
           product_id: string
           qty?: number
+          receipt_url?: string | null
           size?: string | null
           status?: string
           unit_price?: number
@@ -99,10 +103,12 @@ export type Database = {
           customer_phone?: string | null
           delivered_at?: string | null
           id?: string
+          marketer_confirmed_at?: string | null
           marketer_id?: string
           platform_fee?: number
           product_id?: string
           qty?: number
+          receipt_url?: string | null
           size?: string | null
           status?: string
           unit_price?: number
@@ -326,10 +332,12 @@ export type Database = {
           customer_phone: string | null
           delivered_at: string | null
           id: string
+          marketer_confirmed_at: string | null
           marketer_id: string
           platform_fee: number
           product_id: string
           qty: number
+          receipt_url: string | null
           size: string | null
           status: string
           unit_price: number
@@ -367,10 +375,12 @@ export type Database = {
           customer_phone: string | null
           delivered_at: string | null
           id: string
+          marketer_confirmed_at: string | null
           marketer_id: string
           platform_fee: number
           product_id: string
           qty: number
+          receipt_url: string | null
           size: string | null
           status: string
           unit_price: number
