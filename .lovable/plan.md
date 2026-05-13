@@ -1,55 +1,55 @@
 ## Findings
 
-### 1. Marketer earnings/analytics update too early
+### Why the order "disappears" after uploading the receipt
 
-In `src/components/dashboard/lateen/marketer.script.js`:
+`src/components/dashboard/lateen/marketer.body.html` line 476:
 
-- `submitOrder()` (line 70) calls `recomputeAnalytics()` and `refreshWallet()` right after the marketer uploads the receipt and confirms the upfront fee. The order is also pushed into the local `orders` array immediately, with the per-card "Your commission" value shown in full.
-- `recomputeAnalytics()` (line 79) treats `status === 'confirmed'` as earned commission for the chart and ring.
-- The real backend rule (in `confirm_order` and `mark_delivered` Postgres functions) is:
-  - `confirmed` only credits `wallets.pending` for the marketer.
-  - `delivered` is what moves money into `wallets.balance`.
+```html
+<div class="overlay" id="form-overlay">
+  <div class="overlay-bg" onclick="closeForm()"></div>
+  ...
+```
 
-So the marketer's chart, pieces count, and "Done/Failed" ring move as soon as the business owner confirms (and visually feel like they jump as soon as the marketer submits, because of the local push + per-card commission). They should only move when the business marks the order delivered.
+The form overlay has a transparent backdrop wired to `closeForm()`. After the file picker returns, the OS focus shift + scroll lands a tap on that backdrop, the form closes, `resetForm()` wipes every field including `currentProduct`, `currentDelivery`, `hasReceipt`, `receiptUrl`, `depositConfirmed`, and the user lands back on the orders page (which looks like a "redirect to dashboard"). Nothing was saved because `submitOrder` was never called.
 
-### 2. Wallet refresh fires before there is anything to refresh
+### Why the order isn't held back from the business right now
 
-`refreshWallet()` is called inside `submitOrder()`. Nothing on the wallet has changed yet at that point — the order is still `pending`. This is misleading and also adds an extra round-trip.
+`submitOrder()` in `marketer.script.js` requires `depositConfirmed === true` before it does anything — it `alert`s and returns otherwise. So the marketer can't save a draft locally; it's all-or-nothing. Once they do submit, `createOrder` writes to the `orders` table immediately, and the business RLS policy `auth.uid() = business_id` makes the row visible to the business at that moment.
 
-### 3. Upload button "not working"
+The user wants two things:
+1. Be able to fill in and save an order at any time (draft).
+2. The order should only become visible to the business owner after the receipt is uploaded AND the upfront fee is confirmed.
 
-The markup and handlers look wired correctly:
-- `<div class="upload-box" onclick="triggerUpload()">` -> clicks the hidden `<input id="file-input">`.
-- `onFileUpload()` calls `window.LateenAPI.uploadReceipt(file)` which uploads to the `product-photos` bucket under `${userId}/receipts/...`.
+## Plan
 
-The storage RLS policy on `product-photos` only allows INSERT when `auth.uid()::text = foldername[1]`. The marketer uploads to a path starting with their own `userId`, so the policy passes — uploads should work for marketers in principle.
+### 1. Stop the form from closing by accident
 
-Likely real causes the user is hitting:
-- Silent failure when `window.LateenAPI` is not yet attached (script timing), so `uploadReceipt` is undefined and the click appears to do nothing.
-- The error path in `onFileUpload` only `alert`s the message; if the alert is dismissed quickly or blocked, the user just sees the label reset to "Tap to upload receipt" with no visible feedback.
-- No visible "Uploading…" spinner — only the label text changes — easy to miss on mobile.
+In `marketer.body.html`:
+- Replace the `onclick="closeForm()"` on `.overlay-bg` with a no-op (or remove the handler entirely). Closing only via the explicit "Cancel" button or the X.
+- Same fix for the instructions overlay backdrop if it has the same pattern (check and only change if so).
 
-## Plan (after approval)
+### 2. Allow saving an order at any time as a local draft
 
-1. **Stop counting earnings/analytics until delivered.**
-   - In `recomputeAnalytics()`, count earnings and pieces only when `status === 'delivered'` (keep ring "Done" = delivered, "Failed" = cancelled).
-   - Remove the `recomputeAnalytics()` and `refreshWallet()` calls from `submitOrder()`. Only `renderOrders()` (local list) should run there. Realtime subscriptions on `orders` and `wallet` will refresh totals when the business actually confirms or delivers.
+In `marketer.script.js`:
+- Remove the hard `depositConfirmed !== true` block at the top of `submitOrder()`.
+- When the marketer submits without a confirmed receipt:
+  - Build the local order with `_status: 'draft'` and `depositConfirmed: false`, push it into `orders`, do NOT call `createOrder`.
+  - Persist drafts in `localStorage` keyed by `userId` so they survive a refresh (drafts never reach the backend, so RLS is irrelevant).
+- When the marketer submits with `hasReceipt && depositConfirmed === true`:
+  - If the order was a local draft, call `createOrder` now (this is the "send to business" moment) and remove it from the draft store; mark `_status: 'pending'` and store the returned `dbId`.
+  - If the order already has a `dbId` (was already sent), just `updateOrder` with the latest receipt URL / `marketer_confirmed_at`.
 
-2. **Make per-order commission visually conditional.**
-   - In `renderOrders()`, show "Your commission" as `Pending` until the order's DB `_status === 'delivered'`, so the marketer doesn't think money has been earned just because they uploaded a receipt.
+### 3. Make the gating obvious in the UI
 
-3. **Harden the upload button.**
-   - In `onFileUpload()`:
-     - Guard against `window.LateenAPI?.uploadReceipt` being missing and surface a clear inline error inside the upload box (not only `alert`).
-     - Show a small spinner / progress dot in the upload-box while uploading.
-     - Disable the box during upload so double-taps don't restart it.
-     - Reset the label to a clear error state on failure ("Upload failed — tap to try again") instead of silently going back to the default text.
+- The submit button label switches between **"Save as draft"** (no receipt yet) and **"Send to business owner"** (receipt + deposit confirmed). The button is always enabled as long as the customer + product + delivery fields are filled.
+- On the order card in the list, drafts get a `Draft · not yet sent` badge instead of `Fee pending`, and a small "Add receipt" button that re-opens the form for that draft so the marketer can finish it.
 
-4. **Verify after fix.**
-   - Submit a new order with a test image: confirm a Storage object is created under the marketer's user id folder, confirm `orders.receipt_url` is populated, confirm the home charts and wallet do NOT change until the business marks the order delivered.
+### 4. Keep delivered-only earnings rule
+
+No change to `recomputeAnalytics` — it still only counts `delivered` orders, so drafts and pending orders don't affect earnings or analytics.
 
 ### Files to edit
+- `src/components/dashboard/lateen/marketer.body.html`
 - `src/components/dashboard/lateen/marketer.script.js`
-- `src/components/dashboard/lateen/marketer.body.html` (small CSS for the spinner / error state in `.upload-box`)
 
-No DB or RLS changes are needed.
+No DB schema or RLS changes are needed: drafts live only on the marketer's device; backend orders are still gated by `marketer_confirmed_at` + receipt URL when they get inserted.
