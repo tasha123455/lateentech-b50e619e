@@ -97,3 +97,7 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
 function toggle(id){expandedId=expandedId===id?null:id;applyFilters();}
 
 buildMainChart();buildRingChart();
+
+/* ── Live data init ── */
+loadProducts();
+if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubProducts=window.LateenAPI.subscribe('my-products',()=>loadProducts());}
