@@ -233,14 +233,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!ready) return;
+    let scheduled = false;
     const obs = new MutationObserver((muts) => {
       if (lang === "en") return;
+      if (isTranslating()) return;
       let needs = false;
       for (const m of muts) {
         if (m.type === "childList" && m.addedNodes.length) { needs = true; break; }
         if (m.type === "characterData") { needs = true; break; }
       }
-      if (needs) translateDOM(document, lang);
+      if (needs && !scheduled) {
+        scheduled = true;
+        setTimeout(() => { scheduled = false; translateDOM(document, lang); }, 60);
+      }
     });
     obs.observe(document.body, { subtree: true, childList: true, characterData: true });
     return () => obs.disconnect();
