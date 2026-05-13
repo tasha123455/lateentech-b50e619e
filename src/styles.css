@@ -124,3 +124,7 @@
   .auth-input:focus { border-color: var(--color-border-strong); }
   .auth-input::placeholder { color: var(--color-text-3); }
 }
+
+/* RTL support for translated app */
+[dir="rtl"] body { text-align: right; }
+[dir="rtl"] .auth-input { text-align: right; }

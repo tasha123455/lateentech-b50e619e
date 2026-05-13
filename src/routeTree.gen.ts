@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LanguageRouteImport } from './routes/language'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
@@ -16,6 +17,11 @@ import { Route as MarketerRegisterRouteImport } from './routes/marketer.register
 import { Route as BusinessSigninRouteImport } from './routes/business.signin'
 import { Route as BusinessRegisterRouteImport } from './routes/business.register'
 
+const LanguageRoute = LanguageRouteImport.update({
+  id: '/language',
+  path: '/language',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -50,6 +56,7 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/language': typeof LanguageRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/language': typeof LanguageRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/language': typeof LanguageRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/language'
     | '/business/register'
     | '/business/signin'
     | '/marketer/register'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/language'
     | '/business/register'
     | '/business/signin'
     | '/marketer/register'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/language'
     | '/business/register'
     | '/business/signin'
     | '/marketer/register'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  LanguageRoute: typeof LanguageRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
   BusinessSigninRoute: typeof BusinessSigninRoute
   MarketerRegisterRoute: typeof MarketerRegisterRoute
@@ -110,6 +123,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/language': {
+      id: '/language'
+      path: '/language'
+      fullPath: '/language'
+      preLoaderRoute: typeof LanguageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  LanguageRoute: LanguageRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
   BusinessSigninRoute: BusinessSigninRoute,
   MarketerRegisterRoute: MarketerRegisterRoute,
@@ -166,13 +187,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

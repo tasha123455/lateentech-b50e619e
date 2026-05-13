@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { GoogleButton } from "./GoogleButton";
 import { useAuth } from "@/auth/AuthContext";
+import { useT } from "@/i18n/LanguageContext";
 
 type Role = "marketer" | "business";
 
@@ -13,6 +14,7 @@ const styles = (role: Role) =>
 
 export function SignInForm({ role }: { role: Role }) {
   const s = styles(role);
+  const t = useT();
   const nav = useNavigate();
   const { refreshRole } = useAuth();
   const [email, setEmail] = useState("");
@@ -31,31 +33,33 @@ export function SignInForm({ role }: { role: Role }) {
     nav({ to: "/dashboard" });
   };
 
+  const subtitle = role === "marketer" ? t("Sign in to your marketer account") : t("Sign in to your business account");
+
   return (
     <form onSubmit={submit} className="space-y-4">
       <div>
-        <h1 className="text-xl font-medium text-text-1">Welcome back</h1>
-        <p className="mt-1 text-sm text-text-2">Sign in to your {role} account</p>
+        <h1 className="text-xl font-medium text-text-1">{t("Welcome back")}</h1>
+        <p className="mt-1 text-sm text-text-2">{subtitle}</p>
       </div>
-      <Field label="Email">
+      <Field label={t("Email")}>
         <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="auth-input" />
       </Field>
-      <Field label="Password">
+      <Field label={t("Password")}>
         <div className="relative">
           <input type={showPw ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="auth-input pr-16" />
-          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? "Hide" : "Show"}</button>
+          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? t("Hide") : t("Show")}</button>
         </div>
       </Field>
       {error && <p className="text-xs text-destructive">{error}</p>}
       <button type="submit" disabled={busy} className={`h-11 w-full rounded-xl text-sm font-medium transition disabled:opacity-60 ${s.btn}`}>
-        {busy ? "Signing in…" : "Sign in"}
+        {busy ? t("Signing in…") : t("Sign in")}
       </button>
       <Divider />
       <GoogleButton onClick={() => alert("Google sign-in: enable in Lovable Cloud and we'll wire it up.")} />
       <p className="text-center text-xs text-text-2">
-        No account?{" "}
+        {t("No account?")}{" "}
         <Link to={role === "marketer" ? "/marketer/register" : "/business/register"} className={`font-medium ${s.link}`}>
-          Create one
+          {t("Create one")}
         </Link>
       </p>
     </form>
