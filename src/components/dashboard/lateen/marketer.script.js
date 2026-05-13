@@ -48,7 +48,7 @@ function renderSaved(){const saved=P.filter(p=>p.sv);const c=document.getElement
 const PLATFORM_FEE_RATE=0.05;
 let PRODUCTS={};
 const COUNTRY_NAMES={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa'};
-let currentProduct=null,currentDelivery=null,qty=1,selectedSize='',selectedColor='',depositConfirmed=null,hasReceipt=false,orders=[],editingId=null;
+let currentProduct=null,currentDelivery=null,qty=1,selectedSize='',selectedColor='',depositConfirmed=null,hasReceipt=false,receiptUrl='',orders=[],editingId=null;
 const fmt=n=>'£'+parseFloat(n||0).toFixed(2);
 const genCode=()=>'ORD-'+Math.random().toString(36).substr(2,6).toUpperCase();
 const today2=()=>{const d=new Date();return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();};
