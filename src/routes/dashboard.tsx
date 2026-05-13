@@ -1,8 +1,7 @@
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/auth/AuthContext";
-import { BusinessDashboard } from "@/components/dashboard/business/BusinessDashboard";
-import { MarketerDashboard } from "@/components/dashboard/marketer/MarketerDashboard";
+import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard · Lateen" }] }),
