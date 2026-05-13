@@ -31,7 +31,9 @@ function loadChartJs(): Promise<void> {
 type Role = "business" | "marketer";
 
 function buildScript(src: string): string {
-  const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
+  const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(
+    (m) => m[1],
+  );
   const exports = names.length ? `Object.assign(window, { ${names.join(", ")} });` : "";
   return `(function(){\n${src}\n${exports}\n})();`;
 }
@@ -40,12 +42,13 @@ export function LateenShell({ role }: { role: Role }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signOut, user } = useAuth();
   const { lang } = useLanguage();
+  const userId = user?.id;
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || !user) return;
+    if (!el || !userId) return;
     // Install Supabase-backed API on window so the embedded scripts can call it.
-    (window as unknown as { LateenAPI?: unknown }).LateenAPI = createLateenApi(user.id);
+    (window as unknown as { LateenAPI?: unknown }).LateenAPI = createLateenApi(userId);
     let cancelled = false;
     let injected: HTMLScriptElement | null = null;
 
@@ -60,7 +63,11 @@ export function LateenShell({ role }: { role: Role }) {
 
     // Re-translate on language change (after dashboard re-renders strings dynamically)
     const onLang = () => {
-      if (containerRef.current) translateDOM(containerRef.current, (window as unknown as { __lang?: string }).__lang ?? "en");
+      if (containerRef.current)
+        translateDOM(
+          containerRef.current,
+          (window as unknown as { __lang?: string }).__lang ?? "en",
+        );
     };
     window.addEventListener("lateen:lang", onLang);
 
@@ -73,7 +80,11 @@ export function LateenShell({ role }: { role: Role }) {
         injected = script;
         // Translate after the embedded script has populated dynamic content
         requestAnimationFrame(() => {
-          if (containerRef.current) translateDOM(containerRef.current, (window as unknown as { __lang?: string }).__lang ?? "en");
+          if (containerRef.current)
+            translateDOM(
+              containerRef.current,
+              (window as unknown as { __lang?: string }).__lang ?? "en",
+            );
         });
       })
       .catch((err) => console.error("[Lateen] failed", err));
@@ -84,13 +95,19 @@ export function LateenShell({ role }: { role: Role }) {
       window.removeEventListener("lateen:lang", onLang);
       const w = window as unknown as { __lateenUnsubs?: Array<() => void> };
       if (w.__lateenUnsubs) {
-        for (const fn of w.__lateenUnsubs) { try { fn(); } catch { /* ignore */ } }
+        for (const fn of w.__lateenUnsubs) {
+          try {
+            fn();
+          } catch {
+            /* ignore */
+          }
+        }
         w.__lateenUnsubs = [];
       }
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
     };
-  }, [role, signOut, user]);
+  }, [role, signOut, userId]);
 
   // When lang state changes (re-render), also re-walk
   useEffect(() => {
