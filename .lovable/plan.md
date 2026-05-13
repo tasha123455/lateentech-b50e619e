@@ -1,30 +1,22 @@
-## Problem
+## Goal
 
-Clicking **List product** (and likely a few other buttons like Save Order, Pause/Delete, Request payout) does nothing. The form's onclick handler `submitProduct()` is never reachable on `window`, so the click silently throws `ReferenceError: submitProduct is not defined`.
+Find out exactly why clicking **List product** appears to do nothing, by surfacing which of the four validation guards (or which Supabase error) is firing.
 
-## Root cause
+## Change
 
-`src/components/dashboard/lateen/LateenShell.tsx` wraps the embedded dashboard script in an IIFE and then re-exports its top-level functions to `window` so inline `onclick="..."` handlers in the HTML can find them:
+In `src/components/dashboard/lateen/business.script.js`, inside `async function submitProduct()`:
 
-```ts
-const names = [...src.matchAll(/^function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(m => m[1]);
-```
+1. Add `console.log('[Lateen] submitProduct fired', { name, price, commPct, commFixed, selectedCurrency, zones })` immediately after the form values are read.
+2. Add `console.log('[Lateen] payload ready', payload)` immediately before the `await window.LateenAPI.upsertProduct(payload)` call.
+3. Keep the existing `console.error('[Lateen] upsertProduct', e)` in the `catch` block.
 
-That regex only matches `function name(` — it does **not** match `async function name(`. After we made backend calls real, ~14 handlers (across the business and marketer scripts) became `async function`, including `submitProduct`, `loadProducts`, `submitOrder`, `advance`, `refreshWallet`, `refreshProfile`, etc. None of them get attached to `window`, so any inline-onclick referencing them is dead.
+No other behavior changes — alerts and validation logic stay as-is.
 
-## Fix
+## After this lands
 
-Update the export-extraction in `src/components/dashboard/lateen/LateenShell.tsx` to also pick up async functions:
+Click **List product** once. The console will show one of:
+- Nothing → click handler not bound (regex / window-export issue).
+- `submitProduct fired` then no `payload ready` → a validation guard tripped (the alert + the logged values tell us which field is empty).
+- `payload ready` then `[Lateen] upsertProduct` error → Supabase / RLS error; the message guides the real fix.
 
-```ts
-const names = [
-  ...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm),
-].map(m => m[1]);
-```
-
-Single-file change. After this, "List product" submits, products load and render, orders/advance/payout buttons work, and profile/wallet refresh on mount.
-
-## Verification
-
-- Open Business dashboard → fill product form → click **List product** → product appears in the list and in the Marketer Browse view.
-- Console should be free of `submitProduct is not defined` style errors.
+Next message I'll apply the targeted fix based on what the log shows.
