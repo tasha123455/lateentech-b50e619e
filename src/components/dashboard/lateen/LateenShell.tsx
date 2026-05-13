@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/auth/AuthContext";
+import { useLanguage, translateDOM } from "@/i18n/LanguageContext";
+import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import businessBody from "./business.body.html?raw";
 import marketerBody from "./marketer.body.html?raw";
 import businessScript from "./business.script.js?raw";
@@ -36,6 +38,7 @@ function buildScript(src: string): string {
 export function LateenShell({ role }: { role: Role }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuth();
+  const { lang } = useLanguage();
 
   useEffect(() => {
     const el = containerRef.current;
@@ -52,6 +55,12 @@ export function LateenShell({ role }: { role: Role }) {
     };
     el.addEventListener("click", onClick);
 
+    // Re-translate on language change (after dashboard re-renders strings dynamically)
+    const onLang = () => {
+      if (containerRef.current) translateDOM(containerRef.current, (window as unknown as { __lang?: string }).__lang ?? "en");
+    };
+    window.addEventListener("lateen:lang", onLang);
+
     loadChartJs()
       .then(() => {
         if (cancelled) return;
@@ -59,24 +68,38 @@ export function LateenShell({ role }: { role: Role }) {
         script.textContent = buildScript(role === "business" ? businessScript : marketerScript);
         document.body.appendChild(script);
         injected = script;
+        // Translate after the embedded script has populated dynamic content
+        requestAnimationFrame(() => {
+          if (containerRef.current) translateDOM(containerRef.current, (window as unknown as { __lang?: string }).__lang ?? "en");
+        });
       })
       .catch((err) => console.error("[Lateen] failed", err));
 
     return () => {
       cancelled = true;
       el.removeEventListener("click", onClick);
+      window.removeEventListener("lateen:lang", onLang);
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
     };
   }, [role, signOut]);
 
+  // When lang state changes (re-render), also re-walk
+  useEffect(() => {
+    if (containerRef.current) translateDOM(containerRef.current, lang);
+  }, [lang]);
+
   const body = role === "business" ? businessBody : marketerBody;
 
   return (
-    <div
-      ref={containerRef}
-      className={`lateen-${role}`}
-      // Trusted, build-time HTML asset bundled with the app.
-      dangerouslySetInnerHTML={{ __html: body }}
-    />
+    <div className={`lateen-${role} relative`}>
+      <div className="absolute right-3 top-3 z-50">
+        <LanguageSwitcher />
+      </div>
+      <div
+        ref={containerRef}
+        // Trusted, build-time HTML asset bundled with the app.
+        dangerouslySetInnerHTML={{ __html: body }}
+      />
+    </div>
   );
 }
