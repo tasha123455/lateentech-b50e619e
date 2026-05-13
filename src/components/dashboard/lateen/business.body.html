@@ -493,19 +493,23 @@
       <div class="fbc-row"><span class="fbc-label">Marketer commission</span><span class="fbc-value" id="fbc-comm">—</span></div>
       <div class="fbc-row"><span class="fbc-label">Platform fee (5%)</span><span class="fbc-value" id="fbc-platform">—</span></div>
     </div>
-    <div class="section-label">Sizes</div>
-    <div class="variant-builder"><div class="vb-header"><span>Available sizes</span><button class="vb-add-btn" onclick="addVariant('sizes')">+ Add size</button></div><div id="sizes-list"><div class="vb-empty">Skip if not applicable</div></div></div>
-    <div class="section-label">Colours</div>
-    <div class="variant-builder"><div class="vb-header"><span>Available colours</span><button class="vb-add-btn" onclick="addVariant('colors')">+ Add colour</button></div><div id="colors-list"><div class="vb-empty">Skip if not applicable</div></div></div>
+    <div class="section-label">Variants</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;line-height:1.5">Sizes and Colours are added by default. Rename, remove, or add your own (e.g. Material, Flavour, Style).</div>
+    <div id="variant-groups-container"></div>
+    <button type="button" class="add-zone-btn" style="width:100%;margin-bottom:14px;background:transparent;border:0.5px dashed var(--color-border-secondary);color:var(--color-text-secondary)" onclick="addVariantGroup()">+ Add another variant</button>
     <div class="section-label">Delivery zones</div>
     <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.5">Add countries and cities. Set shipping and delivery cost per city.</div>
-    <div class="add-zone-row">
-      <select class="add-zone-select" id="zone-country-select">
-        <option value="">— Add a country —</option>
-        <option value="NG">Nigeria</option><option value="GH">Ghana</option><option value="EG">Egypt</option><option value="KE">Kenya</option><option value="ZA">South Africa</option><option value="MA">Morocco</option><option value="SN">Senegal</option><option value="TZ">Tanzania</option><option value="UG">Uganda</option><option value="CM">Cameroon</option><option value="CI">Côte d'Ivoire</option><option value="ET">Ethiopia</option>
-      </select>
-      <button class="add-zone-btn" onclick="addZone()">+ Add</button>
+    <div class="currency-selected-display" id="country-selected" onclick="toggleCountryDropdown()" style="margin-bottom:8px">
+      <span class="csd-flag" id="country-flag">🌐</span>
+      <div><div class="csd-name" id="country-name">Select a country</div></div>
     </div>
+    <div class="currency-search-wrap" id="country-search-wrap" style="display:none">
+      <svg class="currency-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="currency-search" id="country-search" type="text" placeholder="Search countries…" oninput="filterCountries()"/>
+    </div>
+    <div class="currency-dropdown" id="country-dropdown"></div>
+    <button class="add-zone-btn" style="width:100%;margin-bottom:12px" onclick="addZone()">+ Add country to zones</button>
+
     <div id="zone-builder-list"></div>
     <button class="submit-btn" onclick="submitProduct()">List product</button>
     <button class="cancel-btn" onclick="closeForm()">Cancel</button>
