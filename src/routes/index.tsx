@@ -45,7 +45,7 @@ function Landing() {
       <p className="mt-10 max-w-[300px] text-center text-[11px] leading-relaxed text-text-3">
         {t("New here? Selecting a role will walk you through sign-up.")}
         <br />
-        {t("By continuing you agree to our")} <span className="underline">{t("Terms")}</span> {t("&")} <span className="underline">{t("Privacy Policy")}</span>.
+        {t("By continuing you agree to our")} <span className="underline">{t("Terms")}</span> · <span className="underline">{t("Privacy Policy")}</span>.
       </p>
     </main>
   );
