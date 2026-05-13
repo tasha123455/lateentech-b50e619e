@@ -154,26 +154,35 @@ async function flushAi(code: string, langName: string, root: HTMLElement | Docum
   }
 }
 
+let isApplying = false;
+export function isTranslating() { return isApplying; }
+
 function applyToRoot(root: HTMLElement | Document, code: string, langName: string, alreadyFetching = false) {
   const { textNodes, attrTargets } = collectTexts(root);
   const cache = readCache(code);
   const missing = new Set<string>();
 
-  for (const item of textNodes) {
-    const found = lookup(item.original, code, cache);
-    if (found !== null) {
-      applyTextNode(item, found);
-    } else if (code !== "en") {
-      missing.add(item.original);
+  isApplying = true;
+  try {
+    for (const item of textNodes) {
+      const found = lookup(item.original, code, cache);
+      if (found !== null) {
+        if ((item.node.nodeValue || "").trim() !== found) applyTextNode(item, found);
+      } else if (code !== "en") {
+        missing.add(item.original);
+      }
     }
-  }
-  for (const item of attrTargets) {
-    const found = lookup(item.original, code, cache);
-    if (found !== null) {
-      item.el.setAttribute(item.attr, found);
-    } else if (code !== "en") {
-      missing.add(item.original);
+    for (const item of attrTargets) {
+      const found = lookup(item.original, code, cache);
+      if (found !== null) {
+        if (item.el.getAttribute(item.attr) !== found) item.el.setAttribute(item.attr, found);
+      } else if (code !== "en") {
+        missing.add(item.original);
+      }
     }
+  } finally {
+    // release on next microtask so the observer skips our own writes
+    queueMicrotask(() => { isApplying = false; });
   }
 
   if (code === "en" || alreadyFetching) return;
