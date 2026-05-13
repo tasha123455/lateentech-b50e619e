@@ -1,61 +1,55 @@
-Findings:
+## Findings
 
-1. Business Products/Orders layout is still low because there are two style sources.
-   - `business.body.html` was changed to `padding: 0.75rem...`, but `src/styles/lateen-business.css` still has `.lateen-business .app { padding: 1.5rem 1.25rem 5rem; }`.
-   - The external stylesheet is imported by `LateenShell.tsx` after the raw HTML, so it can override the inline dashboard styling.
-   - The external stylesheet also does not include the new `.sub-header` styling, so the compact header can render inconsistently.
+### 1. Marketer earnings/analytics update too early
 
-2. Business Orders has broken status transitions.
-   - The UI has a `shipped` step, but the database only supports `pending`, `confirmed`, and `delivered` through the current API.
-   - Clicking “Mark shipped” only changes local UI state, then `loadOrders()` reloads from the backend and turns it back into `confirmed`.
-   - Clicking “Failed” has the same issue: it only changes local state and is lost after reload because no backend cancel/fail API exists.
+In `src/components/dashboard/lateen/marketer.script.js`:
 
-3. Business order list may show wrong/incomplete product details if orders load before products.
-   - `dbToOrder()` looks up product info from the in-memory `products` array.
-   - Initial load does `await loadProducts(); await loadOrders();`, which is okay, but realtime order updates only call `loadOrders()`. If product data changes or is missing, order cards can show `(product)` and lose photos/code.
+- `submitOrder()` (line 70) calls `recomputeAnalytics()` and `refreshWallet()` right after the marketer uploads the receipt and confirms the upfront fee. The order is also pushed into the local `orders` array immediately, with the per-card "Your commission" value shown in full.
+- `recomputeAnalytics()` (line 79) treats `status === 'confirmed'` as earned commission for the chart and ring.
+- The real backend rule (in `confirm_order` and `mark_delivered` Postgres functions) is:
+  - `confirmed` only credits `wallets.pending` for the marketer.
+  - `delivered` is what moves money into `wallets.balance`.
 
-4. Business dashboard financial numbers are inconsistent.
-   - The top balance uses `wallet.balance`, which is a marketer wallet concept, while the business dashboard breakdown is calculated from delivered orders.
-   - That can make the business home amount stay `£0.00` even when delivered orders exist, while breakdown fields show different totals.
+So the marketer's chart, pieces count, and "Done/Failed" ring move as soon as the business owner confirms (and visually feel like they jump as soon as the marketer submits, because of the local push + per-card commission). They should only move when the business marks the order delivered.
 
-5. Delivered order analytics update only partially.
-   - `markDelivered()` updates the backend and marketer wallet, then business reloads orders/products, but the business “wallet amount” still reads from the wallet table instead of calculated business net earnings.
-   - Product `sold/revenue` does update when confirming the order, not when delivered, so business product cards can look updated before actual delivery.
+### 2. Wallet refresh fires before there is anything to refresh
 
-6. Marketer order submission is mostly gated correctly now.
-   - The Add Order button requires receipt upload and upfront fee confirmation.
-   - `createOrder()` is only called after confirmation, matching “don’t create it in DB yet”.
-   - Remaining concern: locally adding the order after save can duplicate briefly until backend reload/realtime finishes.
+`refreshWallet()` is called inside `submitOrder()`. Nothing on the wallet has changed yet at that point — the order is still `pending`. This is misleading and also adds an extra round-trip.
 
-7. Live subscriptions are not fully cleaned up.
-   - Business script creates `__unsubProducts`, `__unsubOrders`, `__unsubWallet`, but `LateenShell` only removes the injected script and `LateenAPI`; it does not call these unsubscribe functions.
-   - Re-entering dashboard/role changes can leave duplicate realtime listeners.
+### 3. Upload button "not working"
 
-Plan to fix after approval:
+The markup and handlers look wired correctly:
+- `<div class="upload-box" onclick="triggerUpload()">` -> clicks the hidden `<input id="file-input">`.
+- `onFileUpload()` calls `window.LateenAPI.uploadReceipt(file)` which uploads to the `product-photos` bucket under `${userId}/receipts/...`.
 
-1. Fix the Business Products/Orders vertical layout in both style sources.
-   - Add the same compact `.sub-header` CSS to `src/styles/lateen-business.css`.
-   - Change `.lateen-business .app` padding there to match `business.body.html`.
-   - Tighten orders spacing (`summary-row`, search, filters) so the first order card starts higher.
+The storage RLS policy on `product-photos` only allows INSERT when `auth.uid()::text = foldername[1]`. The marketer uploads to a path starting with their own `userId`, so the policy passes — uploads should work for marketers in principle.
 
-2. Make order status behavior match the real backend.
-   - Remove or disable the fake `shipped` step unless a real backend status is added.
-   - Keep the flow as: New order -> Confirm order -> Mark delivered.
-   - Remove the fake Failed action or add a real cancel/fail backend path if you want failures tracked.
+Likely real causes the user is hitting:
+- Silent failure when `window.LateenAPI` is not yet attached (script timing), so `uploadReceipt` is undefined and the click appears to do nothing.
+- The error path in `onFileUpload` only `alert`s the message; if the alert is dismissed quickly or blocked, the user just sees the label reset to "Tap to upload receipt" with no visible feedback.
+- No visible "Uploading…" spinner — only the label text changes — easy to miss on mobile.
 
-3. Make business dashboard numbers consistent.
-   - Set business top “NET EARNINGS” from delivered orders net revenue, not `wallet.balance`.
-   - Refresh charts, stat cards, and financial breakdown after confirm/deliver/order realtime changes.
+## Plan (after approval)
 
-4. Keep Products and Orders data in sync.
-   - On order realtime updates, reload products then orders so product names/photos/revenue stay correct.
-   - After confirming/delivering, reload in the correct order and recompute analytics.
+1. **Stop counting earnings/analytics until delivered.**
+   - In `recomputeAnalytics()`, count earnings and pieces only when `status === 'delivered'` (keep ring "Done" = delivered, "Failed" = cancelled).
+   - Remove the `recomputeAnalytics()` and `refreshWallet()` calls from `submitOrder()`. Only `renderOrders()` (local list) should run there. Realtime subscriptions on `orders` and `wallet` will refresh totals when the business actually confirms or delivers.
 
-5. Clean up live listeners safely.
-   - Store unsubscribe callbacks on `window` or a role-specific cleanup object and call them when `LateenShell` unmounts/reinjects the dashboard script.
+2. **Make per-order commission visually conditional.**
+   - In `renderOrders()`, show "Your commission" as `Pending` until the order's DB `_status === 'delivered'`, so the marketer doesn't think money has been earned just because they uploaded a receipt.
 
-Files to edit:
-- `src/styles/lateen-business.css`
-- `src/components/dashboard/lateen/business.body.html`
-- `src/components/dashboard/lateen/business.script.js`
-- `src/components/dashboard/lateen/LateenShell.tsx`
+3. **Harden the upload button.**
+   - In `onFileUpload()`:
+     - Guard against `window.LateenAPI?.uploadReceipt` being missing and surface a clear inline error inside the upload box (not only `alert`).
+     - Show a small spinner / progress dot in the upload-box while uploading.
+     - Disable the box during upload so double-taps don't restart it.
+     - Reset the label to a clear error state on failure ("Upload failed — tap to try again") instead of silently going back to the default text.
+
+4. **Verify after fix.**
+   - Submit a new order with a test image: confirm a Storage object is created under the marketer's user id folder, confirm `orders.receipt_url` is populated, confirm the home charts and wallet do NOT change until the business marks the order delivered.
+
+### Files to edit
+- `src/components/dashboard/lateen/marketer.script.js`
+- `src/components/dashboard/lateen/marketer.body.html` (small CSS for the spinner / error state in `.upload-box`)
+
+No DB or RLS changes are needed.
