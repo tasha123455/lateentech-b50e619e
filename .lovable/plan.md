@@ -1,102 +1,80 @@
-# Adopt Lateen as the App Foundation
+# Rebuild dashboards to full lateen.html parity
 
-Goal: rebuild `lateen_combined_2.html` as a real, modular TanStack Start app — same dark "Bento" aesthetic, but with components, routes, live role state, and Lovable Cloud wired up so future features (international, inventory) are easy to bolt on.
+The current foundation only covers Home / Products / Alerts / Menu with mock cards. The source `lateen.html` actually defines two full mini-apps with many more pages, sheets, and interactions. This plan ports every one of them to real React components while preserving the exact look.
 
-## 1. Brand & design tokens
+## What's in the source (verified by extracting DASH_HTML)
 
-- Replace `src/styles.css` palette with the Lateen tokens (`#141414` bg, `#1e1e1e`, `#2a2a2a`, text `#f0eeeb / #9e9b97 / #5e5c58`, borders `#333330 / #272725`, accents marketer `#6c64d4` / business `#2dbd8f`) as oklch CSS variables.
-- Register `--font-sans` (system stack) and `--font-serif` (Georgia) used by the brand wordmark.
-- Keep semantic Tailwind tokens (`bg-background`, `text-foreground`, etc.) mapped to these.
-- Default theme = dark (no light mode toggle for now).
+**Business (`role: business`)**
+- Bottom nav: Home · Products · Orders · Menu
+- Pages:
+  - `pg-home` — balance card, payout sheet, stats row, revenue chart (D/M/Y, revenue/pieces toggle), analytics ring + legend
+  - `pg-products` — product list with expandable cards, add/edit/delete, photo upload, variants (colors/sizes), zones/cities + currency dropdown, status toggle
+  - `pg-orders` — filter tabs (all/new/confirmed/shipped/delivered/failed), order cards with advance actions (confirm → ship → deliver / fail)
+  - `pg-notif` — grouped notifications (ok/info/warn/fail)
+- Drawers/sheets: menu drawer (Home / My products / Orders / Notifications + sign out), payout sheet, product form overlay
 
-## 2. Routes (TanStack file-based)
+**Marketer (`role: marketer`)**
+- Bottom nav: Home · Browse · Saved · Orders · Menu
+- Pages:
+  - `pg-home` — earnings card, withdraw sheet (bank details, copy buttons, confirm), stats, chart (D/M/Y, earnings/pieces)
+  - `pg-browse` — search, category chips (All/Beauty/Fashion/Fitness/Home/Nutrition/Tech), product grid, product detail sheet with variant pickers (color/size), deposit toggle, copy link, save
+  - `pg-saved` — saved products list
+  - `pg-orders` — manual order form (customer, address, qty +/-, deposit), order list with edit/delete (when editable), instructions sheet (fee breakdown)
+  - `pg-notif` — notifications (reachable from menu)
+- Drawers/sheets: menu drawer, withdraw sheet, product detail sheet, manual-order form, instructions sheet, camera/upload modal
 
-```
-src/routes/
-  __root.tsx                 (shell, QueryClientProvider, AuthProvider)
-  index.tsx                  (Landing — role picker)
-  marketer.signin.tsx        (/marketer/signin)
-  marketer.register.tsx      (/marketer/register)
-  business.signin.tsx        (/business/signin)
-  business.register.tsx      (/business/register)
-  _authenticated.tsx         (gate: redirect to / if no session)
-  _authenticated.dashboard.tsx (role-aware dashboard host)
-```
+## Approach
 
-The `dashboard` route reads the user's role from session/profile and renders either `<MarketerDashboard />` or `<BusinessDashboard />`. No iframe, no `srcdoc`, no giant string blobs.
+1. **Preserve the original CSS verbatim.** Drop the inline `<style>` blocks from each blob into `src/styles/lateen-business.css` and `src/styles/lateen-marketer.css`, scoped under `.lateen-business` / `.lateen-marketer` wrappers. This guarantees pixel parity with the file. Tailwind stays for layout outside the dashboard. (Same hex tokens are already in `styles.css` so the brand stays consistent.)
 
-## 3. Component breakdown (replaces `DASH_HTML`)
+2. **One React component per logical page / sheet** — no giant strings, no `dangerouslySetInnerHTML`, no iframe.
 
-```
-src/components/
-  brand/
-    LateenLogo.tsx           (the SVG mark, sized prop)
-    Wordmark.tsx
-  landing/
-    RolePickerCard.tsx
-  auth/
-    AuthCard.tsx             (shared card chrome)
-    SignInForm.tsx           (variant: marketer | business)
-    RegisterForm.tsx         (variant: marketer | business)
-    GoogleButton.tsx
-    SuccessScreen.tsx
-  dashboard/
-    DashboardShell.tsx       (topbar + bottom nav + page slot)
-    Topbar.tsx
-    BottomNav.tsx
+```text
+src/components/dashboard/
+  business/
+    BusinessDashboard.tsx        (shell + nav + page switcher + drawers)
+    HomePage.tsx                 (balance, stats, chart, analytics ring)
+    ProductsPage.tsx             (list, expand, status toggle)
+    ProductForm.tsx              (add/edit: photos, variants, zones, currency)
+    OrdersPage.tsx               (filter tabs, advance actions)
+    NotificationsPage.tsx
+    PayoutSheet.tsx
     MenuDrawer.tsx
-    business/
-      BalanceCard.tsx
-      StatsRow.tsx
-      RevenueChart.tsx
-      AnalyticsRing.tsx
-      ProductList.tsx / ProductCard.tsx
-      NotificationsPage.tsx
-      PayoutSheet.tsx
-    marketer/
-      EarningsCard.tsx
-      CampaignStats.tsx
-      ProductBrowser.tsx
-      ...mirroring marketer DASH_HTML sections
-  ui/                         (existing shadcn primitives reused where useful)
+  marketer/
+    MarketerDashboard.tsx
+    HomePage.tsx                 (earnings, stats, chart)
+    BrowsePage.tsx               (search, category chips, grid)
+    ProductDetailSheet.tsx       (variants, deposit, copy link, save)
+    SavedPage.tsx
+    OrdersPage.tsx               (list + edit/delete)
+    ManualOrderForm.tsx          (customer, address, qty, deposit, submit)
+    InstructionsSheet.tsx        (fee breakdown)
+    WithdrawSheet.tsx            (bank details, copy, confirm)
+    NotificationsPage.tsx
+    MenuDrawer.tsx
+  shared/
+    BottomNav.tsx                (role-aware items)
+    Topbar.tsx
+    RingChart.tsx                (canvas → SVG donut)
+    AreaChart.tsx                (SVG sparkline with D/M/Y + metric toggle)
 ```
 
-Each component owns its own JSX + Tailwind classes. Icons stay as inline SVGs (matching the prototype) inside small `Icon*.tsx` files so they're swappable later.
+3. **State** — each dashboard uses a local reducer (`useReducer`) for in-session data: products list, orders list, filters, active page, open sheet, form draft. Initial values come from `src/lib/mock-data.ts` (expanded to match the seed arrays in the source). All `onclick="addVariant"`, `advance`, `setFilter`, `sv`, `openD`, `submitOrder`, etc. become typed handlers on these reducers. Switching role still routes to the right dashboard via the existing `_authenticated /dashboard` gate.
 
-## 4. State management
+4. **No new DB tables yet.** Auth + role tables stay as they are; products/orders/notifications remain mock until the international/inventory phase. That keeps this change focused on visual + interaction parity.
 
-- `AuthContext` (React context) backed by Supabase session: `{ user, role: 'marketer' | 'business' | null, loading, signOut }`.
-- Role is sourced from a `profiles` row, not from client storage.
-- Route guards: `_authenticated.tsx` `beforeLoad` checks Supabase session; landing/auth routes redirect to `/dashboard` if already signed in.
-- Dashboard tabs (Home / Products / Notifications / Menu) use local component state (no URL changes for now — matches prototype).
+5. **Charts** — replace the Chart.js dependency with two small dependency-free SVG components (`AreaChart`, `RingChart`) that accept the same data shape and respond to the D/M/Y and revenue/pieces/earnings toggles.
 
-## 5. Lovable Cloud foundation
+6. **Verification**
+   - At 420px viewport, side-by-side compare each page against the original blob (Home, Products, Add product form, Orders + each filter, Notifications, Menu, Payout — for marketer: Home, Browse, Product detail, Saved, Orders, Manual order form, Instructions, Withdraw, Menu).
+   - Click every nav item and every sheet open/close in both roles.
+   - Sign-out from menu still returns to landing.
+   - Build passes.
 
-Enable Lovable Cloud and create the minimum schema so chat-driven edits work later:
+## Out of scope (next phase, per your note)
 
-- `profiles` (id uuid PK = auth.uid, full_name, phone, role enum `marketer|business`, business_name nullable, created_at)
-- `user_roles` table + `app_role` enum + `has_role()` security-definer fn (per platform rules — roles never live on profile alone)
-- RLS: users select/update their own profile; role read via `has_role`.
-- Auth: email/password + Google OAuth provider (UI buttons already match).
-- On register, server function inserts `profiles` + `user_roles` row with chosen role.
+- Persisting products/orders/notifications to Lovable Cloud
+- International/inventory features
+- Real payout/withdraw integrations
 
-No business/marketer data tables yet — those come with the international/inventory features. Just the auth + role plumbing.
-
-## 6. What's intentionally deferred
-
-- Live charts (Chart.js in prototype) → render as static SVG/placeholder components with the same dimensions; easy to swap to recharts later.
-- Real product/notification data → components accept props with mock data from `src/lib/mock-data.ts` so layouts render identically; replaced with Supabase queries when those features land.
-- International + inventory features → next phase, after you confirm the foundation matches.
-
-## 7. Verification
-
-- Visual parity: landing, both auth flows, both dashboards match prototype screenshots at 420px width.
-- Role flow: pick Marketer → register → land on marketer dashboard; sign out → pick Business → register → land on business dashboard.
-- Build passes; no placeholder index remains.
-
-## Technical notes
-
-- TanStack Start v1, file-based routing, no `src/pages/`.
-- Supabase clients: browser client for auth UI, `requireSupabaseAuth` middleware for any server fn that reads/writes profile data.
-- All colors via CSS variables in `src/styles.css`; no hex literals in components.
-- Fonts loaded via system stack + Georgia (no external font fetch needed).
+Once you approve, I'll port the CSS, create the components above, wire the reducers, and confirm parity at 420px before handing back.
