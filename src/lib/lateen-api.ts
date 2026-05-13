@@ -174,6 +174,8 @@ export function createLateenApi(userId: string) {
       customer_country?: string;
       size?: string;
       color?: string;
+      receipt_url?: string;
+      marketer_confirmed_at?: string;
     }) {
       const { data, error } = await supabase
         .from("orders")
@@ -182,6 +184,25 @@ export function createLateenApi(userId: string) {
         .single();
       if (error) throw error;
       return data;
+    },
+
+    async updateOrder(id: string, patch: Record<string, unknown>) {
+      const { error } = await supabase
+        .from("orders")
+        .update(patch as never)
+        .eq("id", id);
+      if (error) throw error;
+    },
+
+    async uploadReceipt(file: File): Promise<string> {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${userId}/receipts/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("product-photos")
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("product-photos").getPublicUrl(path);
+      return data.publicUrl;
     },
 
     async listMyOrders() {
