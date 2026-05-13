@@ -1,0 +1,575 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-background-primary: #1e1e1e;
+  --color-background-secondary: #2a2a2a;
+  --color-background-tertiary: #141414;
+  --color-text-primary: #f0eeeb;
+  --color-text-secondary: #9e9b97;
+  --color-text-tertiary: #5e5c58;
+  --color-border-secondary: #333330;
+  --color-border-tertiary: #272725;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.app { background: var(--color-background-tertiary); min-height: 860px; padding: 1.5rem 1.25rem 5rem; max-width: 420px; margin: 0 auto; font-family: var(--font-sans); }
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: #2d2b4e; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #a89ee8; flex-shrink: 0; }
+.greet { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.greet-sub { font-size: 12px; color: var(--color-text-secondary); }
+.notif-btn { width: 36px; height: 36px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.notif-dot { width: 7px; height: 7px; background: #E24B4A; border-radius: 50%; position: absolute; top: 6px; right: 6px; border: 1.5px solid var(--color-background-tertiary); }
+.wallet-card { background: #0D0D0D; border-radius: 18px; padding: 1.5rem; margin-bottom: 1rem; border: 0.5px solid #2a2a2a; }
+.wallet-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 6px; letter-spacing: 0.04em; }
+.wallet-amount { font-size: 34px; font-weight: 500; color: #fff; margin-bottom: 4px; }
+.wallet-pending { font-size: 11px; color: rgba(255,255,255,0.28); margin-bottom: 1.25rem; }
+.wallet-row { display: flex; align-items: center; justify-content: space-between; }
+.wallet-meta { font-size: 11px; color: rgba(255,255,255,0.3); }
+.wallet-meta span { color: rgba(255,255,255,0.65); font-weight: 500; }
+.withdraw-btn { height: 34px; padding: 0 16px; border-radius: 20px; border: none; background: #f0eeeb; color: #0D0D0D; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
+.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+.stat-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 14px; padding: 14px 12px; }
+.stat-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 5px; }
+.stat-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.stat-sub { font-size: 10px; margin-top: 3px; color: var(--color-text-secondary); }
+.stat-up { color: #2dbd8f; }
+.chart-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+.chart-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.chart-toggle { display: flex; background: var(--color-background-secondary); border-radius: 20px; padding: 3px; gap: 2px; }
+.ctoggle { font-size: 11px; padding: 4px 10px; border-radius: 16px; border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); transition: all .15s; white-space: nowrap; }
+.ctoggle.active { background: #f0eeeb; color: #0D0D0D; }
+.period-tabs { display: flex; gap: 4px; }
+.ptab { font-size: 11px; padding: 3px 9px; border-radius: 16px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); }
+.ptab.active { background: var(--color-background-secondary); color: var(--color-text-primary); font-weight: 500; }
+.chart-wrap { position: relative; height: 150px; width: 100%; }
+.analytics-row { display: flex; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--color-border-tertiary); gap: 12px; }
+.ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+.ring-wrap canvas { position: absolute; top: 0; left: 0; }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-pct { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.ring-sub { font-size: 9px; color: var(--color-text-secondary); }
+.analytics-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.leg-row { display: flex; align-items: center; justify-content: space-between; }
+.leg-left { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--color-text-primary); }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.leg-val { font-size: 12px; font-weight: 500; }
+.analytics-note { font-size: 10px; color: var(--color-text-tertiary); margin-top: 4px; line-height: 1.4; }
+.fail-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 8px; border-radius: 8px; font-weight: 500; margin-top: 4px; }
+.page { display: none; }
+.page.active { display: block; }
+.page-header { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1.25rem; }
+.products-list { display: flex; flex-direction: column; gap: 8px; }
+.product-card-saved { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.product-thumb { width: 44px; height: 44px; border-radius: 10px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+.product-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.product-meta { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+.copy-link-btn { font-size: 10px; padding: 3px 8px; border-radius: 8px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; margin-top: 5px; font-family: var(--font-sans); display: block; }
+.copy-link-btn.copied { background: #1a3d2f; color: #2dbd8f; border-color: #1D9E75; }
+.save-btn { background: none; border: none; cursor: pointer; padding: 0; }
+.saved-empty { text-align: center; padding: 3rem 1rem; color: var(--color-text-secondary); font-size: 13px; }
+.saved-empty-icon { font-size: 32px; margin-bottom: 10px; }
+.bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #1a1a1a; border-top: 0.5px solid var(--color-border-tertiary); padding: 10px 0 16px; position: absolute; bottom: 0; left: 0; right: 0; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 1rem; }
+.nav-label { font-size: 10px; color: var(--color-text-secondary); }
+.nav-item.active .nav-label { color: #7f77dd; font-weight: 500; }
+.menu-overlay { display: none; position: absolute; inset: 0; z-index: 30; }
+.menu-overlay.open { display: flex; }
+.menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+.menu-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 78%; background: #1e1e1e; padding: 2rem 1.5rem; display: flex; flex-direction: column; border-radius: 20px 0 0 20px; border-left: 0.5px solid var(--color-border-secondary); }
+.menu-close { align-self: flex-end; background: none; border: none; cursor: pointer; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+.menu-user { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.menu-name { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.menu-country { font-size: 12px; color: var(--color-text-secondary); margin-top: 1px; }
+.menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+.menu-item:last-of-type { border-bottom: none; }
+.menu-item-label { font-size: 14px; color: var(--color-text-primary); }
+.menu-item-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+.menu-icon-wrap { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mi-purple { background: #2d2b4e; } .mi-amber { background: #3a2a10; } .mi-red { background: #3a1a1a; }
+.country-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #3a2a10; color: #c9923a; margin-left: auto; flex-shrink: 0; }
+.notif-list { display: flex; flex-direction: column; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 16px; overflow: hidden; }
+.notif-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.notif-item:last-child { border-bottom: none; }
+.notif-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.ni-ok { background: #1a3d2f; } .ni-fail { background: #3a1a1a; } .ni-info { background: #2d2b4e; }
+.notif-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.notif-body { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.4; }
+.notif-time { font-size: 11px; color: var(--color-text-tertiary); margin-top: 3px; }
+.unread-dot { width: 7px; height: 7px; border-radius: 50%; background: #7f77dd; margin-left: auto; margin-top: 4px; flex-shrink: 0; }
+/* Browse */
+.sr { display: flex; gap: 8px; margin-bottom: 12px; }
+.sb { display: flex; align-items: center; gap: 8px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 12px; padding: 0 12px; height: 42px; flex: 1; }
+.sb input { border: none; background: transparent; font-size: 13px; color: var(--color-text-primary); outline: none; flex: 1; font-family: var(--font-sans); }
+.sb input::placeholder { color: var(--color-text-tertiary); }
+.cbtn { width: 42px; height: 42px; border-radius: 12px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; position: relative; }
+.ci-inp { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.fc-row { display: flex; gap: 7px; overflow-x: auto; margin-bottom: 1.25rem; align-items: center; }
+.fc-row::-webkit-scrollbar { display: none; }
+.fc-divider { width: 0.5px; height: 20px; background: var(--color-border-secondary); flex-shrink: 0; }
+.chip-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 5px 13px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; font-family: var(--font-sans); flex-shrink: 0; transition: all .15s; }
+.chip-btn.on { background: #f0eeeb; color: #0D0D0D; border-color: #f0eeeb; font-weight: 600; }
+.sl { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.sd { width: 6px; height: 6px; border-radius: 50%; background: #7f77dd; }
+.g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.c { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 14px; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+.c:hover { border-color: var(--color-border-secondary); }
+.ci2 { width: 100%; height: 110px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; }
+.cb2 { padding: 10px 12px 12px; }
+.cn { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr { display: flex; align-items: center; justify-content: space-between; }
+.cpr { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.cco { font-size: 12px; font-weight: 500; color: #8b83e8; }
+.em { text-align: center; padding: 3rem 1rem; color: var(--color-text-secondary); font-size: 13px; grid-column: 1/-1; }
+.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1.25rem 0; }
+.pt { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1rem; }
+.ov { display: none; position: absolute; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
+.ov.open { display: flex; }
+.ob { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+.sh { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2.5rem; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--color-border-secondary); }
+.shh { width: 36px; height: 4px; background: var(--color-border-secondary); border-radius: 2px; margin: 0 auto 1.25rem; }
+.sht { font-size: 17px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1.5rem; }
+.shs { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 10px; margin-top: 18px; }
+.shs:first-of-type { margin-top: 0; }
+.oa { display: flex; gap: 7px; flex-wrap: wrap; }
+.oo { font-size: 12px; padding: 6px 13px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); transition: all .15s; }
+.oo.s { background: #2d2b4e; color: #a89ee8; border-color: #534AB7; font-weight: 500; }
+.sa { display: flex; flex-direction: column; gap: 8px; }
+.so { display: flex; align-items: center; padding: 12px 14px; border-radius: 12px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); cursor: pointer; font-size: 13px; color: var(--color-text-primary); font-family: var(--font-sans); }
+.so.s { background: #2d2b4e; border-color: #534AB7; color: #a89ee8; font-weight: 500; }
+.sr2 { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--color-border-secondary); margin-left: auto; flex-shrink: 0; }
+.so.s .sr2 { border-color: #7f77dd; background: #7f77dd; }
+.ab { width: 100%; height: 44px; border-radius: 12px; border: none; background: #f0eeeb; color: #0D0D0D; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); margin-top: 20px; }
+.rb { width: 100%; height: 38px; border-radius: 12px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; font-family: var(--font-sans); margin-top: 8px; }
+.ds { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 0 0 2.5rem; width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--color-border-secondary); }
+.dp { width: 100%; height: 190px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 68px; position: relative; }
+.dh { position: absolute; top: 10px; left: 0; right: 0; display: flex; justify-content: center; }
+.dhb { width: 36px; height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; }
+.db { padding: 16px 16px 0; }
+.dn { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 14px; }
+.ec { background: #0D0D0D; border-radius: 14px; padding: 16px; margin-bottom: 14px; border: 0.5px solid #2a2a2a; }
+.el { font-size: 10px; color: rgba(255,255,255,.35); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; }
+.ea { font-size: 32px; font-weight: 500; color: #fff; margin-bottom: 10px; }
+.eb { display: flex; gap: 14px; flex-wrap: wrap; }
+.ei { font-size: 11px; color: rgba(255,255,255,.38); }
+.ei span { color: rgba(255,255,255,.75); font-weight: 500; }
+.sg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.dt { background: var(--color-background-secondary); border-radius: 10px; padding: 10px 12px; }
+.dl { font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 3px; }
+.dv { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+.dv.pu { color: #8b83e8; } .dv.am { color: #c9923a; }
+.dse { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 8px; margin-top: 14px; }
+.ch { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chi { font-size: 12px; padding: 5px 11px; border-radius: 8px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.zb { border: 0.5px solid var(--color-border-tertiary); border-radius: 10px; overflow: hidden; margin-bottom: 8px; }
+.zh { padding: 7px 12px; background: var(--color-background-secondary); font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+.zr { display: flex; justify-content: space-between; padding: 7px 12px; border-top: 0.5px solid var(--color-border-tertiary); font-size: 12px; }
+.zn { color: var(--color-text-primary); }
+.zc { font-size: 11px; color: var(--color-text-secondary); }
+.zc span { font-weight: 500; color: var(--color-text-primary); }
+.da { display: flex; gap: 10px; padding: 0 16px; margin-top: 16px; }
+.bsv { height: 46px; flex: 1; border-radius: 12px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-primary); font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); display: flex; align-items: center; justify-content: center; gap: 7px; }
+.bsv.sv { background: #3a1a1a; border-color: #6b2424; color: #e07070; }
+.blk { height: 46px; flex: 2; border-radius: 12px; border: none; background: #f0eeeb; color: #0D0D0D; font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
+.blk.cp { background: #1D9E75; color: #fff; }
+.cam { display: none; position: absolute; inset: 0; background: #000; z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
+.cam.open { display: flex; }
+.cx { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,.15); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+
+/* ── Orders page ── */
+.orders-pg { padding: 0; }
+.empty-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; gap: 14px; }
+.empty-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; }
+.empty-text { font-size: 13px; color: var(--color-text-secondary); text-align: center; }
+.add-order-btn { height: 44px; padding: 0 24px; border-radius: 22px; border: none; background: #f0eeeb; color: #0D0D0D; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); display: flex; align-items: center; gap: 8px; margin: 0 auto; }
+.orders-list-pg { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+.order-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 16px; padding: 14px; }
+.order-card.paid { background: #0d2a1f; border-color: #1D9E75; }
+.oc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.oc-code { font-size: 11px; color: var(--color-text-secondary); font-weight: 500; }
+.oc-actions { display: flex; gap: 6px; }
+.oc-btn { width: 28px; height: 28px; border-radius: 8px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.oc-btn.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+.oc-customer { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.oc-phone { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px; }
+.oc-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.oc-chip { font-size: 11px; padding: 3px 8px; border-radius: 8px; background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.oc-chip.purple { background: #2d2b4e; color: #a89ee8; }
+.oc-divider { height: 0.5px; background: var(--color-border-tertiary); margin: 10px 0; }
+.oc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.oc-field-label { font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 2px; }
+.oc-field-value { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+.oc-notes { font-size: 11px; color: var(--color-text-secondary); font-style: italic; margin-bottom: 8px; }
+.oc-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.paid-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: #2dbd8f; background: #0d2a1f; padding: 3px 10px; border-radius: 20px; border: 0.5px solid #1D9E75; }
+.pending-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: #c9923a; background: #3a2a10; padding: 3px 10px; border-radius: 20px; }
+.how-btn { font-size: 11px; padding: 4px 11px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); white-space: nowrap; }
+/* Orders overlays */
+.overlay { display: none; position: absolute; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
+.overlay.open { display: flex; }
+.overlay-bg { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+.sheet { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2rem; width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--color-border-secondary); }
+.sheet-handle { width: 36px; height: 4px; background: var(--color-border-secondary); border-radius: 2px; margin: 0 auto 1.25rem; }
+.sheet-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.sheet-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+.section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; margin-top: 6px; }
+.field { margin-bottom: 13px; }
+.field label { display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 5px; }
+.field input, .field select, .field textarea { width: 100%; padding: 10px 12px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); border-radius: 10px; background: var(--color-background-secondary); color: var(--color-text-primary); outline: none; font-family: var(--font-sans); }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: #7f77dd; }
+.field textarea { resize: none; height: 64px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-hint { font-size: 10px; color: var(--color-text-tertiary); margin-top: 4px; }
+.field select:disabled { background: #222; color: var(--color-text-tertiary); cursor: not-allowed; }
+.field select option { background: #2a2a2a; color: var(--color-text-primary); }
+.auto-card { border-radius: 12px; padding: 13px 14px; margin-bottom: 13px; display: none; }
+.prod-info-card { background: #2d2b4e; }
+.fee-card-dark { background: #0D0D0D; border: 0.5px solid #2a2a2a; }
+.biz-card-dark { background: var(--color-background-secondary); }
+.ac-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.ac-row:last-child { margin-bottom: 0; }
+.ac-label { font-size: 12px; }
+.prod-info-card .ac-label { color: #a89ee8; }
+.fee-card-dark .ac-label { color: rgba(255,255,255,0.5); }
+.biz-card-dark .ac-label { color: var(--color-text-secondary); }
+.ac-value { font-size: 12px; font-weight: 500; }
+.prod-info-card .ac-value { color: #c8c2f5; }
+.fee-card-dark .ac-value { color: #fff; }
+.biz-card-dark .ac-value { color: var(--color-text-primary); }
+.ac-note { font-size: 10px; margin-top: 6px; color: var(--color-text-tertiary); }
+.fee-card-dark .ac-note { color: rgba(255,255,255,0.35); }
+.fee-highlight { font-size: 26px; font-weight: 500; color: #fff; margin: 6px 0 2px; }
+.fee-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 10px; }
+.fee-divider { height: 0.5px; background: rgba(255,255,255,0.1); margin: 10px 0; }
+.variant-group { margin-bottom: 13px; display: none; }
+.variant-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.variant-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.vchip { font-size: 12px; padding: 5px 12px; border-radius: 8px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; transition: all .15s; }
+.vchip.selected { border-color: #7f77dd; background: #2d2b4e; color: #a89ee8; font-weight: 500; }
+.qty-row { display: flex; align-items: center; gap: 12px; margin-bottom: 13px; display: none; }
+.qty-label { font-size: 12px; color: var(--color-text-secondary); }
+.qty-controls { display: flex; align-items: center; border: 0.5px solid var(--color-border-secondary); border-radius: 10px; overflow: hidden; }
+.qty-btn { width: 38px; height: 38px; border: none; background: var(--color-background-secondary); color: var(--color-text-primary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.qty-display { width: 44px; text-align: center; font-size: 15px; font-weight: 500; color: var(--color-text-primary); border-left: 0.5px solid var(--color-border-secondary); border-right: 0.5px solid var(--color-border-secondary); height: 38px; line-height: 38px; background: #1e1e1e; }
+.upload-box { border: 0.5px dashed var(--color-border-secondary); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; margin-bottom: 13px; transition: border-color .15s; }
+.upload-box:hover { border-color: #7f77dd; }
+.upload-box.has-file { border-color: #1D9E75; background: #0d2a1f; }
+.upload-icon-label { font-size: 12px; color: var(--color-text-secondary); margin-top: 6px; }
+.upload-icon-label.done { color: #2dbd8f; font-weight: 500; }
+.deposit-section { display: none; background: var(--color-background-secondary); border-radius: 12px; padding: 14px; margin-bottom: 13px; }
+.deposit-q { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
+.deposit-q-sub { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 10px; }
+.deposit-btns { display: flex; gap: 8px; }
+.dep-btn { flex: 1; height: 38px; border-radius: 10px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); font-size: 13px; cursor: pointer; font-family: var(--font-sans); color: var(--color-text-secondary); }
+.dep-btn.yes.active { background: #0d2a1f; border-color: #1D9E75; color: #2dbd8f; font-weight: 500; }
+.dep-btn.no.active  { background: #3a1a1a; border-color: #e07070; color: #e07070; font-weight: 500; }
+.submit-btn { width: 100%; height: 44px; border-radius: 12px; border: none; background: #f0eeeb; color: #0D0D0D; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); margin-bottom: 10px; }
+.cancel-btn { width: 100%; height: 40px; border-radius: 12px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; font-family: var(--font-sans); }
+.no-delivery-note { background: #3a2a10; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #c9923a; line-height: 1.5; margin-bottom: 13px; display: none; }
+.instr-card { border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.instr-card.dark { background: #0D0D0D; border: 0.5px solid #2a2a2a; }
+.instr-card.light { background: var(--color-background-secondary); }
+.instr-step { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+.instr-step:last-child { margin-bottom: 0; }
+.step-num { width: 24px; height: 24px; border-radius: 50%; background: #534AB7; color: #fff; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.step-body { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+.copy-row { display: flex; align-items: center; justify-content: space-between; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 8px; padding: 8px 10px; margin-top: 6px; }
+.copy-val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.copy-btn { font-size: 11px; padding: 3px 8px; border-radius: 6px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); }
+.copy-btn.done { background: #0d2a1f; color: #2dbd8f; border-color: #1D9E75; }
+.fee-amount-big { font-size: 28px; font-weight: 500; color: #fff; margin: 4px 0; }
+.fee-label-sm { font-size: 11px; color: rgba(255,255,255,0.45); }
+</style>
+
+<div style="position:relative;max-width:420px;margin:0 auto;min-height:860px;overflow:hidden;background:#141414;">
+<div class="app">
+
+  <!-- HOME -->
+  <div class="page active" id="pg-home">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="avatar">AJ</div>
+        <div><div class="greet">Hey, Amara</div><div class="greet-sub">Marketer · Nigeria</div></div>
+      </div>
+      <div class="notif-btn" onclick="goTo('pg-notif')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot" id="notif-dot"></div>
+      </div>
+    </div>
+    <div class="wallet-card">
+      <div class="wallet-label">WALLET BALANCE</div>
+      <div class="wallet-amount">£412.00</div>
+      <div class="wallet-pending">£86.50 pending clearance</div>
+      <div class="wallet-row">
+        <div class="wallet-meta">Next payout <span id="days-left">—</span></div>
+        <button class="withdraw-btn" onclick="openWithdraw()">Withdraw</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total earned</div><div class="stat-value">£3.2k</div><div class="stat-sub stat-up">+£412 this mo.</div></div>
+      <div class="stat-card"><div class="stat-label">Succeeded</div><div class="stat-value">186</div><div class="stat-sub">of 204 orders</div></div>
+      <div class="stat-card"><div class="stat-label">Pieces sold</div><div class="stat-value">531</div><div class="stat-sub">7 products</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-top">
+        <div class="chart-toggle">
+          <button class="ctoggle active" onclick="switchMetric('earnings',this)">Earnings</button>
+          <button class="ctoggle" onclick="switchMetric('pieces',this)">Pieces sold</button>
+        </div>
+        <div class="period-tabs">
+          <button class="ptab active" onclick="switchPeriod('D',this)">D</button>
+          <button class="ptab" onclick="switchPeriod('M',this)">M</button>
+          <button class="ptab" onclick="switchPeriod('Y',this)">Y</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+      <div class="analytics-row">
+        <div class="ring-wrap"><canvas id="ringChart" width="80" height="80"></canvas><div class="ring-center"><div class="ring-pct" id="ring-pct">88%</div><div class="ring-sub">success</div></div></div>
+        <div class="analytics-legend">
+          <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#2dbd8f"></div>Delivered</div><div class="leg-val" style="color:#2dbd8f" id="leg-ok">186</div></div>
+          <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#e07070"></div>Failed (COD)</div><div class="leg-val" style="color:#e07070" id="leg-fail">18</div></div>
+          <div class="fail-badge" id="fail-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg><span id="fail-badge-text">−2% failure rate</span></div>
+          <div class="analytics-note">Cash-on-delivery failures only</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BROWSE -->
+  <div class="page" id="pg-browse">
+    <div class="pt">Browse products</div>
+    <div class="sr">
+      <div class="sb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="si" placeholder="Search products…" oninput="go()"/></div>
+      <div class="cbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><input class="ci-inp" type="file" accept="image/*" capture="environment" onchange="onCam(this)"/></div>
+    </div>
+    <div class="fc-row">
+      <div class="chip-btn" id="fbtn" onclick="openF()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filters</div>
+      <div class="fc-divider"></div>
+      <div class="chip-btn on" id="cat-all" onclick="setCat('',this)">All</div>
+      <div class="chip-btn" id="cat-fash" onclick="setCat('Fashion',this)">Fashion</div>
+      <div class="chip-btn" id="cat-beauty" onclick="setCat('Beauty',this)">Beauty</div>
+      <div class="chip-btn" id="cat-fit" onclick="setCat('Fitness',this)">Fitness</div>
+      <div class="chip-btn" id="cat-tech" onclick="setCat('Tech',this)">Tech</div>
+      <div class="chip-btn" id="cat-nut" onclick="setCat('Nutrition',this)">Nutrition</div>
+      <div class="chip-btn" id="cat-home" onclick="setCat('Home',this)">Home</div>
+    </div>
+    <div id="rw" style="display:none"><div class="sl"><div class="sd"></div>Recommended for you</div><div class="g" id="rg"></div><div class="divider"></div><div class="sl" style="margin-bottom:10px">All products</div></div>
+    <div class="g" id="mg"></div>
+  </div>
+
+  <!-- MY PRODUCTS -->
+  <div class="page" id="pg-saved">
+    <div class="page-header">My products</div>
+    <div id="saved-list"></div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="page orders-pg" id="pg-orders">
+    <div class="page-header">Orders</div>
+    <div class="empty-center" id="empty-state">
+      <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+      <div class="empty-text">No orders yet.<br>Tap the button below to add your first order.</div>
+    </div>
+    <div class="orders-list-pg" id="orders-list" style="display:none"></div>
+    <div style="display:flex;justify-content:center;margin-top:1rem;">
+      <button class="add-order-btn" onclick="openForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add order
+      </button>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="page" id="pg-notif">
+    <div class="page-header">Notifications</div>
+    <div class="notif-list">
+      <div class="notif-item"><div class="notif-icon ni-ok"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2dbd8f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div style="flex:1"><div class="notif-title">Order delivered</div><div class="notif-body">Running shoes · Nike — £18.40 added to your wallet</div><div class="notif-time">2 Apr 2026 · 10:42 AM</div></div><div class="unread-dot"></div></div>
+      <div class="notif-item"><div class="notif-icon ni-ok"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2dbd8f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div style="flex:1"><div class="notif-title">Order delivered</div><div class="notif-body">Skincare set · GlowCo — £22.10 added to your wallet</div><div class="notif-time">1 Apr 2026 · 3:18 PM</div></div><div class="unread-dot"></div></div>
+      <div class="notif-item"><div class="notif-icon ni-fail"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div style="flex:1"><div class="notif-title">Order failed</div><div class="notif-body">Smartwatch · TechBrand — Customer refused delivery (COD)</div><div class="notif-time">31 Mar 2026 · 1:05 PM</div></div></div>
+      <div class="notif-item"><div class="notif-icon ni-info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b83e8" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div style="flex:1"><div class="notif-title">Withdrawal processed</div><div class="notif-body">£320.00 sent to account ending ···4821</div><div class="notif-time">1 Mar 2026 · 8:00 AM</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="goTo('pg-home')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    <span class="nav-label" style="color:#7f77dd">Home</span>
+  </div>
+  <div class="nav-item" id="nav-browse" onclick="goTo('pg-browse')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span class="nav-label">Browse</span>
+  </div>
+  <div class="nav-item" id="nav-orders" onclick="goTo('pg-orders')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    <span class="nav-label">Orders</span>
+  </div>
+  <div class="nav-item" id="nav-saved" onclick="goTo('pg-saved')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+    <span class="nav-label">Saved</span>
+  </div>
+  <div class="nav-item" id="nav-menu" onclick="openMenu()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <span class="nav-label">Menu</span>
+  </div>
+</div>
+
+<!-- MENU DRAWER -->
+<div class="menu-overlay" id="menu-overlay">
+  <div class="menu-backdrop" onclick="closeMenu()"></div>
+  <div class="menu-drawer">
+    <button class="menu-close" onclick="closeMenu()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="menu-user"><div class="avatar">AJ</div><div><div class="menu-name">Amara Johnson</div><div class="menu-country">Nigeria · Marketer</div></div></div>
+    <div class="menu-item" onclick="closeMenu();goTo('pg-home')"><div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b83e8" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div><div class="menu-item-label">Home</div></div></div>
+    <div class="menu-item" onclick="closeMenu();goTo('pg-browse')"><div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b83e8" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="menu-item-label">Browse products</div></div></div>
+    <div class="menu-item" onclick="closeMenu();goTo('pg-orders')"><div class="menu-icon-wrap mi-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9923a" stroke-width="1.8" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div><div class="menu-item-label">Orders</div><div class="menu-item-sub">Track &amp; manage orders</div></div><span class="country-badge">NG · GH · EG</span></div>
+    <div class="menu-item" onclick="closeMenu();goTo('pg-saved')"><div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b83e8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><div><div class="menu-item-label">My products</div></div></div>
+    <div class="menu-item" style="margin-top:auto;border-top:0.5px solid var(--color-border-tertiary);padding-top:14px;"><div class="menu-icon-wrap mi-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><div><div class="menu-item-label" style="color:#e07070">Sign out</div></div></div>
+  </div>
+</div>
+
+<!-- WITHDRAW OVERLAY -->
+<div class="menu-overlay" id="withdraw-overlay">
+  <div class="menu-backdrop" onclick="closeWithdraw()"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#1e1e1e;border-radius:20px 20px 0 0;padding:1.5rem;border-top:0.5px solid #333;">
+    <div style="width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 1.25rem;"></div>
+    <div style="font-size:17px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;">Withdraw earnings</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem;">Funds arrive in 2–5 business days</div>
+    <div style="background:#2a2a2a;border-radius:12px;padding:16px;text-align:center;margin-bottom:1.25rem;">
+      <div style="font-size:30px;font-weight:500;color:var(--color-text-primary);">£412.00</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">To account ending ···4821</div>
+    </div>
+    <button onclick="confirmWithdraw()" style="width:100%;height:44px;border-radius:12px;border:none;background:#f0eeeb;color:#0D0D0D;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);margin-bottom:10px;">Confirm withdrawal</button>
+    <button onclick="closeWithdraw()" style="width:100%;height:40px;border-radius:12px;border:0.5px solid #333;background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;font-family:var(--font-sans);">Cancel</button>
+  </div>
+</div>
+
+<!-- BROWSE OVERLAYS -->
+<div class="ov" id="fov">
+  <div class="ob" onclick="closeF()"></div>
+  <div class="sh">
+    <div class="shh"></div><div class="sht">Filter &amp; sort</div>
+    <div class="shs">Country</div><div class="oa" id="co"></div>
+    <div id="cis" style="display:none"><div class="shs">City</div><div class="oa" id="cio"></div></div>
+    <div class="shs">Commission</div>
+    <div class="sa"><div class="so" id="sch" onclick="pk('ch')">Highest commission first <div class="sr2"></div></div><div class="so" id="scl" onclick="pk('cl')">Lowest commission first <div class="sr2"></div></div></div>
+    <div class="shs">Price</div>
+    <div class="sa"><div class="so" id="sph" onclick="pk('ph')">Highest price first <div class="sr2"></div></div><div class="so" id="spl" onclick="pk('pl')">Lowest price first <div class="sr2"></div></div></div>
+    <button class="ab" onclick="apF()">Apply</button><button class="rb" onclick="rsF()">Reset all</button>
+  </div>
+</div>
+<div class="ov" id="dov"><div class="ob" onclick="closeD()"></div><div class="ds" id="ds"></div></div>
+<div class="cam" id="cam">
+  <button class="cx" onclick="closeCam()">×</button>
+  <div style="font-size:14px;color:#fff;opacity:.8;margin-bottom:16px" id="clb">Analysing image…</div>
+  <div style="font-size:48px;margin-bottom:12px" id="cem"></div>
+  <div style="font-size:15px;color:#fff;font-weight:500;cursor:pointer" id="cnm"></div>
+</div>
+
+<!-- ORDER FORM OVERLAY -->
+<div class="overlay" id="form-overlay">
+  <div class="overlay-bg" onclick="closeForm()"></div>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="form-title">New order</div>
+    <div class="section-label">Customer details</div>
+    <div class="field"><label>Full name</label><input type="text" id="f-name" placeholder="e.g. Omar Hassan"/></div>
+    <div class="field-row">
+      <div class="field"><label>Phone number</label><input type="tel" id="f-phone" placeholder="+234 800 000 0000"/></div>
+      <div class="field"><label>WhatsApp (optional)</label><input type="tel" id="f-whatsapp" placeholder="+234 …"/></div>
+    </div>
+    <div class="section-label" style="margin-top:8px">Product</div>
+    <div class="field">
+      <label>Choose from your saved products</label>
+      <select id="f-product" onchange="onProductChange()">
+        <option value="">— Select a product —</option>
+        <option value="shoes">Running shoes · £49.99</option>
+        <option value="skin">Skincare set · £34.99</option>
+        <option value="protein">Protein powder · £29.99</option>
+        <option value="yoga">Yoga mat · £24.99</option>
+      </select>
+    </div>
+    <div class="auto-card prod-info-card" id="prod-info">
+      <div class="ac-row"><span class="ac-label">Product price</span><span class="ac-value" id="pi-price">—</span></div>
+      <div class="ac-row"><span class="ac-label">Commission rate</span><span class="ac-value" id="pi-pct">—</span></div>
+      <div class="ac-row"><span class="ac-label">Your earning per unit</span><span class="ac-value" id="pi-earn">—</span></div>
+    </div>
+    <div class="variant-group" id="size-group"><div class="variant-label">Select size</div><div class="variant-chips" id="size-chips"></div></div>
+    <div class="variant-group" id="color-group"><div class="variant-label">Select colour</div><div class="variant-chips" id="color-chips"></div></div>
+    <div class="qty-row" id="qty-row">
+      <span class="qty-label">Quantity</span>
+      <div class="qty-controls"><button class="qty-btn" onclick="changeQty(-1)">−</button><div class="qty-display" id="qty-display">1</div><button class="qty-btn" onclick="changeQty(1)">+</button></div>
+    </div>
+    <div class="section-label" id="delivery-section-label" style="display:none;margin-top:4px">Delivery location</div>
+    <div class="field-row" id="location-fields" style="display:none">
+      <div class="field"><label>Country</label><select id="f-country" onchange="onCountryChange()"><option value="">— Select —</option></select><div class="field-hint" id="country-hint"></div></div>
+      <div class="field"><label>City</label><select id="f-city" onchange="onCityChange()" disabled><option value="">— Select country first —</option></select><div class="field-hint" id="city-hint"></div></div>
+    </div>
+    <div class="no-delivery-note" id="no-delivery-note"></div>
+    <div class="field" id="address-field" style="display:none"><label>Full delivery address</label><input type="text" id="f-address" placeholder="Street, area, landmark…"/></div>
+    <div class="auto-card biz-card-dark" id="biz-costs">
+      <div class="ac-row"><span class="ac-label">Shipping cost</span><span class="ac-value" id="bc-shipping">—</span></div>
+      <div class="ac-row"><span class="ac-label">Delivery cost</span><span class="ac-value" id="bc-delivery">—</span></div>
+      <div class="ac-note" id="bc-note">Set by the business owner</div>
+    </div>
+    <div class="auto-card fee-card-dark" id="fee-card">
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.05em">COMMITMENT FEE TO COLLECT</div>
+      <div class="fee-highlight" id="fee-total">—</div>
+      <div class="fee-sub" id="fee-qty-note">per unit × 1</div>
+      <div class="fee-divider"></div>
+      <div class="ac-row"><span class="ac-label">Your commission (per unit)</span><span class="ac-value" id="fee-commission">—</span></div>
+      <div class="ac-row"><span class="ac-label">Platform fee (per unit)</span><span class="ac-value" id="fee-platform">—</span></div>
+      <div class="ac-note">Collect this from the customer before shipping. Set by Lateen.</div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Special instructions, preferred delivery time, etc."></textarea></div>
+    <div class="section-label">Payment receipt</div>
+    <div class="upload-box" id="upload-box" onclick="triggerUpload()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div class="upload-icon-label" id="upload-label">Tap to upload receipt</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none" onchange="onFileUpload(this)"/>
+    <div class="deposit-section" id="deposit-section">
+      <div class="deposit-q">Did the customer pay the commitment fee?</div>
+      <div class="deposit-q-sub" id="deposit-q-sub">—</div>
+      <div class="deposit-btns">
+        <button class="dep-btn yes" id="dep-yes" onclick="setDeposit(true)">Yes, paid</button>
+        <button class="dep-btn no" id="dep-no" onclick="setDeposit(false)">No, not yet</button>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="submitOrder()" id="submit-btn">Add order</button>
+    <button class="cancel-btn" onclick="closeForm()">Cancel</button>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS OVERLAY -->
+<div class="overlay" id="instr-overlay">
+  <div class="overlay-bg" onclick="closeInstr()"></div>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">How to collect the fee</div>
+    <div class="sheet-sub" id="instr-sub">Step-by-step deposit instructions</div>
+    <div class="instr-card dark">
+      <div class="fee-label-sm">COMMITMENT FEE — COLLECT FROM CUSTOMER</div>
+      <div class="fee-amount-big" id="instr-fee-amt">—</div>
+      <div class="fee-label-sm" id="instr-fee-breakdown">—</div>
+    </div>
+    <div class="instr-card light">
+      <div class="instr-step"><div class="step-num">1</div><div><div class="step-title">Tell the customer the fee</div><div class="step-body">Explain that a small commitment fee is required before their order is placed. This reserves the product and confirms they are serious.</div></div></div>
+      <div class="instr-step"><div class="step-num">2</div><div><div class="step-title">Share your payment details</div><div class="step-body">Ask the customer to send the fee to:</div>
+        <div class="copy-row"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px">Account name</div><div class="copy-val">Amara Johnson</div></div><button class="copy-btn" onclick="copyText(this,'Amara Johnson')">Copy</button></div>
+        <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px">Account number</div><div class="copy-val">0123456789</div></div><button class="copy-btn" onclick="copyText(this,'0123456789')">Copy</button></div>
+        <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px">Bank</div><div class="copy-val">First Bank Nigeria</div></div><button class="copy-btn" onclick="copyText(this,'First Bank Nigeria')">Copy</button></div>
+      </div></div>
+      <div class="instr-step"><div class="step-num">3</div><div><div class="step-title">Ask for a screenshot</div><div class="step-body">Once sent, ask the customer to share a screenshot of the bank transfer confirmation.</div></div></div>
+      <div class="instr-step"><div class="step-num">4</div><div><div class="step-title">Upload and confirm</div><div class="step-body">Upload the screenshot in the order form and tap "Yes, paid." The order is then sent to the business for processing and shipping.</div></div></div>
+    </div>
+    <div style="background:#3a2a10;border-radius:12px;padding:12px 14px;font-size:12px;color:#c9923a;line-height:1.5;margin-bottom:1.25rem;">This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.</div>
+    <button class="cancel-btn" onclick="closeInstr()">Close</button>
+  </div>
+</div>
+
+</div>
+
