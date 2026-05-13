@@ -235,8 +235,13 @@ export function createLateenApi(userId: string) {
       if (key === "orders") filters.push({ table: "orders" });
       if (key === "wallet") filters.push({ table: "wallets", filter: `user_id=eq.${userId}` });
       for (const f of filters) {
-        ch.on(
-          // @ts-expect-error - postgres_changes narrow types
+        (ch as unknown as {
+          on: (
+            ev: string,
+            cfg: { event: string; schema: string; table: string; filter?: string },
+            cb: () => void,
+          ) => void;
+        }).on(
           "postgres_changes",
           { event: "*", schema: "public", table: f.table, filter: f.filter },
           () => onChange(),
