@@ -82,6 +82,11 @@ export function LateenShell({ role }: { role: Role }) {
       cancelled = true;
       el.removeEventListener("click", onClick);
       window.removeEventListener("lateen:lang", onLang);
+      const w = window as unknown as { __lateenUnsubs?: Array<() => void> };
+      if (w.__lateenUnsubs) {
+        for (const fn of w.__lateenUnsubs) { try { fn(); } catch { /* ignore */ } }
+        w.__lateenUnsubs = [];
+      }
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
     };
