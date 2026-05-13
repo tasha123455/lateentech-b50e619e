@@ -14,6 +14,226 @@ export type Database = {
   }
   public: {
     Tables: {
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          marketer_id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marketer_id: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marketer_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          business_id: string
+          color: string | null
+          commission: number
+          confirmed_at: string | null
+          created_at: string
+          currency: Json | null
+          customer_city: string | null
+          customer_country: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
+          id: string
+          marketer_id: string
+          platform_fee: number
+          product_id: string
+          qty: number
+          size: string | null
+          status: string
+          unit_price: number
+        }
+        Insert: {
+          business_id: string
+          color?: string | null
+          commission?: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: Json | null
+          customer_city?: string | null
+          customer_country?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivered_at?: string | null
+          id?: string
+          marketer_id: string
+          platform_fee?: number
+          product_id: string
+          qty?: number
+          size?: string | null
+          status?: string
+          unit_price?: number
+        }
+        Update: {
+          business_id?: string
+          color?: string | null
+          commission?: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: Json | null
+          customer_city?: string | null
+          customer_country?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivered_at?: string | null
+          id?: string
+          marketer_id?: string
+          platform_fee?: number
+          product_id?: string
+          qty?: number
+          size?: string | null
+          status?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payouts: {
+        Row: {
+          amount: number
+          id: string
+          paid_at: string | null
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          id?: string
+          paid_at?: string | null
+          requested_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          paid_at?: string | null
+          requested_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          biz_name: string | null
+          biz_phone: string | null
+          business_id: string
+          category: string | null
+          code: string
+          colors: Json
+          comm_fixed: number
+          comm_mode: string
+          comm_pct: number
+          created_at: string
+          currency: Json | null
+          deleted_at: string | null
+          delivery: Json
+          description: string | null
+          id: string
+          name: string
+          photos: string[]
+          platform_fee: number
+          price: number
+          qty: number
+          revenue: number
+          sizes: Json
+          sold: number
+          status: string
+          total_fee_per_unit: number
+          updated_at: string
+          variant_groups: Json
+        }
+        Insert: {
+          biz_name?: string | null
+          biz_phone?: string | null
+          business_id: string
+          category?: string | null
+          code: string
+          colors?: Json
+          comm_fixed?: number
+          comm_mode?: string
+          comm_pct?: number
+          created_at?: string
+          currency?: Json | null
+          deleted_at?: string | null
+          delivery?: Json
+          description?: string | null
+          id?: string
+          name: string
+          photos?: string[]
+          platform_fee?: number
+          price?: number
+          qty?: number
+          revenue?: number
+          sizes?: Json
+          sold?: number
+          status?: string
+          total_fee_per_unit?: number
+          updated_at?: string
+          variant_groups?: Json
+        }
+        Update: {
+          biz_name?: string | null
+          biz_phone?: string | null
+          business_id?: string
+          category?: string | null
+          code?: string
+          colors?: Json
+          comm_fixed?: number
+          comm_mode?: string
+          comm_pct?: number
+          created_at?: string
+          currency?: Json | null
+          deleted_at?: string | null
+          delivery?: Json
+          description?: string | null
+          id?: string
+          name?: string
+          photos?: string[]
+          platform_fee?: number
+          price?: number
+          qty?: number
+          revenue?: number
+          sizes?: Json
+          sold?: number
+          status?: string
+          total_fee_per_unit?: number
+          updated_at?: string
+          variant_groups?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           business_name: string | null
@@ -62,11 +282,65 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets: {
+        Row: {
+          balance: number
+          currency: string
+          pending: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          currency?: string
+          pending?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          currency?: string
+          pending?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      confirm_order: {
+        Args: { _order_id: string }
+        Returns: {
+          business_id: string
+          color: string | null
+          commission: number
+          confirmed_at: string | null
+          created_at: string
+          currency: Json | null
+          customer_city: string | null
+          customer_country: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
+          id: string
+          marketer_id: string
+          platform_fee: number
+          product_id: string
+          qty: number
+          size: string | null
+          status: string
+          unit_price: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -77,6 +351,36 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mark_delivered: {
+        Args: { _order_id: string }
+        Returns: {
+          business_id: string
+          color: string | null
+          commission: number
+          confirmed_at: string | null
+          created_at: string
+          currency: Json | null
+          customer_city: string | null
+          customer_country: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
+          id: string
+          marketer_id: string
+          platform_fee: number
+          product_id: string
+          qty: number
+          size: string | null
+          status: string
+          unit_price: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
