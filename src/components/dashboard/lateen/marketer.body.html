@@ -289,27 +289,27 @@
   <div class="page active" id="pg-home">
     <div class="topbar">
       <div class="topbar-left">
-        <div class="avatar">AJ</div>
-        <div><div class="greet">Hey, Amara</div><div class="greet-sub">Marketer · Nigeria</div></div>
+        <div class="avatar" id="user-avatar">··</div>
+        <div><div class="greet" id="user-greet">Hey there</div><div class="greet-sub" id="user-sub">Marketer</div></div>
       </div>
       <div class="notif-btn" onclick="goTo('pg-notif')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <div class="notif-dot" id="notif-dot"></div>
+        <div class="notif-dot" id="notif-dot" style="display:none"></div>
       </div>
     </div>
     <div class="wallet-card">
       <div class="wallet-label">WALLET BALANCE</div>
-      <div class="wallet-amount">£412.00</div>
-      <div class="wallet-pending">£86.50 pending clearance</div>
+      <div class="wallet-amount">£0.00</div>
+      <div class="wallet-pending" id="wallet-pending">£0.00 pending</div>
       <div class="wallet-row">
         <div class="wallet-meta">Next payout <span id="days-left">—</span></div>
         <button class="withdraw-btn" onclick="openWithdraw()">Withdraw</button>
       </div>
     </div>
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">Total earned</div><div class="stat-value">£3.2k</div><div class="stat-sub stat-up">+£412 this mo.</div></div>
-      <div class="stat-card"><div class="stat-label">Succeeded</div><div class="stat-value">186</div><div class="stat-sub">of 204 orders</div></div>
-      <div class="stat-card"><div class="stat-label">Pieces sold</div><div class="stat-value">531</div><div class="stat-sub">7 products</div></div>
+      <div class="stat-card"><div class="stat-label">Total earned</div><div class="stat-value" id="stat-earned">£0.00</div><div class="stat-sub">all-time</div></div>
+      <div class="stat-card"><div class="stat-label">Succeeded</div><div class="stat-value" id="stat-ok">0</div><div class="stat-sub" id="stat-ok-sub">of 0 orders</div></div>
+      <div class="stat-card"><div class="stat-label">Pieces sold</div><div class="stat-value" id="stat-pieces">0</div><div class="stat-sub" id="stat-pieces-sub">0 products</div></div>
     </div>
     <div class="chart-card">
       <div class="chart-top">
@@ -325,11 +325,11 @@
       </div>
       <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
       <div class="analytics-row">
-        <div class="ring-wrap"><canvas id="ringChart" width="80" height="80"></canvas><div class="ring-center"><div class="ring-pct" id="ring-pct">88%</div><div class="ring-sub">success</div></div></div>
+        <div class="ring-wrap"><canvas id="ringChart" width="80" height="80"></canvas><div class="ring-center"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-sub">success</div></div></div>
         <div class="analytics-legend">
-          <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#2dbd8f"></div>Delivered</div><div class="leg-val" style="color:#2dbd8f" id="leg-ok">186</div></div>
-          <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#e07070"></div>Failed (COD)</div><div class="leg-val" style="color:#e07070" id="leg-fail">18</div></div>
-          <div class="fail-badge" id="fail-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg><span id="fail-badge-text">−2% failure rate</span></div>
+          <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#2dbd8f"></div>Delivered</div><div class="leg-val" style="color:#2dbd8f" id="leg-ok">0</div></div>
+          <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#e07070"></div>Failed (COD)</div><div class="leg-val" style="color:#e07070" id="leg-fail">0</div></div>
+          <div class="fail-badge" id="fail-badge" style="display:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg><span id="fail-badge-text">0% failure rate</span></div>
           <div class="analytics-note">Cash-on-delivery failures only</div>
         </div>
       </div>
