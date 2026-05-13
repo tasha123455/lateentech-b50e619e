@@ -11,18 +11,11 @@ function switchPeriod(period,el){currentPeriod=period;document.querySelectorAll(
 /* ── Browse ── */
 const PLAT=.05;
 const CN={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa',MA:'Morocco'};
-const P=[
-  {id:'p1',e:'👟',ph:[],n:'Running shoes',cat:'Fashion',pr:49.99,cur:{s:'£'},pct:12,q:200,sv:false,sz:['38','39','40','41','42','43','44'],cl:['Black','White','Navy','Red'],d:{NG:{c:{Lagos:{s:4.99,d:2.50},Abuja:{s:4.99,d:2.50},Kano:{s:5.99,d:3.00}}},GH:{c:{Accra:{s:5.99,d:3.00},Kumasi:{s:6.49,d:3.50}}}}},
-  {id:'p2',e:'🧴',ph:[],n:'Skincare set',cat:'Beauty',pr:34.99,cur:{s:'£'},pct:15,q:85,sv:false,sz:[],cl:['Natural','Rose'],d:{NG:{c:{Lagos:{s:3.99,d:2.00},Abuja:{s:3.99,d:2.00}}}}},
-  {id:'p3',e:'💪',ph:[],n:'Protein powder',cat:'Nutrition',pr:29.99,cur:{s:'₦'},pct:10,q:130,sv:false,sz:['500g','1kg','2kg'],cl:['Chocolate','Vanilla'],d:{NG:{c:{Lagos:{s:1500,d:800},Abuja:{s:1500,d:800}}}}},
-  {id:'p4',e:'🧘',ph:[],n:'Yoga mat',cat:'Fitness',pr:24.99,cur:{s:'£'},pct:10,q:18,sv:false,sz:[],cl:['Purple','Blue','Green'],d:{NG:{c:{Lagos:{s:6.99,d:3.00}}},ZA:{c:{Johannesburg:{s:8.99,d:4.50},'Cape Town':{s:9.99,d:5.00}}}}},
-  {id:'p5',e:'🎧',ph:[],n:'Wireless earbuds',cat:'Tech',pr:59.99,cur:{s:'£'},pct:9,q:62,sv:false,sz:[],cl:['Black','White'],d:{NG:{c:{Lagos:{s:5.49,d:2.50}}},GH:{c:{Accra:{s:6.49,d:3.00}}}}},
-  {id:'p6',e:'⌚',ph:[],n:'Smartwatch',cat:'Tech',pr:89.99,cur:{s:'£'},pct:8,q:44,sv:false,sz:[],cl:['Black','Silver','Rose Gold'],d:{NG:{c:{Lagos:{s:5.99,d:3.00},Abuja:{s:5.99,d:3.00}}}}},
-  {id:'p7',e:'💄',ph:[],n:'Luxury cream',cat:'Beauty',pr:44.99,cur:{s:'£'},pct:18,q:55,sv:false,sz:[],cl:['Original'],d:{NG:{c:{Lagos:{s:4.49,d:2.00}}},EG:{c:{Cairo:{s:6.99,d:3.50}}}}},
-  {id:'p8',e:'🪴',ph:[],n:'Plant set',cat:'Home',pr:19.99,cur:{s:'₵'},pct:12,q:200,sv:false,sz:[],cl:['Small','Medium','Large'],d:{GH:{c:{Accra:{s:8,d:5},Kumasi:{s:10,d:6}}}}},
-  {id:'p9',e:'💊',ph:[],n:'Vitamin bundle',cat:'Nutrition',pr:22.99,cur:{s:'£'},pct:14,q:300,sv:false,sz:[],cl:['Morning','Evening'],d:{NG:{c:{Lagos:{s:2.99,d:1.50}}},GH:{c:{Accra:{s:3.99,d:2.00}}}}},
-  {id:'p10',e:'👟',ph:[],n:'Casual sneakers',cat:'Fashion',pr:39.99,cur:{s:'£'},pct:13,q:90,sv:false,sz:['39','40','41','42','43'],cl:['White','Black','Brown'],d:{NG:{c:{Lagos:{s:4.99,d:2.50},Abuja:{s:4.99,d:2.50}}}}},
-];
+let P=[];
+let __favIds=new Set();
+function dbToBrowse(r){const cur=r.currency||{symbol:'£',code:'GBP'};const photo=(r.photos&&r.photos[0])||null;const e=photo?`<img src="${photo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>`:(cur.flag||'📦');const d={};Object.entries(r.delivery||{}).forEach(([code,z])=>{d[code]={c:{}};Object.entries(z.cities||{}).forEach(([city,v])=>{d[code].c[city]={s:Number(v.shipping)||0,d:Number(v.delivery)||0};});});return{id:r.id,e,ph:r.photos||[],n:r.name,cat:r.category||'',pr:Number(r.price)||0,cur:{s:cur.symbol||'£'},pct:Number(r.comm_pct)||0,q:Number(r.qty)||0,sv:__favIds.has(r.id),sz:r.sizes||[],cl:r.colors||[],d};}
+async function loadBrowse(){if(!window.LateenAPI)return;try{__favIds=await window.LateenAPI.listFavoriteIds();const rows=await window.LateenAPI.listBrowse();P=rows.map(dbToBrowse);if(typeof go==='function')go();if(typeof renderSaved==='function')renderSaved();}catch(e){console.error('[Lateen] loadBrowse',e);}}
+let __unsubBrowse=null,__unsubFavs=null;
 let fc='',fct='',fs='',activeCat='',pc2='',pct2='',pss='',did=null;
 const allC=()=>{const s=new Set();P.forEach(p=>Object.keys(p.d).forEach(c=>s.add(c)));return[...s];};
 const citFor=c=>{const s=new Set();P.forEach(p=>{if(p.d[c])Object.keys(p.d[c].c).forEach(x=>s.add(x));});return[...s];};
