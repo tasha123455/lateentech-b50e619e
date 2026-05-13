@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage, translateDOM } from "@/i18n/LanguageContext";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { createLateenApi } from "@/lib/lateen-api";
 import businessBody from "./business.body.html?raw";
 import marketerBody from "./marketer.body.html?raw";
 import businessScript from "./business.script.js?raw";
