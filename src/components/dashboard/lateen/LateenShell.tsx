@@ -31,7 +31,9 @@ function loadChartJs(): Promise<void> {
 type Role = "business" | "marketer";
 
 function buildScript(src: string): string {
-  const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
+  const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(
+    (m) => m[1],
+  );
   const exports = names.length ? `Object.assign(window, { ${names.join(", ")} });` : "";
   return `(function(){\n${src}\n${exports}\n})();`;
 }
@@ -61,7 +63,11 @@ export function LateenShell({ role }: { role: Role }) {
 
     // Re-translate on language change (after dashboard re-renders strings dynamically)
     const onLang = () => {
-      if (containerRef.current) translateDOM(containerRef.current, (window as unknown as { __lang?: string }).__lang ?? "en");
+      if (containerRef.current)
+        translateDOM(
+          containerRef.current,
+          (window as unknown as { __lang?: string }).__lang ?? "en",
+        );
     };
     window.addEventListener("lateen:lang", onLang);
 
@@ -74,7 +80,11 @@ export function LateenShell({ role }: { role: Role }) {
         injected = script;
         // Translate after the embedded script has populated dynamic content
         requestAnimationFrame(() => {
-          if (containerRef.current) translateDOM(containerRef.current, (window as unknown as { __lang?: string }).__lang ?? "en");
+          if (containerRef.current)
+            translateDOM(
+              containerRef.current,
+              (window as unknown as { __lang?: string }).__lang ?? "en",
+            );
         });
       })
       .catch((err) => console.error("[Lateen] failed", err));
@@ -85,7 +95,13 @@ export function LateenShell({ role }: { role: Role }) {
       window.removeEventListener("lateen:lang", onLang);
       const w = window as unknown as { __lateenUnsubs?: Array<() => void> };
       if (w.__lateenUnsubs) {
-        for (const fn of w.__lateenUnsubs) { try { fn(); } catch { /* ignore */ } }
+        for (const fn of w.__lateenUnsubs) {
+          try {
+            fn();
+          } catch {
+            /* ignore */
+          }
+        }
         w.__lateenUnsubs = [];
       }
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
