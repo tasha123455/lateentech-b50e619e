@@ -31,7 +31,7 @@ function loadChartJs(): Promise<void> {
 type Role = "business" | "marketer";
 
 function buildScript(src: string): string {
-  const names = [...src.matchAll(/^function ([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
+  const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
   const exports = names.length ? `Object.assign(window, { ${names.join(", ")} });` : "";
   return `(function(){\n${src}\n${exports}\n})();`;
 }
