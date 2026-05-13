@@ -40,12 +40,13 @@ export function LateenShell({ role }: { role: Role }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signOut, user } = useAuth();
   const { lang } = useLanguage();
+  const userId = user?.id;
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || !user) return;
+    if (!el || !userId) return;
     // Install Supabase-backed API on window so the embedded scripts can call it.
-    (window as unknown as { LateenAPI?: unknown }).LateenAPI = createLateenApi(user.id);
+    (window as unknown as { LateenAPI?: unknown }).LateenAPI = createLateenApi(userId);
     let cancelled = false;
     let injected: HTMLScriptElement | null = null;
 
@@ -90,7 +91,7 @@ export function LateenShell({ role }: { role: Role }) {
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
     };
-  }, [role, signOut, user]);
+  }, [role, signOut, userId]);
 
   // When lang state changes (re-render), also re-walk
   useEffect(() => {
