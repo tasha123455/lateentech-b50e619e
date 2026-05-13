@@ -9,38 +9,114 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
+import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
+import { Route as BusinessSigninRouteImport } from './routes/business.signin'
+import { Route as BusinessRegisterRouteImport } from './routes/business.register'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketerSigninRoute = MarketerSigninRouteImport.update({
+  id: '/marketer/signin',
+  path: '/marketer/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketerRegisterRoute = MarketerRegisterRouteImport.update({
+  id: '/marketer/register',
+  path: '/marketer/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessSigninRoute = BusinessSigninRouteImport.update({
+  id: '/business/signin',
+  path: '/business/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
+  id: '/business/register',
+  path: '/business/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/business/register': typeof BusinessRegisterRoute
+  '/business/signin': typeof BusinessSigninRoute
+  '/marketer/register': typeof MarketerRegisterRoute
+  '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/business/register': typeof BusinessRegisterRoute
+  '/business/signin': typeof BusinessSigninRoute
+  '/marketer/register': typeof MarketerRegisterRoute
+  '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/business/register': typeof BusinessRegisterRoute
+  '/business/signin': typeof BusinessSigninRoute
+  '/marketer/register': typeof MarketerRegisterRoute
+  '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/business/register'
+    | '/business/signin'
+    | '/marketer/register'
+    | '/marketer/signin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/business/register'
+    | '/business/signin'
+    | '/marketer/register'
+    | '/marketer/signin'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/business/register'
+    | '/business/signin'
+    | '/marketer/register'
+    | '/marketer/signin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  BusinessRegisterRoute: typeof BusinessRegisterRoute
+  BusinessSigninRoute: typeof BusinessSigninRoute
+  MarketerRegisterRoute: typeof MarketerRegisterRoute
+  MarketerSigninRoute: typeof MarketerSigninRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +124,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketer/signin': {
+      id: '/marketer/signin'
+      path: '/marketer/signin'
+      fullPath: '/marketer/signin'
+      preLoaderRoute: typeof MarketerSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketer/register': {
+      id: '/marketer/register'
+      path: '/marketer/register'
+      fullPath: '/marketer/register'
+      preLoaderRoute: typeof MarketerRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business/signin': {
+      id: '/business/signin'
+      path: '/business/signin'
+      fullPath: '/business/signin'
+      preLoaderRoute: typeof BusinessSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business/register': {
+      id: '/business/register'
+      path: '/business/register'
+      fullPath: '/business/register'
+      preLoaderRoute: typeof BusinessRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  BusinessRegisterRoute: BusinessRegisterRoute,
+  BusinessSigninRoute: BusinessSigninRoute,
+  MarketerRegisterRoute: MarketerRegisterRoute,
+  MarketerSigninRoute: MarketerSigninRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
