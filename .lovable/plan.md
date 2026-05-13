@@ -1,47 +1,90 @@
-# Full coverage translation — AI fallback for everything not in the dictionary
 
-## Why the previous build left text untranslated
+## Goal
 
-The dashboard translator only swaps phrases that exist in the hand-curated dictionary. The two dashboard HTML bodies + their dynamic JS contain hundreds of unique English strings (product copy, balance labels, chart legends, drawer items, sheet headings, status pills, helper text, "Add product" sheet fields, currency picker rows, etc.). Hand-translating every one of them × 50 languages is not realistic.
+Wire the Lateen app to a real backend so every Business and Marketer has their own data, products sync live in both directions, and stock decrements on confirmed sales. No more mock arrays in the embedded dashboard scripts.
 
-## Fix: Lovable AI fills every gap, cached forever
+## Database (one migration)
 
-Keep the existing static dictionary for instant common UI (Home, Sign in, Continue…) and add a Lovable AI translator that handles **everything else**, with a permanent cache so each phrase is translated once per language and reused forever.
+New tables in `public`, all with RLS:
 
-### Flow
+- **`products`** — owned by a Business user.
+  - `id`, `business_id` (uuid, FK→auth.users), `code`, `name`, `description`, `category`,
+    `price` (numeric), `qty` (int), `currency` (jsonb: code/name/symbol/flag),
+    `comm_pct`, `comm_fixed`, `comm_mode`, `platform_fee`, `total_fee_per_unit`,
+    `variant_groups` (jsonb), `delivery` (jsonb zones/cities),
+    `photos` (text[] of public URLs),
+    `status` text check in (`active`,`paused`),  `sold` int default 0, `revenue` numeric default 0,
+    `biz_name`, `biz_phone`, `created_at`, `updated_at`, `deleted_at` (nullable — soft delete so favorites can stay linked).
+  - Indexes on `business_id`, `status`, `deleted_at`.
 
-1. DOM walker collects every English text node inside the page (dashboards, modals, drawers, sheets, charts) plus `placeholder/title/aria-label`.
-2. Static dictionary lookup first — instant.
-3. Anything missing is batched and sent to Lovable AI Gateway (Gemini 2.5 Flash) in one request: `{lang, phrases: ["…", "…"]}` → `{translations: ["…", "…"]}`.
-4. Results stored in `localStorage` under `lateen_t_<lang>` and applied to the DOM. Next visit / next language switch reads from cache instantly — no AI call.
-5. Numbers, currency codes, and pure-symbol strings (`$1,234`, `100%`, `12:30`) are detected by regex and skipped — they stay English.
+- **`favorites`** — `marketer_id`, `product_id` (FK→products on delete cascade), `created_at`. Unique(marketer_id,product_id).
 
-### What you'll see
+- **`orders`** — `id`, `marketer_id`, `business_id`, `product_id`, `qty` int, `unit_price`, `commission`, `platform_fee`,
+  `currency` (jsonb), `customer_name`, `customer_phone`, `customer_city`, `customer_country`,
+  `status` text check in (`pending`,`confirmed`,`delivered`,`cancelled`),
+  `created_at`, `confirmed_at`, `delivered_at`.
 
-- Switch to *日本語* the first time → ~1 second loading shimmer on the dashboard while AI translates the new strings, then the entire screen is in Japanese including every product card, every menu item, every status, every sheet, every chart label.
-- Switch back to *English* → instant.
-- Switch to *日本語* again later → instant (cached).
-- Numbers stay as digits everywhere; only words translate.
+- **`wallets`** — one row per user: `user_id` PK, `balance` numeric default 0, `pending` numeric default 0, `currency` text default 'GBP', `updated_at`.
 
-### Technical bits
+- **`payouts`** — `id`, `user_id`, `amount`, `status` (`requested`,`paid`,`failed`), `requested_at`, `paid_at`.
 
-- New TanStack server function `src/lib/translate.functions.ts` calls Lovable AI Gateway with the AI-translation system prompt ("Translate UI strings to <lang>. Return JSON array, same length, preserve placeholders, do not translate numbers/proper nouns/currency codes.").
-- New `src/i18n/aiCache.ts` — read/write `localStorage[lateen_t_<lang>]` as `Record<english, translated>`.
-- `translateDOM()` in `LanguageContext.tsx` is upgraded:
-  - phase 1 (sync): apply dictionary + cache
-  - phase 2 (async): collect untranslated phrases, call server fn, write to cache, apply
-- A small skip-regex (`^[\d\s.,:%$€£¥₹\-/+()]+$`) keeps numbers and money intact.
-- The walker also runs on a `MutationObserver` so dashboard content created after mount (charts, drawers opened later) gets translated automatically.
-- `LATEEN_AI_*` secrets already provisioned via Lovable Cloud; no user setup.
+### RLS
+- `products`: Businesses CRUD their own rows; Marketers (any authenticated user with role `marketer`) can `SELECT` rows where `status='active' AND deleted_at IS NULL`. Use `has_role(auth.uid(),'business')` / `'marketer'`.
+- `favorites`: marketer reads/writes own rows only.
+- `orders`: marketer reads/writes own; business reads orders for products they own; both can update only allowed status transitions via a security-definer RPC `confirm_order(order_id)` and `mark_delivered(order_id)`.
+- `wallets`/`payouts`: user reads/writes own.
 
-### Out of scope (kept English on purpose, per your instruction)
+### Triggers / RPCs
+- `set_updated_at` on `products`, `wallets`.
+- **`confirm_order(order_id)`** SECURITY DEFINER: validates caller is the product's business, sets `status='confirmed'`, `confirmed_at=now()`, atomically decrements `products.qty` by `orders.qty` (raise if not enough stock), increments `products.sold` and `products.revenue`, adds commission to marketer's `wallets.pending`.
+- **`mark_delivered(order_id)`**: moves marketer wallet `pending → balance`.
+- **`handle_new_user`** already creates profile/role; extend it to also `INSERT INTO wallets(user_id) VALUES (new.id)`.
+- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE products, favorites, orders, wallets;`
 
-- Numbers, percentages, money amounts, dates expressed as digits.
-- User-typed content (their own product names, their own notes) — only the app chrome translates.
+### Storage
+- Public bucket `product-photos`. RLS: businesses upload to `<business_id>/...`; everyone can SELECT.
+
+## Frontend wiring
+
+The dashboard is a vanilla JS bundle (`business.script.js` / `marketer.script.js`) injected by `LateenShell`. Rather than rewriting it as React, expose a thin async API on `window` that the scripts call instead of mutating local arrays.
+
+**New file `src/lib/lateen-api.ts`** — installed onto `window.LateenAPI` from `LateenShell` `useEffect` *before* injecting the script. Methods (all using `supabase` browser client, RLS-scoped):
+- `listMyProducts()`, `upsertProduct(p)`, `deleteProduct(id)` (soft delete: `deleted_at=now(), status='paused'`), `setStatus(id, status)`.
+- `uploadPhoto(file) → publicUrl`.
+- `listBrowse({search,category})` — products where `status='active' AND deleted_at IS NULL`.
+- `listFavorites()` — join favorites→products filtered to active+not-deleted.
+- `addFavorite(productId)`, `removeFavorite(productId)`.
+- `createOrder(...)`, `confirmOrder(id)`, `markDelivered(id)`.
+- `getWallet()`, `requestPayout(amount)`.
+- `subscribe(table, onChange)` returning unsubscribe — wraps Supabase realtime channels.
+
+**Edit `business.script.js`**:
+- Remove the seeded `products` array. On load, `window.LateenAPI.listMyProducts()` → render. Subscribe to `products` filtered by `business_id=auth.uid()` for live updates.
+- `submitProduct` → `upsertProduct`. Photo step: replace the local data-URL array with `uploadPhoto` calls returning public URLs.
+- `toggleStatus`, `deleteProduct` → backend calls; UI re-renders from realtime event.
+
+**Edit `marketer.script.js`**:
+- Remove demo browse/favorites arrays. `renderBrowse` queries `listBrowse`; `renderSaved` queries `listFavorites`. Subscribe to `products` (any change) and `favorites` (own) for live updates. Paused/deleted products disappear automatically because the realtime payload triggers a re-fetch through the same filter.
+- "Save / unsave" buttons call `addFavorite` / `removeFavorite`.
+- Order-confirmation flow calls `createOrder` then `confirmOrder` (when business confirms via their dashboard); stock decrement happens in the RPC.
+
+**`LateenShell.tsx`**: in the `useEffect`, before injecting the script, do `window.LateenAPI = createLateenApi(supabase, user)` and after unmount delete it. Pass current `user.id` and `role`.
+
+## Out of scope for this milestone
+- Push notifications, payment processor integration (payouts stay as a `requested` row).
+- Multi-currency conversion (each product keeps its own currency object).
+- Admin moderation panel.
 
 ## Verification
+1. Sign in as Business A → add a product with a photo. Sign in as Marketer in another browser → product appears in Browse without refresh.
+2. Marketer favorites it → row in `favorites`. Business pauses product → product disappears from both Browse and Favorites view (favorite row preserved).
+3. Business un-pauses → reappears in Marketer's Favorites instantly.
+4. Marketer creates an order; Business confirms → `products.qty` decremented by 1, marketer wallet `pending` increases.
+5. Hard delete (soft): product removed from all marketer views; favorites row remains but hidden by the active filter.
+6. Sign out / sign in as a new account → empty product list, empty wallet, empty favorites (no leaked demo data).
 
-1. New language → loading flicker once, then **every** word in the UI is translated, including the parts that were still English before.
-2. Numbers (`$1,290`, `42%`, `12:30`) stay English in every language.
-3. Re-pick the same language later → instant, no flicker.
-4. Open a sheet that wasn't visible at first load → its contents also translate.
+## Technical notes
+- All product-mutation paths go through Supabase with RLS; no service role needed in the browser.
+- `confirm_order` is a SECURITY DEFINER RPC because it must touch products owned by another user atomically; it re-checks ownership inside the function.
+- Soft delete chosen so historical orders keep a valid product FK and favorites can survive a temporary pause.
+- Realtime channels are scoped per role/user to avoid noisy broadcasts.
