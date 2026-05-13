@@ -127,11 +127,12 @@ export function createLateenApi(userId: string) {
         .select("product:products(*)")
         .eq("marketer_id", userId);
       if (error) throw error;
-      return ((data ?? [])
-        .map((r: { product: LateenProduct | null }) => r.product)
+      const rows = (data ?? []) as unknown as { product: LateenProduct | null }[];
+      return rows
+        .map((r) => r.product)
         .filter((p): p is LateenProduct =>
           !!p && p.status === "active" && !p.deleted_at,
-        )) as LateenProduct[];
+        );
     },
 
     async listFavoriteIds(): Promise<Set<string>> {
