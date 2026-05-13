@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
+import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const MarketerSigninRoute = MarketerSigninRouteImport.update({
   path: '/marketer/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketerRegisterRoute = MarketerRegisterRouteImport.update({
+  id: '/marketer/register',
+  path: '/marketer/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/marketer/signin'
+  fullPaths: '/' | '/marketer/register' | '/marketer/signin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/marketer/signin'
-  id: '__root__' | '/' | '/marketer/signin'
+  to: '/' | '/marketer/register' | '/marketer/signin'
+  id: '__root__' | '/' | '/marketer/register' | '/marketer/signin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MarketerRegisterRoute: typeof MarketerRegisterRoute
   MarketerSigninRoute: typeof MarketerSigninRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketerSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketer/register': {
+      id: '/marketer/register'
+      path: '/marketer/register'
+      fullPath: '/marketer/register'
+      preLoaderRoute: typeof MarketerRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MarketerRegisterRoute: MarketerRegisterRoute,
   MarketerSigninRoute: MarketerSigninRoute,
 }
 export const routeTree = rootRouteImport
