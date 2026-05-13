@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
+import { LanguageProvider } from "@/i18n/LanguageContext";
 
 function NotFoundComponent() {
   return (
