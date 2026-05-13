@@ -1,8 +1,7 @@
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/auth/AuthContext";
-import { BusinessDashboard } from "@/components/dashboard/business/BusinessDashboard";
-import { MarketerDashboard } from "@/components/dashboard/marketer/MarketerDashboard";
+import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard · Lateen" }] }),
@@ -33,6 +32,5 @@ function DashboardPage() {
     );
   }
 
-  const name = (user.user_metadata?.full_name as string) || user.email?.split("@")[0] || "there";
-  return role === "business" ? <BusinessDashboard name={name} /> : <MarketerDashboard name={name} />;
+  return <LateenShell role={role} />;
 }
