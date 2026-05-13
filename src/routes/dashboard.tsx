@@ -32,6 +32,5 @@ function DashboardPage() {
     );
   }
 
-  const name = (user.user_metadata?.full_name as string) || user.email?.split("@")[0] || "there";
-  return role === "business" ? <BusinessDashboard name={name} /> : <MarketerDashboard name={name} />;
+  return <LateenShell role={role} />;
 }
