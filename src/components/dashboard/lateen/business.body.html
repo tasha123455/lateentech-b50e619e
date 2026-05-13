@@ -294,31 +294,31 @@
 <div class="page active" id="pg-home">
   <div class="topbar">
     <div class="topbar-left">
-      <div class="avatar">SK</div>
-      <div><div class="greet">Hey, Sarah</div><div class="greet-sub">Sunrise Kicks Ltd.</div></div>
+      <div class="avatar" id="user-avatar">··</div>
+      <div><div class="greet" id="user-greet">Hey there</div><div class="greet-sub" id="user-sub">Business</div></div>
     </div>
     <div class="notif-btn" onclick="goTo('pg-notif')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-      <div class="notif-dot" id="notif-dot"></div>
+      <div class="notif-dot" id="notif-dot" style="display:none"></div>
     </div>
   </div>
   <div class="balance-card">
     <div class="bal-label">NET EARNINGS</div>
-    <div class="bal-amount">£23,028</div>
+    <div class="bal-amount wallet-amount">£0.00</div>
     <div class="bal-sub">After commissions &amp; platform fees</div>
     <div class="bal-row">
-      <div class="bal-meta">This month <span>+£4,820</span></div>
+      <div class="bal-meta">All-time</div>
       <button class="payout-btn" onclick="openPayout()">View breakdown</button>
     </div>
   </div>
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-label">Gross revenue</div><div class="stat-value">£28,410</div><div class="stat-sub stat-up">+£4,820 this mo.</div></div>
-    <div class="stat-card"><div class="stat-label">Pieces sold</div><div class="stat-value">2,874</div><div class="stat-sub">across 5 products</div></div>
+    <div class="stat-card"><div class="stat-label">Gross revenue</div><div class="stat-value" id="stat-gross">£0.00</div><div class="stat-sub">all-time</div></div>
+    <div class="stat-card"><div class="stat-label">Pieces sold</div><div class="stat-value" id="stat-pieces">0</div><div class="stat-sub" id="stat-pieces-sub">across 0 products</div></div>
   </div>
   <div class="stats-row-3">
-    <div class="stat-card"><div class="stat-label">Succeeded</div><div class="stat-value">1,042</div><div class="stat-sub stat-up">93.2%</div></div>
-    <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-value">76</div><div class="stat-sub stat-down">6.8%</div></div>
-    <div class="stat-card"><div class="stat-label">Marketers</div><div class="stat-value">14</div><div class="stat-sub">active</div></div>
+    <div class="stat-card"><div class="stat-label">Succeeded</div><div class="stat-value" id="stat-ok">0</div><div class="stat-sub" id="stat-ok-sub">0%</div></div>
+    <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-value" id="stat-fail">0</div><div class="stat-sub" id="stat-fail-sub">0%</div></div>
+    <div class="stat-card"><div class="stat-label">Marketers</div><div class="stat-value" id="stat-marketers">0</div><div class="stat-sub">active</div></div>
   </div>
   <div class="chart-card">
     <div class="chart-top">
@@ -334,14 +334,15 @@
     </div>
     <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
     <div class="analytics-row">
-      <div class="ring-wrap"><canvas id="ringChart" width="80" height="80"></canvas><div class="ring-center"><div class="ring-pct" id="ring-pct">93%</div><div class="ring-sub">success</div></div></div>
+      <div class="ring-wrap"><canvas id="ringChart" width="80" height="80"></canvas><div class="ring-center"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-sub">success</div></div></div>
       <div class="analytics-legend">
-        <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#2dbd8f"></div>Delivered</div><div class="leg-val" style="color:#2dbd8f" id="leg-ok">1,042</div></div>
-        <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#e07070"></div>Failed (COD)</div><div class="leg-val" style="color:#e07070" id="leg-fail">76</div></div>
+        <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#2dbd8f"></div>Delivered</div><div class="leg-val" style="color:#2dbd8f" id="leg-ok">0</div></div>
+        <div class="leg-row"><div class="leg-left"><div class="leg-dot" style="background:#e07070"></div>Failed (COD)</div><div class="leg-val" style="color:#e07070" id="leg-fail">0</div></div>
         <div class="analytics-note">Cash-on-delivery failures only</div>
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <!-- PRODUCTS -->
@@ -385,11 +386,8 @@
 <!-- NOTIFICATIONS -->
 <div class="page" id="pg-notif">
   <div class="page-header"><div class="page-title">Notifications</div></div>
-  <div class="notif-list">
-    <div class="notif-item"><div class="notif-icon ni-ok"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2dbd8f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div style="flex:1"><div class="notif-title">Order delivered</div><div class="notif-body">Running shoes — commission deducted: £8.40</div><div class="notif-time">2 Apr 2026 · 10:42 AM</div></div><div class="unread-dot"></div></div>
-    <div class="notif-item"><div class="notif-icon ni-info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b83e8" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div style="flex:1"><div class="notif-title">New marketer joined</div><div class="notif-body">Amara Johnson is now marketing your Running shoes</div><div class="notif-time">1 Apr 2026 · 2:10 PM</div></div><div class="unread-dot"></div></div>
-    <div class="notif-item"><div class="notif-icon ni-fail"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div style="flex:1"><div class="notif-title">Order failed (COD)</div><div class="notif-body">Smartwatch — customer refused delivery. No charge.</div><div class="notif-time">31 Mar 2026 · 1:05 PM</div></div></div>
-    <div class="notif-item"><div class="notif-icon ni-warn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9923a" stroke-width="2.2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div style="flex:1"><div class="notif-title">Low stock alert</div><div class="notif-body">Yoga mat — only 18 units remaining</div><div class="notif-time">30 Mar 2026 · 9:00 AM</div></div></div>
+  <div class="notif-list" id="notif-list">
+    <div style="padding:60px 20px;text-align:center;color:var(--color-text-secondary);font-size:13px;">No notifications yet.</div>
   </div>
 </div>
 </div>
@@ -419,7 +417,7 @@
   <div class="menu-backdrop" onclick="closeMenu()"></div>
   <div class="menu-drawer">
     <button class="menu-close" onclick="closeMenu()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <div class="menu-user"><div class="avatar">SK</div><div><div class="menu-name">Sarah Khan</div><div class="menu-sub">Sunrise Kicks Ltd. · Business</div></div></div>
+    <div class="menu-user"><div class="avatar" id="menu-avatar">··</div><div><div class="menu-name" id="menu-name">Welcome</div><div class="menu-sub" id="menu-sub">Business</div></div></div>
     <div class="menu-item" onclick="closeMenu();goTo('pg-home')"><div class="menu-icon-wrap mi-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dbd8f" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="menu-item-label">Home</div></div>
     <div class="menu-item" onclick="closeMenu();goTo('pg-products')"><div class="menu-icon-wrap mi-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dbd8f" stroke-width="1.8" stroke-linecap="round"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div><div class="menu-item-label">My products</div></div>
     <div class="menu-item" onclick="closeMenu();goTo('pg-orders')"><div class="menu-icon-wrap mi-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dbd8f" stroke-width="1.8" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="menu-item-label">Orders</div></div>
@@ -436,10 +434,10 @@
     <div class="sheet-title">Financial breakdown</div>
     <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem;">This month</div>
     <div style="display:flex;flex-direction:column;background:var(--color-background-secondary);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;">
-      <div style="display:flex;justify-content:space-between;padding:13px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;"><span style="color:var(--color-text-secondary)">Gross revenue</span><span style="font-weight:500;color:var(--color-text-primary)">£28,410</span></div>
-      <div style="display:flex;justify-content:space-between;padding:13px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;"><span style="color:var(--color-text-secondary)">Marketer commissions</span><span style="font-weight:500;color:#e07070">−£4,262</span></div>
-      <div style="display:flex;justify-content:space-between;padding:13px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;"><span style="color:var(--color-text-secondary)">Platform fees</span><span style="font-weight:500;color:#e07070">−£1,120</span></div>
-      <div style="display:flex;justify-content:space-between;padding:13px 14px;font-size:14px;font-weight:500;"><span style="color:var(--color-text-primary)">Net earnings</span><span style="color:#2dbd8f">£23,028</span></div>
+      <div style="display:flex;justify-content:space-between;padding:13px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;"><span style="color:var(--color-text-secondary)">Gross revenue</span><span style="font-weight:500;color:var(--color-text-primary)" id="brk-gross">£0.00</span></div>
+      <div style="display:flex;justify-content:space-between;padding:13px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;"><span style="color:var(--color-text-secondary)">Marketer commissions</span><span style="font-weight:500;color:#e07070" id="brk-comm">−£0.00</span></div>
+      <div style="display:flex;justify-content:space-between;padding:13px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;"><span style="color:var(--color-text-secondary)">Platform fees</span><span style="font-weight:500;color:#e07070" id="brk-plat">−£0.00</span></div>
+      <div style="display:flex;justify-content:space-between;padding:13px 14px;font-size:14px;font-weight:500;"><span style="color:var(--color-text-primary)">Net earnings</span><span style="color:#2dbd8f" id="brk-net">£0.00</span></div>
     </div>
     <button class="cancel-btn" onclick="closePayout()">Close</button>
   </div>

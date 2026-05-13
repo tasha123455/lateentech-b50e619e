@@ -206,6 +206,16 @@ export function createLateenApi(userId: string) {
       return data;
     },
 
+    async getProfile() {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name, business_name, phone")
+        .eq("id", userId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
     async getWallet() {
       const { data, error } = await supabase
         .from("wallets")
