@@ -103,7 +103,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <LanguageProvider><AuthProvider>{children}</AuthProvider></LanguageProvider>
         <Scripts />
       </body>
     </html>
