@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage, translateDOM } from "@/i18n/LanguageContext";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { createLateenApi } from "@/lib/lateen-api";
 import businessBody from "./business.body.html?raw";
 import marketerBody from "./marketer.body.html?raw";
 import businessScript from "./business.script.js?raw";
@@ -37,12 +38,14 @@ function buildScript(src: string): string {
 
 export function LateenShell({ role }: { role: Role }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { lang } = useLanguage();
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || !user) return;
+    // Install Supabase-backed API on window so the embedded scripts can call it.
+    (window as unknown as { LateenAPI?: unknown }).LateenAPI = createLateenApi(user.id);
     let cancelled = false;
     let injected: HTMLScriptElement | null = null;
 
@@ -80,8 +83,9 @@ export function LateenShell({ role }: { role: Role }) {
       el.removeEventListener("click", onClick);
       window.removeEventListener("lateen:lang", onLang);
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
+      delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
     };
-  }, [role, signOut]);
+  }, [role, signOut, user]);
 
   // When lang state changes (re-render), also re-walk
   useEffect(() => {
