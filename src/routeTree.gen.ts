@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
 import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
 import { Route as BusinessSigninRouteImport } from './routes/business.signin'
 import { Route as BusinessRegisterRouteImport } from './routes/business.register'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/business/register'
     | '/business/signin'
     | '/marketer/register'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/business/register'
     | '/business/signin'
     | '/marketer/register'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/business/register'
     | '/business/signin'
     | '/marketer/register'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
   BusinessSigninRoute: typeof BusinessSigninRoute
   MarketerRegisterRoute: typeof MarketerRegisterRoute
@@ -97,6 +110,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -137,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
   BusinessSigninRoute: BusinessSigninRoute,
   MarketerRegisterRoute: MarketerRegisterRoute,
