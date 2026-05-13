@@ -27,6 +27,12 @@ function loadChartJs(): Promise<void> {
 
 type Role = "business" | "marketer";
 
+function buildScript(src: string): string {
+  const names = [...src.matchAll(/^function ([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
+  const exports = names.length ? `Object.assign(window, { ${names.join(", ")} });` : "";
+  return `(function(){\n${src}\n${exports}\n})();`;
+}
+
 export function LateenShell({ role }: { role: Role }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuth();
@@ -35,32 +41,31 @@ export function LateenShell({ role }: { role: Role }) {
     const el = containerRef.current;
     if (!el) return;
     let cancelled = false;
-    const cleanup: Array<() => void> = [];
+    let injected: HTMLScriptElement | null = null;
 
-    loadChartJs().then(() => {
-      if (cancelled || !el) return;
-      // Execute the original script in an isolated function scope
-      try {
-        const fn = new Function(role === "business" ? businessScript : marketerScript);
-        fn();
-      } catch (err) {
-        console.error("[Lateen] script error", err);
+    const onClick = (e: Event) => {
+      const target = (e.target as HTMLElement | null)?.closest('[data-action="sign-out"]');
+      if (target) {
+        e.preventDefault();
+        void signOut();
       }
-      // Hook sign out
-      const onClick = (e: Event) => {
-        const target = (e.target as HTMLElement | null)?.closest('[data-action="sign-out"]');
-        if (target) {
-          e.preventDefault();
-          void signOut();
-        }
-      };
-      el.addEventListener("click", onClick);
-      cleanup.push(() => el.removeEventListener("click", onClick));
-    });
+    };
+    el.addEventListener("click", onClick);
+
+    loadChartJs()
+      .then(() => {
+        if (cancelled) return;
+        const script = document.createElement("script");
+        script.textContent = buildScript(role === "business" ? businessScript : marketerScript);
+        document.body.appendChild(script);
+        injected = script;
+      })
+      .catch((err) => console.error("[Lateen] failed", err));
 
     return () => {
       cancelled = true;
-      cleanup.forEach((fn) => fn());
+      el.removeEventListener("click", onClick);
+      if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
     };
   }, [role, signOut]);
 
@@ -70,7 +75,7 @@ export function LateenShell({ role }: { role: Role }) {
     <div
       ref={containerRef}
       className={`lateen-${role}`}
-      // The body markup is a trusted, build-time asset shipped with the app.
+      // Trusted, build-time HTML asset bundled with the app.
       dangerouslySetInnerHTML={{ __html: body }}
     />
   );
