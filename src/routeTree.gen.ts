@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
 import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
 import { Route as BusinessSigninRouteImport } from './routes/business.signin'
+import { Route as BusinessRegisterRouteImport } from './routes/business.register'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,15 +35,22 @@ const BusinessSigninRoute = BusinessSigninRouteImport.update({
   path: '/business/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
+  id: '/business/register',
+  path: '/business/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
@@ -50,6 +58,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
@@ -58,14 +67,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/business/register'
     | '/business/signin'
     | '/marketer/register'
     | '/marketer/signin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/business/signin' | '/marketer/register' | '/marketer/signin'
+  to:
+    | '/'
+    | '/business/register'
+    | '/business/signin'
+    | '/marketer/register'
+    | '/marketer/signin'
   id:
     | '__root__'
     | '/'
+    | '/business/register'
     | '/business/signin'
     | '/marketer/register'
     | '/marketer/signin'
@@ -73,6 +89,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BusinessRegisterRoute: typeof BusinessRegisterRoute
   BusinessSigninRoute: typeof BusinessSigninRoute
   MarketerRegisterRoute: typeof MarketerRegisterRoute
   MarketerSigninRoute: typeof MarketerSigninRoute
@@ -108,11 +125,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/register': {
+      id: '/business/register'
+      path: '/business/register'
+      fullPath: '/business/register'
+      preLoaderRoute: typeof BusinessRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BusinessRegisterRoute: BusinessRegisterRoute,
   BusinessSigninRoute: BusinessSigninRoute,
   MarketerRegisterRoute: MarketerRegisterRoute,
   MarketerSigninRoute: MarketerSigninRoute,
