@@ -38,12 +38,14 @@ function buildScript(src: string): string {
 
 export function LateenShell({ role }: { role: Role }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { lang } = useLanguage();
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || !user) return;
+    // Install Supabase-backed API on window so the embedded scripts can call it.
+    (window as unknown as { LateenAPI?: unknown }).LateenAPI = createLateenApi(user.id);
     let cancelled = false;
     let injected: HTMLScriptElement | null = null;
 
