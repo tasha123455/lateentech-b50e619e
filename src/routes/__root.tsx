@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
+import { LanguageProvider } from "@/i18n/LanguageContext";
 
 function NotFoundComponent() {
   return (
@@ -102,7 +103,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <LanguageProvider><AuthProvider>{children}</AuthProvider></LanguageProvider>
         <Scripts />
       </body>
     </html>
