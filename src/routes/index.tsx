@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { LateenLogo } from "@/components/brand/LateenLogo";
 import { useAuth } from "@/auth/AuthContext";
+import { hasStoredLanguage, useT } from "@/i18n/LanguageContext";
+import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,26 +18,34 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { user, role, loading } = useAuth();
   const nav = useNavigate();
+  const t = useT();
+
   useEffect(() => {
+    if (!hasStoredLanguage()) {
+      nav({ to: "/language", replace: true });
+      return;
+    }
     if (!loading && user && role) nav({ to: "/dashboard" });
   }, [loading, user, role, nav]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
+    <main className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <LateenLogo size={68} />
       <h1 className="mt-5 font-serif text-3xl font-medium tracking-tight text-text-1">Lateen</h1>
-      <p className="mt-2 text-[13px] tracking-wide text-text-2">Performance marketing, zero upfront cost</p>
+      <p className="mt-2 text-[13px] tracking-wide text-text-2">{t("Performance marketing, zero upfront cost")}</p>
       <div className="my-9 h-px w-7 bg-border" />
-      <p className="mb-4 text-[13px] tracking-wide text-text-2">Who are you?</p>
+      <p className="mb-4 text-[13px] tracking-wide text-text-2">{t("Who are you?")}</p>
       <div className="flex w-full max-w-[320px] flex-col gap-3">
-        <RoleButton to="/marketer/signin" tone="marketer" title="Marketer" sub="Promote products & earn commission" />
-        <RoleButton to="/business/signin" tone="business" title="Business" sub="List products & grow your sales" />
+        <RoleButton to="/marketer/signin" tone="marketer" title={t("Marketer")} sub={t("Promote products & earn commission")} />
+        <RoleButton to="/business/signin" tone="business" title={t("Business")} sub={t("List products & grow your sales")} />
       </div>
       <p className="mt-10 max-w-[300px] text-center text-[11px] leading-relaxed text-text-3">
-        New here? Selecting a role will walk you through sign-up.
+        {t("New here? Selecting a role will walk you through sign-up.")}
         <br />
-        By continuing you agree to our <span className="underline">Terms</span> and{" "}
-        <span className="underline">Privacy Policy</span>.
+        {t("By continuing you agree to our")} <span className="underline">{t("Terms")}</span> {t("&")} <span className="underline">{t("Privacy Policy")}</span>.
       </p>
     </main>
   );
