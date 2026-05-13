@@ -89,5 +89,5 @@ async function refreshProfile(){if(!window.LateenAPI||!window.LateenAPI.getProfi
 const today=new Date();const next=new Date(today.getFullYear(),today.getMonth()+1,1);
 document.getElementById('days-left').textContent=Math.ceil((next-today)/86400000)+' days';
 buildMainChart();buildRingChart();renderOrders();
-loadBrowse();refreshWallet();refreshProfile();
-if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());}
+loadBrowse().then(()=>loadOrders());refreshWallet();refreshProfile();
+if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();refreshWallet();});}
