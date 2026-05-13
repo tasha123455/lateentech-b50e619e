@@ -1,55 +1,72 @@
-## Problems
 
-1. **Marketer orders disappear on refresh** — `submitOrder` creates the row in Supabase but the page never loads existing orders back. The local `orders=[]` is rebuilt only from in-memory inserts. There's also no realtime subscription to `orders`.
-2. **Receipt upload is fake** — `onFileUpload` only flips `hasReceipt=true` locally. The file is never uploaded, no URL is attached to the order, and the business has no way to see proof of payment.
-3. **Confirm flow to business** — The order already reaches the business via the existing `orders` insert + `confirm_order` RPC; we just need the receipt visible there and the marketer's local "deposit confirmed" state persisted.
+## Goals
 
-## Changes
+1. Marketer's order does NOT exist in the database (and therefore is invisible to the business) until the marketer uploads the receipt AND clicks "Yes, I received the deposit".
+2. The moment that confirmation happens, the order lands in the business owner's dashboard, and the marketer's tracking page, analytics chart, and wallet pending all reflect it.
+3. When the business marks an order Delivered, the business owner's home stats (Sold, Revenue, Total orders, Delivered, charts) update immediately.
+4. Business `pg-products` and `pg-orders` pages currently sit too far down the screen (only `.app` top padding above the title). Lift their headers so they sit near the top like a normal mobile screen.
 
-### 1. Database (migration)
+## Behaviour changes
 
-- Add columns to `public.orders`:
-  - `receipt_url text`
-  - `marketer_confirmed_at timestamptz`
-- Add an RLS UPDATE policy: `Marketers update own pending orders` — `USING (auth.uid() = marketer_id AND status = 'pending') WITH CHECK (auth.uid() = marketer_id)`. This lets the marketer attach the receipt URL and toggle `marketer_confirmed_at` before the business confirms.
-- Enable realtime on `orders` (`ALTER PUBLICATION supabase_realtime ADD TABLE public.orders`).
-- Reuse the existing public `product-photos` bucket; receipts will be stored under `receipts/<userId>/...` (no new bucket needed since the bucket is already public-read and the existing storage policies allow authenticated uploads to that path).
+### A. Marketer "Add order" flow
+- "Add order" / "Save changes" button is **disabled** until: product, country, city, customer name + phone, receipt uploaded, and `depositConfirmed === true`.
+- `submitOrder` only calls `createOrder` when `depositConfirmed === true`. If the marketer cancels/closes before confirming, no DB row is created.
+- For an *edit* of a not-yet-confirmed order, behave the same — only persist on confirm.
+- Drafts (unconfirmed orders) live only in the in-memory `orders` array for that session. They will not survive refresh — and that is intentional, the user picked "Don't create it in DB yet".
+- After persistence, immediately refresh wallet + re-render so the marketer sees pending commission.
 
-### 2. `src/lib/lateen-api.ts`
+### B. Marketer dashboard live data (Earnings / Pieces chart + ring + KPIs)
+- Aggregate from `listMyOrders()` (already used by `loadOrders`), grouped by:
+  - D = current week, Mon–Sun
+  - M = months of current year
+  - Y = last 6 years
+- For "earnings": sum `commission * qty` of orders where `status IN ('confirmed','delivered')`.
+- For "pieces": sum `qty` of same.
+- Ring "Successful vs Failed" per period: ok = delivered, fail = cancelled. failPct shown.
+- Recompute on every `loadOrders`/realtime tick, then `buildMainChart()` + `buildRingChart()`.
+- Top KPI cards (orders count, days-left already wired) — fill in any zero placeholders the same way.
 
-- Add `uploadReceipt(file): Promise<string>` — same as `uploadPhoto` but path prefix `receipts/${userId}/`.
-- Extend `createOrder` input to accept `receipt_url?: string` and `marketer_confirmed_at?: string` and pass through to insert.
-- Add `updateOrder(id, patch)` — `from('orders').update(patch).eq('id', id)` (used to attach receipt to an already-created order if needed).
-- Extend `listMyOrders` already exists; nothing to change.
+### C. Business dashboard live data
+- Same aggregation pattern in `business.script.js`:
+  - Revenue chart: sum `(unit_price - commission - platform_fee) * qty` of orders with `status='delivered'`, by period.
+  - Pieces: sum `qty` of delivered orders.
+  - Ring ok/fail: delivered vs cancelled.
+- Top home stat cards (Sold, Revenue, In stock, etc.) — pull from `products` totals + delivered-orders sum so they stay in sync after `mark_delivered`.
+- `advance(...,'delivered')` already calls `mark_delivered`; after it returns we already `loadOrders()` + `loadProducts()` — also call `recomputeCharts()` and `refreshWallet()` so the home page reflects it without a manual refresh.
 
-### 3. `src/components/dashboard/lateen/marketer.script.js`
+### D. Business `pg-products` / `pg-orders` layout fix
+- Both pages currently render their `.page-header` directly under `.app`'s 24 px top padding with no topbar above (the topbar lives inside `pg-home` only), which makes the title sit visually too low / floaty depending on viewport.
+- Fix: add a slim sub-page topbar (menu icon ⟵ left, page title centered or kept left, notif/avatar right) at the top of `pg-products` and `pg-orders`, matching the `pg-home` topbar's height/spacing. Reduce `.page-header { margin-bottom }` from `1.25rem` to `0.75rem` so the list begins higher.
+- No design overhaul, just align spacing so the title sits ~ same Y position as the home greeting does on `pg-home`.
 
-- New `dbToOrder(row)` mapper: convert DB order row back to the local shape used by `renderOrders` (look up product from `PRODUCTS[row.product_id]` for name/price/pct fallbacks; compute `commPerUnit/platformPerUnit/feePerUnit/totalFee` from stored values).
-- New `loadOrders()` — calls `LateenAPI.listMyOrders()`, filters `marketer_id === userId`, maps to local shape, assigns to `orders`, calls `renderOrders()`.
-- Call `loadOrders()` at the bottom alongside `loadBrowse()` and after `loadBrowse()` resolves (so `PRODUCTS` is populated for name/price lookups).
-- Subscribe to realtime `orders` channel and re-run `loadOrders()` on change.
-- `onFileUpload`: actually upload via `LateenAPI.uploadReceipt(file)`, store the returned URL in a module variable `receiptUrl`. Show "Uploading…" then the file name when done; on failure, alert and reset `hasReceipt`.
-- `submitOrder`: include `receipt_url: receiptUrl || undefined` and, if `depositConfirmed === true`, `marketer_confirmed_at: new Date().toISOString()` in the `createOrder` payload.
-- `resetForm`: clear `receiptUrl`.
+## Files touched
 
-### 4. `src/components/dashboard/lateen/business.script.js` + `business.body.html`
-
-- In the business orders list rendering, when `order.receipt_url` exists, show a small "View receipt" link/thumbnail that opens the URL in a new tab.
-- Show a "Marketer confirmed" badge when `marketer_confirmed_at` is set, so the business owner knows the marketer has uploaded proof and is ready for them to confirm.
-- (No change to the `confirm_order` RPC — the existing button still calls it.)
-
-### 5. `src/integrations/supabase/types.ts`
-
-Auto-regenerated after the migration; no manual edit.
+- `src/components/dashboard/lateen/marketer.script.js`
+  - `submitOrder` — gate DB write on `depositConfirmed === true`.
+  - Disable submit button reactively (`updateSubmitState()` called from `setDeposit`, `onFileUpload`, etc.).
+  - New `recomputeAnalytics()` building `chartData` + `analyticsData` from `orders`, called inside `loadOrders` and after submit; then `buildMainChart()` / `buildRingChart()`.
+- `src/components/dashboard/lateen/business.script.js`
+  - New `recomputeAnalytics()` (revenue / pieces / ring) called from `loadOrders` and after `advance`.
+  - Update home stat cards from products + delivered orders.
+- `src/components/dashboard/lateen/business.body.html`
+  - Add sub-page topbar markup inside `pg-products` and `pg-orders` (above existing `page-header`).
+- `src/styles/lateen-business.css` (or inline in business.body.html `<style>` block — match current pattern)
+  - `.sub-topbar` styles + tighten `.page-header { margin-bottom }`.
 
 ## Out of scope
 
-- No changes to wallet credit logic — `confirm_order` / `mark_delivered` already credit pending/balance correctly.
-- No new bucket; reuse `product-photos`.
-- No changes to commission math.
+- No DB schema changes (the existing `orders.marketer_confirmed_at` + `pending` status are sufficient because rows now only exist post-confirmation).
+- No changes to `confirm_order` / `mark_delivered` RPCs — already correct.
+- No commission / wallet math changes.
 
 ## Verification
 
-1. Marketer creates an order, uploads receipt, confirms deposit → row in `orders` has `receipt_url` populated and `marketer_confirmed_at` set.
-2. Refresh marketer dashboard → order still appears (loaded from DB).
-3. Business dashboard shows the new order with a "View receipt" link and "Marketer confirmed" badge; confirming via the existing button transitions status to `confirmed` and credits the marketer wallet pending.
+1. Marketer fills the form but does NOT upload receipt → "Add order" stays disabled. No DB row.
+2. Uploads receipt + clicks "No" on deposit → still disabled, no DB row.
+3. Clicks "Yes" → button enables. On submit a row is created with `marketer_confirmed_at` set, and instantly:
+   - Marketer's order list shows it as "Fee paid".
+   - Marketer's chart + ring repopulate.
+   - Business owner's `pg-orders` shows the new "New order" with the receipt link.
+4. Business clicks "Confirm order" → marketer wallet `pending` increases (already in RPC). Visible in marketer wallet card after auto-refresh.
+5. Business clicks through to "Mark delivered" → home page Revenue / Sold / Delivered KPI + revenue chart bump up; marketer wallet `balance` increases, ring chart "Successful" count goes up.
+6. Open business → `pg-products` and `pg-orders`: title sits near top of screen with a slim topbar, not floating mid-screen.
