@@ -196,7 +196,7 @@ export function createLateenApi(userId: string) {
 
     async uploadReceipt(file: File): Promise<string> {
       const ext = file.name.split(".").pop() || "jpg";
-      const path = `receipts/${userId}/${crypto.randomUUID()}.${ext}`;
+      const path = `${userId}/receipts/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
         .from("product-photos")
         .upload(path, file, { upsert: false, contentType: file.type });
