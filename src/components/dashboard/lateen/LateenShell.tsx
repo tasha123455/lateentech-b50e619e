@@ -83,8 +83,9 @@ export function LateenShell({ role }: { role: Role }) {
       el.removeEventListener("click", onClick);
       window.removeEventListener("lateen:lang", onLang);
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
+      delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
     };
-  }, [role, signOut]);
+  }, [role, signOut, user]);
 
   // When lang state changes (re-render), also re-walk
   useEffect(() => {
