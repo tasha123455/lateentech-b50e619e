@@ -254,8 +254,13 @@
 .upload-box { border: 0.5px dashed var(--color-border-secondary); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; margin-bottom: 13px; transition: border-color .15s; }
 .upload-box:hover { border-color: #7f77dd; }
 .upload-box.has-file { border-color: #1D9E75; background: #0d2a1f; }
+.upload-box.uploading { border-color: #7f77dd; background: #15142a; pointer-events: none; opacity: .85; }
+.upload-box.error { border-color: #e07070; background: #2a1313; }
 .upload-icon-label { font-size: 12px; color: var(--color-text-secondary); margin-top: 6px; }
 .upload-icon-label.done { color: #2dbd8f; font-weight: 500; }
+.upload-icon-label.err { color: #e07070; font-weight: 500; }
+.upload-spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #5a55a8; border-top-color: #fff; border-radius: 50%; animation: ulspin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes ulspin { to { transform: rotate(360deg); } }
 .deposit-section { display: none; background: var(--color-background-secondary); border-radius: 12px; padding: 14px; margin-bottom: 13px; }
 .deposit-q { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
 .deposit-q-sub { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 10px; }
