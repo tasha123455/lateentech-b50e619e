@@ -80,8 +80,11 @@ function openMenu(){document.getElementById('menu-overlay').classList.add('open'
 function closeMenu(){document.getElementById('menu-overlay').classList.remove('open');}
 function openWithdraw(){document.getElementById('withdraw-overlay').classList.add('open');}
 function closeWithdraw(){document.getElementById('withdraw-overlay').classList.remove('open');}
-function confirmWithdraw(){closeWithdraw();document.querySelector('.wallet-amount').textContent='£0.00';document.querySelector('.withdraw-btn').textContent='Requested';document.querySelector('.withdraw-btn').disabled=true;document.querySelector('.withdraw-btn').style.opacity='0.5';}
+async function confirmWithdraw(){try{const w=await(window.LateenAPI&&window.LateenAPI.getWallet());const amt=w?Number(w.balance)||0:0;if(amt>0&&window.LateenAPI)await window.LateenAPI.requestPayout(amt);}catch(e){console.error('[Lateen] payout',e);}closeWithdraw();const wa=document.querySelector('.wallet-amount');if(wa)wa.textContent='£0.00';const wb=document.querySelector('.withdraw-btn');if(wb){wb.textContent='Requested';wb.disabled=true;wb.style.opacity='0.5';}}
+async function refreshWallet(){if(!window.LateenAPI)return;try{const w=await window.LateenAPI.getWallet();const bal=w?Number(w.balance)||0:0;const pen=w?Number(w.pending)||0:0;const wa=document.querySelector('.wallet-amount');if(wa)wa.textContent='£'+bal.toFixed(2);const wp=document.getElementById('wallet-pending');if(wp)wp.textContent='£'+pen.toFixed(2)+' pending';}catch(e){console.error('[Lateen] wallet',e);}}
 
 const today=new Date();const next=new Date(today.getFullYear(),today.getMonth()+1,1);
 document.getElementById('days-left').textContent=Math.ceil((next-today)/86400000)+' days';
-buildMainChart();buildRingChart();go();renderSaved();renderOrders();
+buildMainChart();buildRingChart();renderOrders();
+loadBrowse();refreshWallet();
+if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());}
