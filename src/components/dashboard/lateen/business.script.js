@@ -94,5 +94,7 @@ function toggle(id){expandedId=expandedId===id?null:id;applyFilters();}
 buildMainChart();buildRingChart();
 
 /* ── Live data init ── */
-loadProducts();
-if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubProducts=window.LateenAPI.subscribe('my-products',()=>loadProducts());}
+let __unsubOrders=null,__unsubWallet=null;
+async function refreshWallet(){if(!window.LateenAPI)return;try{const w=await window.LateenAPI.getWallet();const bal=w?Number(w.balance)||0:0;const wa=document.querySelector('.wallet-amount');if(wa)wa.textContent='£'+bal.toFixed(2);}catch(e){console.error('[Lateen] wallet',e);}}
+(async()=>{await loadProducts();await loadOrders();await refreshWallet();})();
+if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubProducts=window.LateenAPI.subscribe('my-products',()=>loadProducts().then(loadOrders));__unsubOrders=window.LateenAPI.subscribe('orders',()=>loadOrders());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());}
