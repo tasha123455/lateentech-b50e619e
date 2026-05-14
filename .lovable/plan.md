@@ -1,55 +1,37 @@
-## Findings
+## Problem
 
-### Why the order "disappears" after uploading the receipt
+On the business dashboard, when you tap **Products** or **Orders** in the bottom nav, the content shows up far down the screen with no left/right padding, instead of starting at the top like the Home page.
 
-`src/components/dashboard/lateen/marketer.body.html` line 476:
+## Root cause
 
-```html
-<div class="overlay" id="form-overlay">
-  <div class="overlay-bg" onclick="closeForm()"></div>
-  ...
+In `src/components/dashboard/lateen/business.body.html`, the page sections are nested wrong:
+
+```text
+<div outer wrapper, min-height:860px>
+  <div class="app" padding + min-height:860px>
+     <div id="pg-home"> ... </div>
+  </div>          <-- .app closes here
+  <div id="pg-products"> ... </div>   <-- OUTSIDE .app
+  <div id="pg-orders"> ... </div>     <-- OUTSIDE .app
+  <div id="pg-notif"> ... </div>      <-- OUTSIDE .app
+</div>
 ```
 
-The form overlay has a transparent backdrop wired to `closeForm()`. After the file picker returns, the OS focus shift + scroll lands a tap on that backdrop, the form closes, `resetForm()` wipes every field including `currentProduct`, `currentDelivery`, `hasReceipt`, `receiptUrl`, `depositConfirmed`, and the user lands back on the orders page (which looks like a "redirect to dashboard"). Nothing was saved because `submitOrder` was never called.
+Because `.app` has `min-height: 860px` and reserves all the padding, when Home is hidden `.app` still occupies ~860px of empty space, and Products / Orders / Notifications render *below* it, with no horizontal padding. That's exactly the "pushed down" behavior on screen.
 
-### Why the order isn't held back from the business right now
+## Fix
 
-`submitOrder()` in `marketer.script.js` requires `depositConfirmed === true` before it does anything — it `alert`s and returns otherwise. So the marketer can't save a draft locally; it's all-or-nothing. Once they do submit, `createOrder` writes to the `orders` table immediately, and the business RLS policy `auth.uid() = business_id` makes the row visible to the business at that moment.
+Move the closing `</div>` of `.app` so it wraps all four page sections (`pg-home`, `pg-products`, `pg-orders`, `pg-notif`). Concretely in `business.body.html`:
 
-The user wants two things:
-1. Be able to fill in and save an order at any time (draft).
-2. The order should only become visible to the business owner after the receipt is uploaded AND the upfront fee is confirmed.
+- Remove the stray `</div>` at line 350 (the one that closes `.app` right after `pg-home`).
+- Add a matching `</div>` just before line 403 (right after `pg-notif` closes), so `.app` now wraps every page.
 
-## Plan
+No CSS, JS, or business logic changes — purely structural HTML so each page inherits `.app`'s padding and the only-one-page-visible layout collapses correctly.
 
-### 1. Stop the form from closing by accident
+## Files
 
-In `marketer.body.html`:
-- Replace the `onclick="closeForm()"` on `.overlay-bg` with a no-op (or remove the handler entirely). Closing only via the explicit "Cancel" button or the X.
-- Same fix for the instructions overlay backdrop if it has the same pattern (check and only change if so).
+- `src/components/dashboard/lateen/business.body.html`
 
-### 2. Allow saving an order at any time as a local draft
+## Verification
 
-In `marketer.script.js`:
-- Remove the hard `depositConfirmed !== true` block at the top of `submitOrder()`.
-- When the marketer submits without a confirmed receipt:
-  - Build the local order with `_status: 'draft'` and `depositConfirmed: false`, push it into `orders`, do NOT call `createOrder`.
-  - Persist drafts in `localStorage` keyed by `userId` so they survive a refresh (drafts never reach the backend, so RLS is irrelevant).
-- When the marketer submits with `hasReceipt && depositConfirmed === true`:
-  - If the order was a local draft, call `createOrder` now (this is the "send to business" moment) and remove it from the draft store; mark `_status: 'pending'` and store the returned `dbId`.
-  - If the order already has a `dbId` (was already sent), just `updateOrder` with the latest receipt URL / `marketer_confirmed_at`.
-
-### 3. Make the gating obvious in the UI
-
-- The submit button label switches between **"Save as draft"** (no receipt yet) and **"Send to business owner"** (receipt + deposit confirmed). The button is always enabled as long as the customer + product + delivery fields are filled.
-- On the order card in the list, drafts get a `Draft · not yet sent` badge instead of `Fee pending`, and a small "Add receipt" button that re-opens the form for that draft so the marketer can finish it.
-
-### 4. Keep delivered-only earnings rule
-
-No change to `recomputeAnalytics` — it still only counts `delivered` orders, so drafts and pending orders don't affect earnings or analytics.
-
-### Files to edit
-- `src/components/dashboard/lateen/marketer.body.html`
-- `src/components/dashboard/lateen/marketer.script.js`
-
-No DB schema or RLS changes are needed: drafts live only on the marketer's device; backend orders are still gated by `marketer_confirmed_at` + receipt URL when they get inserted.
+After the edit I'll screenshot `/dashboard` on the current viewport (559×1866) and switch to Products and Orders to confirm both pages start right under the topbar with proper side padding, matching the Home page position.
