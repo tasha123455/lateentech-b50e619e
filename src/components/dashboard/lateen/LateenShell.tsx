@@ -31,7 +31,7 @@ function loadChartJs(): Promise<void> {
   return chartPromise;
 }
 
-type Role = "business" | "marketer";
+type Role = "business" | "marketer" | "admin";
 
 function buildScript(src: string): string {
   const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(
