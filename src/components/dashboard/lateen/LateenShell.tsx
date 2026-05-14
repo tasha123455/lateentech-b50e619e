@@ -5,10 +5,13 @@ import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import { createLateenApi } from "@/lib/lateen-api";
 import businessBody from "./business.body.html?raw";
 import marketerBody from "./marketer.body.html?raw";
+import adminBody from "./admin.body.html?raw";
 import businessScript from "./business.script.js?raw";
 import marketerScript from "./marketer.script.js?raw";
+import adminScript from "./admin.script.js?raw";
 import "@/styles/lateen-business.css";
 import "@/styles/lateen-marketer.css";
+import "@/styles/lateen-admin.css";
 
 const CHART_SRC = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
 
