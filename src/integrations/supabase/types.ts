@@ -317,6 +317,125 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_approve_order: {
+        Args: { _order_id: string }
+        Returns: {
+          business_id: string
+          color: string | null
+          commission: number
+          confirmed_at: string | null
+          created_at: string
+          currency: Json | null
+          customer_city: string | null
+          customer_country: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
+          id: string
+          marketer_confirmed_at: string | null
+          marketer_id: string
+          platform_fee: number
+          product_id: string
+          qty: number
+          receipt_url: string | null
+          size: string | null
+          status: string
+          unit_price: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_mark_payout_paid: {
+        Args: { _payout_id: string }
+        Returns: {
+          amount: number
+          id: string
+          paid_at: string | null
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_reject_order: {
+        Args: { _order_id: string }
+        Returns: {
+          business_id: string
+          color: string | null
+          commission: number
+          confirmed_at: string | null
+          created_at: string
+          currency: Json | null
+          customer_city: string | null
+          customer_country: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
+          id: string
+          marketer_confirmed_at: string | null
+          marketer_id: string
+          platform_fee: number
+          product_id: string
+          qty: number
+          receipt_url: string | null
+          size: string | null
+          status: string
+          unit_price: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_product_status: {
+        Args: { _product_id: string; _status: string }
+        Returns: {
+          biz_name: string | null
+          biz_phone: string | null
+          business_id: string
+          category: string | null
+          code: string
+          colors: Json
+          comm_fixed: number
+          comm_mode: string
+          comm_pct: number
+          created_at: string
+          currency: Json | null
+          deleted_at: string | null
+          delivery: Json
+          description: string | null
+          id: string
+          name: string
+          photos: string[]
+          platform_fee: number
+          price: number
+          qty: number
+          revenue: number
+          sizes: Json
+          sold: number
+          status: string
+          total_fee_per_unit: number
+          updated_at: string
+          variant_groups: Json
+        }
+        SetofOptions: {
+          from: "*"
+          to: "products"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       confirm_order: {
         Args: { _order_id: string }
         Returns: {
@@ -394,7 +513,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "marketer" | "business"
+      app_role: "marketer" | "business" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -522,7 +641,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["marketer", "business"],
+      app_role: ["marketer", "business", "admin"],
     },
   },
 } as const

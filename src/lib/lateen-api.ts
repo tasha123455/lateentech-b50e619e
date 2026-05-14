@@ -283,5 +283,122 @@ export function createLateenApi(userId: string) {
         supabase.removeChannel(ch);
       };
     },
+
+    admin: {
+      async listPendingReceipts() {
+        const { data: orders, error } = await supabase
+          .from("orders")
+          .select("*")
+          .eq("status", "pending")
+          .not("receipt_url", "is", null)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        const list = (orders ?? []) as Array<Record<string, unknown> & { marketer_id: string; product_id: string }>;
+        const marketerIds = [...new Set(list.map((o) => o.marketer_id))];
+        const productIds = [...new Set(list.map((o) => o.product_id))];
+        const [{ data: profs }, { data: prods }] = await Promise.all([
+          marketerIds.length
+            ? supabase.from("profiles").select("id, full_name, phone").in("id", marketerIds)
+            : Promise.resolve({ data: [] as Array<{ id: string; full_name: string | null; phone: string | null }> }),
+          productIds.length
+            ? supabase.from("products").select("id, name, photos").in("id", productIds)
+            : Promise.resolve({ data: [] as Array<{ id: string; name: string; photos: string[] }> }),
+        ]);
+        const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
+        const prodmap = new Map((prods ?? []).map((p) => [p.id, p]));
+        return list.map((o) => ({
+          ...o,
+          marketer: pmap.get(o.marketer_id) ?? null,
+          product: prodmap.get(o.product_id) ?? null,
+        }));
+      },
+      async approveOrder(id: string) {
+        const { error } = await supabase.rpc("admin_approve_order", { _order_id: id });
+        if (error) throw error;
+      },
+      async rejectOrder(id: string) {
+        const { error } = await supabase.rpc("admin_reject_order", { _order_id: id });
+        if (error) throw error;
+      },
+      async listPayoutRequests() {
+        const { data, error } = await supabase
+          .from("payouts")
+          .select("*")
+          .eq("status", "requested")
+          .order("requested_at", { ascending: false });
+        if (error) throw error;
+        const rows = (data ?? []) as Array<Record<string, unknown> & { user_id: string }>;
+        const ids = [...new Set(rows.map((r) => r.user_id))];
+        const { data: profs } = ids.length
+          ? await supabase.from("profiles").select("id, full_name, phone, business_name").in("id", ids)
+          : { data: [] as Array<{ id: string; full_name: string | null; phone: string | null; business_name: string | null }> };
+        const m = new Map((profs ?? []).map((p) => [p.id, p]));
+        return rows.map((r) => ({ ...r, user: m.get(r.user_id) ?? null }));
+      },
+      async markPayoutPaid(id: string) {
+        const { error } = await supabase.rpc("admin_mark_payout_paid", { _payout_id: id });
+        if (error) throw error;
+      },
+      async listAllUsers(search?: string) {
+        let q = supabase
+          .from("profiles")
+          .select("id, full_name, phone, business_name, created_at");
+        if (search && search.trim()) {
+          const s = `%${search.trim()}%`;
+          q = q.or(`full_name.ilike.${s},phone.ilike.${s},business_name.ilike.${s}`);
+        }
+        const { data, error } = await q.order("created_at", { ascending: false });
+        if (error) throw error;
+        const profiles = (data ?? []) as Array<{ id: string; full_name: string | null; phone: string | null; business_name: string | null; created_at: string }>;
+        if (!profiles.length) return [];
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", profiles.map((p) => p.id));
+        const rmap = new Map((roles ?? []).map((r: { user_id: string; role: string }) => [r.user_id, r.role]));
+        return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer" }));
+      },
+      async listAllProducts() {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data ?? [];
+      },
+      async setProductStatus(id: string, status: "active" | "hidden") {
+        const { error } = await supabase.rpc("admin_set_product_status", { _product_id: id, _status: status });
+        if (error) throw error;
+      },
+      async getMetrics() {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+
+        const [feesRes, todayRes, activeRes, profilesRes, productsRes] = await Promise.all([
+          supabase.from("orders").select("platform_fee, qty, status").in("status", ["confirmed", "delivered"]),
+          supabase.from("orders").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
+          supabase.from("orders").select("marketer_id, business_id, created_at").gte("created_at", monthAgo),
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("products").select("id", { count: "exact", head: true }).is("deleted_at", null),
+        ]);
+
+        const fees = (feesRes.data ?? []).reduce((sum: number, r: { platform_fee: number; qty: number }) => sum + Number(r.platform_fee || 0) * Number(r.qty || 0), 0);
+        const activeUsers = new Set<string>();
+        for (const r of (activeRes.data ?? []) as Array<{ marketer_id: string; business_id: string }>) {
+          activeUsers.add(r.marketer_id);
+          activeUsers.add(r.business_id);
+        }
+        return {
+          totalFees: fees,
+          activeUsers: activeUsers.size,
+          leadsToday: todayRes.count ?? 0,
+          totalUsers: profilesRes.count ?? 0,
+          totalProducts: productsRes.count ?? 0,
+        };
+      },
+    },
   };
 }
+

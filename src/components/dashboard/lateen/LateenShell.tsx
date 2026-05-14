@@ -5,10 +5,13 @@ import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import { createLateenApi } from "@/lib/lateen-api";
 import businessBody from "./business.body.html?raw";
 import marketerBody from "./marketer.body.html?raw";
+import adminBody from "./admin.body.html?raw";
 import businessScript from "./business.script.js?raw";
 import marketerScript from "./marketer.script.js?raw";
+import adminScript from "./admin.script.js?raw";
 import "@/styles/lateen-business.css";
 import "@/styles/lateen-marketer.css";
+import "@/styles/lateen-admin.css";
 
 const CHART_SRC = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
 
@@ -28,7 +31,7 @@ function loadChartJs(): Promise<void> {
   return chartPromise;
 }
 
-type Role = "business" | "marketer";
+type Role = "business" | "marketer" | "admin";
 
 function buildScript(src: string): string {
   const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(
@@ -75,7 +78,7 @@ export function LateenShell({ role }: { role: Role }) {
       .then(() => {
         if (cancelled) return;
         const script = document.createElement("script");
-        script.textContent = buildScript(role === "business" ? businessScript : marketerScript);
+        script.textContent = buildScript(role === "business" ? businessScript : role === "admin" ? adminScript : marketerScript);
         document.body.appendChild(script);
         injected = script;
         // Translate after the embedded script has populated dynamic content
@@ -114,7 +117,7 @@ export function LateenShell({ role }: { role: Role }) {
     if (containerRef.current) translateDOM(containerRef.current, lang);
   }, [lang]);
 
-  const body = role === "business" ? businessBody : marketerBody;
+  const body = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
 
   return (
     <div className={`lateen-${role} relative`}>
