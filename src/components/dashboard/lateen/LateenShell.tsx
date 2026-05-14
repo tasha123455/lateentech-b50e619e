@@ -78,7 +78,7 @@ export function LateenShell({ role }: { role: Role }) {
       .then(() => {
         if (cancelled) return;
         const script = document.createElement("script");
-        script.textContent = buildScript(role === "business" ? businessScript : marketerScript);
+        script.textContent = buildScript(role === "business" ? businessScript : role === "admin" ? adminScript : marketerScript);
         document.body.appendChild(script);
         injected = script;
         // Translate after the embedded script has populated dynamic content
