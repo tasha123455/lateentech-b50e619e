@@ -1,0 +1,198 @@
+<style>
+.lateen-admin * { box-sizing: border-box; margin: 0; padding: 0; }
+.lateen-admin {
+  --bg: #141414; --surface: #1e1e1e; --surface-2: #2a2a2a; --card: #0d0d0d;
+  --txt-1: #f0eeeb; --txt-2: #9e9b97; --txt-3: #5e5c58;
+  --border: #333330; --border-2: #272725;
+  --accent: #f5b441; --accent-tint: #3a2a10;
+  --danger: #e07070; --danger-tint: #3a1a1a;
+  --ok: #2dbd8f; --ok-tint: #1a3d2f;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.adm-app { background: var(--bg); min-height: 100vh; padding: 0.75rem 1.25rem 5rem; max-width: 480px; margin: 0 auto; font-family: var(--font); color: var(--txt-1); position: relative; }
+.adm-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.adm-tl { display: flex; align-items: center; gap: 10px; }
+.adm-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent-tint); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--accent); }
+.adm-greet { font-size: 15px; font-weight: 500; }
+.adm-greet-sub { font-size: 11px; color: var(--txt-2); }
+.adm-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); text-transform: uppercase; }
+.adm-signout { background: none; border: 0.5px solid var(--border); color: var(--txt-2); font-size: 11px; padding: 6px 11px; border-radius: 14px; cursor: pointer; font-family: var(--font); }
+.adm-page { display: none; }
+.adm-page.active { display: block; }
+.adm-h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; }
+.adm-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.adm-stat { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 14px; padding: 14px; }
+.adm-stat-label { font-size: 11px; color: var(--txt-2); margin-bottom: 6px; }
+.adm-stat-value { font-size: 22px; font-weight: 500; }
+.adm-stat-sub { font-size: 10px; color: var(--txt-3); margin-top: 4px; }
+.adm-stat.full { grid-column: 1 / -1; background: var(--card); border-color: var(--accent-tint); }
+.adm-stat.full .adm-stat-value { color: var(--accent); font-size: 28px; }
+.adm-section { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+.adm-row { padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); cursor: pointer; }
+.adm-row:last-child { border-bottom: none; }
+.adm-row-top { display: flex; align-items: center; gap: 12px; }
+.adm-thumb { width: 48px; height: 48px; border-radius: 8px; background: var(--surface-2); object-fit: cover; flex-shrink: 0; cursor: zoom-in; }
+.adm-thumb-empty { width: 48px; height: 48px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--txt-3); flex-shrink: 0; }
+.adm-row-mid { flex: 1; min-width: 0; }
+.adm-row-name { font-size: 13px; font-weight: 500; }
+.adm-row-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+.adm-row-amt { font-size: 14px; font-weight: 500; color: var(--accent); }
+.adm-expand { display: none; padding: 12px 14px 14px; border-top: 0.5px solid var(--border-2); }
+.adm-expand.open { display: block; }
+.adm-receipt-full { width: 100%; max-height: 360px; object-fit: contain; background: #000; border-radius: 10px; margin-bottom: 10px; }
+.adm-actions { display: flex; gap: 8px; }
+.adm-btn { flex: 1; height: 36px; border-radius: 18px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font); }
+.adm-btn-ok { background: var(--ok); color: #fff; }
+.adm-btn-no { background: var(--danger); color: #fff; }
+.adm-btn-ghost { background: transparent; color: var(--txt-2); border: 0.5px solid var(--border); }
+.adm-btn-acc { background: var(--accent); color: #1a1a1a; }
+.adm-empty { padding: 32px 16px; text-align: center; color: var(--txt-3); font-size: 12px; }
+.adm-search { width: 100%; height: 38px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 0 14px; color: var(--txt-1); font-family: var(--font); font-size: 13px; margin-bottom: 12px; }
+.adm-search:focus { outline: none; border-color: var(--accent); }
+.adm-user-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); }
+.adm-user-row:last-child { border-bottom: none; }
+.adm-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--txt-2); flex-shrink: 0; }
+.adm-role-pill { font-size: 9px; padding: 2px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.adm-role-marketer { background: #2d2b4e; color: #a09efc; }
+.adm-role-business { background: var(--ok-tint); color: var(--ok); }
+.adm-role-admin { background: var(--accent-tint); color: var(--accent); }
+.adm-payout-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); gap: 10px; }
+.adm-payout-row:last-child { border-bottom: none; }
+.adm-pay-info { flex: 1; min-width: 0; }
+.adm-pay-name { font-size: 13px; font-weight: 500; }
+.adm-pay-sub { font-size: 10px; color: var(--txt-3); margin-top: 2px; }
+.adm-pay-amt { font-size: 14px; font-weight: 500; color: var(--accent); margin-right: 8px; }
+.adm-prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.adm-prod { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 14px; overflow: hidden; }
+.adm-prod-img { width: 100%; aspect-ratio: 1; background: var(--surface-2); object-fit: cover; display: block; }
+.adm-prod-img-empty { width: 100%; aspect-ratio: 1; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--txt-3); }
+.adm-prod-body { padding: 10px; }
+.adm-prod-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-prod-shop { font-size: 10px; color: var(--txt-3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-prod-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.adm-prod-price { font-size: 11px; color: var(--txt-2); }
+.adm-prod-toggle { font-size: 10px; padding: 4px 9px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font); font-weight: 500; }
+.adm-prod-toggle.active { background: var(--surface-2); color: var(--txt-2); }
+.adm-prod-toggle.hidden-state { background: var(--danger-tint); color: var(--danger); }
+.adm-status-pill { position: absolute; top: 8px; left: 8px; font-size: 9px; padding: 3px 7px; border-radius: 8px; background: rgba(0,0,0,0.7); color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.adm-prod-img-wrap { position: relative; }
+
+.adm-bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #1a1a1a; border-top: 0.5px solid var(--border-2); padding: 10px 0 16px; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 20; }
+.adm-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 0.6rem; flex: 1; }
+.adm-nav-label { font-size: 10px; color: var(--txt-2); }
+.adm-nav-item.active .adm-nav-label { color: var(--accent); font-weight: 500; }
+.adm-nav-item.active svg { stroke: var(--accent); }
+.adm-nav-item svg { width: 20px; height: 20px; stroke: var(--txt-2); }
+
+.adm-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+.adm-lightbox.open { display: flex; }
+.adm-lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+</style>
+
+<div class="adm-app">
+  <div class="adm-topbar">
+    <div class="adm-tl">
+      <div class="adm-avatar">A</div>
+      <div>
+        <div class="adm-greet">Admin Console</div>
+        <div class="adm-greet-sub">Lateen platform control</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="adm-badge">Admin</span>
+      <button class="adm-signout" data-action="sign-out">Sign out</button>
+    </div>
+  </div>
+
+  <!-- HOME / METRICS -->
+  <section class="adm-page active" id="adm-home">
+    <div class="adm-h1">Global Analytics</div>
+    <div class="adm-stat-grid">
+      <div class="adm-stat full">
+        <div class="adm-stat-label">Total Platform Fees Collected</div>
+        <div class="adm-stat-value" id="m-fees">£0.00</div>
+        <div class="adm-stat-sub">Lifetime, from confirmed & delivered orders</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Active Users</div>
+        <div class="adm-stat-value" id="m-active">0</div>
+        <div class="adm-stat-sub">Last 30 days</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Leads Today</div>
+        <div class="adm-stat-value" id="m-leads">0</div>
+        <div class="adm-stat-sub">New orders today</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Total Users</div>
+        <div class="adm-stat-value" id="m-users">0</div>
+        <div class="adm-stat-sub">All registered accounts</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Live Products</div>
+        <div class="adm-stat-value" id="m-products">0</div>
+        <div class="adm-stat-sub">Across every shop</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER VERIFICATION -->
+  <section class="adm-page" id="adm-verify">
+    <div class="adm-h1">Order Verification Hub</div>
+    <div class="adm-section" id="verify-list">
+      <div class="adm-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- PAYOUTS -->
+  <section class="adm-page" id="adm-payouts">
+    <div class="adm-h1">Payout Manager</div>
+    <div class="adm-section" id="payouts-list">
+      <div class="adm-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- USERS -->
+  <section class="adm-page" id="adm-users">
+    <div class="adm-h1">User Directory</div>
+    <input class="adm-search" id="user-search" placeholder="Search by name, phone, business…" oninput="admUserSearch(this.value)" />
+    <div class="adm-section" id="users-list">
+      <div class="adm-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="adm-page" id="adm-products">
+    <div class="adm-h1">Product Review</div>
+    <div class="adm-prod-grid" id="products-grid">
+      <div class="adm-empty" style="grid-column:1/-1;">Loading…</div>
+    </div>
+  </section>
+
+  <nav class="adm-bottom-nav">
+    <div class="adm-nav-item active" id="nav-adm-home" onclick="admGo('adm-home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+      <span class="adm-nav-label">Home</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-verify" onclick="admGo('adm-verify')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M9 12l2 2 4-4M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span class="adm-nav-label">Verify</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-payouts" onclick="admGo('adm-payouts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 7h18v10H3zM3 11h18M7 15h2"/></svg>
+      <span class="adm-nav-label">Payouts</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-users" onclick="admGo('adm-users')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 11h5M18.5 8.5v5"/></svg>
+      <span class="adm-nav-label">Users</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-products" onclick="admGo('adm-products')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg>
+      <span class="adm-nav-label">Products</span>
+    </div>
+  </nav>
+
+  <div class="adm-lightbox" id="adm-lightbox" onclick="this.classList.remove('open')">
+    <img id="adm-lightbox-img" alt="Receipt" />
+  </div>
+</div>
