@@ -117,7 +117,7 @@ export function LateenShell({ role }: { role: Role }) {
     if (containerRef.current) translateDOM(containerRef.current, lang);
   }, [lang]);
 
-  const body = role === "business" ? businessBody : marketerBody;
+  const body = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
 
   return (
     <div className={`lateen-${role} relative`}>
