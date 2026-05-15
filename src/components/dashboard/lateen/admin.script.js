@@ -22,6 +22,8 @@ async function admLoadMetrics(){
   try{
     const m=await window.LateenAPI.admin.getMetrics();
     document.getElementById('m-fees').textContent=admMoney(m.totalFees);
+    document.getElementById('m-fees-month').textContent=admMoney(m.feesThisMonth||0);
+    document.getElementById('m-fees-year').textContent=admMoney(m.feesThisYear||0);
     document.getElementById('m-active').textContent=m.activeUsers.toLocaleString();
     document.getElementById('m-leads').textContent=m.leadsToday.toLocaleString();
     document.getElementById('m-users').textContent=m.totalUsers.toLocaleString();
