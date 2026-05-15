@@ -228,14 +228,14 @@ async function admLoadProducts(){
       const img=photo?`<img class="adm-prod-img" src="${admEsc(photo)}" alt="${admEsc(p.name)}"/>`:`<div class="adm-prod-img-empty">📦</div>`;
       const isHidden=p.status==='hidden';
       const pill=isHidden?'<span class="adm-status-pill" style="background:rgba(224,112,112,0.85);color:#fff;">Hidden</span>':'';
-      return `<div class="adm-prod">
+      return `<div class="adm-prod" onclick="admOpenProduct('${p.id}')">
         <div class="adm-prod-img-wrap">${img}${pill}</div>
         <div class="adm-prod-body">
           <div class="adm-prod-name">${admEsc(p.name)}</div>
           <div class="adm-prod-shop">${admEsc(p.biz_name||'Shop')}</div>
           <div class="adm-prod-row">
             <span class="adm-prod-price">${admMoney(p.price)}</span>
-            <button class="adm-prod-toggle ${isHidden?'hidden-state':'active'}" onclick="admToggleProduct('${p.id}','${isHidden?'active':'hidden'}')">${isHidden?'Unhide':'Hide'}</button>
+            <button class="adm-prod-toggle ${isHidden?'hidden-state':'active'}" onclick="event.stopPropagation();admToggleProduct('${p.id}','${isHidden?'active':'hidden'}')">${isHidden?'Unhide':'Hide'}</button>
           </div>
         </div>
       </div>`;
@@ -245,6 +245,59 @@ async function admLoadProducts(){
 
 async function admToggleProduct(id,newStatus){
   try{await window.LateenAPI.admin.setProductStatus(id,newStatus);admLoadProducts();}catch(e){alert('Failed: '+e.message);}
+}
+
+function admClosePDetail(){document.getElementById('adm-pdetail').classList.remove('open');}
+
+async function admOpenProduct(id){
+  const modal=document.getElementById('adm-pdetail');
+  const body=document.getElementById('adm-pdetail-body');
+  body.innerHTML='<div class="adm-empty">Loading…</div>';
+  modal.classList.add('open');
+  try{
+    const res=await window.LateenAPI.admin.getProductDetail(id);
+    if(!res||!res.product){body.innerHTML='<div class="adm-empty">Product not found.</div>';return;}
+    const p=res.product, owner=res.owner||{};
+    const cur=(p.currency&&p.currency.symbol)||'£';
+    const photos=Array.isArray(p.photos)?p.photos:[];
+    const mainImg=photos[0]?`<img class="adm-pd-img" src="${admEsc(photos[0])}" alt="${admEsc(p.name)}" onclick="admLightbox('${admEsc(photos[0])}')"/>`:`<div class="adm-pd-img" style="display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--txt-3);">📦</div>`;
+    const thumbs=photos.length>1?`<div class="adm-pd-imgrow">${photos.map(u=>`<img src="${admEsc(u)}" alt="" onclick="admLightbox('${admEsc(u)}')"/>`).join('')}</div>`:'';
+    const sizes=Array.isArray(p.sizes)&&p.sizes.length?`<div class="adm-pd-section">Sizes</div><div class="adm-pd-chips">${p.sizes.map(s=>`<span class="adm-pd-chip">${admEsc(s)}</span>`).join('')}</div>`:'';
+    const colors=Array.isArray(p.colors)&&p.colors.length?`<div class="adm-pd-section">Colours</div><div class="adm-pd-chips">${p.colors.map(s=>`<span class="adm-pd-chip">${admEsc(s)}</span>`).join('')}</div>`:'';
+    const CN={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa',MA:'Morocco'};
+    const delivery=p.delivery&&typeof p.delivery==='object'?Object.entries(p.delivery):[];
+    const deliveryHtml=delivery.length?`<div class="adm-pd-section">Delivery</div>`+delivery.map(([code,z])=>{
+      const cities=z&&z.cities?Object.entries(z.cities):[];
+      return `<div class="adm-pd-zone"><div class="adm-pd-zone-h">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="adm-pd-zone-r"><span>${admEsc(city)}</span><span style="color:var(--txt-2);">Ship ${cur}${Number(c.shipping||0).toFixed(2)} · Deliv ${cur}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
+    }).join(''):'';
+    const ownerName=owner.business_name||owner.full_name||p.biz_name||'Unknown';
+    const ownerOther=owner.business_name&&owner.full_name&&owner.business_name!==owner.full_name?`<div class="adm-pd-owner-row">Contact name: <span>${admEsc(owner.full_name)}</span></div>`:'';
+    body.innerHTML=`
+      ${mainImg}${thumbs}
+      <div class="adm-pd-name">${admEsc(p.name)}</div>
+      <div class="adm-pd-shop">Code: ${admEsc(p.code||'—')} · ${admEsc(p.category||'Uncategorised')}</div>
+      <div class="adm-pd-grid">
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Price</div><div class="adm-pd-cell-v">${cur}${Number(p.price||0).toFixed(2)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">In stock</div><div class="adm-pd-cell-v">${Number(p.qty||0)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Commission</div><div class="adm-pd-cell-v">${p.comm_mode==='fixed'?cur+Number(p.comm_fixed||0).toFixed(2):Number(p.comm_pct||0)+'%'}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Platform fee</div><div class="adm-pd-cell-v">${cur}${Number(p.platform_fee||0).toFixed(2)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Sold</div><div class="adm-pd-cell-v">${Number(p.sold||0)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Revenue</div><div class="adm-pd-cell-v">${cur}${Number(p.revenue||0).toFixed(2)}</div></div>
+      </div>
+      ${p.description?`<div class="adm-pd-section">Description</div><div class="adm-pd-desc">${admEsc(p.description)}</div>`:''}
+      ${sizes}${colors}${deliveryHtml}
+      <div class="adm-pd-section">Business owner</div>
+      <div class="adm-pd-owner">
+        <div class="adm-pd-owner-name">${admEsc(ownerName)}</div>
+        ${ownerOther}
+        <div class="adm-pd-owner-row">Phone: <span>${admEsc(owner.phone||p.biz_phone||'—')}</span></div>
+        <div class="adm-pd-owner-row">Joined: <span>${owner.created_at?admWhen(owner.created_at):'—'}</span></div>
+        <div class="adm-pd-owner-row" style="margin-top:8px;">
+          <button class="adm-go-btn" onclick="admGoToAccount('${p.business_id}','business','${admEsc(ownerName).replace(/'/g,'&#39;')}')">Go to Account</button>
+        </div>
+      </div>
+    `;
+  }catch(e){console.error('[admin] product detail',e);body.innerHTML='<div class="adm-empty">Failed to load: '+admEsc(e.message||'')+'</div>';}
 }
 
 /* boot */
