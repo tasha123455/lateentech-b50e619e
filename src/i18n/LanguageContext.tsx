@@ -185,7 +185,7 @@ function applyToRoot(root: HTMLElement | Document, code: string, langName: strin
     queueMicrotask(() => { isApplying = false; });
   }
 
-  if (code === "en" || code === "ar" || alreadyFetching) return;
+  if (code === "en" || alreadyFetching) return;
   if (missing.size === 0) return;
 
   // Queue + flush
