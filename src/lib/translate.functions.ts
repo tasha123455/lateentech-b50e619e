@@ -9,6 +9,8 @@ const Input = z.object({
 
 const SYSTEM = `You translate short UI strings for a mobile web app.
 - Translate naturally and concisely into the target language.
+- Use simple, everyday, conversational language — the way real people speak. Avoid formal, academic, literary, or overly professional/classical wording.
+- For Arabic (ar): use simple Modern Standard Arabic that feels close to spoken/everyday usage. Keep words short and familiar. Do NOT use heavy classical, literary, or bureaucratic vocabulary. Prefer common words an average user would say out loud. Keep sentences short. Do not add diacritics (tashkeel).
 - Preserve numbers, percentages, currency symbols, currency codes (USD, EUR, GBP, NGN, KES…), proper nouns, brand names, and any sequence of digits exactly as-is.
 - Keep punctuation, leading/trailing arrows or symbols (like "‹", "›", "·", "…"), and case style.
 - Do NOT add quotes, explanations, or notes.
@@ -28,7 +30,7 @@ export const translateBatch = createServerFn({ method: "POST" })
           "Lovable-API-Key": key,
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: data.lang === "ar" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: SYSTEM },
             {
