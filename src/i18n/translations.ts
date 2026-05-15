@@ -747,7 +747,6 @@ export const T: Translations = {
   "Business workspace": { ar: "مساحة عمل الشركة" },
   "Marketer workspace": { ar: "مساحة عمل المسوّق" },
   "Payout": { ar: "سحب" },
-  "Fri": { ar: "الجمعة" },
   "sold": { ar: "مباع" },
   "ago": { ar: "مضت" },
 
@@ -779,10 +778,6 @@ export const T: Translations = {
 
   // Marketer browse / detail
   "Any": { ar: "الكل" },
-  "Get my link": { ar: "احصل على رابطي" },
-  "Copy link": { ar: "نسخ الرابط" },
-  "Copied!": { ar: "تم النسخ!" },
-  "No products found.": { ar: "لا توجد منتجات." },
   "Your earning per sale": { ar: "ربحك لكل عملية بيع" },
   "Fee to collect": { ar: "الرسوم المطلوب تحصيلها" },
   "Total to pay": { ar: "إجمالي المبلغ" },
@@ -790,9 +785,6 @@ export const T: Translations = {
   "Ships to": { ar: "يُشحن إلى" },
   "— Select country —": { ar: "— اختر الدولة —" },
   "— Select city —": { ar: "— اختر المدينة —" },
-  "Found:": { ar: "تم العثور على:" },
-  "Tap to open": { ar: "اضغط للفتح" },
-  "Analysing image…": { ar: "جاري تحليل الصورة…" },
   "⏳ Pending verification": { ar: "⏳ بانتظار المراجعة" },
   "⏳ Pending verification by admin": { ar: "⏳ بانتظار مراجعة المدير" },
   "✓ Approved · forwarded to business": { ar: "✓ تمت الموافقة · وأُرسل إلى الشركة" },
