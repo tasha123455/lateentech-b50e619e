@@ -31,7 +31,6 @@ export const LOCALES: Locale[] = [
   { code: "bg",    name: "Bulgarian",          native: "Български" },
   { code: "sr",    name: "Serbian",            native: "Српски" },
   { code: "hr",    name: "Croatian",           native: "Hrvatski" },
-  { code: "ar",    name: "Arabic",             native: "العربية", rtl: true },
   { code: "he",    name: "Hebrew",             native: "עברית", rtl: true },
   { code: "fa",    name: "Persian",            native: "فارسی", rtl: true },
   { code: "ur",    name: "Urdu",               native: "اردو", rtl: true },
