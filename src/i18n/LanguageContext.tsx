@@ -186,6 +186,7 @@ function applyToRoot(root: HTMLElement | Document, code: string, langName: strin
       const found = lookup(item.original, code, cache);
       if (found !== null) {
         if (item.el.getAttribute(item.attr) !== found) item.el.setAttribute(item.attr, found);
+        (item.el as Element & Record<string, string | undefined>)[`__translated_${item.attr}`] = found;
       } else if (code !== "en") {
         missing.add(item.original);
       }
