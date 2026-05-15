@@ -50,6 +50,8 @@ let PRODUCTS={};
 const COUNTRY_NAMES={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa'};
 let currentProduct=null,currentDelivery=null,qty=1,selectedSize='',selectedColor='',depositConfirmed=null,hasReceipt=false,receiptUrl='',orders=[],editingId=null;
 const fmt=n=>'£'+parseFloat(n||0).toFixed(2);
+const fmtS=(sym,n)=>(sym||'£')+parseFloat(n||0).toFixed(2);
+const fmtO=(o,n)=>fmtS(o&&o._sym,n);
 const genCode=()=>'ORD-'+Math.random().toString(36).substr(2,6).toUpperCase();
 const today2=()=>{const d=new Date();return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();};
 function calcFee(prod,q){const commPerUnit=parseFloat((prod.price*prod.pct).toFixed(2));const platformPerUnit=parseFloat((prod.price*PLATFORM_FEE_RATE).toFixed(2));const feePerUnit=parseFloat((commPerUnit+platformPerUnit).toFixed(2));const totalFee=parseFloat((feePerUnit*q).toFixed(2));return{commPerUnit,platformPerUnit,feePerUnit,totalFee};}
