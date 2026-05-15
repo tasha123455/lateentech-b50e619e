@@ -376,8 +376,13 @@ export function createLateenApi(userId: string) {
         todayStart.setHours(0, 0, 0, 0);
         const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+        const yearStart = new Date(monthStart.getFullYear(), 0, 1);
+
         const [feesRes, todayRes, activeRes, profilesRes, productsRes] = await Promise.all([
-          supabase.from("orders").select("platform_fee, qty, status").in("status", ["confirmed", "delivered"]),
+          supabase.from("orders").select("platform_fee, qty, status, created_at").in("status", ["confirmed", "delivered"]),
           supabase.from("orders").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
           supabase.from("orders").select("marketer_id, business_id, created_at").gte("created_at", monthAgo),
           supabase.from("profiles").select("id", { count: "exact", head: true }),
