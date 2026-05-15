@@ -13,3 +13,24 @@
 }
 .lateen-admin .adm-stat-picker:focus { outline: 1px solid rgba(255,255,255,0.3); }
 .lateen-admin .adm-stat-picker option { background: #1a1a1a; color: #fff; }
+
+.lateen-admin .adm-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.lateen-admin .adm-go-btn {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.1s;
+}
+.lateen-admin .adm-go-btn:hover { transform: translateY(-1px); }
+.lateen-admin .adm-go-btn:active { transform: translateY(0); }
