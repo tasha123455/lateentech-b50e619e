@@ -197,7 +197,7 @@ function applyToRoot(root: HTMLElement | Document, code: string, langName: strin
     queueMicrotask(() => { isApplying = false; });
   }
 
-  if (code === "en" || alreadyFetching) return;
+  if (code === "en" || code === "ar" || alreadyFetching) return;
   if (missing.size === 0) return;
 
   // Queue + flush
@@ -271,7 +271,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     exposeGlobals(code);
     // For switch back to English, restore originals from stashes by walking & resetting
     if (code === "en") restoreOriginals(document);
-    else requestAnimationFrame(() => translateDOM(document, code));
+    else translateDOM(document, code); // synchronous: no RAF gap = no flicker
     window.dispatchEvent(new CustomEvent("lateen:lang", { detail: code }));
   }, []);
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage, translateDOM } from "@/i18n/LanguageContext";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
@@ -112,8 +112,8 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     };
   }, [role, signOut, userId]);
 
-  // When lang state changes (re-render), also re-walk
-  useEffect(() => {
+  // When lang state changes (re-render), translate before paint to avoid flicker
+  useLayoutEffect(() => {
     if (containerRef.current) translateDOM(containerRef.current, lang);
   }, [lang]);
 
