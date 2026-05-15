@@ -228,6 +228,66 @@
     <div class="adm-pdetail-card">
       <button class="adm-pdetail-close" onclick="admClosePDetail()">×</button>
       <div id="adm-pdetail-body"><div class="adm-empty">Loading…</div></div>
+  </div>
+
+  <!-- EMPLOYEES -->
+  <section class="adm-page" id="adm-employees">
+    <div class="adm-h1">Employees & Payroll</div>
+    <div class="adm-stat-grid">
+      <div class="adm-stat full">
+        <div class="adm-stat-label">Total Monthly Salaries</div>
+        <div class="adm-stat-value" id="emp-total-salary">£0.00</div>
+        <div class="adm-stat-sub"><span id="emp-count">0</span> employees · <span id="emp-paid-count">0</span> paid this month</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Paid This Month</div>
+        <div class="adm-stat-value" id="emp-paid-amt">£0.00</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Pending This Month</div>
+        <div class="adm-stat-value" id="emp-pending-amt" style="color:var(--danger)">£0.00</div>
+      </div>
+    </div>
+    <div class="adm-filter-row">
+      <button class="adm-filter-chip on" data-emp-filter="" onclick="admSetEmpFilter('',this)">All</button>
+      <button class="adm-filter-chip" data-emp-filter="pending" onclick="admSetEmpFilter('pending',this)">Pending</button>
+      <button class="adm-filter-chip" data-emp-filter="paid" onclick="admSetEmpFilter('paid',this)">Paid</button>
+      <button class="adm-filter-chip" style="margin-left:auto;background:var(--accent);color:#1a1a1a;border-color:var(--accent);" onclick="admOpenEmpForm()">+ New</button>
+    </div>
+    <input class="adm-search" id="emp-search" placeholder="Search by name, number, role, email…" oninput="admEmpSearch(this.value)" />
+    <div class="adm-section" id="employees-list"><div class="adm-empty">Loading…</div></div>
+  </section>
+
+  <!-- EMPLOYEE FORM MODAL -->
+  <div class="adm-pdetail" id="adm-emp-form" onclick="if(event.target===this)admCloseEmpForm()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admCloseEmpForm()">×</button>
+      <div style="padding:18px 18px 8px;font-size:16px;font-weight:600;" id="adm-emp-form-title">New Employee</div>
+      <div class="adm-emp-form-body">
+        <input type="hidden" id="emp-id" />
+        <label class="adm-emp-lbl">Full name<input id="emp-name" class="adm-emp-inp" /></label>
+        <label class="adm-emp-lbl">Employee number<input id="emp-num" class="adm-emp-inp" placeholder="EMP-001" /></label>
+        <label class="adm-emp-lbl">Job title<input id="emp-job" class="adm-emp-inp" /></label>
+        <label class="adm-emp-lbl">Email<input id="emp-email" type="email" class="adm-emp-inp" /></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <label class="adm-emp-lbl">Monthly salary (£)<input id="emp-salary" type="number" min="0" step="0.01" class="adm-emp-inp" /></label>
+          <label class="adm-emp-lbl">Date of hire<input id="emp-hired" type="date" class="adm-emp-inp" /></label>
+        </div>
+        <label class="adm-emp-lbl">Notes<textarea id="emp-notes" rows="3" class="adm-emp-inp"></textarea></label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="adm-btn adm-btn-ghost" onclick="admCloseEmpForm()">Cancel</button>
+          <button class="adm-btn adm-btn-acc" onclick="admSaveEmp()">Save</button>
+        </div>
+        <button class="adm-btn adm-btn-no" id="emp-delete-btn" style="margin-top:8px;display:none;" onclick="admDeleteEmp()">Delete employee</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPLOYEE HISTORY MODAL -->
+  <div class="adm-pdetail" id="adm-emp-hist" onclick="if(event.target===this)admCloseEmpHist()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admCloseEmpHist()">×</button>
+      <div id="adm-emp-hist-body"><div class="adm-empty">Loading…</div></div>
     </div>
   </div>
 
