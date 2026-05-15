@@ -87,6 +87,38 @@
 .adm-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
 .adm-lightbox.open { display: flex; }
 .adm-lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.adm-filter-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.adm-filter-chip { font-size: 11px; padding: 6px 12px; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); color: var(--txt-2); cursor: pointer; font-family: var(--font); font-weight: 500; }
+.adm-filter-chip.on { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+
+.adm-prod { cursor: pointer; transition: border-color .15s; }
+.adm-prod:hover { border-color: var(--accent-tint); }
+
+.adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; align-items: flex-end; justify-content: center; }
+.adm-pdetail.open { display: flex; }
+.adm-pdetail-card { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; position: relative; padding: 18px 16px 32px; border-top: 0.5px solid var(--border); }
+.adm-pdetail-close { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.4); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 2; }
+.adm-pd-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 14px; background: var(--surface-2); margin-bottom: 12px; }
+.adm-pd-imgrow { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; }
+.adm-pd-imgrow img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
+.adm-pd-name { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+.adm-pd-shop { font-size: 12px; color: var(--txt-2); margin-bottom: 14px; }
+.adm-pd-section { font-size: 11px; font-weight: 600; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 6px; }
+.adm-pd-desc { font-size: 13px; color: var(--txt-1); line-height: 1.5; white-space: pre-wrap; }
+.adm-pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.adm-pd-cell { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; }
+.adm-pd-cell-l { font-size: 10px; color: var(--txt-3); }
+.adm-pd-cell-v { font-size: 14px; font-weight: 500; color: var(--txt-1); }
+.adm-pd-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.adm-pd-chip { font-size: 11px; padding: 4px 9px; border-radius: 8px; background: var(--surface-2); color: var(--txt-2); }
+.adm-pd-owner { background: var(--card); border: 0.5px solid var(--accent-tint); border-radius: 12px; padding: 12px; margin-top: 6px; }
+.adm-pd-owner-name { font-size: 14px; font-weight: 500; color: var(--accent); margin-bottom: 4px; }
+.adm-pd-owner-row { font-size: 12px; color: var(--txt-2); margin-top: 3px; }
+.adm-pd-owner-row span { color: var(--txt-1); font-weight: 500; }
+.adm-pd-zone { border: 0.5px solid var(--border-2); border-radius: 10px; overflow: hidden; margin-top: 6px; }
+.adm-pd-zone-h { padding: 7px 12px; background: var(--surface-2); font-size: 12px; font-weight: 500; }
+.adm-pd-zone-r { display: flex; justify-content: space-between; padding: 7px 12px; border-top: 0.5px solid var(--border-2); font-size: 12px; }
 </style>
 
 <div class="adm-app">
