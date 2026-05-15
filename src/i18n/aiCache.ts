@@ -1,6 +1,6 @@
 // localStorage cache for AI translations: lateen_t_<lang> = { english: translated }
 
-const PREFIX = "lateen_t_";
+const PREFIX = "lateen_t2_";
 
 export type Cache = Record<string, string>;
 
