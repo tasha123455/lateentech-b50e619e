@@ -34,3 +34,17 @@
 }
 .lateen-admin .adm-go-btn:hover { transform: translateY(-1px); }
 .lateen-admin .adm-go-btn:active { transform: translateY(0); }
+
+.lateen-admin .adm-payout-card { border-bottom: 0.5px solid var(--border-2); }
+.lateen-admin .adm-payout-card:last-child { border-bottom: none; }
+.lateen-admin .adm-payout-card .adm-payout-row { border-bottom: none; }
+.lateen-admin .adm-pay-details {
+  padding: 4px 14px 14px 56px;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.lateen-admin .adm-pay-detail-row { display: flex; justify-content: space-between; gap: 12px; }
+.lateen-admin .adm-pay-detail-k { color: rgba(255,255,255,0.55); }
+.lateen-admin .adm-pay-detail-v { color: #fff; font-weight: 500; text-align: right; word-break: break-all; }
+.lateen-admin .adm-pay-details-empty { color: #d97706; font-style: italic; }
