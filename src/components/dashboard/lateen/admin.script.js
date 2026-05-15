@@ -91,20 +91,24 @@ async function admLoadVerify(){
       const phone=o.marketer&&o.marketer.phone||'';
       const product=o.product&&o.product.name||'Order';
       const thumb=o.receipt_url?`<img class="adm-thumb" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="event.stopPropagation();admLightbox('${admEsc(o.receipt_url)}')" />`:`<div class="adm-thumb-empty">📄</div>`;
+      const upAt=o.receipt_uploaded_at?'Uploaded: '+admWhen(o.receipt_uploaded_at):'';
+      const created='Created: '+admWhen(o.created_at);
       return `<div class="adm-row" onclick="admToggleRow('v-${o.id}')">
         <div class="adm-row-top">
           ${thumb}
           <div class="adm-row-mid">
             <div class="adm-row-name">${admEsc(marketer)}</div>
-            <div class="adm-row-sub">${admEsc(product)} · ${admEsc(phone)} · ${admWhen(o.created_at)}</div>
+            <div class="adm-row-sub">${admEsc(product)} · ${admEsc(phone)}</div>
+            <div class="adm-row-sub" style="opacity:.7">${created}${upAt?' · '+upAt:''}</div>
+            <div class="adm-row-sub" style="color:#e0c070">⏳ Pending verification</div>
           </div>
           <div class="adm-row-amt">${admMoney(fee)}</div>
         </div>
         <div class="adm-expand" id="v-${o.id}">
           ${o.receipt_url?`<img class="adm-receipt-full" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="admLightbox('${admEsc(o.receipt_url)}')"/>`:'<div class="adm-empty">No receipt image</div>'}
           <div class="adm-actions">
-            <button class="adm-btn adm-btn-no" onclick="event.stopPropagation();admReject('${o.id}')">Reject</button>
-            <button class="adm-btn adm-btn-ok" onclick="event.stopPropagation();admApprove('${o.id}')">Approve</button>
+            <button class="adm-btn adm-btn-no" onclick="event.stopPropagation();admReject('${o.id}')">Reject with note</button>
+            <button class="adm-btn adm-btn-ok" onclick="event.stopPropagation();admApprove('${o.id}')">Approve &amp; forward</button>
           </div>
         </div>
       </div>`;
@@ -123,12 +127,13 @@ function admLightbox(url){
 }
 
 async function admApprove(id){
-  if(!confirm('Approve this order? Stock will be decremented and the marketer credited.'))return;
+  if(!confirm('Approve this receipt? The order will be forwarded to the business owner and stock will be decremented.'))return;
   try{await window.LateenAPI.admin.approveOrder(id);admLoadVerify();}catch(e){alert('Approve failed: '+e.message);}
 }
 async function admReject(id){
-  if(!confirm('Reject this order? Receipt will be cleared.'))return;
-  try{await window.LateenAPI.admin.rejectOrder(id);admLoadVerify();}catch(e){alert('Reject failed: '+e.message);}
+  const notes=prompt('Reason for rejecting this receipt? (visible to the marketer)');
+  if(notes===null)return;
+  try{await window.LateenAPI.admin.rejectOrder(id,notes||'Receipt rejected');admLoadVerify();}catch(e){alert('Reject failed: '+e.message);}
 }
 
 async function admLoadPayouts(){
