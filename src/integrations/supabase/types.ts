@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      employee_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          paid_at: string
+          period_month: number
+          period_year: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          paid_at?: string
+          period_month: number
+          period_year: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string
+          period_month?: number
+          period_year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_payments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          created_at: string
+          email: string | null
+          employee_number: string
+          full_name: string
+          hired_at: string
+          id: string
+          job_title: string | null
+          monthly_salary: number
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          employee_number: string
+          full_name: string
+          hired_at?: string
+          id?: string
+          job_title?: string | null
+          monthly_salary?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          employee_number?: string
+          full_name?: string
+          hired_at?: string
+          id?: string
+          job_title?: string | null
+          monthly_salary?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
