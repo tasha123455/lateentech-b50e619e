@@ -405,6 +405,10 @@ export function createLateenApi(userId: string) {
           totalFees: fees,
           feesThisMonth,
           feesThisYear,
+          feeRows: feeRows.map((r) => ({
+            ts: new Date(r.created_at).getTime(),
+            amount: Number(r.platform_fee || 0) * Number(r.qty || 0),
+          })),
           activeUsers: activeUsers.size,
           leadsToday: todayRes.count ?? 0,
           totalUsers: profilesRes.count ?? 0,

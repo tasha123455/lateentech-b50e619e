@@ -113,15 +113,21 @@
         <div class="adm-stat-value" id="m-fees">£0.00</div>
         <div class="adm-stat-sub">Lifetime, from confirmed & delivered orders</div>
       </div>
-      <div class="adm-stat">
-        <div class="adm-stat-label">Fees This Month</div>
+      <div class="adm-stat adm-stat-pickable">
+        <div class="adm-stat-label">
+          Fees in
+          <select id="m-month-picker" class="adm-stat-picker" onchange="admUpdateMonthFees()"></select>
+        </div>
         <div class="adm-stat-value" id="m-fees-month">£0.00</div>
-        <div class="adm-stat-sub">Confirmed & delivered, current calendar month</div>
+        <div class="adm-stat-sub">Confirmed &amp; delivered, selected month</div>
       </div>
-      <div class="adm-stat">
-        <div class="adm-stat-label">Fees This Year</div>
+      <div class="adm-stat adm-stat-pickable">
+        <div class="adm-stat-label">
+          Fees in
+          <select id="m-year-picker" class="adm-stat-picker" onchange="admUpdateYearFees()"></select>
+        </div>
         <div class="adm-stat-value" id="m-fees-year">£0.00</div>
-        <div class="adm-stat-sub">Confirmed & delivered, current calendar year</div>
+        <div class="adm-stat-sub">Confirmed &amp; delivered, selected year</div>
       </div>
       <div class="adm-stat">
         <div class="adm-stat-label">Active Users</div>
