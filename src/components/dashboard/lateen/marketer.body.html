@@ -436,18 +436,42 @@
 <!-- WITHDRAW OVERLAY -->
 <div class="menu-overlay" id="withdraw-overlay">
   <div class="menu-backdrop" onclick="closeWithdraw()"></div>
-  <div style="position:absolute;bottom:0;left:0;right:0;background:#1e1e1e;border-radius:20px 20px 0 0;padding:1.5rem;border-top:0.5px solid #333;">
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#1e1e1e;border-radius:20px 20px 0 0;padding:1.5rem;border-top:0.5px solid #333;max-height:90vh;overflow-y:auto;">
     <div style="width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 1.25rem;"></div>
     <div style="font-size:17px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;">Withdraw earnings</div>
     <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem;">Funds arrive in 2–5 business days</div>
     <div style="background:#2a2a2a;border-radius:12px;padding:16px;text-align:center;margin-bottom:1.25rem;">
       <div style="font-size:30px;font-weight:500;color:var(--color-text-primary);" id="withdraw-amount">£0.00</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">Add a payout method in your profile</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">Confirm your payout details below</div>
     </div>
-    <button onclick="confirmWithdraw()" style="width:100%;height:44px;border-radius:12px;border:none;background:#f0eeeb;color:#0D0D0D;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);margin-bottom:10px;">Confirm withdrawal</button>
+    <div style="display:grid;gap:10px;margin-bottom:14px;">
+      <label class="pd-lbl">Method
+        <select id="pd-method" class="pd-inp">
+          <option value="">Select…</option>
+          <option>Bank transfer</option>
+          <option>Mobile wallet</option>
+          <option>PayPal</option>
+          <option>Cash / Other</option>
+        </select>
+      </label>
+      <label class="pd-lbl">Bank / Provider<input id="pd-bank" class="pd-inp" placeholder="e.g. Barclays" /></label>
+      <label class="pd-lbl">Account holder<input id="pd-holder" class="pd-inp" placeholder="Full name on account" /></label>
+      <label class="pd-lbl">Account number<input id="pd-acct" class="pd-inp" placeholder="Account number" /></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <label class="pd-lbl">IBAN<input id="pd-iban" class="pd-inp" placeholder="optional" /></label>
+        <label class="pd-lbl">SWIFT/BIC<input id="pd-swift" class="pd-inp" placeholder="optional" /></label>
+      </div>
+      <label class="pd-lbl">Notes<textarea id="pd-notes" class="pd-inp" rows="2" placeholder="optional"></textarea></label>
+    </div>
+    <button onclick="confirmWithdraw()" style="width:100%;height:44px;border-radius:12px;border:none;background:#f0eeeb;color:#0D0D0D;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);margin-bottom:10px;">Save &amp; request withdrawal</button>
     <button onclick="closeWithdraw()" style="width:100%;height:40px;border-radius:12px;border:0.5px solid #333;background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;font-family:var(--font-sans);">Cancel</button>
   </div>
 </div>
+<style>
+.pd-lbl{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;}
+.pd-inp{background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:8px;padding:10px 12px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);outline:none;text-transform:none;letter-spacing:normal;}
+.pd-inp:focus{border-color:#666;}
+</style>
 
 <!-- BROWSE OVERLAYS -->
 <div class="ov" id="fov">

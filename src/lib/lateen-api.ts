@@ -230,11 +230,19 @@ export function createLateenApi(userId: string) {
     async getProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, business_name, phone")
+        .select("full_name, business_name, phone, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
       return data;
+    },
+
+    async updateProfile(patch: Record<string, unknown>) {
+      const { error } = await supabase
+        .from("profiles")
+        .update(patch as never)
+        .eq("id", userId);
+      if (error) throw error;
     },
 
     async getWallet() {
@@ -330,9 +338,9 @@ export function createLateenApi(userId: string) {
         const rows = (data ?? []) as Array<Record<string, unknown> & { user_id: string }>;
         const ids = [...new Set(rows.map((r) => r.user_id))];
         const { data: profs } = ids.length
-          ? await supabase.from("profiles").select("id, full_name, phone, business_name").in("id", ids)
-          : { data: [] as Array<{ id: string; full_name: string | null; phone: string | null; business_name: string | null }> };
-        const m = new Map((profs ?? []).map((p) => [p.id, p]));
+          ? await supabase.from("profiles").select("id, full_name, phone, business_name, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes").in("id", ids)
+          : { data: [] as Array<Record<string, unknown> & { id: string }> };
+        const m = new Map((profs ?? []).map((p) => [p.id as string, p]));
         return rows.map((r) => ({ ...r, user: m.get(r.user_id) ?? null }));
       },
       async markPayoutPaid(id: string) {

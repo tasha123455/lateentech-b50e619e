@@ -246,6 +246,13 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          payout_account_holder: string | null
+          payout_account_number: string | null
+          payout_bank_name: string | null
+          payout_iban: string | null
+          payout_method: string | null
+          payout_notes: string | null
+          payout_swift: string | null
           phone: string | null
           updated_at: string
         }
@@ -254,6 +261,13 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          payout_account_holder?: string | null
+          payout_account_number?: string | null
+          payout_bank_name?: string | null
+          payout_iban?: string | null
+          payout_method?: string | null
+          payout_notes?: string | null
+          payout_swift?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -262,6 +276,13 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          payout_account_holder?: string | null
+          payout_account_number?: string | null
+          payout_bank_name?: string | null
+          payout_iban?: string | null
+          payout_method?: string | null
+          payout_notes?: string | null
+          payout_swift?: string | null
           phone?: string | null
           updated_at?: string
         }

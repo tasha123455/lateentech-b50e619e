@@ -137,16 +137,31 @@ async function admLoadPayouts(){
     const list=await window.LateenAPI.admin.listPayoutRequests();
     if(!list.length){root.innerHTML='<div class="adm-empty">No payout requests pending.</div>';return;}
     root.innerHTML=list.map(p=>{
-      const name=p.user&&(p.user.business_name||p.user.full_name)||'Marketer';
-      const phone=p.user&&p.user.phone||'';
-      return `<div class="adm-payout-row">
-        <div class="adm-user-av">${admEsc(admInitials(name))}</div>
-        <div class="adm-pay-info">
-          <div class="adm-pay-name">${admEsc(name)}</div>
-          <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
+      const u=p.user||{};
+      const name=u.business_name||u.full_name||'Marketer';
+      const phone=u.phone||'';
+      const detail=(label,val)=>val?`<div class="adm-pay-detail-row"><span class="adm-pay-detail-k">${admEsc(label)}</span><span class="adm-pay-detail-v">${admEsc(val)}</span></div>`:'';
+      const hasAny=u.payout_method||u.payout_bank_name||u.payout_account_holder||u.payout_account_number||u.payout_iban||u.payout_swift||u.payout_notes;
+      const detailsHtml=hasAny?`<div class="adm-pay-details">
+        ${detail('Method',u.payout_method)}
+        ${detail('Bank',u.payout_bank_name)}
+        ${detail('Account holder',u.payout_account_holder)}
+        ${detail('Account #',u.payout_account_number)}
+        ${detail('IBAN',u.payout_iban)}
+        ${detail('SWIFT/BIC',u.payout_swift)}
+        ${detail('Notes',u.payout_notes)}
+      </div>`:`<div class="adm-pay-details adm-pay-details-empty">No payout details on file — contact the marketer.</div>`;
+      return `<div class="adm-payout-card">
+        <div class="adm-payout-row">
+          <div class="adm-user-av">${admEsc(admInitials(name))}</div>
+          <div class="adm-pay-info">
+            <div class="adm-pay-name">${admEsc(name)}</div>
+            <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
+          </div>
+          <div class="adm-pay-amt">${admMoney(p.amount)}</div>
+          <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${p.amount})">Paid</button>
         </div>
-        <div class="adm-pay-amt">${admMoney(p.amount)}</div>
-        <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${p.amount})">Paid</button>
+        ${detailsHtml}
       </div>`;
     }).join('');
   }catch(e){console.error('[admin] payouts',e);root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
