@@ -61,6 +61,7 @@ function admGo(pageId){
   if(pageId==='adm-payouts') admLoadPayouts();
   if(pageId==='adm-users') admLoadUsers('');
   if(pageId==='adm-products') admLoadProducts();
+  if(pageId==='adm-employees') admLoadEmployees();
 }
 
 async function admLoadMetrics(){
