@@ -7,6 +7,7 @@ export type Locale = {
 
 export const LOCALES: Locale[] = [
   { code: "en",    name: "English",            native: "English" },
+  { code: "ar",    name: "Arabic",             native: "العربية", rtl: true },
   { code: "es",    name: "Spanish",            native: "Español" },
   { code: "fr",    name: "French",             native: "Français" },
   { code: "de",    name: "German",             native: "Deutsch" },
