@@ -2,6 +2,7 @@ import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
+import { useT } from "@/i18n/LanguageContext";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard · Lateen" }] }),
@@ -24,6 +25,7 @@ function readImpersonation(): Impersonation | null {
 function DashboardPage() {
   const { user, role, loading } = useAuth();
   const nav = useNavigate();
+  const t = useT();
   const [impersonation, setImpersonation] = useState<Impersonation | null>(() => readImpersonation());
 
   useEffect(() => {
@@ -39,7 +41,7 @@ function DashboardPage() {
   }, [impersonation, role]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center text-text-2">Loading…</div>;
+    return <div className="flex min-h-screen items-center justify-center text-text-2">{t("Loading…")}</div>;
   }
   if (!user) return <Navigate to="/" />;
 
@@ -47,8 +49,8 @@ function DashboardPage() {
     return (
       <div className="flex min-h-screen items-center justify-center px-6 text-center">
         <div>
-          <p className="text-sm text-text-2">Setting up your account…</p>
-          <p className="mt-2 text-xs text-text-3">If this persists, sign out and pick a role again.</p>
+          <p className="text-sm text-text-2">{t("Setting up your account…")}</p>
+          <p className="mt-2 text-xs text-text-3">{t("If this persists, sign out and pick a role again.")}</p>
         </div>
       </div>
     );
@@ -94,7 +96,7 @@ function DashboardPage() {
               fontWeight: 600,
             }}
           >
-            Exit
+            {t("Exit")}
           </button>
         </div>
         <LateenShell role={impersonation.role} overrideUserId={impersonation.userId} />
