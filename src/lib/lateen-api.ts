@@ -371,6 +371,21 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.rpc("admin_set_product_status", { _product_id: id, _status: status });
         if (error) throw error;
       },
+      async getProductDetail(id: string) {
+        const { data: product, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle();
+        if (error) throw error;
+        if (!product) return null;
+        const { data: owner } = await supabase
+          .from("profiles")
+          .select("id, full_name, business_name, phone, created_at")
+          .eq("id", (product as { business_id: string }).business_id)
+          .maybeSingle();
+        return { product, owner };
+      },
       async getMetrics() {
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
