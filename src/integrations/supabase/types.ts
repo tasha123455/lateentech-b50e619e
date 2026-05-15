@@ -125,6 +125,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_notes: string | null
           business_id: string
           color: string | null
           commission: number
@@ -142,12 +143,15 @@ export type Database = {
           platform_fee: number
           product_id: string
           qty: number
+          receipt_uploaded_at: string | null
           receipt_url: string | null
+          reviewed_at: string | null
           size: string | null
           status: string
           unit_price: number
         }
         Insert: {
+          admin_notes?: string | null
           business_id: string
           color?: string | null
           commission?: number
@@ -165,12 +169,15 @@ export type Database = {
           platform_fee?: number
           product_id: string
           qty?: number
+          receipt_uploaded_at?: string | null
           receipt_url?: string | null
+          reviewed_at?: string | null
           size?: string | null
           status?: string
           unit_price?: number
         }
         Update: {
+          admin_notes?: string | null
           business_id?: string
           color?: string | null
           commission?: number
@@ -188,7 +195,9 @@ export type Database = {
           platform_fee?: number
           product_id?: string
           qty?: number
+          receipt_uploaded_at?: string | null
           receipt_url?: string | null
+          reviewed_at?: string | null
           size?: string | null
           status?: string
           unit_price?: number
@@ -421,6 +430,7 @@ export type Database = {
       admin_approve_order: {
         Args: { _order_id: string }
         Returns: {
+          admin_notes: string | null
           business_id: string
           color: string | null
           commission: number
@@ -438,7 +448,9 @@ export type Database = {
           platform_fee: number
           product_id: string
           qty: number
+          receipt_uploaded_at: string | null
           receipt_url: string | null
+          reviewed_at: string | null
           size: string | null
           status: string
           unit_price: number
@@ -470,6 +482,7 @@ export type Database = {
       admin_reject_order: {
         Args: { _order_id: string }
         Returns: {
+          admin_notes: string | null
           business_id: string
           color: string | null
           commission: number
@@ -487,7 +500,44 @@ export type Database = {
           platform_fee: number
           product_id: string
           qty: number
+          receipt_uploaded_at: string | null
           receipt_url: string | null
+          reviewed_at: string | null
+          size: string | null
+          status: string
+          unit_price: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_reject_order_with_notes: {
+        Args: { _notes: string; _order_id: string }
+        Returns: {
+          admin_notes: string | null
+          business_id: string
+          color: string | null
+          commission: number
+          confirmed_at: string | null
+          created_at: string
+          currency: Json | null
+          customer_city: string | null
+          customer_country: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
+          id: string
+          marketer_confirmed_at: string | null
+          marketer_id: string
+          platform_fee: number
+          product_id: string
+          qty: number
+          receipt_uploaded_at: string | null
+          receipt_url: string | null
+          reviewed_at: string | null
           size: string | null
           status: string
           unit_price: number
@@ -540,6 +590,7 @@ export type Database = {
       confirm_order: {
         Args: { _order_id: string }
         Returns: {
+          admin_notes: string | null
           business_id: string
           color: string | null
           commission: number
@@ -557,7 +608,9 @@ export type Database = {
           platform_fee: number
           product_id: string
           qty: number
+          receipt_uploaded_at: string | null
           receipt_url: string | null
+          reviewed_at: string | null
           size: string | null
           status: string
           unit_price: number
@@ -583,6 +636,7 @@ export type Database = {
       mark_delivered: {
         Args: { _order_id: string }
         Returns: {
+          admin_notes: string | null
           business_id: string
           color: string | null
           commission: number
@@ -600,7 +654,9 @@ export type Database = {
           platform_fee: number
           product_id: string
           qty: number
+          receipt_uploaded_at: string | null
           receipt_url: string | null
+          reviewed_at: string | null
           size: string | null
           status: string
           unit_price: number
