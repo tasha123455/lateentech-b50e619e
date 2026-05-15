@@ -5,6 +5,51 @@ function admInitials(name){if(!name)return '?';return name.trim().split(/\s+/).s
 function admWhen(iso){if(!iso)return '';const d=new Date(iso);const diff=Date.now()-d.getTime();const m=Math.floor(diff/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 
 let admUsersCache=[];
+let admFeeRows=[];
+const ADM_MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function admSumFeesIn(year,month){
+  return admFeeRows.reduce((s,r)=>{
+    const d=new Date(r.ts);
+    if(d.getFullYear()!==year)return s;
+    if(month!=null && d.getMonth()!==month)return s;
+    return s+r.amount;
+  },0);
+}
+function admPopulateFeePickers(){
+  const now=new Date();
+  const years=new Set([now.getFullYear()]);
+  admFeeRows.forEach(r=>years.add(new Date(r.ts).getFullYear()));
+  const yearList=[...years].sort((a,b)=>b-a);
+  const yearSel=document.getElementById('m-year-picker');
+  const monthSel=document.getElementById('m-month-picker');
+  if(!yearSel||!monthSel)return;
+  const prevYear=Number(yearSel.dataset.year||now.getFullYear());
+  const prevMonth=monthSel.dataset.value||(now.getFullYear()+'-'+now.getMonth());
+  yearSel.innerHTML=yearList.map(y=>`<option value="${y}">${y}</option>`).join('');
+  yearSel.value=yearList.includes(prevYear)?prevYear:yearList[0];
+  yearSel.dataset.year=yearSel.value;
+  // Build month options across all years that have data, plus current month
+  const monthKeys=new Set([now.getFullYear()+'-'+now.getMonth()]);
+  admFeeRows.forEach(r=>{const d=new Date(r.ts);monthKeys.add(d.getFullYear()+'-'+d.getMonth());});
+  const monthOpts=[...monthKeys].map(k=>{const [y,m]=k.split('-').map(Number);return {k,y,m,ts:new Date(y,m,1).getTime()};}).sort((a,b)=>b.ts-a.ts);
+  monthSel.innerHTML=monthOpts.map(o=>`<option value="${o.k}">${ADM_MONTH_NAMES[o.m]} ${o.y}</option>`).join('');
+  monthSel.value=monthOpts.find(o=>o.k===prevMonth)?prevMonth:monthOpts[0].k;
+  monthSel.dataset.value=monthSel.value;
+}
+function admUpdateMonthFees(){
+  const sel=document.getElementById('m-month-picker');
+  if(!sel||!sel.value)return;
+  sel.dataset.value=sel.value;
+  const [y,m]=sel.value.split('-').map(Number);
+  document.getElementById('m-fees-month').textContent=admMoney(admSumFeesIn(y,m));
+}
+function admUpdateYearFees(){
+  const sel=document.getElementById('m-year-picker');
+  if(!sel||!sel.value)return;
+  sel.dataset.year=sel.value;
+  document.getElementById('m-fees-year').textContent=admMoney(admSumFeesIn(Number(sel.value),null));
+}
 
 function admGo(pageId){
   document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('active'));
