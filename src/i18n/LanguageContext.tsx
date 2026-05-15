@@ -5,6 +5,7 @@ import { mergeCache, readCache } from "./aiCache";
 import { translateBatch } from "@/lib/translate.functions";
 
 const STORAGE_KEY = "lateen_lang";
+const DEFAULT_LANG = "ar";
 
 // Skip strings that are pure numbers / money / time / symbols.
 // Examples that match (and stay English): "$1,290.00", "42%", "12:30", "—", "›", "100", "+44 7700 000000"
@@ -91,10 +92,14 @@ function collectTexts(root: Node): WalkResult {
   let n: Node | null;
   while ((n = walker.nextNode())) {
     const tnode = n as Text;
-    // Stash the original English exactly once (per text node) using a WeakMap-like attribute on parent.
-    // We store on the node itself via a private property to avoid mutating attributes of every node.
-    const stash = tnode as Text & { __orig?: string };
-    if (stash.__orig === undefined) stash.__orig = (tnode.nodeValue || "");
+    // Stash the latest source text. Dashboard scripts often replace text after the
+    // first translation pass, so refresh the source when a script writes new English.
+    const stash = tnode as Text & { __orig?: string; __translated?: string };
+    const current = tnode.nodeValue || "";
+    if (stash.__orig === undefined || (stash.__translated !== undefined && current !== stash.__translated)) {
+      stash.__orig = current;
+      stash.__translated = undefined;
+    }
     const original = (stash.__orig || "").trim();
     if (!shouldSkip(original)) textNodes.push({ node: tnode, original });
   }
@@ -107,8 +112,12 @@ function collectTexts(root: Node): WalkResult {
         if (!v) continue;
         if (el.closest("[data-i18n-skip]")) continue;
         const stashKey = `__orig_${attr}`;
+        const translatedKey = `__translated_${attr}`;
         const elx = el as Element & Record<string, string | undefined>;
-        if (elx[stashKey] === undefined) elx[stashKey] = v;
+        if (elx[stashKey] === undefined || (elx[translatedKey] !== undefined && v !== elx[translatedKey])) {
+          elx[stashKey] = v;
+          elx[translatedKey] = undefined;
+        }
         const original = (elx[stashKey] as string).trim();
         if (!shouldSkip(original)) attrTargets.push({ el, attr, original });
       }
@@ -126,11 +135,13 @@ function lookup(text: string, code: string, cache: Record<string, string>): stri
 }
 
 function applyTextNode(item: { node: Text; original: string }, translated: string) {
-  const stash = item.node as Text & { __orig?: string };
+  const stash = item.node as Text & { __orig?: string; __translated?: string };
   const raw = stash.__orig ?? item.node.nodeValue ?? "";
   const lead = raw.match(/^\s*/)?.[0] ?? "";
   const tail = raw.match(/\s*$/)?.[0] ?? "";
-  item.node.nodeValue = lead + translated + tail;
+  const next = lead + translated + tail;
+  stash.__translated = next;
+  item.node.nodeValue = next;
 }
 
 let inflight: Promise<void> | null = null;
@@ -176,6 +187,7 @@ function applyToRoot(root: HTMLElement | Document, code: string, langName: strin
       const found = lookup(item.original, code, cache);
       if (found !== null) {
         if (item.el.getAttribute(item.attr) !== found) item.el.setAttribute(item.attr, found);
+        (item.el as Element & Record<string, string | undefined>)[`__translated_${item.attr}`] = found;
       } else if (code !== "en") {
         missing.add(item.original);
       }
@@ -213,12 +225,12 @@ export function translateDOM(root: HTMLElement | Document, code: string) {
 
 // ── Provider ──────────────────────────────────────────
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<string>("en");
+  const [lang, setLangState] = useState<string>(() => readInitial() ?? DEFAULT_LANG);
   const [ready, setReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const initial = readInitial() ?? "en";
+    const initial = readInitial() ?? DEFAULT_LANG;
     setLangState(initial);
     applyHtmlAttrs(initial);
     exposeGlobals(initial);
