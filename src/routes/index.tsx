@@ -1,86 +1,86 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { LateenLogo } from "@/components/brand/LateenLogo";
-import { useAuth } from "@/auth/AuthContext";
-import { hasStoredLanguage, useT } from "@/i18n/LanguageContext";
-import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { useLanguage } from "../contexts/LanguageContext";
+import { Package, Truck, BarChart3, Globe } from "lucide-react";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Lateen — Performance marketing, zero upfront cost" },
-      { name: "description", content: "Lateen connects businesses with marketers. Pay only when you sell." },
-    ],
-  }),
-  component: Landing,
-});
+export default function Index() {
+  const { lang, setLang, t } = useLanguage();
 
-function Landing() {
-  const { user, role, loading } = useAuth();
-  const nav = useNavigate();
-  const t = useT();
-
-  useEffect(() => {
-    if (!hasStoredLanguage()) {
-      nav({ to: "/language", replace: true });
-      return;
-    }
-    if (!loading && user && role) nav({ to: "/dashboard" });
-  }, [loading, user, role, nav]);
+  const features = [
+    {
+      title: "Automated Tracking",
+      description: "Sync orders from international suppliers instantly.",
+      icon: <Package className="w-6 h-6 text-indigo-600" />,
+    },
+    {
+      title: "Delegate Management",
+      description: "Track commissions and delivery statuses in real-time.",
+      icon: <Truck className="w-6 h-6 text-indigo-600" />,
+    },
+    {
+      title: "Financial Analytics",
+      description: "Monitor profit margins and automated salary distributions.",
+      icon: <BarChart3 className="w-6 h-6 text-indigo-600" />,
+    },
+  ];
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
-      <div className="absolute right-4 top-4">
-        <LanguageSwitcher />
-      </div>
-      <LateenLogo size={68} />
-      <h1 className="mt-5 font-serif text-3xl font-medium tracking-tight text-text-1">Lateen</h1>
-      <p className="mt-2 text-[13px] tracking-wide text-text-2">{t("Performance marketing, zero upfront cost")}</p>
-      <div className="my-9 h-px w-7 bg-border" />
-      <p className="mb-4 text-[13px] tracking-wide text-text-2">{t("Who are you?")}</p>
-      <div className="flex w-full max-w-[320px] flex-col gap-3">
-        <RoleButton to="/marketer/signin" tone="marketer" title={t("Marketer")} sub={t("Promote products & earn commission")} />
-        <RoleButton to="/business/signin" tone="business" title={t("Business")} sub={t("List products & grow your sales")} />
-      </div>
-      <p className="mt-10 max-w-[300px] text-center text-[11px] leading-relaxed text-text-3">
-        {t("New here? Selecting a role will walk you through sign-up.")}
-        <br />
-        {t("By continuing you agree to our")} <span className="underline">{t("Terms")}</span> · <span className="underline">{t("Privacy Policy")}</span>.
-      </p>
-    </main>
-  );
-}
+    <div className="w-full">
+      {/* Navigation */}
+      <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200">
+        <div className="flex items-center gap-2">
+          <Globe className="w-8 h-8 text-indigo-600" />
+          <span className="text-xl font-bold tracking-tight">Lateen</span>
+        </div>
 
-function RoleButton({ to, tone, title, sub }: { to: string; tone: "marketer" | "business"; title: string; sub: string }) {
-  const tint = tone === "marketer" ? "bg-marketer-tint" : "bg-business-tint";
-  const Icon = tone === "marketer" ? StarIcon : LockIcon;
-  return (
-    <Link to={to} className="group flex w-full items-center justify-between rounded-2xl border border-border bg-surface px-5 py-4 transition hover:-translate-y-0.5 hover:bg-surface-2">
-      <span className="flex items-center gap-3">
-        <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tint}`}><Icon /></span>
-        <span className="text-left">
-          <span className="block text-[15px] font-medium text-text-1">{title}</span>
-          <span className="mt-0.5 block text-[11px] text-text-2">{sub}</span>
-        </span>
-      </span>
-      <span className="text-base text-text-3 transition group-hover:text-text-1">›</span>
-    </Link>
-  );
-}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+            className="px-3 py-1.5 text-sm font-medium transition-colors border rounded-md border-slate-200 hover:bg-slate-100 text-start"
+          >
+            {lang === "ar" ? "English" : "العربية"}
+          </button>
+          <button className="px-4 py-2 text-sm font-semibold text-white transition-colors bg-indigo-600 rounded-md hover:bg-indigo-700">
+            {t("Sign in")}
+          </button>
+        </div>
+      </nav>
 
-function StarIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M10 2L12.09 7.26L18 7.64L13.5 11.47L15.18 17L10 14L4.82 17L6.5 11.47L2 7.64L7.91 7.26L10 2Z" fill="#6c64d4" stroke="#a89ee8" strokeWidth="1.2" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function LockIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="2" y="9" width="16" height="10" rx="2.5" fill="#1a5c42" stroke="#2dbd8f" strokeWidth="1.2" />
-      <path d="M6.5 9V7C6.5 4.52 8.02 3 10 3C11.98 3 13.5 4.52 13.5 7V9" stroke="#2dbd8f" strokeWidth="1.4" strokeLinecap="round" fill="none" />
-      <circle cx="10" cy="14.5" r="1.5" fill="#2dbd8f" />
-    </svg>
+      {/* Hero Section */}
+      <header className="max-w-5xl px-6 py-24 mx-auto text-center md:py-32">
+        <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl text-slate-900">
+          {t("Global Shipping & Logistics")}
+        </h1>
+        <p className="max-w-2xl mx-auto mt-6 text-lg text-slate-600">
+          {t(
+            "Manage your international dropshipping operations, delegate commissions, and automated order tracking seamlessly.",
+          )}
+        </p>
+        <div className="flex justify-center gap-4 mt-10">
+          <button className="px-6 py-3 text-base font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm">
+            {t("Get Started")}
+          </button>
+          <button className="px-6 py-3 text-base font-medium transition-colors bg-white border border-slate-200 text-slate-900 rounded-lg hover:bg-slate-50 shadow-sm">
+            {t("Dashboard")}
+          </button>
+        </div>
+      </header>
+
+      {/* Bento Grid Features */}
+      <section className="max-w-6xl px-6 pb-24 mx-auto">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {features.map((feature, idx) => (
+            <div
+              key={idx}
+              className="p-6 transition-shadow bg-white border border-slate-200 rounded-2xl hover:shadow-md text-start"
+            >
+              <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-xl bg-indigo-50">
+                {feature.icon}
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-slate-900">{t(feature.title)}</h3>
+              <p className="text-slate-600 leading-relaxed">{t(feature.description)}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
