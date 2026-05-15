@@ -96,8 +96,9 @@
   --business-foreground: oklch(0.72 0.14 165);
   --business-tint: oklch(0.32 0.06 165);
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Arabic", "IBM Plex Sans Arabic", "Tajawal", sans-serif;
+  --font-serif: Georgia, "Times New Roman", "Noto Naskh Arabic", serif;
+  --font-arabic: "IBM Plex Sans Arabic", "Noto Sans Arabic", "Tajawal", "Geeza Pro", "Geeza", "Segoe UI", system-ui, sans-serif;
 }
 
 .dark { color-scheme: dark; }
@@ -125,6 +126,53 @@
   .auth-input::placeholder { color: var(--color-text-3); }
 }
 
-/* RTL support for translated app */
+/* ── Native Arabic / RTL layer ───────────────────────── */
+@font-face { font-display: swap; font-family: "IBM Plex Sans Arabic"; src: local("IBM Plex Sans Arabic"); }
+
+html[lang="ar"], [lang="ar"], [dir="rtl"] {
+  font-family: var(--font-arabic);
+  font-feature-settings: "kern", "liga", "calt";
+  letter-spacing: 0;
+}
+html[lang="ar"] body, [dir="rtl"] body { line-height: 1.65; }
+html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3,
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { line-height: 1.4; letter-spacing: 0; font-weight: 600; }
+
 [dir="rtl"] body { text-align: right; }
 [dir="rtl"] .auth-input { text-align: right; }
+[dir="rtl"] input, [dir="rtl"] textarea, [dir="rtl"] select { text-align: right; }
+[dir="rtl"] input[type="email"], [dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="number"], [dir="rtl"] input[type="password"] { direction: ltr; text-align: right; }
+
+/* Money / numeric / code stays LTR even inside RTL paragraphs */
+[dir="rtl"] .ltr, [dir="rtl"] [data-ltr],
+[dir="rtl"] .bal-amount, [dir="rtl"] .wallet-amount, [dir="rtl"] .stat-value,
+[dir="rtl"] .pc-code, [dir="rtl"] .code-val,
+[dir="rtl"] .adm-stat-value, [dir="rtl"] .adm-row-amt, [dir="rtl"] .adm-pay-amt,
+[dir="rtl"] .ea, [dir="rtl"] .fbc-total { direction: ltr; unicode-bidi: isolate; }
+
+/* Long Arabic labels never break containers */
+[dir="rtl"] .pc-stat-label, [dir="rtl"] .stat-label, [dir="rtl"] .nav-label,
+[dir="rtl"] .greet-sub, [dir="rtl"] .menu-item-label { word-break: normal; overflow-wrap: anywhere; }
+
+/* Drawer and absolute side anchors flip in RTL */
+[dir="rtl"] .menu-drawer { right: auto; left: 0;
+  border-left: none; border-right: 0.5px solid var(--color-border-secondary);
+  border-radius: 0 20px 20px 0; }
+[dir="rtl"] .notif-dot { right: auto; left: 6px; }
+[dir="rtl"] .currency-search-icon { left: auto; right: 11px; }
+[dir="rtl"] .currency-search { padding: 9px 34px 9px 12px; }
+[dir="rtl"] .price-input-wrap input { padding-left: 12px; padding-right: 44px; }
+[dir="rtl"] .price-prefix { left: auto; right: 12px; }
+[dir="rtl"] .csd-change { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .ml-auto { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .mr-auto { margin-right: 0; margin-left: auto; }
+[dir="rtl"] .text-left { text-align: right; }
+[dir="rtl"] .text-right { text-align: left; }
+
+/* Carets & arrows that read "›" should mirror */
+[dir="rtl"] .pc-chevron { transform: scaleX(-1); }
+[dir="rtl"] .pc-chevron.open { transform: rotate(90deg) scaleX(-1); }
+
+/* Language switcher button always reads LTR (locale code) */
+[data-i18n-skip] { direction: ltr; }
