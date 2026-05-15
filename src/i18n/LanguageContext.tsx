@@ -271,7 +271,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     exposeGlobals(code);
     // For switch back to English, restore originals from stashes by walking & resetting
     if (code === "en") restoreOriginals(document);
-    else requestAnimationFrame(() => translateDOM(document, code));
+    else translateDOM(document, code); // synchronous: no RAF gap = no flicker
     window.dispatchEvent(new CustomEvent("lateen:lang", { detail: code }));
   }, []);
 
