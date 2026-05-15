@@ -157,14 +157,27 @@ async function admMarkPaid(id,amt){
   try{await window.LateenAPI.admin.markPayoutPaid(id);admLoadPayouts();}catch(e){alert('Failed: '+e.message);}
 }
 
+let admUserRoleFilter='';
 async function admLoadUsers(search){
   const root=document.getElementById('users-list');
   root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
     const list=await window.LateenAPI.admin.listAllUsers(search);
     admUsersCache=list;
-    admRenderUsers(list);
+    admRenderUsers(admApplyUserFilter(list));
   }catch(e){console.error('[admin] users',e);root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
+}
+
+function admApplyUserFilter(list){
+  if(!admUserRoleFilter)return list;
+  return list.filter(u=>(u.role||'marketer')===admUserRoleFilter);
+}
+
+function admSetUserFilter(role,el){
+  admUserRoleFilter=role;
+  document.querySelectorAll('.adm-filter-chip').forEach(c=>c.classList.remove('on'));
+  if(el)el.classList.add('on');
+  admRenderUsers(admApplyUserFilter(admUsersCache));
 }
 
 function admRenderUsers(list){
