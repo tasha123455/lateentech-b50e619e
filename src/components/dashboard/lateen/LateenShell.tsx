@@ -41,11 +41,11 @@ function buildScript(src: string): string {
   return `(function(){\n${src}\n${exports}\n})();`;
 }
 
-export function LateenShell({ role }: { role: Role }) {
+export function LateenShell({ role, overrideUserId }: { role: Role; overrideUserId?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signOut, user } = useAuth();
   const { lang } = useLanguage();
-  const userId = user?.id;
+  const userId = overrideUserId ?? user?.id;
 
   useEffect(() => {
     const el = containerRef.current;
