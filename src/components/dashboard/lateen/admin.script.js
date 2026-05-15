@@ -174,15 +174,28 @@ function admRenderUsers(list){
     const name=u.business_name||u.full_name||'Unnamed';
     const role=u.role||'marketer';
     const pillClass=role==='admin'?'adm-role-admin':role==='business'?'adm-role-business':'adm-role-marketer';
+    const canImpersonate=role==='marketer'||role==='business';
+    const goBtn=canImpersonate?`<button class="adm-go-btn" onclick="admGoToAccount('${u.id}','${role}','${admEsc(name).replace(/'/g,"&#39;")}')">Go to Account</button>`:'';
     return `<div class="adm-user-row">
       <div class="adm-user-av">${admEsc(admInitials(name))}</div>
       <div style="flex:1;min-width:0;">
         <div class="adm-row-name">${admEsc(name)}</div>
         <div class="adm-row-sub">${admEsc(u.phone||'no phone')} · ${admWhen(u.created_at)}</div>
       </div>
-      <span class="adm-role-pill ${pillClass}">${admEsc(role)}</span>
+      <div class="adm-user-actions">
+        <span class="adm-role-pill ${pillClass}">${admEsc(role)}</span>
+        ${goBtn}
+      </div>
     </div>`;
   }).join('');
+}
+
+function admGoToAccount(userId,role,name){
+  if(!confirm('Open '+name+'\u2019s account?\n\nYou\u2019ll see their dashboard for support purposes. You can exit anytime via the banner at the top.'))return;
+  try{
+    sessionStorage.setItem('lateen_impersonate',JSON.stringify({userId:userId,role:role,name:name}));
+    window.location.reload();
+  }catch(e){alert('Failed: '+e.message);}
 }
 
 let admUserSearchTimer=null;
