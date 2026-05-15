@@ -389,7 +389,13 @@ export function createLateenApi(userId: string) {
           supabase.from("products").select("id", { count: "exact", head: true }).is("deleted_at", null),
         ]);
 
-        const fees = (feesRes.data ?? []).reduce((sum: number, r: { platform_fee: number; qty: number }) => sum + Number(r.platform_fee || 0) * Number(r.qty || 0), 0);
+        const feeRows = (feesRes.data ?? []) as Array<{ platform_fee: number; qty: number; created_at: string }>;
+        const calc = (rows: typeof feeRows) => rows.reduce((sum, r) => sum + Number(r.platform_fee || 0) * Number(r.qty || 0), 0);
+        const fees = calc(feeRows);
+        const monthMs = monthStart.getTime();
+        const yearMs = yearStart.getTime();
+        const feesThisMonth = calc(feeRows.filter((r) => new Date(r.created_at).getTime() >= monthMs));
+        const feesThisYear = calc(feeRows.filter((r) => new Date(r.created_at).getTime() >= yearMs));
         const activeUsers = new Set<string>();
         for (const r of (activeRes.data ?? []) as Array<{ marketer_id: string; business_id: string }>) {
           activeUsers.add(r.marketer_id);
@@ -397,6 +403,8 @@ export function createLateenApi(userId: string) {
         }
         return {
           totalFees: fees,
+          feesThisMonth,
+          feesThisYear,
           activeUsers: activeUsers.size,
           leadsToday: todayRes.count ?? 0,
           totalUsers: profilesRes.count ?? 0,
