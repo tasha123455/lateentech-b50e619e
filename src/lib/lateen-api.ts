@@ -230,11 +230,19 @@ export function createLateenApi(userId: string) {
     async getProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, business_name, phone")
+        .select("full_name, business_name, phone, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
       return data;
+    },
+
+    async updateProfile(patch: Record<string, unknown>) {
+      const { error } = await supabase
+        .from("profiles")
+        .update(patch as never)
+        .eq("id", userId);
+      if (error) throw error;
     },
 
     async getWallet() {
