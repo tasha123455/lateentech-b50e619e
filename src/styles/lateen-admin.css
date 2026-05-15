@@ -48,3 +48,42 @@
 .lateen-admin .adm-pay-detail-k { color: rgba(255,255,255,0.55); }
 .lateen-admin .adm-pay-detail-v { color: #fff; font-weight: 500; text-align: right; word-break: break-all; }
 .lateen-admin .adm-pay-details-empty { color: #d97706; font-style: italic; }
+
+/* Employees */
+.lateen-admin .adm-emp-row { padding: 14px; border-bottom: 0.5px solid #272725; display: grid; gap: 8px; }
+.lateen-admin .adm-emp-row:last-child { border-bottom: none; }
+.lateen-admin .adm-emp-top { display: flex; align-items: center; gap: 10px; }
+.lateen-admin .adm-emp-av { width: 40px; height: 40px; border-radius: 50%; background: #3a2a10; color: #f5b441; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+.lateen-admin .adm-emp-name { font-size: 14px; font-weight: 500; color: #f0eeeb; }
+.lateen-admin .adm-emp-sub { font-size: 11px; color: #9e9b97; margin-top: 2px; }
+.lateen-admin .adm-emp-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: 11px; color: #9e9b97; padding-left: 50px; }
+.lateen-admin .adm-emp-meta b { color: #f0eeeb; font-weight: 500; }
+.lateen-admin .adm-emp-actions { display: flex; gap: 8px; padding-left: 50px; }
+.lateen-admin .adm-emp-pay-btn {
+  flex: 1; height: 34px; border-radius: 17px; border: none;
+  background: #e07070; color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.lateen-admin .adm-emp-pay-btn:hover { filter: brightness(1.1); }
+.lateen-admin .adm-emp-pay-btn.paid {
+  background: #2a2a2a; color: #5e5c58; cursor: not-allowed;
+}
+.lateen-admin .adm-emp-link-btn {
+  height: 34px; padding: 0 14px; border-radius: 17px;
+  background: transparent; border: 0.5px solid #333330; color: #9e9b97;
+  font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.lateen-admin .adm-emp-form-body { padding: 0 18px 18px; display: grid; gap: 10px; }
+.lateen-admin .adm-emp-lbl { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #9e9b97; text-transform: uppercase; letter-spacing: 0.5px; }
+.lateen-admin .adm-emp-inp {
+  background: #2a2a2a; border: 0.5px solid #3a3a3a; border-radius: 8px;
+  padding: 10px 12px; color: #f0eeeb; font-size: 13px; font-family: inherit;
+  outline: none; text-transform: none; letter-spacing: normal;
+}
+.lateen-admin .adm-emp-inp:focus { border-color: #666; }
+.lateen-admin .adm-emp-hist-row {
+  display: flex; justify-content: space-between; padding: 10px 14px;
+  border-bottom: 0.5px solid #272725; font-size: 13px;
+}
+.lateen-admin .adm-emp-hist-row:last-child { border-bottom: none; }
+.lateen-admin .adm-emp-hist-row b { color: #2dbd8f; }

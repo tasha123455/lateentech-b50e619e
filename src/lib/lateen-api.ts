@@ -394,6 +394,61 @@ export function createLateenApi(userId: string) {
           .maybeSingle();
         return { product, owner };
       },
+      async listEmployees(search?: string) {
+        let q = supabase.from("employees").select("*");
+        if (search && search.trim()) {
+          const s = `%${search.trim()}%`;
+          q = q.or(`full_name.ilike.${s},employee_number.ilike.${s},job_title.ilike.${s},email.ilike.${s}`);
+        }
+        const { data, error } = await q.order("created_at", { ascending: false });
+        if (error) throw error;
+        const emps = (data ?? []) as Array<Record<string, unknown> & { id: string }>;
+        if (!emps.length) return [];
+        const { data: pays } = await supabase
+          .from("employee_payments")
+          .select("*")
+          .in("employee_id", emps.map((e) => e.id))
+          .order("period_year", { ascending: false })
+          .order("period_month", { ascending: false });
+        const map = new Map<string, Array<Record<string, unknown>>>();
+        for (const p of (pays ?? []) as Array<Record<string, unknown> & { employee_id: string }>) {
+          const arr = map.get(p.employee_id) ?? [];
+          arr.push(p);
+          map.set(p.employee_id, arr);
+        }
+        return emps.map((e) => ({ ...e, payments: map.get(e.id) ?? [] }));
+      },
+      async upsertEmployee(input: {
+        id?: string;
+        employee_number: string;
+        full_name: string;
+        job_title?: string | null;
+        email?: string | null;
+        monthly_salary: number;
+        hired_at: string;
+        notes?: string | null;
+      }) {
+        const { data, error } = await supabase
+          .from("employees")
+          .upsert(input as never)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      },
+      async deleteEmployee(id: string) {
+        const { error } = await supabase.from("employees").delete().eq("id", id);
+        if (error) throw error;
+      },
+      async payEmployee(input: { employee_id: string; period_year: number; period_month: number; amount: number; notes?: string | null }) {
+        const { data, error } = await supabase
+          .from("employee_payments")
+          .insert(input as never)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      },
       async getMetrics() {
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);

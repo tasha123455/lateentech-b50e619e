@@ -61,6 +61,7 @@ function admGo(pageId){
   if(pageId==='adm-payouts') admLoadPayouts();
   if(pageId==='adm-users') admLoadUsers('');
   if(pageId==='adm-products') admLoadProducts();
+  if(pageId==='adm-employees') admLoadEmployees();
 }
 
 async function admLoadMetrics(){
@@ -317,3 +318,168 @@ async function admOpenProduct(id){
 
 /* boot */
 admLoadMetrics();
+
+/* ========== Employees & Payroll ========== */
+let admEmpCache=[];
+let admEmpFilter=''; // '', 'pending', 'paid'
+let admEmpSearchQ='';
+
+function admEmpPeriod(){const d=new Date();return {y:d.getFullYear(),m:d.getMonth()+1};}
+function admEmpIsPaid(emp,p){return (emp.payments||[]).some(x=>x.period_year===p.y&&x.period_month===p.m);}
+function admEmpFmtDate(d){if(!d)return '—';const dt=new Date(d);return dt.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});}
+function admEmpNextPayday(p){const next=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};return ADM_MONTH_NAMES[next.m-1]+' '+next.y;}
+
+async function admLoadEmployees(){
+  const root=document.getElementById('employees-list');
+  root.innerHTML='<div class="adm-empty">Loading…</div>';
+  try{
+    admEmpCache=await window.LateenAPI.admin.listEmployees(admEmpSearchQ);
+    admRenderEmployees();
+  }catch(e){console.error('[admin] employees',e);root.innerHTML='<div class="adm-empty">Failed to load: '+admEsc(e.message||'')+'</div>';}
+}
+
+function admRenderEmployees(){
+  const root=document.getElementById('employees-list');
+  const p=admEmpPeriod();
+  const periodLabel=ADM_MONTH_NAMES[p.m-1]+' '+p.y;
+  let totalSalary=0,paidAmt=0,pendingAmt=0,paidCount=0;
+  admEmpCache.forEach(e=>{
+    const sal=Number(e.monthly_salary||0);
+    totalSalary+=sal;
+    if(admEmpIsPaid(e,p)){paidAmt+=sal;paidCount++;}else{pendingAmt+=sal;}
+  });
+  document.getElementById('emp-total-salary').textContent=admMoney(totalSalary);
+  document.getElementById('emp-paid-amt').textContent=admMoney(paidAmt);
+  document.getElementById('emp-pending-amt').textContent=admMoney(pendingAmt);
+  document.getElementById('emp-count').textContent=admEmpCache.length;
+  document.getElementById('emp-paid-count').textContent=paidCount;
+
+  const filtered=admEmpCache.filter(e=>{
+    const paid=admEmpIsPaid(e,p);
+    if(admEmpFilter==='paid'&&!paid)return false;
+    if(admEmpFilter==='pending'&&paid)return false;
+    return true;
+  });
+  if(!filtered.length){root.innerHTML='<div class="adm-empty">No employees match.</div>';return;}
+  root.innerHTML=filtered.map(e=>{
+    const paid=admEmpIsPaid(e,p);
+    const status=paid?'<span style="color:#2dbd8f">Paid · '+periodLabel+'</span>':'<span style="color:#e07070">Pending · '+periodLabel+'</span>';
+    const payday=paid?admEmpNextPayday(p):periodLabel;
+    return `<div class="adm-emp-row">
+      <div class="adm-emp-top">
+        <div class="adm-emp-av">${admEsc(admInitials(e.full_name))}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="adm-emp-name">${admEsc(e.full_name)} <span style="color:#9e9b97;font-weight:400;">· ${admEsc(e.employee_number)}</span></div>
+          <div class="adm-emp-sub">${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}</div>
+        </div>
+        <div style="text-align:right;font-size:13px;font-weight:500;color:#f5b441;">${admMoney(e.monthly_salary)}</div>
+      </div>
+      <div class="adm-emp-meta">
+        <div>Hired <b>${admEmpFmtDate(e.hired_at)}</b></div>
+        <div>Payday <b>${admEsc(payday)}</b></div>
+        <div style="grid-column:1/-1;">Status: ${status}</div>
+        ${e.notes?`<div style="grid-column:1/-1;color:#9e9b97;font-style:italic;">${admEsc(e.notes)}</div>`:''}
+      </div>
+      <div class="adm-emp-actions">
+        <button class="adm-emp-pay-btn ${paid?'paid':''}" ${paid?'disabled':''} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${paid?'Paid ✓':'Mark as Paid'}</button>
+        <button class="adm-emp-link-btn" onclick="admOpenEmpHist('${e.id}')">History</button>
+        <button class="adm-emp-link-btn" onclick="admOpenEmpForm('${e.id}')">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function admSetEmpFilter(f,el){
+  admEmpFilter=f;
+  document.querySelectorAll('[data-emp-filter]').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  admRenderEmployees();
+}
+let admEmpSearchTimer=null;
+function admEmpSearch(q){
+  admEmpSearchQ=q;
+  clearTimeout(admEmpSearchTimer);
+  admEmpSearchTimer=setTimeout(admLoadEmployees,250);
+}
+
+async function admPayEmp(id,amount){
+  const p=admEmpPeriod();
+  const e=admEmpCache.find(x=>x.id===id);
+  if(!e)return;
+  if(!confirm('Mark '+e.full_name+' as paid for '+ADM_MONTH_NAMES[p.m-1]+' '+p.y+' ('+admMoney(amount)+')?'))return;
+  try{
+    await window.LateenAPI.admin.payEmployee({employee_id:id,period_year:p.y,period_month:p.m,amount:Number(amount)});
+    await admLoadEmployees();
+  }catch(err){alert('Failed: '+err.message);}
+}
+
+function admOpenEmpForm(id){
+  const modal=document.getElementById('adm-emp-form');
+  const title=document.getElementById('adm-emp-form-title');
+  const delBtn=document.getElementById('emp-delete-btn');
+  const e=id?admEmpCache.find(x=>x.id===id):null;
+  document.getElementById('emp-id').value=e?e.id:'';
+  document.getElementById('emp-name').value=e?(e.full_name||''):'';
+  document.getElementById('emp-num').value=e?(e.employee_number||''):'';
+  document.getElementById('emp-job').value=e?(e.job_title||''):'';
+  document.getElementById('emp-email').value=e?(e.email||''):'';
+  document.getElementById('emp-salary').value=e?(e.monthly_salary||0):'';
+  document.getElementById('emp-hired').value=e?(e.hired_at||'').slice(0,10):new Date().toISOString().slice(0,10);
+  document.getElementById('emp-notes').value=e?(e.notes||''):'';
+  title.textContent=e?'Edit Employee':'New Employee';
+  delBtn.style.display=e?'block':'none';
+  modal.classList.add('open');
+}
+function admCloseEmpForm(){document.getElementById('adm-emp-form').classList.remove('open');}
+
+async function admSaveEmp(){
+  const v=id=>document.getElementById(id).value.trim();
+  const payload={
+    full_name:v('emp-name'),
+    employee_number:v('emp-num'),
+    job_title:v('emp-job')||null,
+    email:v('emp-email')||null,
+    monthly_salary:Number(v('emp-salary'))||0,
+    hired_at:v('emp-hired')||new Date().toISOString().slice(0,10),
+    notes:v('emp-notes')||null,
+  };
+  if(!payload.full_name||!payload.employee_number){alert('Name and employee number are required.');return;}
+  const id=v('emp-id');
+  if(id)payload.id=id;
+  try{
+    await window.LateenAPI.admin.upsertEmployee(payload);
+    admCloseEmpForm();
+    await admLoadEmployees();
+  }catch(e){alert('Save failed: '+e.message);}
+}
+
+async function admDeleteEmp(){
+  const id=document.getElementById('emp-id').value;
+  if(!id)return;
+  if(!confirm('Delete this employee and their payment history? This cannot be undone.'))return;
+  try{
+    await window.LateenAPI.admin.deleteEmployee(id);
+    admCloseEmpForm();
+    await admLoadEmployees();
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+
+function admOpenEmpHist(id){
+  const e=admEmpCache.find(x=>x.id===id);
+  const modal=document.getElementById('adm-emp-hist');
+  const body=document.getElementById('adm-emp-hist-body');
+  if(!e){body.innerHTML='<div class="adm-empty">Not found.</div>';modal.classList.add('open');return;}
+  const pays=(e.payments||[]).slice().sort((a,b)=>(b.period_year-a.period_year)||(b.period_month-a.period_month));
+  const total=pays.reduce((s,p)=>s+Number(p.amount||0),0);
+  body.innerHTML=`
+    <div style="padding:18px 18px 8px;">
+      <div style="font-size:16px;font-weight:600;">${admEsc(e.full_name)}</div>
+      <div style="font-size:12px;color:#9e9b97;margin-top:2px;">${admEsc(e.employee_number)} · ${admEsc(e.job_title||'—')}</div>
+      <div style="margin-top:10px;font-size:13px;">Total paid: <b style="color:#2dbd8f;">${admMoney(total)}</b> across ${pays.length} payment${pays.length===1?'':'s'}</div>
+    </div>
+    <div class="adm-section" style="margin:0 18px 18px;">
+      ${pays.length?pays.map(p=>`<div class="adm-emp-hist-row"><span>${ADM_MONTH_NAMES[p.period_month-1]} ${p.period_year}</span><span style="color:#9e9b97;">${admEmpFmtDate(p.paid_at)}</span><b>${admMoney(p.amount)}</b></div>`).join(''):'<div class="adm-empty">No payments recorded yet.</div>'}
+    </div>`;
+  modal.classList.add('open');
+}
+function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.remove('open');}
