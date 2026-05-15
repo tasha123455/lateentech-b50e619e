@@ -1,2 +1,15 @@
 /* Admin dashboard scoped tweaks (most styles live in admin.body.html). */
 .lateen-admin { background: #141414; min-height: 100vh; }
+
+.lateen-admin .adm-stat-picker {
+  background: rgba(255,255,255,0.06);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font: inherit;
+  margin-left: 4px;
+  cursor: pointer;
+}
+.lateen-admin .adm-stat-picker:focus { outline: 1px solid rgba(255,255,255,0.3); }
+.lateen-admin .adm-stat-picker option { background: #1a1a1a; color: #fff; }
