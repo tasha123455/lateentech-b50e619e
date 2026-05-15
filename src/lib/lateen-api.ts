@@ -330,8 +330,8 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.rpc("admin_approve_order", { _order_id: id });
         if (error) throw error;
       },
-      async rejectOrder(id: string) {
-        const { error } = await supabase.rpc("admin_reject_order", { _order_id: id });
+      async rejectOrder(id: string, notes?: string) {
+        const { error } = await supabase.rpc("admin_reject_order_with_notes", { _order_id: id, _notes: notes ?? null });
         if (error) throw error;
       },
       async listPayoutRequests() {
