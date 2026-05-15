@@ -225,7 +225,7 @@ export function translateDOM(root: HTMLElement | Document, code: string) {
 
 // ── Provider ──────────────────────────────────────────
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<string>(DEFAULT_LANG);
+  const [lang, setLangState] = useState<string>(() => readInitial() ?? DEFAULT_LANG);
   const [ready, setReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
