@@ -171,6 +171,12 @@
   <!-- USERS -->
   <section class="adm-page" id="adm-users">
     <div class="adm-h1">User Directory</div>
+    <div class="adm-filter-row" id="user-filter-row">
+      <button class="adm-filter-chip on" data-role="" onclick="admSetUserFilter('',this)">All</button>
+      <button class="adm-filter-chip" data-role="marketer" onclick="admSetUserFilter('marketer',this)">Marketers</button>
+      <button class="adm-filter-chip" data-role="business" onclick="admSetUserFilter('business',this)">Businesses</button>
+      <button class="adm-filter-chip" data-role="admin" onclick="admSetUserFilter('admin',this)">Admins</button>
+    </div>
     <input class="adm-search" id="user-search" placeholder="Search by name, phone, business…" oninput="admUserSearch(this.value)" />
     <div class="adm-section" id="users-list">
       <div class="adm-empty">Loading…</div>
@@ -184,6 +190,14 @@
       <div class="adm-empty" style="grid-column:1/-1;">Loading…</div>
     </div>
   </section>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="adm-pdetail" id="adm-pdetail" onclick="if(event.target===this)admClosePDetail()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admClosePDetail()">×</button>
+      <div id="adm-pdetail-body"><div class="adm-empty">Loading…</div></div>
+    </div>
+  </div>
 
   <nav class="adm-bottom-nav">
     <div class="adm-nav-item active" id="nav-adm-home" onclick="admGo('adm-home')">
