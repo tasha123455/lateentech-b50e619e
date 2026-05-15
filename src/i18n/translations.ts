@@ -703,7 +703,6 @@ export const T: Translations = {
   "Total paid:": { ar: "إجمالي المدفوع:" },
   "Receipt will go to admin for verification, then forwarded to the business owner.": { ar: "سيتم إرسال الإيصال للمدير للتحقق، ثم سيُحوَّل إلى صاحب الشركة." },
   "Order": { ar: "طلب" },
-  "Order": { ar: "طلب" },
   "Mar": { ar: "مارس" },
   "Apr": { ar: "أبريل" },
   "May": { ar: "مايو" },
