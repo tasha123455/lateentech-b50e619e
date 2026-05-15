@@ -30,7 +30,7 @@ export const translateBatch = createServerFn({ method: "POST" })
           "Lovable-API-Key": key,
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: data.lang === "ar" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: SYSTEM },
             {
