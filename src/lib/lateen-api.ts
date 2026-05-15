@@ -177,9 +177,11 @@ export function createLateenApi(userId: string) {
       receipt_url?: string;
       marketer_confirmed_at?: string;
     }) {
+      const payload: Record<string, unknown> = { ...input, marketer_id: userId };
+      if (input.receipt_url) payload.receipt_uploaded_at = new Date().toISOString();
       const { data, error } = await supabase
         .from("orders")
-        .insert({ ...input, marketer_id: userId } as never)
+        .insert(payload as never)
         .select()
         .single();
       if (error) throw error;
@@ -187,9 +189,13 @@ export function createLateenApi(userId: string) {
     },
 
     async updateOrder(id: string, patch: Record<string, unknown>) {
+      const next: Record<string, unknown> = { ...patch };
+      if (patch.receipt_url && !patch.receipt_uploaded_at) {
+        next.receipt_uploaded_at = new Date().toISOString();
+      }
       const { error } = await supabase
         .from("orders")
-        .update(patch as never)
+        .update(next as never)
         .eq("id", id);
       if (error) throw error;
     },
