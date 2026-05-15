@@ -5,6 +5,7 @@ import { mergeCache, readCache } from "./aiCache";
 import { translateBatch } from "@/lib/translate.functions";
 
 const STORAGE_KEY = "lateen_lang";
+const DEFAULT_LANG = "ar";
 
 // Skip strings that are pure numbers / money / time / symbols.
 // Examples that match (and stay English): "$1,290.00", "42%", "12:30", "—", "›", "100", "+44 7700 000000"
@@ -224,12 +225,12 @@ export function translateDOM(root: HTMLElement | Document, code: string) {
 
 // ── Provider ──────────────────────────────────────────
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<string>("en");
+  const [lang, setLangState] = useState<string>(DEFAULT_LANG);
   const [ready, setReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const initial = readInitial() ?? "en";
+    const initial = readInitial() ?? DEFAULT_LANG;
     setLangState(initial);
     applyHtmlAttrs(initial);
     exposeGlobals(initial);
