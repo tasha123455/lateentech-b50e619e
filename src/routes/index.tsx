@@ -1,7 +1,12 @@
 import { useLanguage } from "@/i18n/LanguageContext";
+import { createFileRoute } from "@tanstack/react-router";
 import { Package, Truck, BarChart3, Globe } from "lucide-react";
 
-export default function Index() {
+export const Route = createFileRoute("/")({
+  component: Index,
+});
+
+function Index() {
   const { lang, setLang, t } = useLanguage();
 
   const features = [
