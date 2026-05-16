@@ -42,12 +42,12 @@ export function SignInForm({ role }: { role: Role }) {
         <p className="mt-1 text-sm text-text-2">{subtitle}</p>
       </div>
       <Field label={t("Email")}>
-        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("you@example.com")} className="auth-input" />
+        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="auth-input" />
       </Field>
       <Field label={t("Password")}>
         <div className="relative">
-          <input type={showPw ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="auth-input pe-16" />
-          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? t("Hide") : t("Show")}</button>
+          <input type={showPw ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="auth-input pr-16" />
+          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? t("Hide") : t("Show")}</button>
         </div>
       </Field>
       {error && <p className="text-xs text-destructive">{error}</p>}
@@ -55,7 +55,7 @@ export function SignInForm({ role }: { role: Role }) {
         {busy ? t("Signing in…") : t("Sign in")}
       </button>
       <Divider />
-      <GoogleButton onClick={() => alert(t("Google sign-in is not available yet."))} />
+      <GoogleButton onClick={() => alert("Google sign-in: enable in Lovable Cloud and we'll wire it up.")} />
       <p className="text-center text-xs text-text-2">
         {t("No account?")}{" "}
         <Link to={role === "marketer" ? "/marketer/register" : "/business/register"} className={`font-medium ${s.link}`}>
@@ -79,7 +79,7 @@ export function Divider() {
   return (
     <div className="flex items-center gap-3 py-1">
       <div className="h-px flex-1 bg-border" />
-      <span className="text-[10px] uppercase tracking-wider text-text-3">{useT()("or")}</span>
+      <span className="text-[10px] uppercase tracking-wider text-text-3">or</span>
       <div className="h-px flex-1 bg-border" />
     </div>
   );

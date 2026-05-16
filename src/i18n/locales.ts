@@ -1,23 +1,61 @@
 export type Locale = {
   code: string;
-  name: string;
-  native: string;
+  name: string;     // English name
+  native: string;   // Native name
   rtl?: boolean;
 };
 
 export const LOCALES: Locale[] = [
-  { code: "ar", name: "Arabic", native: "العربية", rtl: true },
-  { code: "en", name: "English", native: "English" },
-  { code: "es", name: "Spanish", native: "Español" },
-  { code: "fr", name: "French", native: "Français" },
-  { code: "de", name: "German", native: "Deutsch" },
-  { code: "it", name: "Italian", native: "Italiano" },
-  { code: "pt", name: "Portuguese", native: "Português" },
-  { code: "nl", name: "Dutch", native: "Nederlands" },
-  { code: "tr", name: "Turkish", native: "Türkçe" },
-  { code: "he", name: "Hebrew", native: "עברית", rtl: true },
-  { code: "fa", name: "Persian", native: "فارسی", rtl: true },
-  { code: "ur", name: "Urdu", native: "اردو", rtl: true },
+  { code: "en",    name: "English",            native: "English" },
+  { code: "ar",    name: "Arabic",             native: "العربية", rtl: true },
+  { code: "es",    name: "Spanish",            native: "Español" },
+  { code: "fr",    name: "French",             native: "Français" },
+  { code: "de",    name: "German",             native: "Deutsch" },
+  { code: "it",    name: "Italian",            native: "Italiano" },
+  { code: "pt",    name: "Portuguese",         native: "Português" },
+  { code: "pt-BR", name: "Portuguese (Brazil)",native: "Português (Brasil)" },
+  { code: "nl",    name: "Dutch",              native: "Nederlands" },
+  { code: "sv",    name: "Swedish",            native: "Svenska" },
+  { code: "da",    name: "Danish",             native: "Dansk" },
+  { code: "no",    name: "Norwegian",          native: "Norsk" },
+  { code: "fi",    name: "Finnish",            native: "Suomi" },
+  { code: "pl",    name: "Polish",             native: "Polski" },
+  { code: "cs",    name: "Czech",              native: "Čeština" },
+  { code: "sk",    name: "Slovak",             native: "Slovenčina" },
+  { code: "hu",    name: "Hungarian",          native: "Magyar" },
+  { code: "ro",    name: "Romanian",           native: "Română" },
+  { code: "el",    name: "Greek",              native: "Ελληνικά" },
+  { code: "tr",    name: "Turkish",            native: "Türkçe" },
+  { code: "ru",    name: "Russian",            native: "Русский" },
+  { code: "uk",    name: "Ukrainian",          native: "Українська" },
+  { code: "bg",    name: "Bulgarian",          native: "Български" },
+  { code: "sr",    name: "Serbian",            native: "Српски" },
+  { code: "hr",    name: "Croatian",           native: "Hrvatski" },
+  { code: "he",    name: "Hebrew",             native: "עברית", rtl: true },
+  { code: "fa",    name: "Persian",            native: "فارسی", rtl: true },
+  { code: "ur",    name: "Urdu",               native: "اردو", rtl: true },
+  { code: "hi",    name: "Hindi",              native: "हिन्दी" },
+  { code: "bn",    name: "Bengali",            native: "বাংলা" },
+  { code: "ta",    name: "Tamil",              native: "தமிழ்" },
+  { code: "te",    name: "Telugu",             native: "తెలుగు" },
+  { code: "mr",    name: "Marathi",            native: "मराठी" },
+  { code: "gu",    name: "Gujarati",           native: "ગુજરાતી" },
+  { code: "pa",    name: "Punjabi",            native: "ਪੰਜਾਬੀ" },
+  { code: "zh-CN", name: "Chinese (Simplified)",native: "简体中文" },
+  { code: "zh-TW", name: "Chinese (Traditional)",native: "繁體中文" },
+  { code: "ja",    name: "Japanese",           native: "日本語" },
+  { code: "ko",    name: "Korean",             native: "한국어" },
+  { code: "vi",    name: "Vietnamese",         native: "Tiếng Việt" },
+  { code: "th",    name: "Thai",               native: "ไทย" },
+  { code: "id",    name: "Indonesian",         native: "Bahasa Indonesia" },
+  { code: "ms",    name: "Malay",              native: "Bahasa Melayu" },
+  { code: "fil",   name: "Filipino",           native: "Filipino" },
+  { code: "sw",    name: "Swahili",            native: "Kiswahili" },
+  { code: "am",    name: "Amharic",            native: "አማርኛ" },
+  { code: "yo",    name: "Yoruba",             native: "Yorùbá" },
+  { code: "ha",    name: "Hausa",              native: "Hausa" },
+  { code: "zu",    name: "Zulu",               native: "isiZulu" },
+  { code: "af",    name: "Afrikaans",          native: "Afrikaans" },
 ];
 
-export const RTL_CODES = new Set(LOCALES.filter((locale) => locale.rtl).map((locale) => locale.code));
+export const RTL_CODES = new Set(LOCALES.filter(l => l.rtl).map(l => l.code));

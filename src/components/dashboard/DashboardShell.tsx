@@ -20,7 +20,7 @@ export function DashboardShell({ accent, name, subtitle, pages }: Props) {
   };
 
   return (
-    <div className="relative mx-auto min-h-[860px] max-w-[420px] bg-background px-5 pt-6 pb-24 rtl:leading-[1.6]">
+    <div className="relative mx-auto min-h-[860px] max-w-[420px] bg-background px-5 pt-6 pb-24">
       <Topbar name={name} subtitle={subtitle} accent={accent} />
       {pages[tab]}
       <BottomNav active={tab} onChange={handleTab} accent={accent} />

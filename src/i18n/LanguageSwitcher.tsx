@@ -3,15 +3,15 @@ import { LanguagePicker } from "./LanguagePicker";
 import { LOCALES } from "./locales";
 
 export function LanguageSwitcher({ className = "" }: { className?: string }) {
-  const { lang, open, isOpen, close, t } = useLanguage();
+  const { lang, open, isOpen, close } = useLanguage();
   const current = LOCALES.find((l) => l.code === lang);
   return (
     <>
       <button
         type="button"
         onClick={open}
-        title={t("Language")}
-        aria-label={t("Change language")}
+        title="Language"
+        aria-label="Change language"
         data-i18n-skip
         className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] text-text-2 hover:bg-surface-2 ${className}`}
       >

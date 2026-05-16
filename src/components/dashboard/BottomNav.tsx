@@ -1,5 +1,3 @@
-import { useT } from "@/i18n/LanguageContext";
-
 type Tab = "home" | "products" | "alerts" | "menu";
 type Props = { active: Tab; onChange: (t: Tab) => void; accent: "marketer" | "business" };
 
@@ -12,7 +10,6 @@ const items: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 export function BottomNav({ active, onChange, accent }: Props) {
   const activeColor = accent === "marketer" ? "text-marketer-foreground" : "text-business";
-  const t = useT();
   return (
     <nav className="absolute inset-x-0 bottom-0 flex items-center justify-around border-t border-border bg-[#1a1a1a] px-4 pt-2.5 pb-4">
       {items.map((it) => {
@@ -20,7 +17,7 @@ export function BottomNav({ active, onChange, accent }: Props) {
         return (
           <button key={it.id} onClick={() => onChange(it.id)} className={`flex flex-col items-center gap-1 ${isActive ? activeColor : "text-text-2"}`}>
             <span className={isActive ? activeColor : "text-text-2"}>{it.icon}</span>
-            <span className={`text-[10px] ${isActive ? "font-medium" : ""}`}>{t(it.label)}</span>
+            <span className={`text-[10px] ${isActive ? "font-medium" : ""}`}>{it.label}</span>
           </button>
         );
       })}

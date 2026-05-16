@@ -1,5 +1,4 @@
 import { useAuth } from "@/auth/AuthContext";
-import { useT } from "@/i18n/LanguageContext";
 
 type Props = { name: string; subtitle: string; accent: "marketer" | "business"; onMenu?: () => void };
 
@@ -21,9 +20,8 @@ export function Topbar({ name, subtitle, accent }: Props) {
 }
 
 function NotificationButton() {
-  const t = useT();
   return (
-    <button className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface" aria-label={t("Notifications")}>
+    <button className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface" aria-label="Notifications">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-1"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-destructive ring-2 ring-background" />
     </button>
@@ -32,6 +30,5 @@ function NotificationButton() {
 
 export function SignOutInline() {
   const { signOut } = useAuth();
-  const t = useT();
-  return <button onClick={signOut} className="text-xs text-text-2 underline">{t("Sign out")}</button>;
+  return <button onClick={signOut} className="text-xs text-text-2 underline">Sign out</button>;
 }

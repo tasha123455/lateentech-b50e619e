@@ -25,7 +25,7 @@ export function AuthCard({ role, children, backTo = "/" }: Props) {
         <div className="mb-5 flex items-center gap-2">
           <LateenLogo size={34} />
           <span className="font-serif text-lg text-text-1">Lateen</span>
-          <span className={`ms-auto rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider ${tint}`}>{label}</span>
+          <span className={`ml-auto rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider ${tint}`}>{label}</span>
         </div>
         {children}
       </div>

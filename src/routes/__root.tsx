@@ -9,24 +9,24 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { useT } from "@/i18n/LanguageContext";
+import { AuthProvider } from "@/auth/AuthContext";
+import { LanguageProvider } from "@/i18n/LanguageContext";
 
 function NotFoundComponent() {
-  const t = useT();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">{t("Page not found")}</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          {t("The page you're looking for doesn't exist or has been moved.")}
+          The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            {t("Go home")}
+            Go home
           </Link>
         </div>
       </div>
@@ -37,16 +37,15 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  const t = useT();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          {t("This page didn't load")}
+          This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {t("Something went wrong on our end. You can try refreshing or head back home.")}
+          Something went wrong on our end. You can try refreshing or head back home.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -56,13 +55,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            {t("Try again")}
+            Try again
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            {t("Go home")}
+            Go home
           </a>
         </div>
       </div>
@@ -76,17 +75,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Lovable App" },
-      { name: "description", content: "Lateen Builder is a business management application for marketers and business owners." },
+      { name: "description", content: "Lovable Generated Project" },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lateen Builder is a business management application for marketers and business owners." },
+      { property: "og:description", content: "Lovable Generated Project" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Lateen Builder is a business management application for marketers and business owners." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e62e2b8f-c7c2-488b-88bd-9c341d8f669d/id-preview-9398881e--73d4fe96-27fd-448d-9c26-2d6be279c925.lovable.app-1778858648113.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e62e2b8f-c7c2-488b-88bd-9c341d8f669d/id-preview-9398881e--73d4fe96-27fd-448d-9c26-2d6be279c925.lovable.app-1778858648113.png" },
     ],
     links: [
       {
@@ -101,17 +96,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const PRE_PAINT_LANG = `(function(){try{var RTL=['ar','he','fa','ur'];var v=localStorage.getItem('lateen_lang')||'ar';document.documentElement.lang=v;document.documentElement.dir=RTL.indexOf(v)>-1?'rtl':'ltr';}catch(e){document.documentElement.lang='ar';document.documentElement.dir='rtl';}})();`;
-
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="en">
       <head>
-        <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_LANG }} />
         <HeadContent />
       </head>
       <body>
-        {children}
+        <LanguageProvider><AuthProvider>{children}</AuthProvider></LanguageProvider>
         <Scripts />
       </body>
     </html>

@@ -60,20 +60,20 @@ export function RegisterForm({ role }: { role: Role }) {
         <p className="mt-1 text-sm text-text-2">{subtitle}</p>
       </div>
       <Field label={t("Full name")}>
-        <input required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("Alex Morgan")} className="auth-input" />
+        <input required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Alex Morgan" className="auth-input" />
       </Field>
       {role === "business" && (
         <Field label={t("Business name")}>
-          <input required value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder={t("Sunrise Kicks Ltd.")} className="auth-input" />
+          <input required value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Sunrise Kicks Ltd." className="auth-input" />
         </Field>
       )}
       <Field label={t("Email")}>
-        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("you@example.com")} className="auth-input" />
+        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="auth-input" />
       </Field>
       <Field label={t("Password")}>
         <div className="relative">
-          <input type={showPw ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="auth-input pe-16" />
-          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? t("Hide") : t("Show")}</button>
+          <input type={showPw ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="auth-input pr-16" />
+          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? t("Hide") : t("Show")}</button>
         </div>
       </Field>
       <Field label={t("Phone number")}>
