@@ -9,8 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { AuthProvider } from "@/auth/AuthContext";
-import { LanguageProvider, useT } from "@/i18n/LanguageContext";
+import { useT } from "@/i18n/LanguageContext";
 
 function NotFoundComponent() {
   const t = useT();
@@ -112,7 +111,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <LanguageProvider><AuthProvider>{children}</AuthProvider></LanguageProvider>
+        {children}
         <Scripts />
       </body>
     </html>
