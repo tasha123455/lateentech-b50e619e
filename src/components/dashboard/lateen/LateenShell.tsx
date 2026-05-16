@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useAuth } from "@/auth/AuthContext";
-import { useLanguage, translateDOM } from "@/i18n/LanguageContext";
+import { useT } from "@/i18n/LanguageContext";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import { createLateenApi } from "@/lib/lateen-api";
 import businessBody from "./business.body.html?raw";
@@ -44,7 +44,7 @@ function buildScript(src: string): string {
 export function LateenShell({ role, overrideUserId }: { role: Role; overrideUserId?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signOut, user } = useAuth();
-  const { lang } = useLanguage();
+  const t = useT();
   const userId = overrideUserId ?? user?.id;
 
   useEffect(() => {
@@ -64,15 +64,6 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     };
     el.addEventListener("click", onClick);
 
-    // Re-translate on language change (after dashboard re-renders strings dynamically)
-    const onLang = () => {
-      if (containerRef.current)
-        translateDOM(
-          containerRef.current,
-          (window as unknown as { __lang?: string }).__lang ?? "en",
-        );
-    };
-    window.addEventListener("lateen:lang", onLang);
 
     loadChartJs()
       .then(() => {
@@ -81,21 +72,12 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
         script.textContent = buildScript(role === "business" ? businessScript : role === "admin" ? adminScript : marketerScript);
         document.body.appendChild(script);
         injected = script;
-        // Translate after the embedded script has populated dynamic content
-        requestAnimationFrame(() => {
-          if (containerRef.current)
-            translateDOM(
-              containerRef.current,
-              (window as unknown as { __lang?: string }).__lang ?? "en",
-            );
-        });
       })
       .catch((err) => console.error("[Lateen] failed", err));
 
     return () => {
       cancelled = true;
       el.removeEventListener("click", onClick);
-      window.removeEventListener("lateen:lang", onLang);
       const w = window as unknown as { __lateenUnsubs?: Array<() => void> };
       if (w.__lateenUnsubs) {
         for (const fn of w.__lateenUnsubs) {
@@ -112,12 +94,8 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     };
   }, [role, signOut, userId]);
 
-  // When lang state changes (re-render), translate before paint to avoid flicker
-  useLayoutEffect(() => {
-    if (containerRef.current) translateDOM(containerRef.current, lang);
-  }, [lang]);
-
-  const body = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
+  const sourceBody = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
+  const body = useMemo(() => translateStaticHtml(sourceBody, t), [sourceBody, t]);
 
   return (
     <div className={`lateen-${role} relative`}>
@@ -131,4 +109,15 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       />
     </div>
   );
+}
+
+
+function translateStaticHtml(html: string, t: (key: string) => string) {
+  return html
+    .replace(/(>)([^<>{}][^<]*?)(<)/g, (_match, open, text, close) => {
+      const trimmed = String(text).trim();
+      if (!trimmed || /^[\d\s.,:;%$€£¥+\-()#@·•—–…×]+$/.test(trimmed)) return `${open}${text}${close}`;
+      return `${open}${String(text).replace(trimmed, t(trimmed))}${close}`;
+    })
+    .replace(/(placeholder|title|aria-label)=(["'])(.*?)\2/g, (_match, attr, quote, value) => `${attr}=${quote}${t(value)}${quote}`);
 }

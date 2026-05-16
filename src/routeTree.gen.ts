@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LanguageRouteImport } from './routes/language'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
 import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
 import { Route as BusinessSigninRouteImport } from './routes/business.signin'
@@ -24,6 +25,11 @@ const LanguageRoute = LanguageRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketerSigninRoute = MarketerSigninRouteImport.update({
@@ -48,6 +54,7 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/language': typeof LanguageRoute
   '/business/register': typeof BusinessRegisterRoute
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/marketer/signin': typeof MarketerSigninRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/language': typeof LanguageRoute
   '/business/register': typeof BusinessRegisterRoute
@@ -65,6 +73,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/language': typeof LanguageRoute
   '/business/register': typeof BusinessRegisterRoute
@@ -75,6 +84,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/dashboard'
     | '/language'
     | '/business/register'
@@ -83,6 +93,7 @@ export interface FileRouteTypes {
     | '/marketer/signin'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/dashboard'
     | '/language'
     | '/business/register'
@@ -91,6 +102,7 @@ export interface FileRouteTypes {
     | '/marketer/signin'
   id:
     | '__root__'
+    | '/'
     | '/dashboard'
     | '/language'
     | '/business/register'
@@ -100,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   LanguageRoute: typeof LanguageRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketer/signin': {
@@ -156,6 +176,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   LanguageRoute: LanguageRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,

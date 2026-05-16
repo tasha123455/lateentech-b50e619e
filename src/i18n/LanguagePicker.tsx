@@ -42,14 +42,14 @@ export function LanguagePicker({ asModal, onPicked }: Props) {
         placeholder={t("Search languages…")}
         className="auth-input mb-3"
       />
-      <div className="grid max-h-[60vh] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3">
+      <div className="grid max-h-[60vh] grid-cols-2 gap-2 overflow-y-auto pe-1 sm:grid-cols-3">
         {filtered.map((l) => {
           const active = l.code === lang;
           return (
             <button
               key={l.code}
               onClick={() => pick(l.code)}
-              className={`rounded-xl border px-3 py-2.5 text-left transition hover:-translate-y-0.5 hover:bg-surface-2 ${
+              className={`rounded-xl border px-3 py-2.5 text-start transition hover:-translate-y-0.5 hover:bg-surface-2 ${
                 active ? "border-primary bg-surface-2" : "border-border bg-surface"
               }`}
             >

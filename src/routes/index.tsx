@@ -1,23 +1,28 @@
-import { useLanguage } from "../contexts/LanguageContext";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { createFileRoute } from "@tanstack/react-router";
 import { Package, Truck, BarChart3, Globe } from "lucide-react";
 
-export default function Index() {
+export const Route = createFileRoute("/")({
+  component: Index,
+});
+
+function Index() {
   const { lang, setLang, t } = useLanguage();
 
   const features = [
     {
-      title: "Automated Tracking",
-      description: "Sync orders from international suppliers instantly.",
+      title: t("Automated Tracking"),
+      description: t("Sync orders from international suppliers instantly."),
       icon: <Package className="w-6 h-6 text-indigo-600" />,
     },
     {
-      title: "Delegate Management",
-      description: "Track commissions and delivery statuses in real-time.",
+      title: t("Delegate Management"),
+      description: t("Track commissions and delivery statuses in real-time."),
       icon: <Truck className="w-6 h-6 text-indigo-600" />,
     },
     {
-      title: "Financial Analytics",
-      description: "Monitor profit margins and automated salary distributions.",
+      title: t("Financial Analytics"),
+      description: t("Monitor profit margins and automated salary distributions."),
       icon: <BarChart3 className="w-6 h-6 text-indigo-600" />,
     },
   ];
@@ -75,8 +80,8 @@ export default function Index() {
               <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-xl bg-indigo-50">
                 {feature.icon}
               </div>
-              <h3 className="mb-2 text-xl font-bold text-slate-900">{t(feature.title)}</h3>
-              <p className="text-slate-600 leading-relaxed">{t(feature.description)}</p>
+              <h3 className="mb-2 text-xl font-bold text-slate-900">{feature.title}</h3>
+              <p className="text-slate-600 leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>

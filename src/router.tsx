@@ -1,24 +1,26 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "./contexts/LanguageContext";
-import Index from "./pages/Index";
+import { QueryClient } from "@tanstack/react-query";
+import { createRouter } from "@tanstack/react-router";
+import { AuthProvider } from "@/auth/AuthContext";
+import { LanguageProvider } from "@/i18n/LanguageContext";
+import { routeTree } from "./routeTree.gen";
 
-function App() {
-  return (
-    <LanguageProvider>
-      {/* 
-        Tailwind rtl: modifiers are automatically triggered 
-        by the dir="rtl" applied in the LanguageProvider 
-      */}
-      <div className="min-h-screen bg-slate-50 text-slate-900 rtl:leading-[1.6]">
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* Add other dashboard routes here */}
-          </Routes>
-        </Router>
-      </div>
-    </LanguageProvider>
-  );
+export function getRouter() {
+  const queryClient = new QueryClient();
+
+  return createRouter({
+    routeTree,
+    context: { queryClient },
+    scrollRestoration: true,
+    Wrap: ({ children }) => (
+      <LanguageProvider>
+        <AuthProvider>{children}</AuthProvider>
+      </LanguageProvider>
+    ),
+  });
 }
 
-export default App;
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: ReturnType<typeof getRouter>;
+  }
+}
