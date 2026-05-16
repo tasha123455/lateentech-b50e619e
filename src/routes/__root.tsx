@@ -96,10 +96,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const PRE_PAINT_LANG = `(function(){try{var RTL=['ar','he','fa','ur'];var v=localStorage.getItem('lateen_lang')||'ar';document.documentElement.lang=v;document.documentElement.dir=RTL.indexOf(v)>-1?'rtl':'ltr';}catch(e){document.documentElement.lang='ar';document.documentElement.dir='rtl';}})();`;
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_LANG }} />
         <HeadContent />
       </head>
       <body>
