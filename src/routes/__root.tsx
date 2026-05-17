@@ -10,14 +10,13 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
-import { LanguageProvider } from "@/i18n/LanguageContext";
+import { LanguageProvider, useT } from "@/i18n/LanguageContext";
 
 function NotFoundComponent() {
   return <NotFoundView />;
 }
 
 function NotFoundView() {
-  const { useT } = require("@/i18n/LanguageContext") as typeof import("@/i18n/LanguageContext");
   const t = useT();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -43,7 +42,6 @@ function NotFoundView() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  const { useT } = require("@/i18n/LanguageContext") as typeof import("@/i18n/LanguageContext");
   const t = useT();
 
   return (
