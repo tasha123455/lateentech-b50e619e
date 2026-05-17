@@ -31,7 +31,7 @@ function readInitial(): string {
 function applyHtmlAttrs(code: string) {
   if (typeof document === "undefined") return;
   document.documentElement.lang = code;
-  document.documentElement.dir = RTL_CODES.has(code) ? "rtl" : "ltr";
+  document.documentElement.dir = RTL_CODES.has(code as "en" | "ar") ? "rtl" : "ltr";
 }
 
 // Cache original English text per node so toggling languages re-translates
