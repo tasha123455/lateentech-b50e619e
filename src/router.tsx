@@ -2,8 +2,6 @@ import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
-// Moving this outside makes it a singleton.
-// Your data and wallet numbers will now survive language toggles.
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
