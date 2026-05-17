@@ -64,16 +64,6 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     };
     el.addEventListener("click", onClick);
 
-    // Re-translate on language change (after dashboard re-renders strings dynamically)
-    const onLang = () => {
-      if (containerRef.current)
-        translateDOM(
-          containerRef.current,
-          (window as unknown as { __lang?: string }).__lang ?? "en",
-        );
-    };
-    window.addEventListener("lateen:lang", onLang);
-
     loadChartJs()
       .then(() => {
         if (cancelled) return;
@@ -95,7 +85,6 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     return () => {
       cancelled = true;
       el.removeEventListener("click", onClick);
-      window.removeEventListener("lateen:lang", onLang);
       const w = window as unknown as { __lateenUnsubs?: Array<() => void> };
       if (w.__lateenUnsubs) {
         for (const fn of w.__lateenUnsubs) {
