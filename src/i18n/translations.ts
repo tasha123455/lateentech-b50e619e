@@ -1340,7 +1340,6 @@ export const T: Translations = {
   "per unit ×": { "ar": "لكل قطعة ×" },
   "After commissions &amp; platform fees": { "ar": "بعد العمولات ورسوم المنصة" },
   "· set by business owner": { "ar": "· يحددها صاحب الشركة" },
-  "Upload the screenshot in the order form and tap \"Yes, paid.\" The order is then sent to the business for processing and shipping.": { "ar": "ارفع لقطة الشاشة في نموذج الطلب واضغط \"نعم، دُفعت.\" يتم بعدها إرسال الطلب للشركة للمعالجة والشحن." },
   "Filter &amp; sort": { "ar": "تصفية وترتيب" },
   "Affiliate link": { "ar": "رابط الإحالة" },
   "Sunday": { "ar": "الأحد" },
