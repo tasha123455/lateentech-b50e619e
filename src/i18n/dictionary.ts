@@ -36,10 +36,13 @@ export const DICT: Record<string, string> = {
   "Edit": "تعديل",
   "Save": "حفظ",
   "Save as Draft": "حفظ كمسودة",
+  "Save as draft": "حفظ كمسودة",
   "Copy": "نسخ",
   "Copy link": "نسخ الرابط",
   "Get my link": "احصل على الرابط الخاص بي",
   "Copied!": "تم النسخ!",
+  "Hey": "مرحباً",
+  "Hey there": "أهلاً بك",
 
   // ===== Auth =====
   "Welcome back": "مرحبتين بيك من جديد",
@@ -68,7 +71,9 @@ export const DICT: Record<string, string> = {
   "Business name": "اسم الشركة / النشاط التجاري",
   "Go to dashboard →": "الانتقال إلى لوحة التحكم ←",
   "Marketer": "مسوّق",
-  "Business": "شركة / صاحب عمل",
+  "Business": "الشركة",
+  "business owner": "صاحب العمل",
+  "Business owner": "صاحب العمل",
 
   // ===== Business Profile & Settings =====
   "Business Profile": "ملف الشركة",
@@ -98,11 +103,20 @@ export const DICT: Record<string, string> = {
   "Delivery time": "مدة التوصيل",
   "e.g., 2-3 days": "مثال: 2-3 أيام",
   "COD available": "الدفع عند الاستلام (COD) متاح",
+  "Shipping delivery": "الشحن والتوصيل",
+  "Shipping & delivery": "الشحن والتوصيل",
+  "Delivery by city": "التوصيل حسب المدينة",
+  "Delivery": "التوصيل",
+  "delivery": "التوصيل",
+  "Deliv": "التوصيل",
+  "Low stock": "المخزون منخفض",
 
   // ===== Dashboards: Stats & Wallet =====
   "Business Dashboard": "لوحة تحكم الشركة",
   "Marketer Dashboard": "لوحة تحكم المسوّق",
   "WALLET BALANCE": "رصيد المحفظة",
+  "Wallet": "المحفظة",
+  "wallet": "المحفظة",
   "NET EARNINGS": "صافي الأرباح",
   "Net earnings": "صافي الأرباح",
   "Next payout": "الدفعة الجاية",
@@ -113,7 +127,8 @@ export const DICT: Record<string, string> = {
   "Withdrawal processed": "جاري معالجة السحب",
   "Requested": "تم تقديم الطلب",
   "pending clearance": "في الانتظار / قيد المراجعة",
-  "Pending": "في الانتظار",
+  "Pending": "قيد الانتظار",
+  "Pending verification by admin": "في انتظار مراجعة الإدارة",
   "Total earned": "إجمالي الأرباح",
   "Gross revenue": "إجمالي الإيرادات",
   "Revenue": "الإيرادات",
@@ -142,6 +157,7 @@ export const DICT: Record<string, string> = {
   "Payouts": "السحوبات",
   "Confirm your payout details below": "أكّد تفاصيل السحب أسفله",
   "Lifetime, from confirmed & delivered orders": "إجمالي الأرباح من الطلبيات المؤكدة والمسلّمة",
+  "Commissions": "العمولات",
 
   // ===== Products & Browse =====
   "Filters": "الفلاتر",
@@ -172,6 +188,9 @@ export const DICT: Record<string, string> = {
   "Stock qty": "الكمية بالمخزون",
   "Sold": "مبيوع",
   "Product code": "كود المنتج",
+  "Order Code": "كود الطلبية",
+  "Order code": "كود الطلبية",
+  "Source": "المصدر",
   "Commission": "نسبة العمولة",
   "Commission %": "نسبة العمولة",
   "Commission rate": "نسبة العمولة",
@@ -196,6 +215,8 @@ export const DICT: Record<string, string> = {
   "Select colour": "اختار اللون",
   "Select size": "اختار المقاس",
   "Quantity": "الكمية",
+  "QTY": "الكمية",
+  "Qty": "الكمية",
   "Product name": "اسم المنتج",
   "Description": "الوصف",
   "Product details": "تفاصيل المنتج",
@@ -215,6 +236,7 @@ export const DICT: Record<string, string> = {
   "Variants": "خيارات المنتج",
   "Currency": "العملة",
   "Select a currency": "اختار العملة",
+  "Select a product": "اختار منتج",
   "Auto-generated": "توليد تلقائي",
   "Regenerate": "إعادة توليد",
   "Pause": "إيقاف مؤقت",
@@ -224,6 +246,7 @@ export const DICT: Record<string, string> = {
   "Choose from your saved products": "اختار من منتجاتك المحفوظة",
   "Across every shop": "في كل المتاجر",
   "Available across ": "متوفر في ",
+  "Available across two currencies": "متوفر بعملتين",
 
   // ===== Orders =====
   "Customer orders": "طلبات الزبائن",
@@ -239,6 +262,8 @@ export const DICT: Record<string, string> = {
   "Delivery location": "مكان التوصيل",
   "Delivery zones": "مناطق التوصيل",
   "Shipping cost": "تكلفة الشحن",
+  "ships to": "يشحن إلى",
+  "Ships to": "يشحن إلى",
   "Country": "الدولة",
   "City": "المدينة",
   "Any city": "أي مدينة",
@@ -262,8 +287,14 @@ export const DICT: Record<string, string> = {
   "Confirmed": "تم التأكيد",
   "awaiting": "في الانتظار",
   "completed": "مكتملة",
-  "Select a product": "اختار منتج",
   "Confirm, ship, deliver": "تأكيد، شحن، تسليم",
+  "Send order to business owner": "إرسال الطلبية لصاحب العمل",
+  "Forwarded to Business": "تم التحويل للشركة",
+  "Forwarded to business": "تم التحويل للشركة",
+  "Draft": "مسودة",
+  "Not sent": "لم يتم الإرسال",
+  "Reviewed": "تمت المراجعة",
+  "Approved": "تمت الموافقة",
 
   // ===== Commitment Fee & Payments =====
   "COMMITMENT FEE TO COLLECT": "قيمة العربون المطلوب",
@@ -281,6 +312,7 @@ export const DICT: Record<string, string> = {
   "Cash on delivery": "الدفع عند الاستلام",
   "This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.": "هذا العربون غير قابل للترجيع لو الزبون لغى الطلبية، عشان يحميك ويحمي الشركة من الطلبات الوهمية.",
   "How to collect the fee": "كيف تحصل العربون",
+  "How to collect fee": "كيف تحصل الرسوم",
   "Step-by-step deposit instructions": "خطوات التحويل بالتفصيل",
   "COMMITMENT FEE — COLLECT FROM CUSTOMER": "عربون الحجز — احصله من الزبون",
   "Tell the customer the fee": "خبر الزبون بقيمة العربون",
@@ -305,6 +337,11 @@ export const DICT: Record<string, string> = {
   "Choose where the receipt is coming from": "اختر مصدر الإيصال",
   "Full name on account": "الاسم الكامل لصاحب الحساب",
   "optional": "اختياري",
+  "Marketer confirmed payment": "المسوّق أكد الدفع",
+  "View payment receipts": "عرض إيصالات الدفع",
+  "Upfront fee paid": "تم دفع العربون",
+  "Add receipt and send": "إضافة الإيصال والإرسال",
+  "Receipt uploaded": "تم رفع الإيصال",
 
   // ===== Empty States & Search =====
   "No orders found.": "لم يتم العثور على طلبيات.",
@@ -325,10 +362,11 @@ export const DICT: Record<string, string> = {
   "Search products & marketers…": "ابحث عن المنتجات والمسوّقين…",
   "Street, area, landmark…": "الشارع، المنطقة، علامة مميزة…",
   "Brief description for marketers…": "وصف موجز للمسوّقين…",
+  "e.g. product name": "مثال: اسم المنتج",
+  "e.g. notes": "مثال: ملاحظاتك هنا",
 
   // ===== Misc UI =====
   "Verify": "التحقق",
-  "Hey there": "أهلاً بك",
   "Welcome": "مرحباً",
   "Loading…": "جارٍ التحميل…",
   "Try again": "إعادة المحاولة",
@@ -364,6 +402,15 @@ export const DICT: Record<string, string> = {
   "Product Review": "مراجعة المنتجات",
   "Select a country": "اختر الدولة",
   "All-time": "كل الأوقات",
+  "all time": "كل الوقت",
+  "All time": "كل الوقت",
+
+  // ===== Entities (lowercase plurals) =====
+  "products": "منتجات",
+  "orders": "طلبيات",
+  "cities": "مدن",
+  "days": "أيام",
+  "day": "يوم",
 
   // ===== Chart periods & dates =====
   "D": "يوم",
@@ -371,19 +418,64 @@ export const DICT: Record<string, string> = {
   "M": "شهر",
   "Y": "سنة",
   "Mon": "الإثنين", "Tue": "الثلاثاء", "Wed": "الأربعاء",
-  "Thu": "الخميس", "Fri": "الجمعة", "Sat": "السبت", "Sun": "الأحد",
+  "Thu": "الخميس", "Thur": "الخميس", "Fri": "الجمعة", "Sat": "السبت", "Sun": "الأحد",
   "Jan": "يناير", "Feb": "فبراير", "Mar": "مارس", "Apr": "أبريل",
   "May": "مايو", "Jun": "يونيو", "Jul": "يوليو", "Aug": "أغسطس",
   "Sep": "سبتمبر", "Oct": "أكتوبر", "Nov": "نوفمبر", "Dec": "ديسمبر",
 };
 
+// Build a case-insensitive lookup map (lowercased key -> Arabic value).
+// First insertion wins, so the canonical-cased entries above take precedence
+// for any future programmatic checks.
+const DICT_CI: Record<string, string> = {};
+for (const [k, v] of Object.entries(DICT)) {
+  const lower = k.toLowerCase();
+  if (!(lower in DICT_CI)) DICT_CI[lower] = v;
+}
+
+// ===== Pattern translations =====
+// These handle dynamic strings with numbers/variables inside.
+// Each pattern: regex + builder that receives the matched groups.
+type Pattern = { re: RegExp; build: (m: RegExpMatchArray) => string };
+const PATTERNS: Pattern[] = [
+  // "Across 5 products" / "Across 12 cities" / "Across 3 orders"
+  { re: /^Across\s+(\d[\d,]*)\s+products\b\.?$/i, build: (m) => `عبر ${m[1]} منتجات` },
+  { re: /^Across\s+(\d[\d,]*)\s+cities\b\.?$/i, build: (m) => `عبر ${m[1]} مدن` },
+  { re: /^Across\s+(\d[\d,]*)\s+orders\b\.?$/i, build: (m) => `عبر ${m[1]} طلبيات` },
+  { re: /^Across\s+(\d[\d,]*)\s+shops?\b\.?$/i, build: (m) => `عبر ${m[1]} متاجر` },
+  // "Order Code #1234" / "Order code: 1234"
+  { re: /^Order\s+Code\s*[:#]?\s*(.+)$/i, build: (m) => `كود الطلبية ${m[1]}` },
+  // "Product Code #1234"
+  { re: /^Product\s+Code\s*[:#]?\s*(.+)$/i, build: (m) => `كود المنتج ${m[1]}` },
+  // "Ships to <Country>"
+  { re: /^Ships?\s+to\s+(.+)$/i, build: (m) => `يشحن إلى ${m[1]}` },
+  // "Hey <Name>" / "Hey, <Name>"
+  { re: /^Hey[,!]?\s+(.+)$/i, build: (m) => `مرحباً ${m[1]}` },
+  // "Low stock: 3" / "Low stock (3)"
+  { re: /^Low\s+stock\b(.*)$/i, build: (m) => `المخزون منخفض${m[1]}` },
+];
+
 // Normalize then lookup. Returns the translation, or null if not in dict.
 export function translate(text: string): string | null {
   const trimmed = text.trim();
   if (!trimmed) return null;
+
+  // 1) Exact match (case-preserving)
   if (DICT[trimmed]) return DICT[trimmed];
-  // Strip trailing punctuation for a second-chance match
+
+  // 2) Strip trailing punctuation for a second-chance exact match
   const stripped = trimmed.replace(/[.,;:!?]+$/, "");
   if (stripped !== trimmed && DICT[stripped]) return DICT[stripped];
+
+  // 3) Case-insensitive match
+  const lower = stripped.toLowerCase();
+  if (DICT_CI[lower]) return DICT_CI[lower];
+
+  // 4) Pattern match (preserves dynamic numbers / IDs / names)
+  for (const p of PATTERNS) {
+    const m = stripped.match(p.re);
+    if (m) return p.build(m);
+  }
+
   return null;
 }
