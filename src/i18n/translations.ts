@@ -1,745 +1,1301 @@
-// Translation dictionary. Keys are the canonical English text.
-// Missing locales fall back to the key (English).
-// Languages with full coverage: en, es, fr, de, it, pt, pt-BR, nl, ru, ar, he, hi, zh-CN, zh-TW, ja, ko, tr, id, sv, pl.
-// Other locales fall back to English (the picker still lists them).
-
-export type Translations = Record<string, Partial<Record<string, string>>>;
+// Static EN/AR dictionary. Keys are canonical English; values are MSA Arabic.
+// Missing keys fall back to English.
+export type Translations = Record<string, { ar?: string }>;
 
 export const T: Translations = {
-  // ── Picker ────────────────────────────────────────────
   "Choose your language": {
-    es: "Elige tu idioma", fr: "Choisissez votre langue", de: "Wähle deine Sprache",
-    it: "Scegli la tua lingua", pt: "Escolha o seu idioma", "pt-BR": "Escolha seu idioma",
-    nl: "Kies je taal", ru: "Выберите язык", ar: "اختر لغتك", he: "בחר את השפה שלך",
-    hi: "अपनी भाषा चुनें", "zh-CN": "选择你的语言", "zh-TW": "選擇你的語言",
-    ja: "言語を選択", ko: "언어 선택", tr: "Dilini seç", id: "Pilih bahasa Anda",
-    sv: "Välj ditt språk", pl: "Wybierz język", fa: "زبان خود را انتخاب کنید",
-    ur: "اپنی زبان منتخب کریں", vi: "Chọn ngôn ngữ", th: "เลือกภาษาของคุณ",
-    el: "Επιλέξτε τη γλώσσα σας", uk: "Виберіть мову", cs: "Vyberte jazyk",
-    da: "Vælg dit sprog", no: "Velg språk", fi: "Valitse kieli", hu: "Válassz nyelvet",
-    ro: "Alege limba", bg: "Изберете език", sk: "Vyberte jazyk", hr: "Odaberi jezik",
-    sr: "Изаберите језик", bn: "আপনার ভাষা নির্বাচন করুন", ta: "உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்",
-    te: "మీ భాషను ఎంచుకోండి", mr: "तुमची भाषा निवडा", gu: "તમારી ભાષા પસંદ કરો",
-    pa: "ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ", ms: "Pilih bahasa anda", fil: "Piliin ang iyong wika",
-    sw: "Chagua lugha yako", am: "ቋንቋዎን ይምረጡ", yo: "Yan èdè rẹ", ha: "Zaɓi yarenka",
-    zu: "Khetha ulimi lwakho", af: "Kies jou taal",
+    "ar": "اختر لغتك"
   },
   "Continue": {
-    es: "Continuar", fr: "Continuer", de: "Weiter", it: "Continua", pt: "Continuar",
-    "pt-BR": "Continuar", nl: "Doorgaan", ru: "Продолжить", ar: "متابعة", he: "המשך",
-    hi: "जारी रखें", "zh-CN": "继续", "zh-TW": "繼續", ja: "続ける", ko: "계속",
-    tr: "Devam et", id: "Lanjutkan", sv: "Fortsätt", pl: "Kontynuuj", fa: "ادامه",
-    ur: "جاری رکھیں", vi: "Tiếp tục", th: "ดำเนินการต่อ", el: "Συνέχεια", uk: "Продовжити",
-    cs: "Pokračovat", da: "Fortsæt", no: "Fortsett", fi: "Jatka", hu: "Folytatás",
-    ro: "Continuă", bg: "Продължи", sk: "Pokračovať", hr: "Nastavi", sr: "Настави",
-    ms: "Teruskan", fil: "Magpatuloy", sw: "Endelea", af: "Gaan voort",
+    "ar": "متابعة"
   },
   "Search languages…": {
-    es: "Buscar idiomas…", fr: "Rechercher…", de: "Sprachen suchen…", it: "Cerca lingue…",
-    pt: "Pesquisar idiomas…", "pt-BR": "Pesquisar idiomas…", nl: "Talen zoeken…",
-    ru: "Поиск языков…", ar: "ابحث عن اللغات…", he: "חפש שפות…", hi: "भाषाएँ खोजें…",
-    "zh-CN": "搜索语言…", "zh-TW": "搜尋語言…", ja: "言語を検索…", ko: "언어 검색…",
-    tr: "Dil ara…", id: "Cari bahasa…", sv: "Sök språk…", pl: "Szukaj języków…",
-    fa: "جستجوی زبان‌ها…", ur: "زبانیں تلاش کریں…", vi: "Tìm ngôn ngữ…", th: "ค้นหาภาษา…",
+    "ar": "ابحث عن اللغات…"
   },
-
-  // ── Landing ───────────────────────────────────────────
   "Performance marketing, zero upfront cost": {
-    es: "Marketing de resultados, sin coste inicial",
-    fr: "Marketing à la performance, sans frais initiaux",
-    de: "Performance-Marketing, ohne Vorkosten",
-    it: "Marketing a performance, senza costi iniziali",
-    pt: "Marketing de performance, sem custo inicial",
-    "pt-BR": "Marketing de performance, sem custo inicial",
-    nl: "Performance marketing, geen voorafkosten",
-    ru: "Маркетинг с оплатой за результат, без предоплаты",
-    ar: "تسويق بالأداء، بدون تكلفة مسبقة",
-    he: "שיווק לפי ביצועים, ללא עלות מראש",
-    hi: "प्रदर्शन विपणन, कोई अग्रिम लागत नहीं",
-    "zh-CN": "效果营销,零预付费用", "zh-TW": "效果行銷,零預付費用",
-    ja: "成果報酬型マーケティング、初期費用ゼロ",
-    ko: "성과 마케팅, 선불 비용 없음",
-    tr: "Performans pazarlama, ön maliyet yok",
-    id: "Pemasaran berbasis kinerja, tanpa biaya di muka",
-    sv: "Prestationsbaserad marknadsföring, inga förkostnader",
-    pl: "Marketing efektywnościowy, bez kosztów początkowych",
+    "ar": "تسويق بالأداء، بدون تكلفة مسبقة"
   },
   "Who are you?": {
-    es: "¿Quién eres?", fr: "Qui êtes-vous ?", de: "Wer bist du?", it: "Chi sei?",
-    pt: "Quem é você?", "pt-BR": "Quem é você?", nl: "Wie ben jij?", ru: "Кто вы?",
-    ar: "من أنت؟", he: "מי אתה?", hi: "आप कौन हैं?", "zh-CN": "您是?", "zh-TW": "您是?",
-    ja: "あなたは?", ko: "누구신가요?", tr: "Kimsiniz?", id: "Siapa Anda?",
-    sv: "Vem är du?", pl: "Kim jesteś?", fa: "شما کی هستید؟", ur: "آپ کون ہیں؟",
-    vi: "Bạn là ai?", th: "คุณคือใคร?",
+    "ar": "من أنت؟"
   },
   "Marketer": {
-    es: "Marketer", fr: "Marketeur", de: "Marketer", it: "Marketer", pt: "Marketer",
-    "pt-BR": "Marketer", nl: "Marketer", ru: "Маркетолог", ar: "مسوّق", he: "משווק",
-    hi: "मार्केटर", "zh-CN": "推广者", "zh-TW": "推廣者", ja: "マーケター", ko: "마케터",
-    tr: "Pazarlamacı", id: "Pemasar", sv: "Marknadsförare", pl: "Marketer",
-    fa: "بازاریاب", ur: "مارکیٹر", vi: "Nhà tiếp thị", th: "นักการตลาด",
+    "ar": "مسوّق"
   },
   "Business": {
-    es: "Empresa", fr: "Entreprise", de: "Unternehmen", it: "Azienda", pt: "Empresa",
-    "pt-BR": "Empresa", nl: "Bedrijf", ru: "Бизнес", ar: "شركة", he: "עסק",
-    hi: "व्यवसाय", "zh-CN": "商家", "zh-TW": "商家", ja: "ビジネス", ko: "비즈니스",
-    tr: "İşletme", id: "Bisnis", sv: "Företag", pl: "Firma", fa: "کسب‌وکار",
-    ur: "کاروبار", vi: "Doanh nghiệp", th: "ธุรกิจ",
+    "ar": "شركة"
   },
   "Promote products & earn commission": {
-    es: "Promociona productos y gana comisión", fr: "Promouvoir des produits et gagner une commission",
-    de: "Produkte bewerben & Provision verdienen", it: "Promuovi prodotti e guadagna commissioni",
-    pt: "Promova produtos e ganhe comissão", "pt-BR": "Promova produtos e ganhe comissão",
-    nl: "Producten promoten & commissie verdienen", ru: "Продвигайте товары и получайте комиссию",
-    ar: "روّج للمنتجات واكسب عمولة", he: "קדם מוצרים וצבור עמלה",
-    hi: "उत्पादों का प्रचार करें और कमीशन कमाएँ", "zh-CN": "推广商品,赚取佣金",
-    "zh-TW": "推廣商品,賺取佣金", ja: "商品を宣伝して報酬を獲得", ko: "상품을 홍보하고 수수료를 받으세요",
-    tr: "Ürünleri tanıt, komisyon kazan", id: "Promosikan produk & dapatkan komisi",
-    sv: "Marknadsför produkter & tjäna provision", pl: "Promuj produkty i zarabiaj prowizję",
+    "ar": "روّج للمنتجات واكسب عمولة"
   },
   "List products & grow your sales": {
-    es: "Publica productos y aumenta tus ventas", fr: "Listez des produits et développez vos ventes",
-    de: "Produkte einstellen & Verkäufe steigern", it: "Pubblica prodotti e fai crescere le vendite",
-    pt: "Publique produtos e aumente vendas", "pt-BR": "Publique produtos e aumente vendas",
-    nl: "Producten plaatsen & verkoop laten groeien", ru: "Размещайте товары и увеличивайте продажи",
-    ar: "اعرض منتجاتك ونمِّ مبيعاتك", he: "פרסם מוצרים והגדל את המכירות",
-    hi: "उत्पाद सूचीबद्ध करें और बिक्री बढ़ाएँ", "zh-CN": "上架商品,扩大销售",
-    "zh-TW": "上架商品,擴大銷售", ja: "商品を掲載し売上を伸ばす", ko: "상품을 등록하고 매출을 늘리세요",
-    tr: "Ürünleri listele, satışlarını büyüt", id: "Cantumkan produk & tingkatkan penjualan",
-    sv: "Lista produkter & öka försäljningen", pl: "Wystawiaj produkty i zwiększaj sprzedaż",
+    "ar": "اعرض منتجاتك ونمِّ مبيعاتك"
   },
   "New here? Selecting a role will walk you through sign-up.": {
-    es: "¿Nuevo aquí? Selecciona un rol y te guiamos en el registro.",
-    fr: "Nouveau ? Choisissez un rôle, on vous guide pour l'inscription.",
-    de: "Neu hier? Wähle eine Rolle und wir führen dich durch die Registrierung.",
-    it: "Sei nuovo? Seleziona un ruolo e ti guidiamo nella registrazione.",
-    pt: "Novo aqui? Selecione um papel para começar o registo.",
-    "pt-BR": "Novo por aqui? Selecione um papel para começar o cadastro.",
-    nl: "Nieuw hier? Kies een rol en we begeleiden je door de aanmelding.",
-    ru: "Впервые здесь? Выберите роль — мы проведём вас по регистрации.",
-    ar: "جديد هنا؟ اختر دورًا وسنرشدك خلال التسجيل.",
-    he: "חדש כאן? בחר תפקיד ונלווה אותך לרישום.",
-    hi: "यहाँ नए हैं? भूमिका चुनें, हम साइन-अप में मदद करेंगे.",
-    "zh-CN": "新来的吗?选择一个角色,我们会引导您注册。",
-    "zh-TW": "新來的嗎?選擇一個角色,我們會引導您註冊。",
-    ja: "はじめてですか?役割を選ぶと登録に進みます。",
-    ko: "처음이신가요? 역할을 선택하면 가입을 안내해 드립니다。",
-    tr: "Yeni misin? Bir rol seç, kaydını birlikte yapalım.",
-    id: "Baru di sini? Pilih peran dan kami pandu pendaftaran Anda.",
+    "ar": "جديد هنا؟ اختر دورًا وسنرشدك خلال التسجيل."
   },
   "By continuing you agree to our": {
-    es: "Al continuar aceptas nuestros", fr: "En continuant, vous acceptez nos",
-    de: "Mit der Fortsetzung stimmst du unseren", it: "Continuando accetti i nostri",
-    pt: "Ao continuar aceita os nossos", "pt-BR": "Ao continuar você aceita nossos",
-    nl: "Door verder te gaan ga je akkoord met onze", ru: "Продолжая, вы принимаете наши",
-    ar: "بالمتابعة فإنك توافق على", he: "בהמשך אתה מסכים ל",
-    hi: "जारी रखकर आप हमारी", "zh-CN": "继续即表示您同意我们的",
-    "zh-TW": "繼續即表示您同意我們的", ja: "続行すると当社の", ko: "계속하면 다음에 동의합니다",
-    tr: "Devam ederek", id: "Dengan melanjutkan, Anda menyetujui",
+    "ar": "بالمتابعة فإنك توافق على"
   },
   "Terms": {
-    es: "Términos", fr: "Conditions", de: "Bedingungen", it: "Termini", pt: "Termos",
-    "pt-BR": "Termos", nl: "Voorwaarden", ru: "Условия", ar: "الشروط", he: "תנאים",
-    hi: "शर्तें", "zh-CN": "条款", "zh-TW": "條款", ja: "利用規約", ko: "약관",
-    tr: "Şartlar", id: "Ketentuan", sv: "Villkor", pl: "Regulamin", fa: "شرایط",
+    "ar": "الشروط"
   },
   "Privacy Policy": {
-    es: "Política de privacidad", fr: "Politique de confidentialité",
-    de: "Datenschutzrichtlinie", it: "Informativa sulla privacy",
-    pt: "Política de Privacidade", "pt-BR": "Política de Privacidade",
-    nl: "Privacybeleid", ru: "Политика конфиденциальности", ar: "سياسة الخصوصية",
-    he: "מדיניות פרטיות", hi: "गोपनीयता नीति", "zh-CN": "隐私政策", "zh-TW": "隱私政策",
-    ja: "プライバシーポリシー", ko: "개인정보 처리방침", tr: "Gizlilik Politikası",
-    id: "Kebijakan Privasi", sv: "Integritetspolicy", pl: "Polityka prywatności",
+    "ar": "سياسة الخصوصية"
   },
-
-  // ── Auth ──────────────────────────────────────────────
   "‹ Back": {
-    es: "‹ Atrás", fr: "‹ Retour", de: "‹ Zurück", it: "‹ Indietro", pt: "‹ Voltar",
-    "pt-BR": "‹ Voltar", nl: "‹ Terug", ru: "‹ Назад", ar: "‹ رجوع", he: "‹ חזרה",
-    hi: "‹ वापस", "zh-CN": "‹ 返回", "zh-TW": "‹ 返回", ja: "‹ 戻る", ko: "‹ 뒤로",
-    tr: "‹ Geri", id: "‹ Kembali", sv: "‹ Tillbaka", pl: "‹ Wstecz", fa: "‹ بازگشت",
+    "ar": "‹ رجوع"
   },
   "Welcome back": {
-    es: "Bienvenido de nuevo", fr: "Bon retour", de: "Willkommen zurück", it: "Bentornato",
-    pt: "Bem-vindo de volta", "pt-BR": "Bem-vindo de volta", nl: "Welkom terug",
-    ru: "С возвращением", ar: "أهلًا بعودتك", he: "ברוך שובך", hi: "वापसी पर स्वागत है",
-    "zh-CN": "欢迎回来", "zh-TW": "歡迎回來", ja: "おかえりなさい", ko: "다시 오신 것을 환영합니다",
-    tr: "Tekrar hoş geldin", id: "Selamat datang kembali", sv: "Välkommen tillbaka",
-    pl: "Witaj ponownie", fa: "خوش آمدید", ur: "خوش آمدید", vi: "Chào mừng trở lại",
+    "ar": "أهلًا بعودتك"
   },
   "Sign in to your marketer account": {
-    es: "Inicia sesión en tu cuenta de marketer", fr: "Connectez-vous à votre compte marketeur",
-    de: "Melde dich in deinem Marketer-Konto an", it: "Accedi al tuo account marketer",
-    pt: "Entre na sua conta de marketer", "pt-BR": "Entre na sua conta de marketer",
-    nl: "Log in op je marketer-account", ru: "Войдите в аккаунт маркетолога",
-    ar: "سجّل الدخول إلى حسابك كمسوّق", he: "היכנס לחשבון המשווק שלך",
-    hi: "अपने मार्केटर खाते में साइन इन करें", "zh-CN": "登录推广者账户",
-    "zh-TW": "登入推廣者帳戶", ja: "マーケターアカウントにサインイン",
-    ko: "마케터 계정으로 로그인", tr: "Pazarlamacı hesabına giriş yap",
-    id: "Masuk ke akun pemasar Anda",
+    "ar": "سجّل الدخول إلى حسابك كمسوّق"
   },
   "Sign in to your business account": {
-    es: "Inicia sesión en tu cuenta de empresa", fr: "Connectez-vous à votre compte entreprise",
-    de: "Melde dich in deinem Unternehmenskonto an", it: "Accedi al tuo account azienda",
-    pt: "Entre na sua conta de empresa", "pt-BR": "Entre na sua conta de empresa",
-    nl: "Log in op je bedrijfsaccount", ru: "Войдите в бизнес-аккаунт",
-    ar: "سجّل الدخول إلى حساب شركتك", he: "היכנס לחשבון העסקי שלך",
-    hi: "अपने व्यवसाय खाते में साइन इन करें", "zh-CN": "登录商家账户",
-    "zh-TW": "登入商家帳戶", ja: "ビジネスアカウントにサインイン",
-    ko: "비즈니스 계정으로 로그인", tr: "İşletme hesabına giriş yap",
-    id: "Masuk ke akun bisnis Anda",
+    "ar": "سجّل الدخول إلى حساب شركتك"
   },
   "Email": {
-    es: "Correo", fr: "E-mail", de: "E-Mail", it: "Email", pt: "E-mail", "pt-BR": "E-mail",
-    nl: "E-mail", ru: "Эл. почта", ar: "البريد الإلكتروني", he: "אימייל", hi: "ईमेल",
-    "zh-CN": "邮箱", "zh-TW": "電子郵件", ja: "メール", ko: "이메일", tr: "E-posta",
-    id: "Email", sv: "E-post", pl: "E-mail", fa: "ایمیل", ur: "ای میل", vi: "Email", th: "อีเมล",
+    "ar": "البريد الإلكتروني"
   },
   "Password": {
-    es: "Contraseña", fr: "Mot de passe", de: "Passwort", it: "Password", pt: "Palavra-passe",
-    "pt-BR": "Senha", nl: "Wachtwoord", ru: "Пароль", ar: "كلمة المرور", he: "סיסמה",
-    hi: "पासवर्ड", "zh-CN": "密码", "zh-TW": "密碼", ja: "パスワード", ko: "비밀번호",
-    tr: "Şifre", id: "Kata sandi", sv: "Lösenord", pl: "Hasło", fa: "رمز عبور",
-    ur: "پاس ورڈ", vi: "Mật khẩu", th: "รหัสผ่าน",
+    "ar": "كلمة المرور"
   },
   "Phone number": {
-    es: "Teléfono", fr: "Téléphone", de: "Telefonnummer", it: "Telefono", pt: "Telefone",
-    "pt-BR": "Telefone", nl: "Telefoonnummer", ru: "Телефон", ar: "رقم الهاتف",
-    he: "טלפון", hi: "फ़ोन नंबर", "zh-CN": "电话号码", "zh-TW": "電話號碼",
-    ja: "電話番号", ko: "전화번호", tr: "Telefon", id: "Nomor telepon",
-    sv: "Telefonnummer", pl: "Numer telefonu",
+    "ar": "رقم الهاتف"
   },
   "Full name": {
-    es: "Nombre completo", fr: "Nom complet", de: "Vollständiger Name", it: "Nome completo",
-    pt: "Nome completo", "pt-BR": "Nome completo", nl: "Volledige naam", ru: "Полное имя",
-    ar: "الاسم الكامل", he: "שם מלא", hi: "पूरा नाम", "zh-CN": "姓名", "zh-TW": "姓名",
-    ja: "氏名", ko: "이름", tr: "Ad Soyad", id: "Nama lengkap", sv: "Fullständigt namn",
-    pl: "Imię i nazwisko",
+    "ar": "الاسم الكامل"
   },
   "Business name": {
-    es: "Nombre de la empresa", fr: "Nom de l'entreprise", de: "Firmenname",
-    it: "Nome azienda", pt: "Nome da empresa", "pt-BR": "Nome da empresa",
-    nl: "Bedrijfsnaam", ru: "Название компании", ar: "اسم الشركة", he: "שם העסק",
-    hi: "व्यवसाय का नाम", "zh-CN": "商家名称", "zh-TW": "商家名稱",
-    ja: "会社名", ko: "비즈니스 이름", tr: "İşletme adı", id: "Nama bisnis",
+    "ar": "اسم الشركة"
   },
   "Show": {
-    es: "Mostrar", fr: "Afficher", de: "Zeigen", it: "Mostra", pt: "Mostrar",
-    "pt-BR": "Mostrar", nl: "Tonen", ru: "Показать", ar: "إظهار", he: "הצג",
-    hi: "दिखाएँ", "zh-CN": "显示", "zh-TW": "顯示", ja: "表示", ko: "표시",
-    tr: "Göster", id: "Tampilkan", sv: "Visa", pl: "Pokaż",
+    "ar": "إظهار"
   },
   "Hide": {
-    es: "Ocultar", fr: "Masquer", de: "Verbergen", it: "Nascondi", pt: "Ocultar",
-    "pt-BR": "Ocultar", nl: "Verbergen", ru: "Скрыть", ar: "إخفاء", he: "הסתר",
-    hi: "छिपाएँ", "zh-CN": "隐藏", "zh-TW": "隱藏", ja: "非表示", ko: "숨기기",
-    tr: "Gizle", id: "Sembunyikan", sv: "Dölj", pl: "Ukryj",
+    "ar": "إخفاء"
   },
   "Sign in": {
-    es: "Iniciar sesión", fr: "Se connecter", de: "Anmelden", it: "Accedi", pt: "Entrar",
-    "pt-BR": "Entrar", nl: "Inloggen", ru: "Войти", ar: "تسجيل الدخول", he: "התחבר",
-    hi: "साइन इन", "zh-CN": "登录", "zh-TW": "登入", ja: "サインイン", ko: "로그인",
-    tr: "Giriş yap", id: "Masuk", sv: "Logga in", pl: "Zaloguj się", fa: "ورود",
-    ur: "سائن ان", vi: "Đăng nhập", th: "เข้าสู่ระบบ",
+    "ar": "تسجيل الدخول"
   },
   "Signing in…": {
-    es: "Iniciando…", fr: "Connexion…", de: "Anmelden…", it: "Accesso…", pt: "A entrar…",
-    "pt-BR": "Entrando…", nl: "Inloggen…", ru: "Вход…", ar: "جارٍ الدخول…", he: "מתחבר…",
-    hi: "साइन इन हो रहा है…", "zh-CN": "登录中…", "zh-TW": "登入中…", ja: "サインイン中…",
-    ko: "로그인 중…", tr: "Giriş yapılıyor…", id: "Masuk…",
+    "ar": "جارٍ الدخول…"
   },
   "Continue with Google": {
-    es: "Continuar con Google", fr: "Continuer avec Google", de: "Mit Google fortfahren",
-    it: "Continua con Google", pt: "Continuar com Google", "pt-BR": "Continuar com Google",
-    nl: "Doorgaan met Google", ru: "Продолжить с Google", ar: "المتابعة مع Google",
-    he: "המשך עם Google", hi: "Google के साथ जारी रखें", "zh-CN": "使用 Google 继续",
-    "zh-TW": "使用 Google 繼續", ja: "Google で続ける", ko: "Google로 계속하기",
-    tr: "Google ile devam et", id: "Lanjutkan dengan Google",
+    "ar": "المتابعة مع Google"
   },
   "No account?": {
-    es: "¿No tienes cuenta?", fr: "Pas de compte ?", de: "Noch kein Konto?",
-    it: "Non hai un account?", pt: "Sem conta?", "pt-BR": "Sem conta?",
-    nl: "Geen account?", ru: "Нет аккаунта?", ar: "ليس لديك حساب؟", he: "אין חשבון?",
-    hi: "कोई खाता नहीं?", "zh-CN": "没有账户?", "zh-TW": "沒有帳戶?",
-    ja: "アカウントがない?", ko: "계정이 없으신가요?", tr: "Hesabın yok mu?",
-    id: "Belum punya akun?",
+    "ar": "ليس لديك حساب؟"
   },
   "Create one": {
-    es: "Crear una", fr: "Créer un compte", de: "Erstellen", it: "Creane uno",
-    pt: "Criar conta", "pt-BR": "Criar uma", nl: "Maak er een", ru: "Создать",
-    ar: "أنشئ حسابًا", he: "צור חשבון", hi: "बनाएँ", "zh-CN": "创建一个",
-    "zh-TW": "建立一個", ja: "作成", ko: "만들기", tr: "Oluştur", id: "Buat akun",
+    "ar": "أنشئ حسابًا"
   },
   "Create account": {
-    es: "Crear cuenta", fr: "Créer un compte", de: "Konto erstellen",
-    it: "Crea account", pt: "Criar conta", "pt-BR": "Criar conta",
-    nl: "Account aanmaken", ru: "Создать аккаунт", ar: "إنشاء حساب",
-    he: "צור חשבון", hi: "खाता बनाएँ", "zh-CN": "创建账户", "zh-TW": "建立帳戶",
-    ja: "アカウント作成", ko: "계정 만들기", tr: "Hesap oluştur", id: "Buat akun",
+    "ar": "إنشاء حساب"
   },
   "Creating…": {
-    es: "Creando…", fr: "Création…", de: "Erstelle…", it: "Creazione…",
-    pt: "A criar…", "pt-BR": "Criando…", nl: "Aanmaken…", ru: "Создание…",
-    ar: "جارٍ الإنشاء…", he: "יוצר…", hi: "बना रहा है…", "zh-CN": "创建中…",
-    "zh-TW": "建立中…", ja: "作成中…", ko: "생성 중…", tr: "Oluşturuluyor…",
-    id: "Membuat…",
+    "ar": "جارٍ الإنشاء…"
   },
   "Free to join — earn on every sale you drive": {
-    es: "Únete gratis — gana en cada venta que generes",
-    fr: "Inscription gratuite — gagnez sur chaque vente",
-    de: "Kostenlos beitreten — bei jedem Verkauf verdienen",
-    it: "Iscrizione gratuita — guadagna su ogni vendita",
-    pt: "Adesão gratuita — ganhe em cada venda",
-    "pt-BR": "Entrada gratuita — ganhe em cada venda",
-    nl: "Gratis lid worden — verdien op elke verkoop",
-    ru: "Бесплатно — зарабатывайте на каждой продаже",
-    ar: "الانضمام مجاني — اكسب على كل عملية بيع",
-    he: "ההצטרפות חינם — הרוויחו על כל מכירה",
-    hi: "मुफ़्त जुड़ें — हर बिक्री पर कमाएँ",
-    "zh-CN": "免费加入 — 每笔销售都赚佣金",
-    "zh-TW": "免費加入 — 每筆銷售都賺佣金",
-    ja: "登録無料 — 売上ごとに報酬",
-    ko: "가입 무료 — 모든 판매에서 수익",
-    tr: "Ücretsiz katıl — her satıştan kazan",
-    id: "Gratis bergabung — dapatkan dari setiap penjualan",
+    "ar": "الانضمام مجاني — اكسب على كل عملية بيع"
   },
   "List your products and let marketers grow your sales": {
-    es: "Publica tus productos y deja que los marketers aumenten tus ventas",
-    fr: "Listez vos produits et laissez les marketeurs développer vos ventes",
-    de: "Stelle deine Produkte ein und lass Marketer deinen Umsatz steigern",
-    it: "Pubblica i tuoi prodotti e lascia che i marketer facciano crescere le vendite",
-    pt: "Publique os seus produtos e deixe os marketers crescer as suas vendas",
-    "pt-BR": "Publique seus produtos e deixe os marketers crescer suas vendas",
-    nl: "Plaats je producten en laat marketers je verkoop laten groeien",
-    ru: "Размещайте товары — маркетологи помогут увеличить продажи",
-    ar: "اعرض منتجاتك ودع المسوّقين ينمون مبيعاتك",
-    he: "פרסם את המוצרים ותן למשווקים להגדיל את המכירות",
-    hi: "अपने उत्पाद सूचीबद्ध करें और मार्केटरों को अपनी बिक्री बढ़ाने दें",
-    "zh-CN": "上架您的商品,让推广者帮您扩大销售",
-    "zh-TW": "上架您的商品,讓推廣者幫您擴大銷售",
-    ja: "商品を掲載して、マーケターに売上を伸ばしてもらう",
-    ko: "상품을 등록하고 마케터가 매출을 키우게 하세요",
-    tr: "Ürünlerini listele, pazarlamacılar satışlarını büyütsün",
-    id: "Cantumkan produk Anda dan biarkan pemasar mengembangkan penjualan",
+    "ar": "اعرض منتجاتك ودع المسوّقين ينمون مبيعاتك"
   },
   "Already have an account?": {
-    es: "¿Ya tienes cuenta?", fr: "Vous avez déjà un compte ?", de: "Schon ein Konto?",
-    it: "Hai già un account?", pt: "Já tem conta?", "pt-BR": "Já tem conta?",
-    nl: "Al een account?", ru: "Уже есть аккаунт?", ar: "لديك حساب بالفعل؟",
-    he: "כבר יש לך חשבון?", hi: "पहले से खाता है?", "zh-CN": "已有账户?",
-    "zh-TW": "已有帳戶?", ja: "アカウントをお持ちですか?", ko: "이미 계정이 있으신가요?",
-    tr: "Hesabın var mı?", id: "Sudah punya akun?",
+    "ar": "لديك حساب بالفعل؟"
   },
-
-  // ── Dashboard chrome (HTML walker targets) ────────────
-  "Home": { es: "Inicio", fr: "Accueil", de: "Start", it: "Home", pt: "Início", "pt-BR": "Início", nl: "Home", ru: "Главная", ar: "الرئيسية", he: "בית", hi: "होम", "zh-CN": "首页", "zh-TW": "首頁", ja: "ホーム", ko: "홈", tr: "Ana sayfa", id: "Beranda", sv: "Hem", pl: "Główna" },
-  "Products": { es: "Productos", fr: "Produits", de: "Produkte", it: "Prodotti", pt: "Produtos", "pt-BR": "Produtos", nl: "Producten", ru: "Товары", ar: "المنتجات", he: "מוצרים", hi: "उत्पाद", "zh-CN": "商品", "zh-TW": "商品", ja: "商品", ko: "상품", tr: "Ürünler", id: "Produk", sv: "Produkter", pl: "Produkty" },
-  "Orders": { es: "Pedidos", fr: "Commandes", de: "Bestellungen", it: "Ordini", pt: "Pedidos", "pt-BR": "Pedidos", nl: "Bestellingen", ru: "Заказы", ar: "الطلبات", he: "הזמנות", hi: "ऑर्डर", "zh-CN": "订单", "zh-TW": "訂單", ja: "注文", ko: "주문", tr: "Siparişler", id: "Pesanan", sv: "Beställningar", pl: "Zamówienia" },
-  "Wallet": { es: "Cartera", fr: "Portefeuille", de: "Wallet", it: "Portafoglio", pt: "Carteira", "pt-BR": "Carteira", nl: "Portemonnee", ru: "Кошелёк", ar: "المحفظة", he: "ארנק", hi: "वॉलेट", "zh-CN": "钱包", "zh-TW": "錢包", ja: "ウォレット", ko: "지갑", tr: "Cüzdan", id: "Dompet", sv: "Plånbok", pl: "Portfel" },
-  "Menu": { es: "Menú", fr: "Menu", de: "Menü", it: "Menu", pt: "Menu", "pt-BR": "Menu", nl: "Menu", ru: "Меню", ar: "القائمة", he: "תפריט", hi: "मेनू", "zh-CN": "菜单", "zh-TW": "選單", ja: "メニュー", ko: "메뉴", tr: "Menü", id: "Menu", sv: "Meny", pl: "Menu" },
-  "Notifications": { es: "Notificaciones", fr: "Notifications", de: "Benachrichtigungen", it: "Notifiche", pt: "Notificações", "pt-BR": "Notificações", nl: "Meldingen", ru: "Уведомления", ar: "الإشعارات", he: "התראות", hi: "सूचनाएँ", "zh-CN": "通知", "zh-TW": "通知", ja: "通知", ko: "알림", tr: "Bildirimler", id: "Notifikasi", sv: "Aviseringar", pl: "Powiadomienia" },
-  "Settings": { es: "Configuración", fr: "Paramètres", de: "Einstellungen", it: "Impostazioni", pt: "Definições", "pt-BR": "Configurações", nl: "Instellingen", ru: "Настройки", ar: "الإعدادات", he: "הגדרות", hi: "सेटिंग्स", "zh-CN": "设置", "zh-TW": "設定", ja: "設定", ko: "설정", tr: "Ayarlar", id: "Pengaturan", sv: "Inställningar", pl: "Ustawienia" },
-  "Profile": { es: "Perfil", fr: "Profil", de: "Profil", it: "Profilo", pt: "Perfil", "pt-BR": "Perfil", nl: "Profiel", ru: "Профиль", ar: "الملف الشخصي", he: "פרופיל", hi: "प्रोफ़ाइल", "zh-CN": "资料", "zh-TW": "個人檔案", ja: "プロフィール", ko: "프로필", tr: "Profil", id: "Profil" },
-  "Help": { es: "Ayuda", fr: "Aide", de: "Hilfe", it: "Aiuto", pt: "Ajuda", "pt-BR": "Ajuda", nl: "Hulp", ru: "Помощь", ar: "مساعدة", he: "עזרה", hi: "सहायता", "zh-CN": "帮助", "zh-TW": "幫助", ja: "ヘルプ", ko: "도움말", tr: "Yardım", id: "Bantuan" },
-  "Sign out": { es: "Cerrar sesión", fr: "Se déconnecter", de: "Abmelden", it: "Esci", pt: "Sair", "pt-BR": "Sair", nl: "Uitloggen", ru: "Выйти", ar: "تسجيل الخروج", he: "התנתק", hi: "साइन आउट", "zh-CN": "退出", "zh-TW": "登出", ja: "サインアウト", ko: "로그아웃", tr: "Çıkış yap", id: "Keluar" },
-  "Today": { es: "Hoy", fr: "Aujourd'hui", de: "Heute", it: "Oggi", pt: "Hoje", "pt-BR": "Hoje", nl: "Vandaag", ru: "Сегодня", ar: "اليوم", he: "היום", hi: "आज", "zh-CN": "今天", "zh-TW": "今天", ja: "今日", ko: "오늘", tr: "Bugün", id: "Hari ini" },
-  "Yesterday": { es: "Ayer", fr: "Hier", de: "Gestern", it: "Ieri", pt: "Ontem", "pt-BR": "Ontem", nl: "Gisteren", ru: "Вчера", ar: "أمس", he: "אתמול", hi: "कल", "zh-CN": "昨天", "zh-TW": "昨天", ja: "昨日", ko: "어제", tr: "Dün", id: "Kemarin" },
-  "This week": { es: "Esta semana", fr: "Cette semaine", de: "Diese Woche", it: "Questa settimana", pt: "Esta semana", "pt-BR": "Esta semana", nl: "Deze week", ru: "На этой неделе", ar: "هذا الأسبوع", he: "השבוע", hi: "इस सप्ताह", "zh-CN": "本周", "zh-TW": "本週", ja: "今週", ko: "이번 주", tr: "Bu hafta", id: "Minggu ini" },
-  "This month": { es: "Este mes", fr: "Ce mois", de: "Dieser Monat", it: "Questo mese", pt: "Este mês", "pt-BR": "Este mês", nl: "Deze maand", ru: "В этом месяце", ar: "هذا الشهر", he: "החודש", hi: "इस माह", "zh-CN": "本月", "zh-TW": "本月", ja: "今月", ko: "이번 달", tr: "Bu ay", id: "Bulan ini" },
-  "Active": { es: "Activo", fr: "Actif", de: "Aktiv", it: "Attivo", pt: "Ativo", "pt-BR": "Ativo", nl: "Actief", ru: "Активно", ar: "نشط", he: "פעיל", hi: "सक्रिय", "zh-CN": "活跃", "zh-TW": "活躍", ja: "有効", ko: "활성", tr: "Aktif", id: "Aktif" },
-  "Paused": { es: "Pausado", fr: "En pause", de: "Pausiert", it: "In pausa", pt: "Pausado", "pt-BR": "Pausado", nl: "Gepauzeerd", ru: "Приостановлено", ar: "متوقف", he: "מושהה", hi: "रोका गया", "zh-CN": "已暂停", "zh-TW": "已暫停", ja: "一時停止", ko: "일시중지", tr: "Duraklatıldı", id: "Dijeda" },
-  "Pending": { es: "Pendiente", fr: "En attente", de: "Ausstehend", it: "In attesa", pt: "Pendente", "pt-BR": "Pendente", nl: "In afwachting", ru: "Ожидается", ar: "قيد الانتظار", he: "ממתין", hi: "लंबित", "zh-CN": "待处理", "zh-TW": "待處理", ja: "保留中", ko: "대기 중", tr: "Beklemede", id: "Tertunda" },
-  "Approved": { es: "Aprobado", fr: "Approuvé", de: "Genehmigt", it: "Approvato", pt: "Aprovado", "pt-BR": "Aprovado", nl: "Goedgekeurd", ru: "Одобрено", ar: "موافق عليه", he: "מאושר", hi: "स्वीकृत", "zh-CN": "已批准", "zh-TW": "已批准", ja: "承認済み", ko: "승인됨", tr: "Onaylandı", id: "Disetujui" },
-  "Rejected": { es: "Rechazado", fr: "Rejeté", de: "Abgelehnt", it: "Rifiutato", pt: "Rejeitado", "pt-BR": "Rejeitado", nl: "Geweigerd", ru: "Отклонено", ar: "مرفوض", he: "נדחה", hi: "अस्वीकृत", "zh-CN": "已拒绝", "zh-TW": "已拒絕", ja: "却下", ko: "거부됨", tr: "Reddedildi", id: "Ditolak" },
-  "Add product": { es: "Añadir producto", fr: "Ajouter un produit", de: "Produkt hinzufügen", it: "Aggiungi prodotto", pt: "Adicionar produto", "pt-BR": "Adicionar produto", nl: "Product toevoegen", ru: "Добавить товар", ar: "أضف منتجًا", he: "הוסף מוצר", hi: "उत्पाद जोड़ें", "zh-CN": "添加商品", "zh-TW": "新增商品", ja: "商品を追加", ko: "상품 추가", tr: "Ürün ekle", id: "Tambah produk" },
-  "Cancel": { es: "Cancelar", fr: "Annuler", de: "Abbrechen", it: "Annulla", pt: "Cancelar", "pt-BR": "Cancelar", nl: "Annuleren", ru: "Отмена", ar: "إلغاء", he: "ביטול", hi: "रद्द करें", "zh-CN": "取消", "zh-TW": "取消", ja: "キャンセル", ko: "취소", tr: "İptal", id: "Batal" },
-  "Save": { es: "Guardar", fr: "Enregistrer", de: "Speichern", it: "Salva", pt: "Guardar", "pt-BR": "Salvar", nl: "Opslaan", ru: "Сохранить", ar: "حفظ", he: "שמור", hi: "सहेजें", "zh-CN": "保存", "zh-TW": "儲存", ja: "保存", ko: "저장", tr: "Kaydet", id: "Simpan" },
-  "Delete": { es: "Eliminar", fr: "Supprimer", de: "Löschen", it: "Elimina", pt: "Eliminar", "pt-BR": "Excluir", nl: "Verwijderen", ru: "Удалить", ar: "حذف", he: "מחק", hi: "हटाएँ", "zh-CN": "删除", "zh-TW": "刪除", ja: "削除", ko: "삭제", tr: "Sil", id: "Hapus" },
-  "Edit": { es: "Editar", fr: "Modifier", de: "Bearbeiten", it: "Modifica", pt: "Editar", "pt-BR": "Editar", nl: "Bewerken", ru: "Изменить", ar: "تعديل", he: "ערוך", hi: "संपादित करें", "zh-CN": "编辑", "zh-TW": "編輯", ja: "編集", ko: "편집", tr: "Düzenle", id: "Edit" },
-  "Search": { es: "Buscar", fr: "Rechercher", de: "Suchen", it: "Cerca", pt: "Pesquisar", "pt-BR": "Pesquisar", nl: "Zoeken", ru: "Поиск", ar: "بحث", he: "חיפוש", hi: "खोज", "zh-CN": "搜索", "zh-TW": "搜尋", ja: "検索", ko: "검색", tr: "Ara", id: "Cari" },
-  "Balance": { es: "Saldo", fr: "Solde", de: "Guthaben", it: "Saldo", pt: "Saldo", "pt-BR": "Saldo", nl: "Saldo", ru: "Баланс", ar: "الرصيد", he: "יתרה", hi: "बैलेंस", "zh-CN": "余额", "zh-TW": "餘額", ja: "残高", ko: "잔액", tr: "Bakiye", id: "Saldo" },
-  "Revenue": { es: "Ingresos", fr: "Revenus", de: "Umsatz", it: "Ricavi", pt: "Receita", "pt-BR": "Receita", nl: "Omzet", ru: "Доход", ar: "الإيرادات", he: "הכנסות", hi: "राजस्व", "zh-CN": "收入", "zh-TW": "收入", ja: "売上", ko: "수익", tr: "Gelir", id: "Pendapatan" },
-  "Sales": { es: "Ventas", fr: "Ventes", de: "Verkäufe", it: "Vendite", pt: "Vendas", "pt-BR": "Vendas", nl: "Verkopen", ru: "Продажи", ar: "المبيعات", he: "מכירות", hi: "बिक्री", "zh-CN": "销售", "zh-TW": "銷售", ja: "販売", ko: "판매", tr: "Satışlar", id: "Penjualan" },
-  "Withdraw": { es: "Retirar", fr: "Retirer", de: "Auszahlen", it: "Preleva", pt: "Levantar", "pt-BR": "Sacar", nl: "Opnemen", ru: "Вывести", ar: "سحب", he: "משוך", hi: "निकालें", "zh-CN": "提现", "zh-TW": "提現", ja: "出金", ko: "출금", tr: "Çek", id: "Tarik" },
-  "Total": { es: "Total", fr: "Total", de: "Gesamt", it: "Totale", pt: "Total", "pt-BR": "Total", nl: "Totaal", ru: "Итого", ar: "المجموع", he: "סך הכול", hi: "कुल", "zh-CN": "总计", "zh-TW": "總計", ja: "合計", ko: "총", tr: "Toplam", id: "Total" },
-  "Language": { es: "Idioma", fr: "Langue", de: "Sprache", it: "Lingua", pt: "Idioma", "pt-BR": "Idioma", nl: "Taal", ru: "Язык", ar: "اللغة", he: "שפה", hi: "भाषा", "zh-CN": "语言", "zh-TW": "語言", ja: "言語", ko: "언어", tr: "Dil", id: "Bahasa", sv: "Språk", pl: "Język" },
-  "Dashboard": { ar: "لوحة التحكم" },
-  "Browse": { ar: "تصفح" },
-  "Browse products": { ar: "تصفح المنتجات" },
-  "All products": { ar: "كل المنتجات" },
-  "Recommended for you": { ar: "مقترحة لك" },
-  "Filter & sort": { ar: "فلترة وترتيب" },
-  "Filters": { ar: "الفلاتر" },
-  "Apply": { ar: "تطبيق" },
-  "Reset all": { ar: "إعادة الضبط" },
-  "Saved": { ar: "محفوظ" },
-  "My products": { ar: "منتجاتي" },
-  "Choose from your saved products": { ar: "اختر من منتجاتك المحفوظة" },
-  "No notifications yet.": { ar: "لا توجد إشعارات بعد." },
-  "Hey there": { ar: "أهلًا" },
-  "Welcome": { ar: "مرحبًا" },
-  "Earnings": { ar: "الأرباح" },
-  "WALLET BALANCE": { ar: "رصيد المحفظة" },
-  "Wallet balance": { ar: "رصيد المحفظة" },
-  "Withdraw earnings": { ar: "سحب الأرباح" },
-  "Next payout": { ar: "السحب القادم" },
-  "Total earned": { ar: "إجمالي الأرباح" },
-  "Pieces sold": { ar: "القطع المباعة" },
-  "Succeeded": { ar: "ناجحة" },
-  "Failed": { ar: "فشلت" },
-  "Failed (COD)": { ar: "فشلت (الدفع عند الاستلام)" },
-  "Delivered": { ar: "تم التسليم" },
-  "Cash-on-delivery failures only": { ar: "فشل الدفع عند الاستلام فقط" },
-  "success": { ar: "نجاح" },
-  "all-time": { ar: "من البداية" },
-  "All-time": { ar: "من البداية" },
-  "active": { ar: "نشط" },
-  "completed": { ar: "مكتمل" },
-  "awaiting": { ar: "بانتظار" },
-  "pending": { ar: "قيد الانتظار" },
-  "Track & manage orders": { ar: "تابع وأدر الطلبات" },
-  "No orders yet.": { ar: "لا توجد طلبات بعد." },
-  "Tap the button below to add your first order.": { ar: "اضغط الزر بالأسفل لإضافة أول طلب." },
-  "Add order": { ar: "إضافة طلب" },
-  "New order": { ar: "طلب جديد" },
-  "Customer details": { ar: "بيانات العميل" },
-  "WhatsApp (optional)": { ar: "واتساب (اختياري)" },
-  "Country": { ar: "الدولة" },
-  "City": { ar: "المدينة" },
-  "Delivery location": { ar: "مكان التوصيل" },
-  "Full delivery address": { ar: "عنوان التوصيل كامل" },
-  "Street, area, landmark…": { ar: "الشارع، المنطقة، علامة مميزة…" },
-  "Notes": { ar: "ملاحظات" },
-  "Special instructions, preferred delivery time, etc.": { ar: "تعليمات خاصة، وقت توصيل مناسب، وغيرها." },
-  "Product": { ar: "المنتج" },
-  "Product price": { ar: "سعر المنتج" },
-  "Quantity": { ar: "الكمية" },
-  "Select size": { ar: "اختر المقاس" },
-  "Select colour": { ar: "اختر اللون" },
-  "Select…": { ar: "اختر…" },
-  "— Select —": { ar: "— اختر —" },
-  "— Select a product —": { ar: "— اختر منتجًا —" },
-  "— Select country first —": { ar: "— اختر الدولة أولًا —" },
-  "Save as Draft": { ar: "حفظ كمسودة" },
-  "Save as Draft (keep editing later)": { ar: "حفظ كمسودة (أكمل لاحقًا)" },
-  "Upload and confirm": { ar: "ارفع وأكد" },
-  "Payment receipt": { ar: "إيصال الدفع" },
-  "Upload payment receipt": { ar: "ارفع إيصال الدفع" },
-  "Tap to upload receipt": { ar: "اضغط لرفع الإيصال" },
-  "Upload receipt": { ar: "رفع الإيصال" },
-  "Choose where the receipt is coming from": { ar: "اختر مصدر الإيصال" },
-  "Camera · Gallery · Files": { ar: "الكاميرا · المعرض · الملفات" },
-  "Take photo": { ar: "التقط صورة" },
-  "Choose from Gallery": { ar: "اختر من المعرض" },
-  "Upload from Files": { ar: "ارفع من الملفات" },
-  "📷 Take photo (Camera)": { ar: "📷 التقط صورة (الكاميرا)" },
-  "🖼️ Choose from Gallery": { ar: "🖼️ اختر من المعرض" },
-  "📁 Upload from Files": { ar: "📁 ارفع من الملفات" },
-  "Analysing image…": { ar: "جاري فحص الصورة…" },
-  "Yes, paid": { ar: "نعم، تم الدفع" },
-  "No, not yet": { ar: "لا، ليس بعد" },
-  "COMMITMENT FEE TO COLLECT": { ar: "رسوم التأكيد المطلوب تحصيلها" },
-  "COMMITMENT FEE — COLLECT FROM CUSTOMER": { ar: "رسوم التأكيد — حصّلها من العميل" },
-  "Did the customer pay the commitment fee?": { ar: "هل دفع العميل رسوم التأكيد؟" },
-  "Tell the customer the fee": { ar: "أخبر العميل بالرسوم" },
-  "How to collect the fee": { ar: "طريقة تحصيل الرسوم" },
-  "Ask for a screenshot": { ar: "اطلب صورة إثبات" },
-  "Explain that a small commitment fee is required before their order is placed. This reserves the product and confirms they are serious.": { ar: "اشرح أن هناك رسوم تأكيد بسيطة قبل تسجيل الطلب. هذا يحجز المنتج ويؤكد جدية العميل." },
-  "Once sent, ask the customer to share a screenshot of the bank transfer confirmation.": { ar: "بعد الدفع، اطلب من العميل إرسال صورة تأكيد التحويل." },
-  "Upload the screenshot in the order form and tap \"Yes, paid.\" The order is then sent to the business for processing and shipping.": { ar: "ارفع صورة الإثبات في نموذج الطلب واضغط \"نعم، تم الدفع\". بعدها يُرسل الطلب للشركة للتجهيز والشحن." },
-  "This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.": { ar: "هذه الرسوم لا تُرجع إذا ألغى العميل. هي تحميك وتحمي الشركة من الطلبات الوهمية." },
-  "Collect this from the customer before shipping. Set by Lateen.": { ar: "حصّلها من العميل قبل الشحن. يحددها Lateen." },
-  "Set by the business owner": { ar: "يحددها صاحب الشركة" },
-  "Share your payment details": { ar: "شارك بيانات الدفع" },
-  "Step-by-step deposit instructions": { ar: "خطوات الإيداع" },
-  "Confirm your payout details below": { ar: "أكد بيانات السحب بالأسفل" },
-  "Funds arrive in 2–5 business days": { ar: "تصل الأموال خلال 2–5 أيام عمل" },
-  "Save & request withdrawal": { ar: "حفظ وطلب السحب" },
-  "Bank transfer": { ar: "تحويل بنكي" },
-  "Mobile wallet": { ar: "محفظة إلكترونية" },
-  "Cash / Other": { ar: "نقدًا / أخرى" },
-  "Bank / Provider": { ar: "البنك / المزود" },
-  "Account holder": { ar: "صاحب الحساب" },
-  "Account name": { ar: "اسم الحساب" },
-  "Account number": { ar: "رقم الحساب" },
-  "Method": { ar: "الطريقة" },
-  "Bank": { ar: "البنك" },
-  "Copy": { ar: "نسخ" },
-  "Close": { ar: "إغلاق" },
-  "NET EARNINGS": { ar: "صافي الأرباح" },
-  "After commissions & platform fees": { ar: "بعد العمولات ورسوم المنصة" },
-  "View breakdown": { ar: "عرض التفاصيل" },
-  "Gross revenue": { ar: "إجمالي الإيرادات" },
-  "Marketers": { ar: "المسوقون" },
-  "Pieces": { ar: "القطع" },
-  "Manage your catalog": { ar: "أدر منتجاتك" },
-  "Customer orders": { ar: "طلبات العملاء" },
-  "Confirm, ship, deliver": { ar: "أكد، اشحن، وسلّم" },
-  "All orders": { ar: "كل الطلبات" },
-  "To ship": { ar: "للشحن" },
-  "Confirmed": { ar: "مؤكد" },
-  "Shipped": { ar: "تم الشحن" },
-  "New": { ar: "جديد" },
-  "Search by name, ID, city, product…": { ar: "ابحث بالاسم أو الرقم أو المدينة أو المنتج…" },
-  "Financial breakdown": { ar: "تفاصيل المال" },
-  "Marketer commissions": { ar: "عمولات المسوقين" },
-  "Platform fees": { ar: "رسوم المنصة" },
-  "Net earnings": { ar: "صافي الأرباح" },
-  "Add a product": { ar: "أضف منتجًا" },
-  "Product code": { ar: "كود المنتج" },
-  "Auto-generated": { ar: "يُنشأ تلقائيًا" },
-  "Regenerate": { ar: "إنشاء من جديد" },
-  "Product photos": { ar: "صور المنتج" },
-  "Up to 6 photos. First photo is the main image.": { ar: "حتى 6 صور. أول صورة هي الرئيسية." },
-  "Product details": { ar: "تفاصيل المنتج" },
-  "Product name": { ar: "اسم المنتج" },
-  "Description": { ar: "الوصف" },
-  "Currency": { ar: "العملة" },
-  "Select a currency": { ar: "اختر عملة" },
-  "Search currencies…": { ar: "ابحث عن العملات…" },
-  "Stock qty": { ar: "كمية المخزون" },
-  "Category": { ar: "الفئة" },
-  "Marketer commission": { ar: "عمولة المسوق" },
-  "By percentage (%)": { ar: "بالنسبة (%)" },
-  "Fixed amount": { ar: "مبلغ ثابت" },
-  "Commission %": { ar: "نسبة العمولة %" },
-  "Marketer earns": { ar: "ربح المسوق" },
-  "Platform fee (5%)": { ar: "رسوم المنصة (5%)" },
-  "per unit · calculated by Lateen": { ar: "لكل قطعة · يحسبها Lateen" },
-  "TOTAL COMMITMENT FEE FROM CUSTOMER": { ar: "إجمالي رسوم التأكيد من العميل" },
-  "Delivery zones": { ar: "مناطق التوصيل" },
-  "Add countries and cities. Set shipping and delivery cost per city.": { ar: "أضف الدول والمدن. حدد تكلفة الشحن والتوصيل لكل مدينة." },
-  "Select a country": { ar: "اختر دولة" },
-  "Search countries…": { ar: "ابحث عن الدول…" },
-  "Add country to zones": { ar: "أضف دولة للمناطق" },
-  "Shipping cost": { ar: "تكلفة الشحن" },
-  "Delivery cost": { ar: "تكلفة التوصيل" },
-  "Variants": { ar: "الخيارات" },
-  "Sizes and Colours are added by default. Rename, remove, or add your own (e.g. Material, Flavour, Style).": { ar: "المقاسات والألوان مضافة تلقائيًا. يمكنك تغيير الاسم أو الحذف أو إضافة خيارك مثل الخامة أو النكهة أو الستايل." },
-  "+ Add another variant": { ar: "+ أضف خيارًا آخر" },
-  "List product": { ar: "نشر المنتج" },
-  "Brief description for marketers…": { ar: "وصف مختصر للمسوقين…" },
-  "e.g. Running shoes": { ar: "مثلًا: حذاء رياضي" },
-  "Fashion & footwear": { ar: "الموضة والأحذية" },
-  "Health & fitness": { ar: "الصحة والرياضة" },
-  "Beauty & skincare": { ar: "الجمال والعناية بالبشرة" },
-  "Tech & gadgets": { ar: "التقنية والأجهزة" },
-  "Home & living": { ar: "المنزل والمعيشة" },
-  "Food & nutrition": { ar: "الطعام والتغذية" },
-  "Admin Console": { ar: "لوحة المدير" },
-  "Lateen platform control": { ar: "إدارة منصة Lateen" },
-  "Admin": { ar: "مدير" },
-  "Global Analytics": { ar: "تحليلات عامة" },
-  "Total Platform Fees Collected": { ar: "إجمالي رسوم المنصة المحصلة" },
-  "Lifetime, from confirmed & delivered orders": { ar: "من البداية، من الطلبات المؤكدة والمسلمة" },
-  "Fees in": { ar: "الرسوم في" },
-  "Confirmed & delivered, selected month": { ar: "مؤكدة ومسلمة، الشهر المختار" },
-  "Confirmed & delivered, selected year": { ar: "مؤكدة ومسلمة، السنة المختارة" },
-  "Active Users": { ar: "المستخدمون النشطون" },
-  "Last 30 days": { ar: "آخر 30 يومًا" },
-  "Leads Today": { ar: "طلبات اليوم" },
-  "New orders today": { ar: "طلبات جديدة اليوم" },
-  "Total Users": { ar: "إجمالي المستخدمين" },
-  "All registered accounts": { ar: "كل الحسابات المسجلة" },
-  "Live Products": { ar: "المنتجات المنشورة" },
-  "Across every shop": { ar: "في كل المتاجر" },
-  "Order Verification Hub": { ar: "مراجعة إيصالات الطلبات" },
-  "Payout Manager": { ar: "إدارة السحوبات" },
-  "User Directory": { ar: "دليل المستخدمين" },
-  "Product Review": { ar: "مراجعة المنتجات" },
-  "Employees & Payroll": { ar: "الموظفون والرواتب" },
-  "Total Monthly Salaries": { ar: "إجمالي الرواتب الشهرية" },
-  "Paid This Month": { ar: "مدفوع هذا الشهر" },
-  "Pending This Month": { ar: "متبقي هذا الشهر" },
-  
-
-  // ── Catch-all dashboard strings (Arabic — natural MSA) ───────────────
-  "Admins": { ar: "المدراء" },
-  "Businesses": { ar: "الشركات" },
-  "Users": { ar: "المستخدمون" },
-  "All": { ar: "الكل" },
-  "Beauty": { ar: "الجمال" },
-  "Fashion": { ar: "الموضة" },
-  "Fitness": { ar: "الرياضة" },
-  "Tech": { ar: "التقنية" },
-  "Nutrition": { ar: "التغذية" },
-  "Change": { ar: "تغيير" },
-  "Commission": { ar: "العمولة" },
-  "Commission rate": { ar: "نسبة العمولة" },
-  "Date of hire": { ar: "تاريخ التعيين" },
-  "Delete employee": { ar: "حذف الموظف" },
-  "EMP-001": { ar: "EMP-001" },
-  "Employee number": { ar: "رقم الموظف" },
-  "Employees": { ar: "الموظفون" },
-  "Full name on account": { ar: "الاسم الكامل على الحساب" },
-  "Highest commission first": { ar: "الأعلى عمولة أولًا" },
-  "Highest price first": { ar: "الأعلى سعرًا أولًا" },
-  "Lowest commission first": { ar: "الأقل عمولة أولًا" },
-  "Lowest price first": { ar: "الأقل سعرًا أولًا" },
-  "IBAN": { ar: "IBAN" },
-  "SWIFT/BIC": { ar: "SWIFT/BIC" },
-  "Job title": { ar: "المسمى الوظيفي" },
-  "Monthly salary (£)": { ar: "الراتب الشهري (£)" },
-  "New Employee": { ar: "موظف جديد" },
-  "Paid": { ar: "مدفوع" },
-  "PayPal": { ar: "PayPal" },
-  "Payouts": { ar: "السحوبات" },
-  "Platform fee (per unit)": { ar: "رسوم المنصة (لكل قطعة)" },
-  "Price": { ar: "السعر" },
-  "Receipt": { ar: "الإيصال" },
-  "Search by name, number, role, email…": { ar: "ابحث بالاسم أو الرقم أو الدور أو البريد…" },
-  "Search by name, phone, business…": { ar: "ابحث بالاسم أو الهاتف أو الشركة…" },
-  "Search products…": { ar: "ابحث عن المنتجات…" },
-  "Verify": { ar: "تحقق" },
-  "Your commission (per unit)": { ar: "عمولتك (لكل قطعة)" },
-  "Your earning per unit": { ar: "ربحك لكل قطعة" },
-  "across 0 products": { ar: "عبر 0 منتج" },
-  "e.g. 12": { ar: "مثلًا 12" },
-  "e.g. Barclays": { ar: "مثلًا Barclays" },
-  "e.g. Omar Hassan": { ar: "مثلًا عمر حسن" },
-  "employees ·": { ar: "موظفون ·" },
-  "of 0 orders": { ar: "من أصل 0 طلب" },
-  "optional": { ar: "اختياري" },
-  "paid this month": { ar: "مدفوع هذا الشهر" },
-  "per unit × 1": { ar: "لكل قطعة × 1" },
-  "£0.00 pending": { ar: "£0.00 قيد الانتظار" },
-  "— Add in profile —": { ar: "— أضِف في الملف —" },
-  "+ New": { ar: "+ جديد" },
-  "+ Add country to zones": { ar: "+ أضف دولة للمناطق" },
-  "0 new": { ar: "0 جديد" },
-  "0 products": { ar: "0 منتج" },
-  "0% failure rate": { ar: "نسبة فشل 0%" },
-  "Ask the customer to send the fee to:": { ar: "اطلب من العميل إرسال الرسوم إلى:" },
-
-  // ── Dynamic JS-injected strings ──────────────────────────
-  "Action failed:": { ar: "فشلت العملية:" },
-  "Add photo": { ar: "أضف صورة" },
-  "Add receipt & send": { ar: "أضف إيصالًا وأرسل" },
-  "Any city": { ar: "أي مدينة" },
-  "Approve & forward": { ar: "موافقة وإرسال" },
-  "Approve failed:": { ar: "فشلت الموافقة:" },
-  "Approve this receipt? The order will be forwarded to the business owner and stock will be decremented.": { ar: "موافقة على هذا الإيصال؟ سيُرسل الطلب لصاحب الشركة وسيُخصم من المخزون." },
-  "Awaiting business": { ar: "بانتظار الشركة" },
-  "Browse and tap the heart to save products you want to market.": { ar: "تصفح واضغط على القلب لحفظ المنتجات التي تريد تسويقها." },
-  "Business owner": { ar: "صاحب الشركة" },
-  "Colour": { ar: "اللون" },
-  "Colours": { ar: "الألوان" },
-  "Confirm order": { ar: "تأكيد الطلب" },
-  "Confirm receipt of": { ar: "تأكيد استلام" },
-  "Confirm you have manually transferred": { ar: "أكد أنك قمت بالتحويل يدويًا" },
-  "Copied!": { ar: "تم النسخ!" },
-  "Copy link": { ar: "نسخ الرابط" },
-  "Could not save order:": { ar: "تعذر حفظ الطلب:" },
-  "Could not save product:": { ar: "تعذر حفظ المنتج:" },
-  "Delete failed:": { ar: "فشل الحذف:" },
-  "Delete this employee and their payment history? This cannot be undone.": { ar: "حذف هذا الموظف وسجل دفعاته؟ لا يمكن التراجع." },
-  "Delete this product? Marketers will no longer see it.": { ar: "حذف هذا المنتج؟ لن يظهر للمسوقين بعد الآن." },
-  "Delivery": { ar: "التوصيل" },
-  "Delivery by city": { ar: "التوصيل حسب المدينة" },
-  "Failed to delete": { ar: "فشل الحذف" },
-  "Failed to update status": { ar: "فشل تحديث الحالة" },
-  "Failed:": { ar: "فشل:" },
-  "Fee/unit": { ar: "الرسوم/قطعة" },
-  "For": { ar: "لـ" },
-  "Found:": { ar: "تم العثور على:" },
-  "Get my link": { ar: "احصل على رابطي" },
-  "Go to Account": { ar: "اذهب إلى الحساب" },
-  "Hey,": { ar: "مرحبًا،" },
-  "How to collect fee": { ar: "طريقة تحصيل الرسوم" },
-  "In stock": { ar: "متوفر" },
-  "Includes your commission of": { ar: "يشمل عمولتك البالغة" },
-  "Mark": { ar: "تحديد" },
-  "Mark delivered": { ar: "تحديد كمسلَّم" },
-  "Mark as Paid": { ar: "تحديد كمدفوع" },
-  "Name and employee number are required.": { ar: "الاسم ورقم الموظف مطلوبان." },
-  "No cities yet": { ar: "لا توجد مدن بعد" },
-  "No employees match.": { ar: "لا يوجد موظفون مطابقون." },
-  "No payments recorded yet.": { ar: "لا توجد دفعات مسجلة بعد." },
-  "No payout details on file — contact the marketer.": { ar: "لا توجد بيانات سحب — تواصل مع المسوّق." },
-  "No receipt image": { ar: "لا توجد صورة للإيصال" },
-  "No saved products yet.": { ar: "لا توجد منتجات محفوظة بعد." },
-  "Not found.": { ar: "غير موجود." },
-  "Open": { ar: "فتح" },
-  "Order failed": { ar: "فشل الطلب" },
-  "Photo upload failed.": { ar: "فشل رفع الصورة." },
-  "Please add at least one delivery zone.": { ar: "أضف منطقة توصيل واحدة على الأقل." },
-  "Please complete at least one city.": { ar: "أكمل بيانات مدينة واحدة على الأقل." },
-  "Please fill in name, price and commission.": { ar: "أكمل الاسم والسعر والعمولة." },
-  "Please fill in your payout method, bank, account holder, and account number so the admin can pay you.": { ar: "أكمل طريقة السحب والبنك واسم صاحب الحساب ورقم الحساب ليتمكن المدير من الدفع لك." },
-  "Please select a currency.": { ar: "اختر عملة." },
-  "Re-upload receipt": { ar: "إعادة رفع الإيصال" },
-  "Receipt rejected": { ar: "تم رفض الإيصال" },
-  "Reject failed:": { ar: "فشل الرفض:" },
-  "Reject with note": { ar: "رفض مع ملاحظة" },
-  "Reason for rejecting this receipt? (visible to the marketer)": { ar: "سبب رفض هذا الإيصال؟ (يظهر للمسوّق)" },
-  "Remove": { ar: "إزالة" },
-  "Remove group": { ar: "إزالة المجموعة" },
-  "Requested": { ar: "مطلوب" },
-  "Save changes": { ar: "حفظ التغييرات" },
-  "Save failed:": { ar: "فشل الحفظ:" },
-  "Saved locally. Upload a receipt to send for verification.": { ar: "تم الحفظ محليًا. ارفع إيصالًا لإرساله للتحقق." },
-  "Send Order to Business Owner": { ar: "أرسل الطلب لصاحب الشركة" },
-  "Ship": { ar: "شحن" },
-  "Size": { ar: "المقاس" },
-  "Sizes": { ar: "المقاسات" },
-  "Skip if not applicable": { ar: "تخطَّ إن لم يكن ضروريًا" },
-  "Sold": { ar: "مباع" },
-  "Tap to open": { ar: "اضغط للفتح" },
-  "This product is not available for delivery to": { ar: "هذا المنتج غير متاح للتوصيل إلى" },
-  "To send for verification: please fill customer name, phone, product, country and city.": { ar: "للإرسال للتحقق: أكمل اسم العميل والهاتف والمنتج والدولة والمدينة." },
-  "Upload failed — tap to try again (": { ar: "فشل الرفع — اضغط للمحاولة مرة أخرى (" },
-  "Upload service not ready — refresh and try again": { ar: "خدمة الرفع غير جاهزة — حدّث الصفحة وحاول مجددًا." },
-  "Variant name": { ar: "اسم الخيار" },
-  "View payment receipt": { ar: "عرض إيصال الدفع" },
-  "WhatsApp": { ar: "واتساب" },
-  "receipt": { ar: "إيصال" },
-  "Edit order": { ar: "تعديل الطلب" },
-  "Edit product": { ar: "تعديل المنتج" },
-  "Edit Employee": { ar: "تعديل الموظف" },
-  "Hired": { ar: "تم التعيين" },
-  "Payday": { ar: "يوم الدفع" },
-  "History": { ar: "السجل" },
-  "Total paid:": { ar: "إجمالي المدفوع:" },
-  "Receipt will go to admin for verification, then forwarded to the business owner.": { ar: "سيتم إرسال الإيصال للمدير للتحقق، ثم سيُحوَّل إلى صاحب الشركة." },
-  "Order": { ar: "طلب" },
-  "Mar": { ar: "مارس" },
-  "Apr": { ar: "أبريل" },
-  "May": { ar: "مايو" },
-  "Jun": { ar: "يونيو" },
-  "Jul": { ar: "يوليو" },
-  "Aug": { ar: "أغسطس" },
-  "Sep": { ar: "سبتمبر" },
-  "Oct": { ar: "أكتوبر" },
-  "Nov": { ar: "نوفمبر" },
-  "Dec": { ar: "ديسمبر" },
-  "Jan": { ar: "يناير" },
-  "Feb": { ar: "فبراير" },
-  "Mon": { ar: "الإثنين" },
-  "Tue": { ar: "الثلاثاء" },
-  "Wed": { ar: "الأربعاء" },
-  "Thu": { ar: "الخميس" },
-  "Fri": { ar: "الجمعة" },
-  "Sat": { ar: "السبت" },
-  "Sun": { ar: "الأحد" },
-
-  // ── App chrome (root + dashboard route) ──────────────
-  "Page not found": { ar: "الصفحة غير موجودة", es: "Página no encontrada", fr: "Page introuvable", de: "Seite nicht gefunden", it: "Pagina non trovata", pt: "Página não encontrada", "pt-BR": "Página não encontrada", nl: "Pagina niet gevonden", ru: "Страница не найдена", he: "הדף לא נמצא", hi: "पृष्ठ नहीं मिला", "zh-CN": "未找到页面", "zh-TW": "找不到頁面", ja: "ページが見つかりません", ko: "페이지를 찾을 수 없습니다", tr: "Sayfa bulunamadı", id: "Halaman tidak ditemukan" },
-  "The page you're looking for doesn't exist or has been moved.": { ar: "الصفحة التي تبحث عنها غير موجودة أو تم نقلها." },
-  "Go home": { ar: "العودة للرئيسية", es: "Ir al inicio", fr: "Accueil", de: "Zur Startseite", it: "Vai alla home", pt: "Ir para o início", "pt-BR": "Ir para o início", nl: "Naar home", ru: "На главную", he: "לדף הבית", hi: "होम जाएँ", "zh-CN": "回到首页", "zh-TW": "回到首頁", ja: "ホームへ", ko: "홈으로", tr: "Ana sayfaya dön", id: "Ke beranda" },
-  "This page didn't load": { ar: "تعذّر تحميل هذه الصفحة" },
-  "Something went wrong on our end. You can try refreshing or head back home.": { ar: "حدث خطأ من جانبنا. يمكنك إعادة المحاولة أو العودة للرئيسية." },
-  "Try again": { ar: "حاول مرة أخرى", es: "Reintentar", fr: "Réessayer", de: "Erneut versuchen", it: "Riprova", pt: "Tentar de novo", "pt-BR": "Tentar novamente", nl: "Opnieuw proberen", ru: "Повторить", he: "נסה שוב", hi: "पुनः प्रयास", "zh-CN": "重试", "zh-TW": "重試", ja: "再試行", ko: "다시 시도", tr: "Tekrar dene", id: "Coba lagi" },
-  "Loading…": { ar: "جارٍ التحميل…", es: "Cargando…", fr: "Chargement…", de: "Lädt…", it: "Caricamento…", pt: "A carregar…", "pt-BR": "Carregando…", nl: "Laden…", ru: "Загрузка…", he: "טוען…", hi: "लोड हो रहा है…", "zh-CN": "加载中…", "zh-TW": "載入中…", ja: "読み込み中…", ko: "로딩 중…", tr: "Yükleniyor…", id: "Memuat…" },
-  "Setting up your account…": { ar: "جارٍ إعداد حسابك…" },
-  "If this persists, sign out and pick a role again.": { ar: "إن استمر ذلك، سجّل الخروج واختر دورًا من جديد." },
-  "👁 Viewing as": { ar: "👁 يُعرض باسم" },
-  "read-only support mode": { ar: "وضع الدعم للقراءة فقط" },
-  "Exit": { ar: "خروج", es: "Salir", fr: "Quitter", de: "Beenden", it: "Esci", pt: "Sair", "pt-BR": "Sair", nl: "Sluiten", ru: "Выйти", he: "יציאה", hi: "बाहर निकलें", "zh-CN": "退出", "zh-TW": "退出", ja: "終了", ko: "나가기", tr: "Çıkış", id: "Keluar" },
+  "Home": {
+    "ar": "الرئيسية"
+  },
+  "Products": {
+    "ar": "المنتجات"
+  },
+  "Orders": {
+    "ar": "الطلبات"
+  },
+  "Wallet": {
+    "ar": "المحفظة"
+  },
+  "Menu": {
+    "ar": "القائمة"
+  },
+  "Notifications": {
+    "ar": "الإشعارات"
+  },
+  "Settings": {
+    "ar": "الإعدادات"
+  },
+  "Profile": {
+    "ar": "الملف الشخصي"
+  },
+  "Help": {
+    "ar": "مساعدة"
+  },
+  "Sign out": {
+    "ar": "تسجيل الخروج"
+  },
+  "Today": {
+    "ar": "اليوم"
+  },
+  "Yesterday": {
+    "ar": "أمس"
+  },
+  "This week": {
+    "ar": "هذا الأسبوع"
+  },
+  "This month": {
+    "ar": "هذا الشهر"
+  },
+  "Active": {
+    "ar": "نشط"
+  },
+  "Paused": {
+    "ar": "متوقف"
+  },
+  "Pending": {
+    "ar": "قيد الانتظار"
+  },
+  "Approved": {
+    "ar": "موافق عليه"
+  },
+  "Rejected": {
+    "ar": "مرفوض"
+  },
+  "Add product": {
+    "ar": "أضف منتجًا"
+  },
+  "Cancel": {
+    "ar": "إلغاء"
+  },
+  "Save": {
+    "ar": "حفظ"
+  },
+  "Delete": {
+    "ar": "حذف"
+  },
+  "Edit": {
+    "ar": "تعديل"
+  },
+  "Search": {
+    "ar": "بحث"
+  },
+  "Balance": {
+    "ar": "الرصيد"
+  },
+  "Revenue": {
+    "ar": "الإيرادات"
+  },
+  "Sales": {
+    "ar": "المبيعات"
+  },
+  "Withdraw": {
+    "ar": "سحب"
+  },
+  "Total": {
+    "ar": "المجموع"
+  },
+  "Language": {
+    "ar": "اللغة"
+  },
+  "Dashboard": {
+    "ar": "لوحة التحكم"
+  },
+  "Browse": {
+    "ar": "تصفح"
+  },
+  "Browse products": {
+    "ar": "تصفح المنتجات"
+  },
+  "All products": {
+    "ar": "كل المنتجات"
+  },
+  "Recommended for you": {
+    "ar": "مقترحة لك"
+  },
+  "Filter & sort": {
+    "ar": "فلترة وترتيب"
+  },
+  "Filters": {
+    "ar": "الفلاتر"
+  },
+  "Apply": {
+    "ar": "تطبيق"
+  },
+  "Reset all": {
+    "ar": "إعادة الضبط"
+  },
+  "Saved": {
+    "ar": "محفوظ"
+  },
+  "My products": {
+    "ar": "منتجاتي"
+  },
+  "Choose from your saved products": {
+    "ar": "اختر من منتجاتك المحفوظة"
+  },
+  "No notifications yet.": {
+    "ar": "لا توجد إشعارات بعد."
+  },
+  "Hey there": {
+    "ar": "أهلًا"
+  },
+  "Welcome": {
+    "ar": "مرحبًا"
+  },
+  "Earnings": {
+    "ar": "الأرباح"
+  },
+  "WALLET BALANCE": {
+    "ar": "رصيد المحفظة"
+  },
+  "Wallet balance": {
+    "ar": "رصيد المحفظة"
+  },
+  "Withdraw earnings": {
+    "ar": "سحب الأرباح"
+  },
+  "Next payout": {
+    "ar": "السحب القادم"
+  },
+  "Total earned": {
+    "ar": "إجمالي الأرباح"
+  },
+  "Pieces sold": {
+    "ar": "القطع المباعة"
+  },
+  "Succeeded": {
+    "ar": "ناجحة"
+  },
+  "Failed": {
+    "ar": "فشلت"
+  },
+  "Failed (COD)": {
+    "ar": "فشلت (الدفع عند الاستلام)"
+  },
+  "Delivered": {
+    "ar": "تم التسليم"
+  },
+  "Cash-on-delivery failures only": {
+    "ar": "فشل الدفع عند الاستلام فقط"
+  },
+  "success": {
+    "ar": "نجاح"
+  },
+  "all-time": {
+    "ar": "من البداية"
+  },
+  "All-time": {
+    "ar": "من البداية"
+  },
+  "active": {
+    "ar": "نشط"
+  },
+  "completed": {
+    "ar": "مكتمل"
+  },
+  "awaiting": {
+    "ar": "بانتظار"
+  },
+  "pending": {
+    "ar": "قيد الانتظار"
+  },
+  "Track & manage orders": {
+    "ar": "تابع وأدر الطلبات"
+  },
+  "No orders yet.": {
+    "ar": "لا توجد طلبات بعد."
+  },
+  "Tap the button below to add your first order.": {
+    "ar": "اضغط الزر بالأسفل لإضافة أول طلب."
+  },
+  "Add order": {
+    "ar": "إضافة طلب"
+  },
+  "New order": {
+    "ar": "طلب جديد"
+  },
+  "Customer details": {
+    "ar": "بيانات العميل"
+  },
+  "WhatsApp (optional)": {
+    "ar": "واتساب (اختياري)"
+  },
+  "Country": {
+    "ar": "الدولة"
+  },
+  "City": {
+    "ar": "المدينة"
+  },
+  "Delivery location": {
+    "ar": "مكان التوصيل"
+  },
+  "Full delivery address": {
+    "ar": "عنوان التوصيل كامل"
+  },
+  "Street, area, landmark…": {
+    "ar": "الشارع، المنطقة، علامة مميزة…"
+  },
+  "Notes": {
+    "ar": "ملاحظات"
+  },
+  "Special instructions, preferred delivery time, etc.": {
+    "ar": "تعليمات خاصة، وقت توصيل مناسب، وغيرها."
+  },
+  "Product": {
+    "ar": "المنتج"
+  },
+  "Product price": {
+    "ar": "سعر المنتج"
+  },
+  "Quantity": {
+    "ar": "الكمية"
+  },
+  "Select size": {
+    "ar": "اختر المقاس"
+  },
+  "Select colour": {
+    "ar": "اختر اللون"
+  },
+  "Select…": {
+    "ar": "اختر…"
+  },
+  "— Select —": {
+    "ar": "— اختر —"
+  },
+  "— Select a product —": {
+    "ar": "— اختر منتجًا —"
+  },
+  "— Select country first —": {
+    "ar": "— اختر الدولة أولًا —"
+  },
+  "Save as Draft": {
+    "ar": "حفظ كمسودة"
+  },
+  "Save as Draft (keep editing later)": {
+    "ar": "حفظ كمسودة (أكمل لاحقًا)"
+  },
+  "Upload and confirm": {
+    "ar": "ارفع وأكد"
+  },
+  "Payment receipt": {
+    "ar": "إيصال الدفع"
+  },
+  "Upload payment receipt": {
+    "ar": "ارفع إيصال الدفع"
+  },
+  "Tap to upload receipt": {
+    "ar": "اضغط لرفع الإيصال"
+  },
+  "Upload receipt": {
+    "ar": "رفع الإيصال"
+  },
+  "Choose where the receipt is coming from": {
+    "ar": "اختر مصدر الإيصال"
+  },
+  "Camera · Gallery · Files": {
+    "ar": "الكاميرا · المعرض · الملفات"
+  },
+  "Take photo": {
+    "ar": "التقط صورة"
+  },
+  "Choose from Gallery": {
+    "ar": "اختر من المعرض"
+  },
+  "Upload from Files": {
+    "ar": "ارفع من الملفات"
+  },
+  "📷 Take photo (Camera)": {
+    "ar": "📷 التقط صورة (الكاميرا)"
+  },
+  "🖼️ Choose from Gallery": {
+    "ar": "🖼️ اختر من المعرض"
+  },
+  "📁 Upload from Files": {
+    "ar": "📁 ارفع من الملفات"
+  },
+  "Analysing image…": {
+    "ar": "جاري فحص الصورة…"
+  },
+  "Yes, paid": {
+    "ar": "نعم، تم الدفع"
+  },
+  "No, not yet": {
+    "ar": "لا، ليس بعد"
+  },
+  "COMMITMENT FEE TO COLLECT": {
+    "ar": "رسوم التأكيد المطلوب تحصيلها"
+  },
+  "COMMITMENT FEE — COLLECT FROM CUSTOMER": {
+    "ar": "رسوم التأكيد — حصّلها من العميل"
+  },
+  "Did the customer pay the commitment fee?": {
+    "ar": "هل دفع العميل رسوم التأكيد؟"
+  },
+  "Tell the customer the fee": {
+    "ar": "أخبر العميل بالرسوم"
+  },
+  "How to collect the fee": {
+    "ar": "طريقة تحصيل الرسوم"
+  },
+  "Ask for a screenshot": {
+    "ar": "اطلب صورة إثبات"
+  },
+  "Explain that a small commitment fee is required before their order is placed. This reserves the product and confirms they are serious.": {
+    "ar": "اشرح أن هناك رسوم تأكيد بسيطة قبل تسجيل الطلب. هذا يحجز المنتج ويؤكد جدية العميل."
+  },
+  "Once sent, ask the customer to share a screenshot of the bank transfer confirmation.": {
+    "ar": "بعد الدفع، اطلب من العميل إرسال صورة تأكيد التحويل."
+  },
+  "Upload the screenshot in the order form and tap \"Yes, paid.\" The order is then sent to the business for processing and shipping.": {
+    "ar": "ارفع صورة الإثبات في نموذج الطلب واضغط \"نعم، تم الدفع\". بعدها يُرسل الطلب للشركة للتجهيز والشحن."
+  },
+  "This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.": {
+    "ar": "هذه الرسوم لا تُرجع إذا ألغى العميل. هي تحميك وتحمي الشركة من الطلبات الوهمية."
+  },
+  "Collect this from the customer before shipping. Set by Lateen.": {
+    "ar": "حصّلها من العميل قبل الشحن. يحددها Lateen."
+  },
+  "Set by the business owner": {
+    "ar": "يحددها صاحب الشركة"
+  },
+  "Share your payment details": {
+    "ar": "شارك بيانات الدفع"
+  },
+  "Step-by-step deposit instructions": {
+    "ar": "خطوات الإيداع"
+  },
+  "Confirm your payout details below": {
+    "ar": "أكد بيانات السحب بالأسفل"
+  },
+  "Funds arrive in 2–5 business days": {
+    "ar": "تصل الأموال خلال 2–5 أيام عمل"
+  },
+  "Save & request withdrawal": {
+    "ar": "حفظ وطلب السحب"
+  },
+  "Bank transfer": {
+    "ar": "تحويل بنكي"
+  },
+  "Mobile wallet": {
+    "ar": "محفظة إلكترونية"
+  },
+  "Cash / Other": {
+    "ar": "نقدًا / أخرى"
+  },
+  "Bank / Provider": {
+    "ar": "البنك / المزود"
+  },
+  "Account holder": {
+    "ar": "صاحب الحساب"
+  },
+  "Account name": {
+    "ar": "اسم الحساب"
+  },
+  "Account number": {
+    "ar": "رقم الحساب"
+  },
+  "Method": {
+    "ar": "الطريقة"
+  },
+  "Bank": {
+    "ar": "البنك"
+  },
+  "Copy": {
+    "ar": "نسخ"
+  },
+  "Close": {
+    "ar": "إغلاق"
+  },
+  "NET EARNINGS": {
+    "ar": "صافي الأرباح"
+  },
+  "After commissions & platform fees": {
+    "ar": "بعد العمولات ورسوم المنصة"
+  },
+  "View breakdown": {
+    "ar": "عرض التفاصيل"
+  },
+  "Gross revenue": {
+    "ar": "إجمالي الإيرادات"
+  },
+  "Marketers": {
+    "ar": "المسوقون"
+  },
+  "Pieces": {
+    "ar": "القطع"
+  },
+  "Manage your catalog": {
+    "ar": "أدر منتجاتك"
+  },
+  "Customer orders": {
+    "ar": "طلبات العملاء"
+  },
+  "Confirm, ship, deliver": {
+    "ar": "أكد، اشحن، وسلّم"
+  },
+  "All orders": {
+    "ar": "كل الطلبات"
+  },
+  "To ship": {
+    "ar": "للشحن"
+  },
+  "Confirmed": {
+    "ar": "مؤكد"
+  },
+  "Shipped": {
+    "ar": "تم الشحن"
+  },
+  "New": {
+    "ar": "جديد"
+  },
+  "Search by name, ID, city, product…": {
+    "ar": "ابحث بالاسم أو الرقم أو المدينة أو المنتج…"
+  },
+  "Financial breakdown": {
+    "ar": "تفاصيل المال"
+  },
+  "Marketer commissions": {
+    "ar": "عمولات المسوقين"
+  },
+  "Platform fees": {
+    "ar": "رسوم المنصة"
+  },
+  "Net earnings": {
+    "ar": "صافي الأرباح"
+  },
+  "Add a product": {
+    "ar": "أضف منتجًا"
+  },
+  "Product code": {
+    "ar": "كود المنتج"
+  },
+  "Auto-generated": {
+    "ar": "يُنشأ تلقائيًا"
+  },
+  "Regenerate": {
+    "ar": "إنشاء من جديد"
+  },
+  "Product photos": {
+    "ar": "صور المنتج"
+  },
+  "Up to 6 photos. First photo is the main image.": {
+    "ar": "حتى 6 صور. أول صورة هي الرئيسية."
+  },
+  "Product details": {
+    "ar": "تفاصيل المنتج"
+  },
+  "Product name": {
+    "ar": "اسم المنتج"
+  },
+  "Description": {
+    "ar": "الوصف"
+  },
+  "Currency": {
+    "ar": "العملة"
+  },
+  "Select a currency": {
+    "ar": "اختر عملة"
+  },
+  "Search currencies…": {
+    "ar": "ابحث عن العملات…"
+  },
+  "Stock qty": {
+    "ar": "كمية المخزون"
+  },
+  "Category": {
+    "ar": "الفئة"
+  },
+  "Marketer commission": {
+    "ar": "عمولة المسوق"
+  },
+  "By percentage (%)": {
+    "ar": "بالنسبة (%)"
+  },
+  "Fixed amount": {
+    "ar": "مبلغ ثابت"
+  },
+  "Commission %": {
+    "ar": "نسبة العمولة %"
+  },
+  "Marketer earns": {
+    "ar": "ربح المسوق"
+  },
+  "Platform fee (5%)": {
+    "ar": "رسوم المنصة (5%)"
+  },
+  "per unit · calculated by Lateen": {
+    "ar": "لكل قطعة · يحسبها Lateen"
+  },
+  "TOTAL COMMITMENT FEE FROM CUSTOMER": {
+    "ar": "إجمالي رسوم التأكيد من العميل"
+  },
+  "Delivery zones": {
+    "ar": "مناطق التوصيل"
+  },
+  "Add countries and cities. Set shipping and delivery cost per city.": {
+    "ar": "أضف الدول والمدن. حدد تكلفة الشحن والتوصيل لكل مدينة."
+  },
+  "Select a country": {
+    "ar": "اختر دولة"
+  },
+  "Search countries…": {
+    "ar": "ابحث عن الدول…"
+  },
+  "Add country to zones": {
+    "ar": "أضف دولة للمناطق"
+  },
+  "Shipping cost": {
+    "ar": "تكلفة الشحن"
+  },
+  "Delivery cost": {
+    "ar": "تكلفة التوصيل"
+  },
+  "Variants": {
+    "ar": "الخيارات"
+  },
+  "Sizes and Colours are added by default. Rename, remove, or add your own (e.g. Material, Flavour, Style).": {
+    "ar": "المقاسات والألوان مضافة تلقائيًا. يمكنك تغيير الاسم أو الحذف أو إضافة خيارك مثل الخامة أو النكهة أو الستايل."
+  },
+  "+ Add another variant": {
+    "ar": "+ أضف خيارًا آخر"
+  },
+  "List product": {
+    "ar": "نشر المنتج"
+  },
+  "Brief description for marketers…": {
+    "ar": "وصف مختصر للمسوقين…"
+  },
+  "e.g. Running shoes": {
+    "ar": "مثلًا: حذاء رياضي"
+  },
+  "Fashion & footwear": {
+    "ar": "الموضة والأحذية"
+  },
+  "Health & fitness": {
+    "ar": "الصحة والرياضة"
+  },
+  "Beauty & skincare": {
+    "ar": "الجمال والعناية بالبشرة"
+  },
+  "Tech & gadgets": {
+    "ar": "التقنية والأجهزة"
+  },
+  "Home & living": {
+    "ar": "المنزل والمعيشة"
+  },
+  "Food & nutrition": {
+    "ar": "الطعام والتغذية"
+  },
+  "Admin Console": {
+    "ar": "لوحة المدير"
+  },
+  "Lateen platform control": {
+    "ar": "إدارة منصة Lateen"
+  },
+  "Admin": {
+    "ar": "مدير"
+  },
+  "Global Analytics": {
+    "ar": "تحليلات عامة"
+  },
+  "Total Platform Fees Collected": {
+    "ar": "إجمالي رسوم المنصة المحصلة"
+  },
+  "Lifetime, from confirmed & delivered orders": {
+    "ar": "من البداية، من الطلبات المؤكدة والمسلمة"
+  },
+  "Fees in": {
+    "ar": "الرسوم في"
+  },
+  "Confirmed & delivered, selected month": {
+    "ar": "مؤكدة ومسلمة، الشهر المختار"
+  },
+  "Confirmed & delivered, selected year": {
+    "ar": "مؤكدة ومسلمة، السنة المختارة"
+  },
+  "Active Users": {
+    "ar": "المستخدمون النشطون"
+  },
+  "Last 30 days": {
+    "ar": "آخر 30 يومًا"
+  },
+  "Leads Today": {
+    "ar": "طلبات اليوم"
+  },
+  "New orders today": {
+    "ar": "طلبات جديدة اليوم"
+  },
+  "Total Users": {
+    "ar": "إجمالي المستخدمين"
+  },
+  "All registered accounts": {
+    "ar": "كل الحسابات المسجلة"
+  },
+  "Live Products": {
+    "ar": "المنتجات المنشورة"
+  },
+  "Across every shop": {
+    "ar": "في كل المتاجر"
+  },
+  "Order Verification Hub": {
+    "ar": "مراجعة إيصالات الطلبات"
+  },
+  "Payout Manager": {
+    "ar": "إدارة السحوبات"
+  },
+  "User Directory": {
+    "ar": "دليل المستخدمين"
+  },
+  "Product Review": {
+    "ar": "مراجعة المنتجات"
+  },
+  "Employees & Payroll": {
+    "ar": "الموظفون والرواتب"
+  },
+  "Total Monthly Salaries": {
+    "ar": "إجمالي الرواتب الشهرية"
+  },
+  "Paid This Month": {
+    "ar": "مدفوع هذا الشهر"
+  },
+  "Pending This Month": {
+    "ar": "متبقي هذا الشهر"
+  },
+  "Admins": {
+    "ar": "المدراء"
+  },
+  "Businesses": {
+    "ar": "الشركات"
+  },
+  "Users": {
+    "ar": "المستخدمون"
+  },
+  "All": {
+    "ar": "الكل"
+  },
+  "Beauty": {
+    "ar": "الجمال"
+  },
+  "Fashion": {
+    "ar": "الموضة"
+  },
+  "Fitness": {
+    "ar": "الرياضة"
+  },
+  "Tech": {
+    "ar": "التقنية"
+  },
+  "Nutrition": {
+    "ar": "التغذية"
+  },
+  "Change": {
+    "ar": "تغيير"
+  },
+  "Commission": {
+    "ar": "العمولة"
+  },
+  "Commission rate": {
+    "ar": "نسبة العمولة"
+  },
+  "Date of hire": {
+    "ar": "تاريخ التعيين"
+  },
+  "Delete employee": {
+    "ar": "حذف الموظف"
+  },
+  "EMP-001": {
+    "ar": "EMP-001"
+  },
+  "Employee number": {
+    "ar": "رقم الموظف"
+  },
+  "Employees": {
+    "ar": "الموظفون"
+  },
+  "Full name on account": {
+    "ar": "الاسم الكامل على الحساب"
+  },
+  "Highest commission first": {
+    "ar": "الأعلى عمولة أولًا"
+  },
+  "Highest price first": {
+    "ar": "الأعلى سعرًا أولًا"
+  },
+  "Lowest commission first": {
+    "ar": "الأقل عمولة أولًا"
+  },
+  "Lowest price first": {
+    "ar": "الأقل سعرًا أولًا"
+  },
+  "IBAN": {
+    "ar": "IBAN"
+  },
+  "SWIFT/BIC": {
+    "ar": "SWIFT/BIC"
+  },
+  "Job title": {
+    "ar": "المسمى الوظيفي"
+  },
+  "Monthly salary (£)": {
+    "ar": "الراتب الشهري (£)"
+  },
+  "New Employee": {
+    "ar": "موظف جديد"
+  },
+  "Paid": {
+    "ar": "مدفوع"
+  },
+  "PayPal": {
+    "ar": "PayPal"
+  },
+  "Payouts": {
+    "ar": "السحوبات"
+  },
+  "Platform fee (per unit)": {
+    "ar": "رسوم المنصة (لكل قطعة)"
+  },
+  "Price": {
+    "ar": "السعر"
+  },
+  "Receipt": {
+    "ar": "الإيصال"
+  },
+  "Search by name, number, role, email…": {
+    "ar": "ابحث بالاسم أو الرقم أو الدور أو البريد…"
+  },
+  "Search by name, phone, business…": {
+    "ar": "ابحث بالاسم أو الهاتف أو الشركة…"
+  },
+  "Search products…": {
+    "ar": "ابحث عن المنتجات…"
+  },
+  "Verify": {
+    "ar": "تحقق"
+  },
+  "Your commission (per unit)": {
+    "ar": "عمولتك (لكل قطعة)"
+  },
+  "Your earning per unit": {
+    "ar": "ربحك لكل قطعة"
+  },
+  "across 0 products": {
+    "ar": "عبر 0 منتج"
+  },
+  "e.g. 12": {
+    "ar": "مثلًا 12"
+  },
+  "e.g. Barclays": {
+    "ar": "مثلًا Barclays"
+  },
+  "e.g. Omar Hassan": {
+    "ar": "مثلًا عمر حسن"
+  },
+  "employees ·": {
+    "ar": "موظفون ·"
+  },
+  "of 0 orders": {
+    "ar": "من أصل 0 طلب"
+  },
+  "optional": {
+    "ar": "اختياري"
+  },
+  "paid this month": {
+    "ar": "مدفوع هذا الشهر"
+  },
+  "per unit × 1": {
+    "ar": "لكل قطعة × 1"
+  },
+  "£0.00 pending": {
+    "ar": "£0.00 قيد الانتظار"
+  },
+  "— Add in profile —": {
+    "ar": "— أضِف في الملف —"
+  },
+  "+ New": {
+    "ar": "+ جديد"
+  },
+  "+ Add country to zones": {
+    "ar": "+ أضف دولة للمناطق"
+  },
+  "0 new": {
+    "ar": "0 جديد"
+  },
+  "0 products": {
+    "ar": "0 منتج"
+  },
+  "0% failure rate": {
+    "ar": "نسبة فشل 0%"
+  },
+  "Ask the customer to send the fee to:": {
+    "ar": "اطلب من العميل إرسال الرسوم إلى:"
+  },
+  "Action failed:": {
+    "ar": "فشلت العملية:"
+  },
+  "Add photo": {
+    "ar": "أضف صورة"
+  },
+  "Add receipt & send": {
+    "ar": "أضف إيصالًا وأرسل"
+  },
+  "Any city": {
+    "ar": "أي مدينة"
+  },
+  "Approve & forward": {
+    "ar": "موافقة وإرسال"
+  },
+  "Approve failed:": {
+    "ar": "فشلت الموافقة:"
+  },
+  "Approve this receipt? The order will be forwarded to the business owner and stock will be decremented.": {
+    "ar": "موافقة على هذا الإيصال؟ سيُرسل الطلب لصاحب الشركة وسيُخصم من المخزون."
+  },
+  "Awaiting business": {
+    "ar": "بانتظار الشركة"
+  },
+  "Browse and tap the heart to save products you want to market.": {
+    "ar": "تصفح واضغط على القلب لحفظ المنتجات التي تريد تسويقها."
+  },
+  "Business owner": {
+    "ar": "صاحب الشركة"
+  },
+  "Colour": {
+    "ar": "اللون"
+  },
+  "Colours": {
+    "ar": "الألوان"
+  },
+  "Confirm order": {
+    "ar": "تأكيد الطلب"
+  },
+  "Confirm receipt of": {
+    "ar": "تأكيد استلام"
+  },
+  "Confirm you have manually transferred": {
+    "ar": "أكد أنك قمت بالتحويل يدويًا"
+  },
+  "Copied!": {
+    "ar": "تم النسخ!"
+  },
+  "Copy link": {
+    "ar": "نسخ الرابط"
+  },
+  "Could not save order:": {
+    "ar": "تعذر حفظ الطلب:"
+  },
+  "Could not save product:": {
+    "ar": "تعذر حفظ المنتج:"
+  },
+  "Delete failed:": {
+    "ar": "فشل الحذف:"
+  },
+  "Delete this employee and their payment history? This cannot be undone.": {
+    "ar": "حذف هذا الموظف وسجل دفعاته؟ لا يمكن التراجع."
+  },
+  "Delete this product? Marketers will no longer see it.": {
+    "ar": "حذف هذا المنتج؟ لن يظهر للمسوقين بعد الآن."
+  },
+  "Delivery": {
+    "ar": "التوصيل"
+  },
+  "Delivery by city": {
+    "ar": "التوصيل حسب المدينة"
+  },
+  "Failed to delete": {
+    "ar": "فشل الحذف"
+  },
+  "Failed to update status": {
+    "ar": "فشل تحديث الحالة"
+  },
+  "Failed:": {
+    "ar": "فشل:"
+  },
+  "Fee/unit": {
+    "ar": "الرسوم/قطعة"
+  },
+  "For": {
+    "ar": "لـ"
+  },
+  "Found:": {
+    "ar": "تم العثور على:"
+  },
+  "Get my link": {
+    "ar": "احصل على رابطي"
+  },
+  "Go to Account": {
+    "ar": "اذهب إلى الحساب"
+  },
+  "Hey,": {
+    "ar": "مرحبًا،"
+  },
+  "How to collect fee": {
+    "ar": "طريقة تحصيل الرسوم"
+  },
+  "In stock": {
+    "ar": "متوفر"
+  },
+  "Includes your commission of": {
+    "ar": "يشمل عمولتك البالغة"
+  },
+  "Mark": {
+    "ar": "تحديد"
+  },
+  "Mark delivered": {
+    "ar": "تحديد كمسلَّم"
+  },
+  "Mark as Paid": {
+    "ar": "تحديد كمدفوع"
+  },
+  "Name and employee number are required.": {
+    "ar": "الاسم ورقم الموظف مطلوبان."
+  },
+  "No cities yet": {
+    "ar": "لا توجد مدن بعد"
+  },
+  "No employees match.": {
+    "ar": "لا يوجد موظفون مطابقون."
+  },
+  "No payments recorded yet.": {
+    "ar": "لا توجد دفعات مسجلة بعد."
+  },
+  "No payout details on file — contact the marketer.": {
+    "ar": "لا توجد بيانات سحب — تواصل مع المسوّق."
+  },
+  "No receipt image": {
+    "ar": "لا توجد صورة للإيصال"
+  },
+  "No saved products yet.": {
+    "ar": "لا توجد منتجات محفوظة بعد."
+  },
+  "Not found.": {
+    "ar": "غير موجود."
+  },
+  "Open": {
+    "ar": "فتح"
+  },
+  "Order failed": {
+    "ar": "فشل الطلب"
+  },
+  "Photo upload failed.": {
+    "ar": "فشل رفع الصورة."
+  },
+  "Please add at least one delivery zone.": {
+    "ar": "أضف منطقة توصيل واحدة على الأقل."
+  },
+  "Please complete at least one city.": {
+    "ar": "أكمل بيانات مدينة واحدة على الأقل."
+  },
+  "Please fill in name, price and commission.": {
+    "ar": "أكمل الاسم والسعر والعمولة."
+  },
+  "Please fill in your payout method, bank, account holder, and account number so the admin can pay you.": {
+    "ar": "أكمل طريقة السحب والبنك واسم صاحب الحساب ورقم الحساب ليتمكن المدير من الدفع لك."
+  },
+  "Please select a currency.": {
+    "ar": "اختر عملة."
+  },
+  "Re-upload receipt": {
+    "ar": "إعادة رفع الإيصال"
+  },
+  "Receipt rejected": {
+    "ar": "تم رفض الإيصال"
+  },
+  "Reject failed:": {
+    "ar": "فشل الرفض:"
+  },
+  "Reject with note": {
+    "ar": "رفض مع ملاحظة"
+  },
+  "Reason for rejecting this receipt? (visible to the marketer)": {
+    "ar": "سبب رفض هذا الإيصال؟ (يظهر للمسوّق)"
+  },
+  "Remove": {
+    "ar": "إزالة"
+  },
+  "Remove group": {
+    "ar": "إزالة المجموعة"
+  },
+  "Requested": {
+    "ar": "مطلوب"
+  },
+  "Save changes": {
+    "ar": "حفظ التغييرات"
+  },
+  "Save failed:": {
+    "ar": "فشل الحفظ:"
+  },
+  "Saved locally. Upload a receipt to send for verification.": {
+    "ar": "تم الحفظ محليًا. ارفع إيصالًا لإرساله للتحقق."
+  },
+  "Send Order to Business Owner": {
+    "ar": "أرسل الطلب لصاحب الشركة"
+  },
+  "Ship": {
+    "ar": "شحن"
+  },
+  "Size": {
+    "ar": "المقاس"
+  },
+  "Sizes": {
+    "ar": "المقاسات"
+  },
+  "Skip if not applicable": {
+    "ar": "تخطَّ إن لم يكن ضروريًا"
+  },
+  "Sold": {
+    "ar": "مباع"
+  },
+  "Tap to open": {
+    "ar": "اضغط للفتح"
+  },
+  "This product is not available for delivery to": {
+    "ar": "هذا المنتج غير متاح للتوصيل إلى"
+  },
+  "To send for verification: please fill customer name, phone, product, country and city.": {
+    "ar": "للإرسال للتحقق: أكمل اسم العميل والهاتف والمنتج والدولة والمدينة."
+  },
+  "Upload failed — tap to try again (": {
+    "ar": "فشل الرفع — اضغط للمحاولة مرة أخرى ("
+  },
+  "Upload service not ready — refresh and try again": {
+    "ar": "خدمة الرفع غير جاهزة — حدّث الصفحة وحاول مجددًا."
+  },
+  "Variant name": {
+    "ar": "اسم الخيار"
+  },
+  "View payment receipt": {
+    "ar": "عرض إيصال الدفع"
+  },
+  "WhatsApp": {
+    "ar": "واتساب"
+  },
+  "receipt": {
+    "ar": "إيصال"
+  },
+  "Edit order": {
+    "ar": "تعديل الطلب"
+  },
+  "Edit product": {
+    "ar": "تعديل المنتج"
+  },
+  "Edit Employee": {
+    "ar": "تعديل الموظف"
+  },
+  "Hired": {
+    "ar": "تم التعيين"
+  },
+  "Payday": {
+    "ar": "يوم الدفع"
+  },
+  "History": {
+    "ar": "السجل"
+  },
+  "Total paid:": {
+    "ar": "إجمالي المدفوع:"
+  },
+  "Receipt will go to admin for verification, then forwarded to the business owner.": {
+    "ar": "سيتم إرسال الإيصال للمدير للتحقق، ثم سيُحوَّل إلى صاحب الشركة."
+  },
+  "Order": {
+    "ar": "طلب"
+  },
+  "Mar": {
+    "ar": "مارس"
+  },
+  "Apr": {
+    "ar": "أبريل"
+  },
+  "May": {
+    "ar": "مايو"
+  },
+  "Jun": {
+    "ar": "يونيو"
+  },
+  "Jul": {
+    "ar": "يوليو"
+  },
+  "Aug": {
+    "ar": "أغسطس"
+  },
+  "Sep": {
+    "ar": "سبتمبر"
+  },
+  "Oct": {
+    "ar": "أكتوبر"
+  },
+  "Nov": {
+    "ar": "نوفمبر"
+  },
+  "Dec": {
+    "ar": "ديسمبر"
+  },
+  "Jan": {
+    "ar": "يناير"
+  },
+  "Feb": {
+    "ar": "فبراير"
+  },
+  "Mon": {
+    "ar": "الإثنين"
+  },
+  "Tue": {
+    "ar": "الثلاثاء"
+  },
+  "Wed": {
+    "ar": "الأربعاء"
+  },
+  "Thu": {
+    "ar": "الخميس"
+  },
+  "Fri": {
+    "ar": "الجمعة"
+  },
+  "Sat": {
+    "ar": "السبت"
+  },
+  "Sun": {
+    "ar": "الأحد"
+  },
+  "Page not found": {
+    "ar": "الصفحة غير موجودة"
+  },
+  "The page you're looking for doesn't exist or has been moved.": {
+    "ar": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+  },
+  "Go home": {
+    "ar": "العودة للرئيسية"
+  },
+  "This page didn't load": {
+    "ar": "تعذّر تحميل هذه الصفحة"
+  },
+  "Something went wrong on our end. You can try refreshing or head back home.": {
+    "ar": "حدث خطأ من جانبنا. يمكنك إعادة المحاولة أو العودة للرئيسية."
+  },
+  "Try again": {
+    "ar": "حاول مرة أخرى"
+  },
+  "Loading…": {
+    "ar": "جارٍ التحميل…"
+  },
+  "Setting up your account…": {
+    "ar": "جارٍ إعداد حسابك…"
+  },
+  "If this persists, sign out and pick a role again.": {
+    "ar": "إن استمر ذلك، سجّل الخروج واختر دورًا من جديد."
+  },
+  "👁 Viewing as": {
+    "ar": "👁 يُعرض باسم"
+  },
+  "read-only support mode": {
+    "ar": "وضع الدعم للقراءة فقط"
+  },
+  "Exit": {
+    "ar": "خروج"
+  }
 };
 
-export function translate(key: string, code: string): string {
+export function translate(key, code) {
   if (code === "en") return key;
-  const entry = T[key];
-  return (entry && entry[code]) || key;
+  return T[key]?.ar ?? key;
 }
