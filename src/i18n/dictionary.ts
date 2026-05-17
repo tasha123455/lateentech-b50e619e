@@ -602,6 +602,19 @@ const PATTERNS: Pattern[] = [
   { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من ${m[1]} منتجات` },
   // "Delivered" variants like "Deliv." or "deliv"
   { re: /^Deliv\.?$/i, build: () => `التوصيل` },
+
+  // "0 new", "5 new" — notification banner
+  { re: /^(\d[\d,]*)\s+new$/i, build: (m) => `${m[1]} جديد` },
+  // "£0.00 pending" / "£12.50 pending"
+  { re: /^([£$€])\s*([\d.,]+)\s+pending$/i, build: (m) => `${m[1]}${m[2]} معلّق` },
+  // "0% failure rate" / "12.5% failure rate"
+  { re: /^([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة فشل ${m[1]}%` },
+  // "per unit" / "per unit × 1"
+  { re: /^per\s+unit$/i, build: () => `للوحدة` },
+  { re: /^([£$€]?[\d.,]*)\s*per\s+unit\s*[×x]\s*(\d+)$/i,
+    build: (m) => `${m[1] ? m[1] + ' ' : ''}للوحدة × ${m[2]}` },
+  // "Draft · not sent" / "Draft not sent"
+  { re: /^Draft\s*[·.\-]?\s*not\s+sent$/i, build: () => `مسودة · لم تُرسل` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
