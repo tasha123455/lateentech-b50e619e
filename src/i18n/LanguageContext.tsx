@@ -34,6 +34,11 @@ function applyHtmlAttrs(code: string) {
   document.documentElement.dir = RTL_CODES.has(code) ? "rtl" : "ltr";
 }
 
+// Safe placeholder export to prevent compilation errors in other files
+export function translateDOM(root: HTMLElement | Document, code: string) {
+  return;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<string>(() => readInitial());
   const [isOpen, setIsOpen] = useState(false);
