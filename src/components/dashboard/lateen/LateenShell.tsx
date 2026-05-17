@@ -106,7 +106,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
     };
-  }, [role, signOut, userId]);
+  }, [role, userId]);
 
   // When lang state changes (re-render), translate before paint to avoid flicker
   useLayoutEffect(() => {
