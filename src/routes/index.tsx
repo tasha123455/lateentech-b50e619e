@@ -30,7 +30,7 @@ function Landing() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
-      <div className="absolute right-4 top-4">
+      <div className="absolute end-4 top-4">
         <LanguageSwitcher />
       </div>
       <LateenLogo size={68} />
@@ -58,7 +58,7 @@ function RoleButton({ to, tone, title, sub }: { to: string; tone: "marketer" | "
     <Link to={to} className="group flex w-full items-center justify-between rounded-2xl border border-border bg-surface px-5 py-4 transition hover:-translate-y-0.5 hover:bg-surface-2">
       <span className="flex items-center gap-3">
         <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tint}`}><Icon /></span>
-        <span className="text-left">
+        <span className="text-start">
           <span className="block text-[15px] font-medium text-text-1">{title}</span>
           <span className="mt-0.5 block text-[11px] text-text-2">{sub}</span>
         </span>

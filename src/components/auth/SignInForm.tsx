@@ -46,8 +46,8 @@ export function SignInForm({ role }: { role: Role }) {
       </Field>
       <Field label={t("Password")}>
         <div className="relative">
-          <input type={showPw ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="auth-input pr-16" />
-          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? t("Hide") : t("Show")}</button>
+          <input type={showPw ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="auth-input pe-16" />
+          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-text-2">{showPw ? t("Hide") : t("Show")}</button>
         </div>
       </Field>
       {error && <p className="text-xs text-destructive">{error}</p>}
