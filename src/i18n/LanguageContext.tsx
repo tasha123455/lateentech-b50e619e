@@ -118,7 +118,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     applyHtmlAttrs(lang);
     if (typeof window !== "undefined") {
-      (window as unknown as { __lang?: string }).__lang = lang;
+      (window as unknown as { __lang?: string; __T?: typeof T }).__lang = lang;
+      (window as unknown as { __lang?: string; __T?: typeof T }).__T = T;
+      // Translate the whole document body and re-render any Chart.js instances.
+      try {
+        (window as unknown as { __retranslate?: () => void }).__retranslate?.();
+        if (document.body) translateDOM(document.body, lang);
+      } catch { /* ignore */ }
     }
   }, [lang]);
 
