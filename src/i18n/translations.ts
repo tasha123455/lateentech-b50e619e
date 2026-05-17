@@ -552,7 +552,7 @@ export const T: Translations = {
   "Total Monthly Salaries": { ar: "إجمالي الرواتب الشهرية" },
   "Paid This Month": { ar: "مدفوع هذا الشهر" },
   "Pending This Month": { ar: "متبقي هذا الشهر" },
-  "Loading…": { ar: "جاري التحميل…" },
+  
 
   // ── Catch-all dashboard strings (Arabic — natural MSA) ───────────────
   "Admins": { ar: "المدراء" },
