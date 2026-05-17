@@ -615,6 +615,17 @@ const PATTERNS: Pattern[] = [
     build: (m) => `${m[1] ? m[1] + ' ' : ''}للوحدة × ${m[2]}` },
   // "Draft · not sent" / "Draft not sent"
   { re: /^Draft\s*[·.\-]?\s*not\s+sent$/i, build: () => `مسودة · لم تُرسل` },
+
+  // "Paid June 2025" / "Pending July 2025" (admin period labels)
+  { re: /^Paid\s+([A-Z][a-z]+\s+\d{4})$/, build: (m) => `تم الدفع ${m[1]}` },
+  { re: /^Pending\s+([A-Z][a-z]+\s+\d{4})$/, build: (m) => `معلّق ${m[1]}` },
+  // "Failed to load: <message>"
+  { re: /^Failed\s+to\s+load\s*[:\-]\s*(.+)$/i, build: (m) => `فشل التحميل: ${m[1]}` },
+  // "Size: M" / "Colour: Red"
+  { re: /^Size\s*:\s*(.+)$/i, build: (m) => `المقاس: ${m[1]}` },
+  { re: /^Colou?r\s*:\s*(.+)$/i, build: (m) => `اللون: ${m[1]}` },
+  // "Note: ..."
+  { re: /^Note\s*:\s*(.+)$/i, build: (m) => `ملاحظة: ${m[1]}` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
