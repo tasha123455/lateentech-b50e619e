@@ -66,7 +66,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       const target = (e.target as HTMLElement | null)?.closest('[data-action="sign-out"]');
       if (target) {
         e.preventDefault();
-        void signOut();
+        void signOutRef.current();
       }
     };
     el.addEventListener("click", onClick);
