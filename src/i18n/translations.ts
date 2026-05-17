@@ -1295,7 +1295,7 @@ export const T: Translations = {
   }
 };
 
-export function translate(key, code) {
+export function translate(key: string, code: string): string {
   if (code === "en") return key;
   return T[key]?.ar ?? key;
 }
