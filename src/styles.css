@@ -128,3 +128,12 @@
 /* RTL support for translated app */
 [dir="rtl"] body { text-align: right; }
 [dir="rtl"] .auth-input { text-align: right; }
+
+/* Arabic typography: switch all root families to a clean Arabic-friendly stack */
+body.lang-ar,
+body.lang-ar .lateen-business,
+body.lang-ar .lateen-marketer,
+body.lang-ar .lateen-admin {
+  font-family: 'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, -apple-system, sans-serif;
+}
+body.lang-ar .app { direction: rtl; }
