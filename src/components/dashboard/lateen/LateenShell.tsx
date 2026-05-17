@@ -106,10 +106,29 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
 
     // Expose the retranslate bridge for the embedded script's wrapped renderers.
     (window as unknown as { __retranslate?: () => void }).__retranslate = () => {
-      if (containerRef.current) {
-        const currentLang = (window as unknown as { __lang?: string }).__lang ?? "en";
-        translateDOM(containerRef.current, currentLang);
-      }
+      if (!containerRef.current) return;
+      const currentLang = (window as unknown as { __lang?: string }).__lang ?? "en";
+      translateDOM(containerRef.current, currentLang);
+      // Translate any Chart.js instances (canvas labels can't be reached by DOM walker).
+      try {
+        const Chart = (window as unknown as { Chart?: { instances?: Record<string, { data?: { labels?: unknown[] }; _i18nOriginalLabels?: string[]; update?: (mode?: string) => void } > } }).Chart;
+        const instances = Chart?.instances ?? {};
+        for (const id of Object.keys(instances)) {
+          const inst = instances[id];
+          if (!inst?.data) continue;
+          const labels = inst.data.labels;
+          if (!Array.isArray(labels)) continue;
+          if (!inst._i18nOriginalLabels) inst._i18nOriginalLabels = labels.map(String);
+          const orig = inst._i18nOriginalLabels;
+          const translated = orig.map((k) => {
+            if (currentLang === "en") return k;
+            const v = (window as unknown as { __T?: Record<string, { ar?: string }> }).__T?.[k]?.ar;
+            return v ?? k;
+          });
+          inst.data.labels = translated;
+          inst.update?.("none");
+        }
+      } catch { /* ignore */ }
     };
 
     let cancelled = false;

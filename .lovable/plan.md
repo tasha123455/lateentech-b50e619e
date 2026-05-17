@@ -1,88 +1,62 @@
-## Goal
+# Fix: Arabic toggle leaves many strings in English
 
-Lock the app to English + Arabic only, eliminate the bug where toggling languages wipes dashboard data (balance, name, analytics, products, orders), and ensure every visible string — including mock data arrays inside the embedded dashboards — translates cleanly while preserving the exact Lateen visual design.
+## Root cause
 
-## 1. Restrict languages to EN + AR
+`translateDOM` in `src/i18n/LanguageContext.tsx` is currently a no-op:
 
-- `src/i18n/locales.ts` — reduce `LOCALES` to just `en` and `ar`. `RTL_CODES` automatically narrows.
-- `src/i18n/translations.ts` — keep only the `ar` value on every entry; strip `es/fr/de/...` keys (smaller dictionary, no behavior change since lookup falls back to English anyway).
-- `src/i18n/LanguagePicker.tsx` — replace the search-grid picker with a simple two-button EN / العربية toggle (still themed with existing tokens).
-- `src/i18n/LanguageSwitcher.tsx` — keep the globe button, but on click toggle directly between `en` and `ar` instead of opening the modal (no picker needed for 2 locales). Modal path removed.
-- `src/routes/language.tsx` — simplify to the same EN/AR toggle.
+```ts
+export function translateDOM(root, code) { return; }
+```
 
-## 2. Kill the data-wipe bug on language toggle
+The wrapping/retranslate plumbing in `LateenShell` already calls it after every render and on language change — but because the function does nothing, all HTML/JS-injected English text (Browse products, Orders, Wallet, weekday labels, "Save", "Continue with Google", etc.) stays in English. Static React strings using `t()` work, but everything injected via `dangerouslySetInnerHTML` or the embedded scripts (business/marketer/admin) is untouched.
 
-The real cause is structural: every time `lang` changes, `LanguageProvider` re-renders its entire subtree. `AuthProvider` lives inside it, so a new `signOut` identity is produced, and the embedded dashboard scripts (`business/marketer/admin.script.js`) are torn down and re-injected with `document.body.appendChild(script)` — wiping their in-memory state (balance, name, analytics, product list, orders).
+## Plan
 
-Fixes:
+### 1. Implement a real `translateDOM`
 
-- **Provider order** (`src/routes/__root.tsx`): mount `AuthProvider` *outside* `LanguageProvider` so a language toggle never re-renders auth state.
-- **Stable callbacks** (`src/auth/AuthContext.tsx`): wrap `signOut` / `refreshRole` in `useCallback` and memoize the context `value` so consumers don't see new references on unrelated re-renders.
-- **LateenShell** (`src/components/dashboard/lateen/LateenShell.tsx`):
-  - Keep the existing `signOutRef` pattern.
-  - Guard the script-injection effect with an idempotency check: if the script for this `role` + `userId` is already mounted, do not re-inject.
-  - The lang `useLayoutEffect` continues to call `translateDOM(containerRef.current, lang)` only — no DOM rebuild, no API refetch.
-- **No reload, no router invalidate** anywhere in the language change path. `setLang` only updates state + writes `localStorage` + flips `documentElement.dir` via `useLayoutEffect` (already in place; verify).
+In `src/i18n/LanguageContext.tsx`, replace the stub with a DOM walker that:
 
-## 3. Translate dynamic mock data and dashboard arrays
+- Bails immediately when `code === "en"` (no-op fast path).
+- Uses a `TreeWalker(NodeFilter.SHOW_TEXT)` to visit every text node under `root`.
+- For each text node, trims the value; if the trimmed string exists as a key in `T` and has an `ar` value, replace just the trimmed portion (preserve surrounding whitespace) with the translation.
+- Also translates these attributes when present on element nodes: `placeholder`, `title`, `aria-label`, `alt`, `value` (only on `<input type="button|submit">` / `<button>`).
+- Skips `<script>`, `<style>`, `<noscript>`, and any element with `data-no-i18n` or `contenteditable="true"`.
+- Caches the original English string on the node in a WeakMap (`__i18nOriginal`) the first time it sees it, so subsequent re-translations re-lookup from the original — this lets toggling EN ↔ AR work cleanly even if a previous AR pass already replaced the text node's content.
+- Numbers, currency symbols (`£`), and mixed strings with digits stay intact unless the whole trimmed string is itself a dictionary key (e.g. weekday/month labels are pure words; values like "£1,250.00" are skipped).
 
-The embedded dashboards render product names, order statuses, metric labels, currency names, and notification text from JS arrays inside `business.script.js`, `marketer.script.js`, and `admin.script.js`. `translateDOM` already walks the rendered DOM, so the fix is to make those strings translatable rather than rewriting the render layer:
+### 2. Massively expand `src/i18n/translations.ts`
 
-- Audit each `*.script.js` for literal English strings used in rendered HTML: product names, order statuses (`Pending`, `Paid`, `Shipped`, `Cancelled`), metric labels (`Revenue`, `Pieces`, `Success`, `Failed`), period labels (`Day`, `Month`, `Year`), notification copy, currency display names, empty-state text.
-- Add every one of those strings as a key in `src/i18n/translations.ts` with its Arabic value.
-- After the dashboard script repaints a section (`renderProducts`, `applyFilters`, `updateSummary`, `renderPhotoGrid`, notification render, etc.), trigger a re-translate. Two options; we'll use (a):
-  - (a) Patch each render function tail to call `window.__retranslate?.()`, and expose `__retranslate = () => translateDOM(containerRef.current, currentLang)` from `LateenShell`. This is one-line per render function.
-  - (b) A scoped `MutationObserver` on the container. Rejected — user explicitly wants no observer-based translation.
-- Chart axis tick labels (`Mon…Sun`, `Jan…Dec`) and tooltip suffixes (`pcs`) are produced inside Chart.js callbacks; route those through the same dictionary by reading `window.__lang` at draw time and translating before returning.
+Audit the three embedded dashboards and add every English string to the dictionary. Concrete sweeps:
 
-## 4. Audit remaining hardcoded strings in React components
+- **business.body.html** + **business.script.js** — page titles ("Products", "Orders", "Analytics", "Wallet"), buttons ("Save", "Cancel", "Add product", "Edit", "Delete", "Withdraw"), filter chips ("All", "Active", "Pending", "Completed", "Refunded"), order statuses ("Paid", "Shipped", "Delivered", "Cancelled"), table headers ("Order", "Customer", "Date", "Total", "Status"), empty states, mock product names and categories.
+- **marketer.body.html** + **marketer.script.js** — nav ("Browse", "Saved", "Orders", "Wallet", "Profile"), product card labels ("Commission", "Price", "Stock", "Save link", "Copy"), wallet card ("Available balance", "Pending", "This month", "Withdraw"), filter/sort labels, mock product/category strings.
+- **admin.body.html** + **admin.script.js** — verification labels, payout statuses, user/employee table headers, metric labels.
+- **Date/time labels** — full + short weekday names (`Sunday`…`Saturday`, `Sun`…`Sat`), month names (`January`…`December`, `Jan`…`Dec`), and the words `Day`, `Week`, `Month`, `Year`, `Today`, `Yesterday`.
+- **Auth surface** — `Continue with Google`, `Sign in with Google`, `or`.
+- **Common UI verbs** — `Save`, `Cancel`, `Close`, `Confirm`, `Delete`, `Edit`, `Apply`, `Reset`, `Search`, `Filter`, `Sort`, `View all`, `See more`, `Loading…`, `No results`.
 
-Sweep these files for raw English and wrap in `t()`:
+Each gets an `ar` MSA translation. (Approximate count: ~250 new keys.)
 
-- `src/components/dashboard/*` — `DashboardShell`, `Topbar`, `BottomNav`, `MenuDrawer`, `BalanceCard`, `NotificationsPage`, `RevenueChart`, `StatsRow`, `ProductList` (label default `"Products"`, `"sold"`).
-- `src/components/dashboard/business/BusinessDashboard.tsx`, `src/components/dashboard/marketer/MarketerDashboard.tsx`.
-- `src/components/auth/*` — labels, placeholders, button text, helper copy.
-- `src/routes/index.tsx`, `src/routes/dashboard.tsx`, `src/routes/{business,marketer}.{signin,register}.tsx`.
-- Mock-data labels in `src/lib/mock-data.ts` that surface in the UI (stat labels like `"Sales today"`, `"Orders"`, `"Conversion"`, notification titles/bodies) — add to dictionary; components already pass them through, so wrapping at the render site with `t(stat.label)` is enough.
+### 3. Chart axis & tooltip labels
 
-Every new English string discovered is added to `src/i18n/translations.ts` with a professional MSA Arabic translation.
+`Chart.js` axis tick callbacks render strings the DOM walker cannot reach (canvas). In each `script.js`, route the tick/tooltip label functions through `window.__t = (k) => (window.__T?.[k]?.[window.__lang] ?? k)`. Expose `__T` and `__lang` from `LanguageContext` (already partially done for `__lang`; add `__T = T` on mount). Re-render charts on language change via the existing `__retranslate` bridge: in the wrapped renderers, if a chart instance exists, call `chart.update()` after the language flips so weekday/month tick labels re-evaluate.
 
-## 5. RTL via Tailwind logical properties (no visual changes)
+### 4. Verification
 
-Sweep components for directional Tailwind classes and convert:
+After implementation, manually flip EN ↔ AR on `/dashboard` for each role (business, marketer, admin) and check:
+- Nav, headers, buttons, table headers, status pills.
+- Browse/Products/Orders/Wallet cards (data preserved, labels translated).
+- Chart axis labels (weekdays/months) flip.
+- Auth pages ("Continue with Google" reads in Arabic).
+- No layout shift, no data wipe, RTL mirroring intact (already handled by `useLayoutEffect` + logical Tailwind classes).
 
-- `text-left` → `text-start`, `text-right` → `text-end`
-- `ml-*` → `ms-*`, `mr-*` → `me-*`
-- `pl-*` → `ps-*`, `pr-*` → `pe-*`
-- `left-*` → `start-*`, `right-*` → `end-*`
-- `rounded-l-*` → `rounded-s-*`, `rounded-r-*` → `rounded-e-*`
-- `border-l*` → `border-s*`, `border-r*` → `border-e*`
+## Files to edit
 
-No color, spacing scale, radius, shadow, or typography changes. The embedded dashboards use their own CSS (`lateen-*.css`) — only flip directional properties there (`left`/`right`, `margin-left`/`right`, `padding-left`/`right`, `text-align`) using `[dir="rtl"]` selectors where logical properties aren't already used. Layout, colors, components stay identical.
+- `src/i18n/LanguageContext.tsx` — implement `translateDOM`, expose `__T` and `__lang`.
+- `src/i18n/translations.ts` — add ~250 new EN→AR entries.
+- `src/components/dashboard/lateen/business.script.js`
+- `src/components/dashboard/lateen/marketer.script.js`
+- `src/components/dashboard/lateen/admin.script.js` — route chart tick/tooltip strings through `window.__t`, trigger `chart.update()` on retranslate.
+- `src/components/auth/SignInForm.tsx` / `RegisterForm.tsx` — wrap any remaining literal strings (e.g. Google button label override) in `t()`.
 
-## 6. Synchronous RTL flip
-
-Already present in `LanguageContext.tsx` (`useLayoutEffect` sets `document.documentElement.dir` and `lang` before paint). Verify it stays synchronous and runs before the `translateDOM` call in `LateenShell`'s own `useLayoutEffect` (React guarantees parent layout effects before children — good).
-
-## Out of scope
-
-- No new dependencies.
-- No changes to Supabase schema, auth flows, routing, or styling tokens.
-- No edits to `src/integrations/supabase/*` or `src/routeTree.gen.ts`.
-
-## Files touched
-
-- `src/i18n/locales.ts`
-- `src/i18n/translations.ts` (trim to AR, add missing keys)
-- `src/i18n/LanguageContext.tsx` (verify, no logic change beyond memoization)
-- `src/i18n/LanguagePicker.tsx`, `src/i18n/LanguageSwitcher.tsx`, `src/routes/language.tsx`
-- `src/routes/__root.tsx` (swap provider order)
-- `src/auth/AuthContext.tsx` (useCallback + useMemo)
-- `src/components/dashboard/lateen/LateenShell.tsx` (idempotent script injection + `__retranslate` bridge)
-- `src/components/dashboard/lateen/{business,marketer,admin}.script.js` (call `__retranslate` after each render; translate chart labels)
-- `src/components/dashboard/lateen/{business,marketer,admin}.body.html` (logical-property sweep where needed)
-- `src/styles/lateen-{business,marketer,admin}.css` (add `[dir="rtl"]` overrides only where logical props can't reach)
-- `src/components/dashboard/*` and `src/components/auth/*` (t-wrap + logical-property sweep)
-- Route files under `src/routes/` for any loose strings
-
-Estimated change is mechanical and large in line count but small in risk — no behavior changes beyond what is listed.
+No visual design, layout, colors, padding, or component shapes change. Only string delivery + a real DOM walker.
