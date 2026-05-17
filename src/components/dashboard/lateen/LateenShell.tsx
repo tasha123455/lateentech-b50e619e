@@ -110,7 +110,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
 
   return (
     <div className={`lateen-${role} relative`}>
-      <div className="absolute right-3 top-3 z-50">
+      <div className="absolute end-3 top-3 z-50">
         <LanguageSwitcher />
       </div>
       <div
