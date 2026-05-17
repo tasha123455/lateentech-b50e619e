@@ -179,6 +179,9 @@ export function useLanguage() {
 
 export function FloatingLanguageToggle() {
   const { lang, dir, toggle } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
   const label = lang === "en" ? "العربية" : "English";
   const side = dir === "rtl" ? { left: 16 } : { right: 16 };
   return (
