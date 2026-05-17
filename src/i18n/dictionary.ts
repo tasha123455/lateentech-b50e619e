@@ -248,7 +248,6 @@ export const DICT: Record<string, string> = {
   "Total to pay": "الإجمالي المطلوب دفعه",
   "Confirm order": "تأكيد الطلبية",
   "Save changes": "حفظ التغييرات",
-  "Saved": "تم الحفظ",
   "To ship": "بانتظار الشحن",
   "Shipped": "تم الشحن",
   "Order delivered": "تم تسليم الطلبية",
