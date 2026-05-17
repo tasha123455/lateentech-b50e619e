@@ -34,9 +34,81 @@ function applyHtmlAttrs(code: string) {
   document.documentElement.dir = RTL_CODES.has(code) ? "rtl" : "ltr";
 }
 
-// Safe placeholder export to prevent compilation errors in other files
+// Cache original English text per node so toggling languages re-translates
+// from the canonical key, not from previously-injected Arabic.
+const ORIG_TEXT = new WeakMap<Text, string>();
+const ORIG_ATTR = new WeakMap<Element, Record<string, string>>();
+const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "CODE"]);
+const ATTRS = ["placeholder", "title", "aria-label", "alt"] as const;
+
+function lookup(key: string, code: string): string {
+  if (code === "en") return key;
+  const v = T[key]?.ar;
+  return v ?? key;
+}
+
+function translateText(node: Text, code: string) {
+  const original = ORIG_TEXT.get(node) ?? node.nodeValue ?? "";
+  if (!ORIG_TEXT.has(node)) ORIG_TEXT.set(node, original);
+  const trimmed = original.trim();
+  if (!trimmed) return;
+  // Only translate if the whole trimmed string is a known key.
+  const translated = lookup(trimmed, code);
+  if (translated === trimmed && code !== "en") return;
+  // Preserve surrounding whitespace.
+  const leading = original.match(/^\s*/)?.[0] ?? "";
+  const trailing = original.match(/\s*$/)?.[0] ?? "";
+  const next = code === "en" ? original : leading + translated + trailing;
+  if (node.nodeValue !== next) node.nodeValue = next;
+}
+
+function translateAttrs(el: Element, code: string) {
+  let orig = ORIG_ATTR.get(el);
+  for (const attr of ATTRS) {
+    if (!el.hasAttribute(attr)) continue;
+    if (!orig) { orig = {}; ORIG_ATTR.set(el, orig); }
+    if (!(attr in orig)) orig[attr] = el.getAttribute(attr) ?? "";
+    const original = orig[attr];
+    const trimmed = original.trim();
+    if (!trimmed) continue;
+    const translated = lookup(trimmed, code);
+    const next = code === "en" ? original : translated;
+    if (el.getAttribute(attr) !== next) el.setAttribute(attr, next);
+  }
+}
+
 export function translateDOM(root: HTMLElement | Document, code: string) {
-  return;
+  if (typeof document === "undefined") return;
+  const rootEl = (root as Document).documentElement
+    ? (root as Document).body || (root as Document).documentElement
+    : (root as HTMLElement);
+  if (!rootEl) return;
+
+  // Walk text nodes.
+  const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = (node as Text).parentElement;
+      if (!parent) return NodeFilter.FILTER_REJECT;
+      if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+      if (parent.closest("[data-no-i18n]")) return NodeFilter.FILTER_REJECT;
+      if (parent.isContentEditable) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  let n: Node | null;
+  while ((n = walker.nextNode())) translateText(n as Text, code);
+
+  // Walk elements for attributes.
+  const ewalker = document.createTreeWalker(rootEl, NodeFilter.SHOW_ELEMENT, {
+    acceptNode(el) {
+      const e = el as Element;
+      if (SKIP_TAGS.has(e.tagName)) return NodeFilter.FILTER_REJECT;
+      if (e.closest("[data-no-i18n]")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  let e: Node | null;
+  while ((e = ewalker.nextNode())) translateAttrs(e as Element, code);
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
