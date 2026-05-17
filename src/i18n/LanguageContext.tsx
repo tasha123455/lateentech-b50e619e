@@ -5,7 +5,6 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -128,43 +127,52 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     walkAndTranslate(document.body, lang);
   }, [lang, dir]);
 
-  // Observe dynamically inserted nodes (Lateen dashboards inject markup via innerHTML)
-  const observerRef = useRef<MutationObserver | null>(null);
+  // Observe dynamically inserted nodes — ONLY when Arabic is active.
+  // In English (default) we skip all DOM observation to keep the app fast.
   useEffect(() => {
     if (typeof document === "undefined") return;
-    const obs = new MutationObserver((mutations) => {
-      const currentLang = lang;
-      for (const m of mutations) {
-        if (m.type === "childList") {
-          m.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-              const parent = (node as Text).parentElement;
-              if (parent && !shouldSkip(parent)) applyTextNode(node as Text, currentLang);
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-              walkAndTranslate(node, currentLang);
-            }
-          });
-        } else if (m.type === "characterData") {
-          const node = m.target;
-          if (node.nodeType === Node.TEXT_NODE) {
-            const parent = (node as Text).parentElement;
-            if (parent && !shouldSkip(parent)) applyTextNode(node as Text, currentLang);
-          }
-        } else if (m.type === "attributes" && m.target.nodeType === Node.ELEMENT_NODE) {
-          const el = m.target as Element;
-          if (!shouldSkip(el)) applyAttributes(el, currentLang);
+    if (lang !== "ar") return;
+
+    let scheduled = false;
+    const pendingNodes = new Set<Node>();
+    const flush = () => {
+      scheduled = false;
+      for (const node of pendingNodes) {
+        if (!node.isConnected) continue;
+        if (node.nodeType === Node.TEXT_NODE) {
+          const parent = (node as Text).parentElement;
+          if (parent && !shouldSkip(parent)) applyTextNode(node as Text, "ar");
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          walkAndTranslate(node, "ar");
         }
       }
+      pendingNodes.clear();
+    };
+    const schedule = () => {
+      if (scheduled) return;
+      scheduled = true;
+      const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
+        .requestIdleCallback;
+      if (ric) ric(flush);
+      else setTimeout(flush, 50);
+    };
+
+    const obs = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "childList") {
+          m.addedNodes.forEach((node) => pendingNodes.add(node));
+        } else if (m.type === "characterData") {
+          pendingNodes.add(m.target);
+        }
+      }
+      if (pendingNodes.size) schedule();
     });
     obs.observe(document.body, {
       childList: true,
       subtree: true,
       characterData: true,
-      attributes: true,
-      attributeFilter: [...TRANSLATABLE_ATTRS],
     });
-    observerRef.current = obs;
-    return () => { obs.disconnect(); observerRef.current = null; };
+    return () => { obs.disconnect(); pendingNodes.clear(); };
   }, [lang]);
 
   const value = useMemo<LanguageState>(() => ({ lang, dir, setLang, toggle }), [lang, dir, setLang, toggle]);
