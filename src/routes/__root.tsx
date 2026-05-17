@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const PRE_PAINT_LANG = `(function(){try{var RTL=['ar','he','fa','ur'];var v=localStorage.getItem('lateen_lang')||'ar';document.documentElement.lang=v;document.documentElement.dir=RTL.indexOf(v)>-1?'rtl':'ltr';}catch(e){document.documentElement.lang='ar';document.documentElement.dir='rtl';}})();`;
+const PRE_PAINT_LANG = `(function(){try{var v=localStorage.getItem('lateen_lang');if(v!=='en'&&v!=='ar')v='ar';document.documentElement.lang=v;document.documentElement.dir=v==='ar'?'rtl':'ltr';}catch(e){document.documentElement.lang='ar';document.documentElement.dir='rtl';}})();`;
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
@@ -112,7 +112,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <LanguageProvider><AuthProvider>{children}</AuthProvider></LanguageProvider>
+        {/* AuthProvider mounted OUTSIDE LanguageProvider so language toggles
+            never re-render auth state or tear down dashboards. */}
+        <AuthProvider><LanguageProvider>{children}</LanguageProvider></AuthProvider>
         <Scripts />
       </body>
     </html>

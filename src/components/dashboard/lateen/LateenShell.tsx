@@ -34,12 +34,51 @@ function loadChartJs(): Promise<void> {
 
 type Role = "business" | "marketer" | "admin";
 
+// Render-function names across the three dashboards. After any of these runs,
+// we re-translate the container so freshly-injected English strings flip to
+// Arabic immediately. Unknown names are silently skipped per script.
+const RENDER_HOOKS = [
+  // shared / business
+  "renderProducts", "renderPhotoGrid", "applyFilters", "updateSummary", "goTo",
+  "buildMainChart", "buildRingChart",
+  // marketer
+  "go", "rg2", "rr", "renderSaved", "onProductChange", "updateFeeCard", "openD", "openF",
+  // admin
+  "admGo", "admLoadMetrics", "admLoadVerify", "admLoadPayouts", "admRenderUsers",
+  "admLoadProducts", "admLoadEmployees", "admOpenProduct",
+];
+
 function buildScript(src: string): string {
   const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(
     (m) => m[1],
   );
   const exports = names.length ? `Object.assign(window, { ${names.join(", ")} });` : "";
-  return `(function(){\n${src}\n${exports}\n})();`;
+  const hookNames = JSON.stringify(RENDER_HOOKS);
+  // After the script defines its functions, wrap each render function to call
+  // window.__retranslate(). This is the "patch render tails" strategy from the
+  // approved plan — no MutationObserver, no AI, no network.
+  const wrap = `
+;(function(){
+  var hooks = ${hookNames};
+  hooks.forEach(function(name){
+    var fn = window[name];
+    if (typeof fn !== 'function' || fn.__lateenWrapped) return;
+    var wrapped = function(){
+      var r = fn.apply(this, arguments);
+      if (window.__retranslate) {
+        if (r && typeof r.then === 'function') {
+          r.then(function(){ window.__retranslate(); }, function(){});
+        } else {
+          window.__retranslate();
+        }
+      }
+      return r;
+    };
+    wrapped.__lateenWrapped = true;
+    window[name] = wrapped;
+  });
+})();`;
+  return `(function(){\n${src}\n${exports}\n${wrap}\n})();`;
 }
 
 export function LateenShell({ role, overrideUserId }: { role: Role; overrideUserId?: string }) {
@@ -47,18 +86,32 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
   const { signOut, user } = useAuth();
   const { lang } = useLanguage();
   const userId = overrideUserId ?? user?.id;
-  // Keep signOut in a ref so the script-injection effect doesn't re-run
-  // every time AuthProvider re-renders (e.g. when LanguageProvider above
-  // re-renders on a language switch, which would otherwise tear down and
-  // re-inject the embedded dashboard script and momentarily wipe its data).
+
   const signOutRef = useRef(signOut);
   useEffect(() => { signOutRef.current = signOut; }, [signOut]);
+
+  // Track what's currently mounted so we never re-inject for the same role+user.
+  const mountedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el || !userId) return;
-    // Install Supabase-backed API on window so the embedded scripts can call it.
+    const key = `${role}:${userId}`;
+    // Idempotency: if already mounted for this role+user, skip the whole
+    // tear-down/re-inject cycle — preserves balance, analytics, products, orders.
+    if (mountedKeyRef.current === key) return;
+    mountedKeyRef.current = key;
+
     (window as unknown as { LateenAPI?: unknown }).LateenAPI = createLateenApi(userId);
+
+    // Expose the retranslate bridge for the embedded script's wrapped renderers.
+    (window as unknown as { __retranslate?: () => void }).__retranslate = () => {
+      if (containerRef.current) {
+        const currentLang = (window as unknown as { __lang?: string }).__lang ?? "en";
+        translateDOM(containerRef.current, currentLang);
+      }
+    };
+
     let cancelled = false;
     let injected: HTMLScriptElement | null = null;
 
@@ -75,10 +128,11 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       .then(() => {
         if (cancelled) return;
         const script = document.createElement("script");
-        script.textContent = buildScript(role === "business" ? businessScript : role === "admin" ? adminScript : marketerScript);
+        script.textContent = buildScript(
+          role === "business" ? businessScript : role === "admin" ? adminScript : marketerScript,
+        );
         document.body.appendChild(script);
         injected = script;
-        // Translate after the embedded script has populated dynamic content
         requestAnimationFrame(() => {
           if (containerRef.current)
             translateDOM(
@@ -92,23 +146,21 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     return () => {
       cancelled = true;
       el.removeEventListener("click", onClick);
-      const w = window as unknown as { __lateenUnsubs?: Array<() => void> };
+      const w = window as unknown as { __lateenUnsubs?: Array<() => void>; __retranslate?: () => void };
       if (w.__lateenUnsubs) {
         for (const fn of w.__lateenUnsubs) {
-          try {
-            fn();
-          } catch {
-            /* ignore */
-          }
+          try { fn(); } catch { /* ignore */ }
         }
         w.__lateenUnsubs = [];
       }
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
+      delete w.__retranslate;
+      mountedKeyRef.current = null;
     };
   }, [role, userId]);
 
-  // When lang state changes (re-render), translate before paint to avoid flicker
+  // Language toggle: translate in place before paint. No script re-injection.
   useLayoutEffect(() => {
     if (containerRef.current) translateDOM(containerRef.current, lang);
   }, [lang]);

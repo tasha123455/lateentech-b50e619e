@@ -10,13 +10,11 @@ import {
 import { LOCALES, RTL_CODES } from "./locales";
 import { T } from "./translations";
 
-// 100% static, hardcoded dictionary translation system.
-// No AI. No MutationObserver. No network calls. No caches.
+// 100% static, hardcoded EN/AR dictionary. No AI, no observer, no network.
 
 const STORAGE_KEY = "lateen_lang";
-const DEFAULT_LANG = "ar";
+const DEFAULT_LANG: "en" | "ar" = "ar";
 
-// Skip strings that are pure numbers / money / time / symbols.
 const SKIP_RE = /^[\s\d.,:;%$€£¥₹\-+/()*#@~_=<>&|·•—–…«»‹›"'`!?\\[\]{}]+$/;
 const MAX_LEN = 800;
 
@@ -29,9 +27,11 @@ function shouldSkip(text: string): boolean {
   return false;
 }
 
+type LangCode = "en" | "ar";
+
 type Ctx = {
-  lang: string;
-  setLang: (code: string) => void;
+  lang: LangCode;
+  setLang: (code: LangCode) => void;
   t: (key: string) => string;
   ready: boolean;
   open: () => void;
@@ -41,33 +41,32 @@ type Ctx = {
 
 const LanguageContext = createContext<Ctx | null>(null);
 
-function readInitial(): string {
+function readInitial(): LangCode {
   if (typeof window === "undefined") return DEFAULT_LANG;
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
-    if (v && LOCALES.some((l) => l.code === v)) return v;
+    if (v === "en" || v === "ar") return v;
   } catch {
     /* ignore */
   }
   return DEFAULT_LANG;
 }
 
-function applyHtmlAttrs(code: string) {
+function applyHtmlAttrs(code: LangCode) {
   if (typeof document === "undefined") return;
   document.documentElement.lang = code;
   document.documentElement.dir = RTL_CODES.has(code) ? "rtl" : "ltr";
 }
 
-function lookup(text: string, code: string): string {
+function lookup(text: string, code: LangCode): string {
   if (code === "en") return text;
-  return T[text]?.[code] ?? text;
+  return T[text]?.ar ?? text;
 }
 
-// ── DOM walker (static-only) ─────────────────────────────
-// Used exclusively to translate the embedded HTML dashboards
-// (business/marketer/admin) that are injected via dangerouslySetInnerHTML.
-// React components themselves use the t() function directly.
+// DOM walker — used to translate the embedded HTML dashboards injected via
+// dangerouslySetInnerHTML. React components themselves use t() directly.
 export function translateDOM(root: HTMLElement | Document, code: string) {
+  const lang: LangCode = code === "ar" ? "ar" : "en";
   const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT"]);
 
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -84,8 +83,6 @@ export function translateDOM(root: HTMLElement | Document, code: string) {
   while ((n = walker.nextNode())) {
     const tnode = n as Text & { __orig?: string; __translated?: string };
     const current = tnode.nodeValue ?? "";
-    // Capture the source text the first time we see this node, or whenever
-    // a dashboard script has replaced the previous translation with new English.
     if (
       tnode.__orig === undefined ||
       (tnode.__translated !== undefined && current !== tnode.__translated)
@@ -97,7 +94,7 @@ export function translateDOM(root: HTMLElement | Document, code: string) {
     if (shouldSkip(stripped)) continue;
     const lead = raw.match(/^\s*/)?.[0] ?? "";
     const tail = raw.match(/\s*$/)?.[0] ?? "";
-    const translated = lookup(stripped, code);
+    const translated = lookup(stripped, lang);
     const next = lead + translated + tail;
     if (tnode.nodeValue !== next) {
       tnode.nodeValue = next;
@@ -123,7 +120,7 @@ export function translateDOM(root: HTMLElement | Document, code: string) {
       }
       const raw = (elx[origKey] as string).trim();
       if (shouldSkip(raw)) continue;
-      const translated = lookup(raw, code);
+      const translated = lookup(raw, lang);
       if (el.getAttribute(attr) !== translated) {
         el.setAttribute(attr, translated);
         elx[translatedKey] = translated;
@@ -132,12 +129,11 @@ export function translateDOM(root: HTMLElement | Document, code: string) {
   });
 }
 
-// ── Provider ──────────────────────────────────────────
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<string>(() => readInitial());
+  const [lang, setLangState] = useState<LangCode>(() => readInitial());
   const [isOpen, setIsOpen] = useState(false);
 
-  // Apply lang + dir BEFORE paint to avoid any flicker.
+  // Sync dir + lang BEFORE paint to prevent flicker.
   useLayoutEffect(() => {
     applyHtmlAttrs(lang);
     if (typeof window !== "undefined") {
@@ -145,8 +141,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, [lang]);
 
-  const setLang = useCallback((code: string) => {
-    if (!LOCALES.some((l) => l.code === code)) return;
+  const setLang = useCallback((code: LangCode) => {
+    if (code !== "en" && code !== "ar") return;
     try {
       window.localStorage.setItem(STORAGE_KEY, code);
     } catch {
@@ -158,22 +154,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const t = useCallback(
     (key: string) => {
       if (lang === "en") return key;
-      return T[key]?.[lang] ?? key;
+      return T[key]?.ar ?? key;
     },
     [lang],
   );
 
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
+
   const value = useMemo<Ctx>(
-    () => ({
-      lang,
-      setLang,
-      t,
-      ready: true,
-      open: () => setIsOpen(true),
-      close: () => setIsOpen(false),
-      isOpen,
-    }),
-    [lang, setLang, t, isOpen],
+    () => ({ lang, setLang, t, ready: true, open, close, isOpen }),
+    [lang, setLang, t, open, close, isOpen],
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
@@ -193,8 +184,11 @@ export function hasStoredLanguage(): boolean {
   if (typeof window === "undefined") return false;
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
-    return !!(v && LOCALES.some((l) => l.code === v));
+    return v === "en" || v === "ar";
   } catch {
     return false;
   }
 }
+
+// Ensure LOCALES type compatibility (referenced elsewhere via LOCALES)
+export { LOCALES };
