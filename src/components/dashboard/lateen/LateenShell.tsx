@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
+
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage, translateDOM } from "@/i18n/LanguageContext";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
