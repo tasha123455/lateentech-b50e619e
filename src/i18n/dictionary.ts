@@ -455,6 +455,88 @@ export const DICT: Record<string, string> = {
     "المقاسات والألوان مضافة افتراضياً. تقدر تغير اسمها، تمسحها، أو تضيف خياراتك الخاصة (مثال: الخامة، النكهة، الستايل)",
   "Add countries and cities. Set shipping and delivery cost per city.":
     "ضيف الدول والمدن. وحدد تكلفة الشحن والتوصيل لكل مدينة.",
+
+  // ===== Final sweep — missing user-facing strings =====
+  "— Add in profile —": "— أضف في الملف الشخصي —",
+  "— Select —": "— اختر —",
+  "— Select city —": "— اختر المدينة —",
+  "— Select country —": "— اختر الدولة —",
+  "— Select country first —": "— اختر الدولة أولاً —",
+  "Select…": "اختر…",
+  "+ Add another variant": "+ أضف خياراً آخر",
+  "+ Add country to zones": "+ أضف دولة إلى المناطق",
+  "+ Add value": "+ أضف قيمة",
+  "+ New": "+ جديد",
+  "Add a city…": "أضف مدينة…",
+  "⏳ Pending verification": "⏳ بانتظار التحقق",
+  "⏳ Pending verification by admin": "⏳ بانتظار تحقق الإدارة",
+  "✏ Edit": "✏ تعديل",
+  "✕ Receipt rejected": "✕ تم رفض الإيصال",
+  "🗑 Delete": "🗑 حذف",
+  "📷 Take photo (Camera)": "📷 التقط صورة (الكاميرا)",
+  "🖼️ Choose from Gallery": "🖼️ اختر من المعرض",
+  "📁 Upload from Files": "📁 ارفع من الملفات",
+  "📝 Draft not sent": "📝 مسودة غير مرسلة",
+  "Add receipt & send": "أضف الإيصال وأرسل",
+  "Re-upload receipt": "أعد رفع الإيصال",
+  "Receipt will go to admin for verification, then forwarded to the business owner.":
+    "سيتم إرسال الإيصال للإدارة للتحقق، ثم يُحوَّل لصاحب العمل.",
+  "Saved locally. Upload a receipt to send for verification.":
+    "تم الحفظ محلياً. ارفع الإيصال لإرساله للتحقق.",
+  "Analysing image…": "جاري تحليل الصورة…",
+  "Any": "الكل",
+  "Approve & forward": "اعتماد وتحويل",
+  "Approved forwarded to business": "تمت الموافقة وتم التحويل للشركة",
+  "Awaiting business": "بانتظار الشركة",
+  "Bank / Provider": "البنك / المزود",
+  "Camera Gallery Files": "الكاميرا · المعرض · الملفات",
+  "Cash / Other": "نقداً / أخرى",
+  "Confirmed & delivered, selected month": "تم التأكيد والتوصيل، الشهر المحدد",
+  "Confirmed & delivered, selected year": "تم التأكيد والتوصيل، السنة المحددة",
+  "Contact name:": "اسم جهة الاتصال:",
+  "e.g. Barclays": "مثال: باركليز",
+  "e.g. Omar Hassan": "مثال: عمر حسن",
+  "Failed to load.": "فشل التحميل.",
+  "Fees in": "الرسوم في",
+  "Funds arrive in 2–5 business days": "تصل الأموال خلال 2–5 أيام عمل",
+  "Go to Account": "الذهاب إلى الحساب",
+  "Hidden": "مخفي",
+  "Hired": "تم التوظيف",
+  "History": "السجل",
+  "Joined:": "انضم في:",
+  "Last 30 days": "آخر 30 يوماً",
+  "Method": "الطريقة",
+  "Monthly salary (£)": "الراتب الشهري (£)",
+  "No employees match.": "لا يوجد موظفون مطابقون.",
+  "No matches": "لا توجد نتائج",
+  "No payments recorded yet.": "لم يتم تسجيل أي مدفوعات بعد.",
+  "No payout details on file — contact the marketer.":
+    "لا توجد بيانات صرف مسجلة — تواصل مع المسوّق.",
+  "No payout requests pending.": "لا توجد طلبات صرف معلقة.",
+  "No receipt image": "لا توجد صورة للإيصال",
+  "No receipts awaiting review.": "لا توجد إيصالات بانتظار المراجعة.",
+  "No users found.": "لم يتم العثور على مستخدمين.",
+  "No variants. Tap \"Add another variant\" below.":
+    "لا توجد خيارات. اضغط \"أضف خياراً آخر\" بالأسفل.",
+  "Not found.": "غير موجود.",
+  "Payday": "يوم الدفع",
+  "per unit calculated by Lateen": "للوحدة — تحسبها Lateen",
+  "Platform fee (5%)": "رسوم المنصة (5%)",
+  "Platform fee (per unit)": "رسوم المنصة (للوحدة)",
+  "Product not found.": "المنتج غير موجود.",
+  "Receipt": "الإيصال",
+  "Reject with note": "رفض مع ملاحظة",
+  "Remove group": "حذف المجموعة",
+  "Save & request withdrawal": "حفظ وطلب السحب",
+  "SWIFT/BIC": "SWIFT/BIC",
+  "Total paid:": "إجمالي المدفوع:",
+  "Track & manage orders": "تتبع وإدارة الطلبيات",
+  "Upload the screenshot in the order form and tap \"Yes, paid.\" The order is then sent to the business for processing and shipping.":
+    "ارفع الصورة في نموذج الطلبية واضغط \"نعم، تم الدفع\". بعدها يتم إرسال الطلبية للشركة للمعالجة والشحن.",
+  "Variant name": "اسم الخيار",
+  "Your commission (per unit)": "عمولتك (للوحدة)",
+  "EMP-001": "EMP-001",
+  "receipt": "إيصال",
 };
 
 // Build a case-insensitive lookup map (lowercased key -> Arabic value).
@@ -520,6 +602,30 @@ const PATTERNS: Pattern[] = [
   { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من ${m[1]} منتجات` },
   // "Delivered" variants like "Deliv." or "deliv"
   { re: /^Deliv\.?$/i, build: () => `التوصيل` },
+
+  // "0 new", "5 new" — notification banner
+  { re: /^(\d[\d,]*)\s+new$/i, build: (m) => `${m[1]} جديد` },
+  // "£0.00 pending" / "£12.50 pending"
+  { re: /^([£$€])\s*([\d.,]+)\s+pending$/i, build: (m) => `${m[1]}${m[2]} معلّق` },
+  // "0% failure rate" / "12.5% failure rate"
+  { re: /^([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة فشل ${m[1]}%` },
+  // "per unit" / "per unit × 1"
+  { re: /^per\s+unit$/i, build: () => `للوحدة` },
+  { re: /^([£$€]?[\d.,]*)\s*per\s+unit\s*[×x]\s*(\d+)$/i,
+    build: (m) => `${m[1] ? m[1] + ' ' : ''}للوحدة × ${m[2]}` },
+  // "Draft · not sent" / "Draft not sent"
+  { re: /^Draft\s*[·.\-]?\s*not\s+sent$/i, build: () => `مسودة · لم تُرسل` },
+
+  // "Paid June 2025" / "Pending July 2025" (admin period labels)
+  { re: /^Paid\s+([A-Z][a-z]+\s+\d{4})$/, build: (m) => `تم الدفع ${m[1]}` },
+  { re: /^Pending\s+([A-Z][a-z]+\s+\d{4})$/, build: (m) => `معلّق ${m[1]}` },
+  // "Failed to load: <message>"
+  { re: /^Failed\s+to\s+load\s*[:\-]\s*(.+)$/i, build: (m) => `فشل التحميل: ${m[1]}` },
+  // "Size: M" / "Colour: Red"
+  { re: /^Size\s*:\s*(.+)$/i, build: (m) => `المقاس: ${m[1]}` },
+  { re: /^Colou?r\s*:\s*(.+)$/i, build: (m) => `اللون: ${m[1]}` },
+  // "Note: ..."
+  { re: /^Note\s*:\s*(.+)$/i, build: (m) => `ملاحظة: ${m[1]}` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
