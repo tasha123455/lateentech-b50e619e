@@ -135,7 +135,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const t = useCallback(
     (key: string) => {
       if (lang === "en") return key;
-      return T[key]?.[lang] ?? key;
+      return T[key]?.ar ?? key;
     },
     [lang],
   );
