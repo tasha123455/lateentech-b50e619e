@@ -722,6 +722,20 @@ export const T: Translations = {
   "Fri": { ar: "الجمعة" },
   "Sat": { ar: "السبت" },
   "Sun": { ar: "الأحد" },
+
+  // ── App chrome (root + dashboard route) ──────────────
+  "Page not found": { ar: "الصفحة غير موجودة", es: "Página no encontrada", fr: "Page introuvable", de: "Seite nicht gefunden", it: "Pagina non trovata", pt: "Página não encontrada", "pt-BR": "Página não encontrada", nl: "Pagina niet gevonden", ru: "Страница не найдена", he: "הדף לא נמצא", hi: "पृष्ठ नहीं मिला", "zh-CN": "未找到页面", "zh-TW": "找不到頁面", ja: "ページが見つかりません", ko: "페이지를 찾을 수 없습니다", tr: "Sayfa bulunamadı", id: "Halaman tidak ditemukan" },
+  "The page you're looking for doesn't exist or has been moved.": { ar: "الصفحة التي تبحث عنها غير موجودة أو تم نقلها." },
+  "Go home": { ar: "العودة للرئيسية", es: "Ir al inicio", fr: "Accueil", de: "Zur Startseite", it: "Vai alla home", pt: "Ir para o início", "pt-BR": "Ir para o início", nl: "Naar home", ru: "На главную", he: "לדף הבית", hi: "होम जाएँ", "zh-CN": "回到首页", "zh-TW": "回到首頁", ja: "ホームへ", ko: "홈으로", tr: "Ana sayfaya dön", id: "Ke beranda" },
+  "This page didn't load": { ar: "تعذّر تحميل هذه الصفحة" },
+  "Something went wrong on our end. You can try refreshing or head back home.": { ar: "حدث خطأ من جانبنا. يمكنك إعادة المحاولة أو العودة للرئيسية." },
+  "Try again": { ar: "حاول مرة أخرى", es: "Reintentar", fr: "Réessayer", de: "Erneut versuchen", it: "Riprova", pt: "Tentar de novo", "pt-BR": "Tentar novamente", nl: "Opnieuw proberen", ru: "Повторить", he: "נסה שוב", hi: "पुनः प्रयास", "zh-CN": "重试", "zh-TW": "重試", ja: "再試行", ko: "다시 시도", tr: "Tekrar dene", id: "Coba lagi" },
+  "Loading…": { ar: "جارٍ التحميل…", es: "Cargando…", fr: "Chargement…", de: "Lädt…", it: "Caricamento…", pt: "A carregar…", "pt-BR": "Carregando…", nl: "Laden…", ru: "Загрузка…", he: "טוען…", hi: "लोड हो रहा है…", "zh-CN": "加载中…", "zh-TW": "載入中…", ja: "読み込み中…", ko: "로딩 중…", tr: "Yükleniyor…", id: "Memuat…" },
+  "Setting up your account…": { ar: "جارٍ إعداد حسابك…" },
+  "If this persists, sign out and pick a role again.": { ar: "إن استمر ذلك، سجّل الخروج واختر دورًا من جديد." },
+  "👁 Viewing as": { ar: "👁 يُعرض باسم" },
+  "read-only support mode": { ar: "وضع الدعم للقراءة فقط" },
+  "Exit": { ar: "خروج", es: "Salir", fr: "Quitter", de: "Beenden", it: "Esci", pt: "Sair", "pt-BR": "Sair", nl: "Sluiten", ru: "Выйти", he: "יציאה", hi: "बाहर निकलें", "zh-CN": "退出", "zh-TW": "退出", ja: "終了", ko: "나가기", tr: "Çıkış", id: "Keluar" },
 };
 
 export function translate(key: string, code: string): string {
