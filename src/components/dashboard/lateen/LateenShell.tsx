@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
+
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage, translateDOM } from "@/i18n/LanguageContext";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
@@ -46,6 +47,12 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
   const { signOut, user } = useAuth();
   const { lang } = useLanguage();
   const userId = overrideUserId ?? user?.id;
+  // Keep signOut in a ref so the script-injection effect doesn't re-run
+  // every time AuthProvider re-renders (e.g. when LanguageProvider above
+  // re-renders on a language switch, which would otherwise tear down and
+  // re-inject the embedded dashboard script and momentarily wipe its data).
+  const signOutRef = useRef(signOut);
+  useEffect(() => { signOutRef.current = signOut; }, [signOut]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -59,7 +66,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       const target = (e.target as HTMLElement | null)?.closest('[data-action="sign-out"]');
       if (target) {
         e.preventDefault();
-        void signOut();
+        void signOutRef.current();
       }
     };
     el.addEventListener("click", onClick);
@@ -99,7 +106,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
     };
-  }, [role, signOut, userId]);
+  }, [role, userId]);
 
   // When lang state changes (re-render), translate before paint to avoid flicker
   useLayoutEffect(() => {
