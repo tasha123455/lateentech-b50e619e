@@ -47,6 +47,12 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
   const { signOut, user } = useAuth();
   const { lang } = useLanguage();
   const userId = overrideUserId ?? user?.id;
+  // Keep signOut in a ref so the script-injection effect doesn't re-run
+  // every time AuthProvider re-renders (e.g. when LanguageProvider above
+  // re-renders on a language switch, which would otherwise tear down and
+  // re-inject the embedded dashboard script and momentarily wipe its data).
+  const signOutRef = useRef(signOut);
+  useEffect(() => { signOutRef.current = signOut; }, [signOut]);
 
   useEffect(() => {
     const el = containerRef.current;
