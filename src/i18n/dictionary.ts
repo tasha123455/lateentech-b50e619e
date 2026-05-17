@@ -422,6 +422,39 @@ export const DICT: Record<string, string> = {
   "Jan": "يناير", "Feb": "فبراير", "Mar": "مارس", "Apr": "أبريل",
   "May": "مايو", "Jun": "يونيو", "Jul": "يوليو", "Aug": "أغسطس",
   "Sep": "سبتمبر", "Oct": "أكتوبر", "Nov": "نوفمبر", "Dec": "ديسمبر",
+
+  // ===== Final sweep: actions, selects, uploads =====
+  "- Select -": "- اختار -",
+  "— Select a product —": "— اختار منتج —",
+  "-- Select --": "- اختار -",
+  "Add value +": "+ إضافة قيمة",
+  "Add another variant +": "+ إضافة خيار تاني",
+  "Add country to zones +": "+ إضافة دولة لمناطق التوصيل",
+  "Take photo (Camera)": "التقاط صورة (الكاميرا)",
+  "Choose from Gallery": "اختيار من الاستوديو",
+  "Upload from Files": "رفع من الملفات",
+  "Save as Draft (keep editing later)": "حفظ كمسودة (الاستمرار في التعديل لاحقاً)",
+
+  // ===== Order details / receipts =====
+  "ORDER": "الطلبية",
+  "Order": "الطلبية",
+  "Code": "الكود",
+  "Shipping": "الشحن",
+  "Approved · forwarded to business ✓ ✓": "تمت الموافقة · تم التحويل للشركة ✓ ✓",
+  "Pending verification by admin ⏳": "في انتظار مراجعة الإدارة ⏳",
+  "View payment receipt": "عرض إيصال الدفع",
+  "commission": "العمولة",
+
+  // ===== Product creation placeholders =====
+  "e.g. Running shoes": "مثال: أحذية رياضية",
+  "Brief description for marketers...": "...وصف مختصر للمسوّقين",
+  "...Brief description for marketers": "...وصف مختصر للمسوّقين",
+  "Special instructions, preferred delivery time, etc": "ملاحظات خاصة، وقت التوصيل المفضل، إلخ",
+  ".Special instructions, preferred delivery time, etc": "ملاحظات خاصة، وقت التوصيل المفضل، إلخ.",
+  "Sizes and Colours are added by default. Rename, remove, or add your own (e.g. Material, Flavour, Style)":
+    "المقاسات والألوان مضافة افتراضياً. تقدر تغير اسمها، تمسحها، أو تضيف خياراتك الخاصة (مثال: الخامة، النكهة، الستايل)",
+  "Add countries and cities. Set shipping and delivery cost per city.":
+    "ضيف الدول والمدن. وحدد تكلفة الشحن والتوصيل لكل مدينة.",
 };
 
 // Build a case-insensitive lookup map (lowercased key -> Arabic value).
@@ -453,6 +486,40 @@ const PATTERNS: Pattern[] = [
   { re: /^Hey[,!]?\s+(.+)$/i, build: (m) => `مرحباً ${m[1]}` },
   // "Low stock: 3" / "Low stock (3)"
   { re: /^Low\s+stock\b(.*)$/i, build: (m) => `المخزون منخفض${m[1]}` },
+
+  // "New (2)" -> "جديد (2)"
+  { re: /^New\s*\((\d+)\)$/i, build: (m) => `جديد (${m[1]})` },
+  // "Qty: 1" / "QTY 1" -> "الكمية: 1"
+  { re: /^Qty\s*[:.]?\s*(\d[\d,]*)$/i, build: (m) => `الكمية: ${m[1]}` },
+  { re: /^Quantity\s*[:.]?\s*(\d[\d,]*)$/i, build: (m) => `الكمية: ${m[1]}` },
+  // "Shipping (Benghazi)" — translate inner city if dict has it
+  { re: /^Shipping\s*\((.+)\)$/i, build: (m) => {
+      const inner = DICT[m[1]] || DICT_CI[m[1].toLowerCase()] || m[1];
+      return `الشحن (${inner})`;
+    } },
+  // "Delivery (City)"
+  { re: /^Delivery\s*\((.+)\)$/i, build: (m) => {
+      const inner = DICT[m[1]] || DICT_CI[m[1].toLowerCase()] || m[1];
+      return `التوصيل (${inner})`;
+    } },
+  // "Receipt uploaded: <datetime>"
+  { re: /^Receipt\s+uploaded\s*[:\-]\s*(.+)$/i, build: (m) => `تم رفع الإيصال: ${m[1]}` },
+  // "Reviewed: <datetime>"
+  { re: /^Reviewed\s*[:\-]\s*(.+)$/i, build: (m) => `تمت المراجعة: ${m[1]}` },
+  // "Available across X currencies"
+  { re: /^Available\s+across\s+(\d[\d,]*)\s+currenc(?:y|ies)\b\.?$/i,
+    build: (m) => `متوفر بـ ${m[1]} عملات` },
+  // "15 days" / "30 day"
+  { re: /^(\d[\d,]*)\s+days?\b\.?$/i, build: (m) => `${m[1]} أيام` },
+  // "5 products"
+  { re: /^(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `${m[1]} منتجات` },
+  // "3 cities"
+  { re: /^(\d[\d,]*)\s+cities\b\.?$/i, build: (m) => `${m[1]} مدن` },
+  // "of 12 orders" / "of 5 products"
+  { re: /^of\s+(\d[\d,]*)\s+orders?\b\.?$/i, build: (m) => `من ${m[1]} طلبيات` },
+  { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من ${m[1]} منتجات` },
+  // "Delivered" variants like "Deliv." or "deliv"
+  { re: /^Deliv\.?$/i, build: () => `التوصيل` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
