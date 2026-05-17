@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,13 +28,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadRole = async (userId: string) => {
+  const loadRole = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
     const roles = (data ?? []).map((r) => r.role as Role);
-    // Priority: admin > business > marketer
     const picked: Role | null = roles.includes("admin")
       ? "admin"
       : roles.includes("business")
@@ -35,13 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ? "marketer"
           : null;
     setRole(picked);
-  };
+  }, []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       if (s?.user) {
-        // defer to avoid deadlock
         setTimeout(() => loadRole(s.user.id), 0);
       } else {
         setRole(null);
@@ -53,16 +59,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       else setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
+  }, [loadRole]);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
   }, []);
 
-  const value: AuthState = {
-    user: session?.user ?? null,
-    session,
-    role,
-    loading,
-    signOut: async () => { await supabase.auth.signOut(); },
-    refreshRole: async () => { if (session?.user) await loadRole(session.user.id); },
-  };
+  const refreshRole = useCallback(async () => {
+    if (session?.user) await loadRole(session.user.id);
+  }, [session, loadRole]);
+
+  const value = useMemo<AuthState>(
+    () => ({
+      user: session?.user ?? null,
+      session,
+      role,
+      loading,
+      signOut,
+      refreshRole,
+    }),
+    [session, role, loading, signOut, refreshRole],
+  );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
