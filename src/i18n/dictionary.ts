@@ -626,6 +626,36 @@ const PATTERNS: Pattern[] = [
   { re: /^Colou?r\s*:\s*(.+)$/i, build: (m) => `اللون: ${m[1]}` },
   // "Note: ..."
   { re: /^Note\s*:\s*(.+)$/i, build: (m) => `ملاحظة: ${m[1]}` },
+
+  // "Marketer confirmed payment · 16 May 2026"
+  { re: /^Marketer\s+confirmed\s+payment\s*[·\-]\s*(.+)$/i,
+    build: (m) => `المسوّق أكد الدفع · ${m[1]}` },
+  // "Upfront fee paid · 11.25د.ل · 16 May 2026" (any order/extras)
+  { re: /^Upfront\s+fee\s+paid\s*[·\-]\s*(.+)$/i,
+    build: (m) => `تم دفع العربون · ${m[1]}` },
+  // "Delivered ✓" / "Delivered ✔"
+  { re: /^Delivered\s*[✓✔]+$/i, build: () => `تم التسليم ✓` },
+  // "Approved · forwarded to business ✓ ✓"
+  { re: /^Approved\s*[·\-]\s*forwarded\s+to\s+business[\s✓✔]*$/i,
+    build: () => `تمت الموافقة · تم التحويل للشركة ✓ ✓` },
+  // "wallet د.ل" / "wallet د.إ" / "wallet $"
+  { re: /^wallet\s+(.+)$/i, build: (m) => `المحفظة ${m[1]}` },
+  { re: /^(.+)\s+wallet$/i, build: (m) => `المحفظة ${m[1]}` },
+  // "1 cities available" / "12 cities available"
+  { re: /^(\d[\d,]*)\s+cities\s+available\b\.?$/i,
+    build: (m) => `${m[1]} مدن متاحة` },
+  // "1 countries available for this product"
+  { re: /^(\d[\d,]*)\s+countries\s+available(?:\s+for\s+this\s+product)?\b\.?$/i,
+    build: (m) => `${m[1]} دول متاحة لهذا المنتج` },
+  // "For Benghazi, LY · set by business owner"
+  { re: /^For\s+(.+?)\s*[·\-]\s*set\s+by\s+business\s+owner\b\.?$/i,
+    build: (m) => `لـ ${m[1]} · يحدده صاحب الشركة` },
+  { re: /^set\s+by\s+business\s+owner\b\.?$/i,
+    build: () => `يحدده صاحب الشركة` },
+  // "commission %28.6" / "commission 28.6%"
+  { re: /^commission\s+%?([\d.]+)%?$/i, build: (m) => `العمولة ${m[1]}%` },
+  // "%28.6 commission" / "28.6% commission"
+  { re: /^%?([\d.]+)%?\s+commission$/i, build: (m) => `عمولة ${m[1]}%` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
