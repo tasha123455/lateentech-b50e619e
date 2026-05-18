@@ -632,10 +632,13 @@ const PATTERNS: Pattern[] = [
   { re: /^Qty\s*[:.]?\s*(\d[\d,]*)$/i, build: (m) => `الكمية: ${m[1]}` },
   { re: /^Quantity\s*[:.]?\s*(\d[\d,]*)$/i, build: (m) => `الكمية: ${m[1]}` },
   // "Shipping (Benghazi)" — translate inner city if dict has it
-  { re: /^Shipping\s*\((.+)\)$/i, build: (m) => {
-      const inner = DICT[m[1]] || DICT_CI[m[1].toLowerCase()] || m[1];
+  { re: /^Shipping\s*\((.*)\)$/i, build: (m) => {
+      const inner = m[1] ? (DICT[m[1]] || DICT_CI[m[1].toLowerCase()] || m[1]) : "";
       return `الشحن (${inner})`;
     } },
+  // "per unit · marketer £5.00 + platform £1.00"
+  { re: /^per\s+unit\s*[·\-]\s*marketer\s+(.+?)\s*\+\s*platform\s+(.+)$/i,
+    build: (m) => `للوحدة · المسوّق ${m[1]} + المنصة ${m[2]}` },
   // "Delivery (City)"
   { re: /^Delivery\s*\((.+)\)$/i, build: (m) => {
       const inner = DICT[m[1]] || DICT_CI[m[1].toLowerCase()] || m[1];
