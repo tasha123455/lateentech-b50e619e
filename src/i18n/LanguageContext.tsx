@@ -171,6 +171,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           m.addedNodes.forEach((node) => pendingNodes.add(node));
         } else if (m.type === "characterData") {
           pendingNodes.add(m.target);
+        } else if (m.type === "attributes") {
+          pendingNodes.add(m.target);
         }
       }
       if (pendingNodes.size) schedule();
@@ -179,6 +181,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       childList: true,
       subtree: true,
       characterData: true,
+      attributes: true,
+      attributeFilter: ["placeholder", "title", "aria-label", "alt"],
     });
     return () => { obs.disconnect(); pendingNodes.clear(); };
   }, [lang]);
