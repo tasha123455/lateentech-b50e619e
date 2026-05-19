@@ -716,6 +716,12 @@ const PATTERNS: Pattern[] = [
   { re: /^commission\s+%?([\d.]+)%?$/i, build: (m) => `العمولة ${m[1]}%` },
   // "%28.6 commission" / "28.6% commission"
   { re: /^%?([\d.]+)%?\s+commission$/i, build: (m) => `عمولة ${m[1]}%` },
+  // Product card meta: "£25.00 · 28.6% commission · 3 cities"
+  { re: /^(.+?)\s*·\s*(.+?)\s+commission\s*·\s*(\d[\d,]*)\s+cities$/i,
+    build: (m) => `${m[1]} · عمولة ${m[2]} · ${m[3]} مدن` },
+  // "28.6% commission · 3 cities"
+  { re: /^(.+?)\s+commission\s*·\s*(\d[\d,]*)\s+cities$/i,
+    build: (m) => `عمولة ${m[1]} · ${m[2]} مدن` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
