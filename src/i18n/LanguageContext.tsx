@@ -79,6 +79,14 @@ function shouldSkip(el: Element): boolean {
   return false;
 }
 
+// Attributes (placeholder/title/aria-label/alt) are safe to translate even on
+// TEXTAREA/INPUT — only user-typed text content must be preserved.
+function shouldSkipAttrs(el: Element): boolean {
+  if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "NOSCRIPT") return true;
+  if (el.closest("[data-no-i18n]")) return true;
+  return false;
+}
+
 function walkAndTranslate(root: Node, lang: Lang) {
   // Translate text nodes
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -95,9 +103,9 @@ function walkAndTranslate(root: Node, lang: Lang) {
   // Translate attributes (including the root if it's an Element)
   if (root.nodeType === Node.ELEMENT_NODE) {
     const rootEl = root as Element;
-    if (!shouldSkip(rootEl)) applyAttributes(rootEl, lang);
+    if (!shouldSkipAttrs(rootEl)) applyAttributes(rootEl, lang);
     rootEl.querySelectorAll("*").forEach((el) => {
-      if (!shouldSkip(el)) applyAttributes(el, lang);
+      if (!shouldSkipAttrs(el)) applyAttributes(el, lang);
     });
   }
 }
