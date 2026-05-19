@@ -273,6 +273,10 @@ export const DICT: Record<string, string> = {
   "Total to pay": "الإجمالي المطلوب دفعه",
   "Confirm order": "تأكيد الطلبية",
   "Save changes": "حفظ التغييرات",
+  "Save changes (Draft)": "حفظ التغييرات (مسودة)",
+  "Edit order": "تعديل الطلبية",
+  "Unknown shop": "متجر غير معروف",
+  "No earnings yet": "لا توجد أرباح بعد",
   "To ship": "بانتظار الشحن",
   "Shipped": "تم الشحن",
   "Order delivered": "تم تسليم الطلبية",
@@ -722,6 +726,9 @@ const PATTERNS: Pattern[] = [
   // "28.6% commission · 3 cities"
   { re: /^(.+?)\s+commission\s*·\s*(\d[\d,]*)\s+cities$/i,
     build: (m) => `عمولة ${m[1]} · ${m[2]} مدن` },
+  // "£25.00 · 28.6% commission" (saved/favorites card meta)
+  { re: /^(.+?)\s*·\s*(.+?)\s+commission$/i,
+    build: (m) => `${m[1]} · عمولة ${m[2]}` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
