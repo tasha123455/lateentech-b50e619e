@@ -426,6 +426,8 @@ export const DICT: Record<string, string> = {
   "W": "أ",
   "M": "شهر",
   "Y": "سنة",
+  "Business workspace": "مساحة عمل التاجر",
+  "Marketer workspace": "مساحة عمل المسوّق",
   "Mon": "الإثنين", "Tue": "الثلاثاء", "Wed": "الأربعاء",
   "Thu": "الخميس", "Thur": "الخميس", "Fri": "الجمعة", "Sat": "السبت", "Sun": "الأحد",
   "Jan": "يناير", "Feb": "فبراير", "Mar": "مارس", "Apr": "أبريل",

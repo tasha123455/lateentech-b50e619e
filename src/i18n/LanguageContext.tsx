@@ -133,6 +133,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.body.classList.toggle("lang-ar", lang === "ar");
     document.body.classList.toggle("lang-en", lang === "en");
     walkAndTranslate(document.body, lang);
+    try { window.dispatchEvent(new CustomEvent("lateen-lang", { detail: { lang } })); } catch { /* ignore */ }
   }, [lang, dir]);
 
   // Observe dynamically inserted nodes — ONLY when Arabic is active.
