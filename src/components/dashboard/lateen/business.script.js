@@ -1,5 +1,9 @@
 
 /* Charts */
+const __AR_LBL={Sun:'الأحد',Mon:'الإثنين',Tue:'الثلاثاء',Wed:'الأربعاء',Thu:'الخميس',Fri:'الجمعة',Sat:'السبت',Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر'};
+const __ar=()=>document.documentElement.lang==='ar';
+const __tlbl=v=>(__ar()&&__AR_LBL[v])?__AR_LBL[v]:v;
+window.addEventListener('lateen-lang',()=>{try{if(typeof buildMainChart==='function')buildMainChart();if(typeof renderVariantGroups==='function')renderVariantGroups();}catch(e){}});
 const chartData={revenue:{D:{labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],values:[0,0,0,0,0,0,0]},M:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],values:[0,0,0,0,0,0,0,0,0,0,0,0]},Y:{labels:['2021','2022','2023','2024','2025','2026'],values:[0,0,0,0,0,0]}},pieces:{D:{labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],values:[0,0,0,0,0,0,0]},M:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],values:[0,0,0,0,0,0,0,0,0,0,0,0]},Y:{labels:['2021','2022','2023','2024','2025','2026'],values:[0,0,0,0,0,0]}}};
 const analyticsData={D:{ok:0,fail:0},M:{ok:0,fail:0},Y:{ok:0,fail:0}};
 let currentMetric='revenue',currentPeriod='D',mainChart,ringChart;
