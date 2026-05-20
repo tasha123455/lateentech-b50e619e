@@ -145,6 +145,11 @@ export const DICT: Record<string, string> = {
   "Succeeded": "ناجحة",
   "Failed": "فاشلة",
   "Delivered": "تم التسليم",
+  "✓ Delivered": "✓ تم التسليم",
+  "Full payment received": "تم استلام كامل المبلغ",
+  "Awaiting marketer confirmation": "بانتظار تأكيد المسوّق",
+  "Manual (marketer)": "يدوي (المسوّق)",
+  "(no customer yet)": "(لا يوجد زبون بعد)",
   "Failed (COD)": "فشلت (الدفع عند الاستلام)",
   "Cash-on-delivery failures only": "إخفاقات الدفع عند الاستلام فقط",
   "failure rate": "نسبة الفشل",
@@ -729,6 +734,15 @@ const PATTERNS: Pattern[] = [
   // "£25.00 · 28.6% commission" (saved/favorites card meta)
   { re: /^(.+?)\s*·\s*(.+?)\s+commission$/i,
     build: (m) => `${m[1]} · عمولة ${m[2]}` },
+  // "Awaiting marketer confirmation · 16 May 2026"
+  { re: /^Awaiting\s+marketer\s+confirmation\s*[·\-]\s*(.+)$/i,
+    build: (m) => `بانتظار تأكيد المسوّق · ${m[1]}` },
+  // "Your commission (×2)" / "Your commission ×3"
+  { re: /^Your\s+commission\s*[\(]?\s*[×x]\s*(\d+)\s*[\)]?$/i,
+    build: (m) => `مكسبك من كل بيعة (×${m[1]})` },
+  // "Full payment received · £25.00 · 16 May 2026"
+  { re: /^Full\s+payment\s+received(?:\s*[·\-]\s*(.+))?$/i,
+    build: (m) => m[1] ? `تم استلام كامل المبلغ · ${m[1]}` : `تم استلام كامل المبلغ` },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
