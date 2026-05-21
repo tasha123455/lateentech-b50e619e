@@ -605,6 +605,24 @@ export const DICT: Record<string, string> = {
   "Your commission (per unit)": "عمولتك (للوحدة)",
   "EMP-001": "EMP-001",
   "receipt": "إيصال",
+
+  // ===== Comprehensive audit additions =====
+  "Alerts": "التنبيهات",
+  "Setting up your account…": "جارٍ إعداد حسابك…",
+  "If this persists, sign out and pick a role again.": "إذا استمرت المشكلة، سجّل الخروج واختر دورك من جديد.",
+  "Edit Employee": "تعديل بيانات الموظف",
+  "Enter": "أدخل",
+  "Failed:": "فشل:",
+  "Receipt rejected": "تم رفض الإيصال",
+  "Alex Morgan": "أحمد محمد",
+  "Sunrise Kicks Ltd.": "شركة شروق الأحذية المحدودة",
+  "Phone:": "الهاتف:",
+  "Hired:": "تاريخ التوظيف:",
+  "Payday:": "يوم الدفع:",
+  "Ship:": "الشحن:",
+  "Commission:": "العمولة:",
+  "Platform fee:": "رسوم المنصة:",
+  "Fee to collect:": "العربون المطلوب:",
 };
 
 // Build a case-insensitive lookup map (lowercased key -> Arabic value).
