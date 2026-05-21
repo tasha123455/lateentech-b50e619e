@@ -617,7 +617,6 @@ export const DICT: Record<string, string> = {
   "Alex Morgan": "أحمد محمد",
   "Sunrise Kicks Ltd.": "شركة شروق الأحذية المحدودة",
   "Phone:": "الهاتف:",
-  "Phone:": "الهاتف:",
   "Hired:": "تاريخ التوظيف:",
   "Payday:": "يوم الدفع:",
   "Ship:": "الشحن:",
