@@ -29,10 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadRole = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
+    if (error) throw error;
     const roles = (data ?? []).map((r) => r.role as Role);
     const picked: Role | null = roles.includes("admin")
       ? "admin"
@@ -42,23 +43,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ? "marketer"
           : null;
     setRole(picked);
+    return picked;
   }, []);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      if (s?.user) {
-        setTimeout(() => loadRole(s.user.id), 0);
-      } else {
+    let active = true;
+
+    const applySession = async (nextSession: Session | null) => {
+      if (!active) return;
+      setLoading(true);
+      setSession(nextSession);
+      if (!nextSession?.user) {
         setRole(null);
+        setLoading(false);
+        return;
       }
+
+      try {
+        await loadRole(nextSession.user.id);
+      } catch (error) {
+        console.error("[auth] failed to load role", error);
+        if (active) setRole(null);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setTimeout(() => { void applySession(s); }, 0);
     });
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      if (data.session?.user) loadRole(data.session.user.id).finally(() => setLoading(false));
-      else setLoading(false);
+      void applySession(data.session);
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [loadRole]);
 
   const signOut = useCallback(async () => {
