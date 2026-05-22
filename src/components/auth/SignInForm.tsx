@@ -14,7 +14,7 @@ const styles = (role: Role) =>
 export function SignInForm({ role }: { role: Role }) {
   const s = styles(role);
   const nav = useNavigate();
-  const { refreshRole } = useAuth();
+  const { loadRoleForUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -24,11 +24,13 @@ export function SignInForm({ role }: { role: Role }) {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true); setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setBusy(false);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); return; }
-    await refreshRole();
+    const session = data.session ?? (await supabase.auth.getSession()).data.session;
+    if (!session?.user) { setError("Sign in did not complete. Please try again."); setBusy(false); return; }
+    await loadRoleForUser(session.user.id);
     nav({ to: "/dashboard" });
+    setBusy(false);
   };
 
   const subtitle = role === "marketer" ? "Sign in to your marketer account" : "Sign in to your business account";
