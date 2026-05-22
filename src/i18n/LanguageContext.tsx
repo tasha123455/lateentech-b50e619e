@@ -150,28 +150,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (lang !== "ar") return;
 
     let scheduled = false;
+    let observing = true;
     const pendingNodes = new Set<Node>();
-    const flush = () => {
-      scheduled = false;
-      for (const node of pendingNodes) {
-        if (!node.isConnected) continue;
-        if (node.nodeType === Node.TEXT_NODE) {
-          const parent = (node as Text).parentElement;
-          if (parent && !shouldSkip(parent)) applyTextNode(node as Text, "ar");
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          walkAndTranslate(node, "ar");
-        }
-      }
-      pendingNodes.clear();
-    };
-    // Synchronous microtask flush — translate inserted nodes before the
-    // browser paints them, so Arabic UI never flickers through English.
-    const schedule = () => {
-      if (scheduled) return;
-      scheduled = true;
-      queueMicrotask(flush);
-    };
-
     const obs = new MutationObserver((mutations) => {
       for (const m of mutations) {
         if (m.type === "childList") {
@@ -184,6 +164,46 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       }
       if (pendingNodes.size) schedule();
     });
+
+    const startObserving = () => {
+      if (observing) return;
+      obs.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ["placeholder", "title", "aria-label", "alt"],
+      });
+      observing = true;
+    };
+
+    const flush = () => {
+      scheduled = false;
+      obs.disconnect();
+      observing = false;
+      try {
+        for (const node of pendingNodes) {
+          if (!node.isConnected) continue;
+          if (node.nodeType === Node.TEXT_NODE) {
+            const parent = (node as Text).parentElement;
+            if (parent && !shouldSkip(parent)) applyTextNode(node as Text, "ar");
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            walkAndTranslate(node, "ar");
+          }
+        }
+      } finally {
+        pendingNodes.clear();
+        startObserving();
+      }
+    };
+    // Synchronous microtask flush — translate inserted nodes before the
+    // browser paints them, so Arabic UI never flickers through English.
+    const schedule = () => {
+      if (scheduled) return;
+      scheduled = true;
+      queueMicrotask(flush);
+    };
+
     obs.observe(document.body, {
       childList: true,
       subtree: true,
@@ -191,6 +211,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       attributes: true,
       attributeFilter: ["placeholder", "title", "aria-label", "alt"],
     });
+    observing = true;
     return () => { obs.disconnect(); pendingNodes.clear(); };
   }, [lang]);
 
