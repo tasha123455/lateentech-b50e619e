@@ -157,13 +157,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       }
       pendingNodes.clear();
     };
+    // Synchronous microtask flush — translate inserted nodes before the
+    // browser paints them, so Arabic UI never flickers through English.
     const schedule = () => {
       if (scheduled) return;
       scheduled = true;
-      const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
-        .requestIdleCallback;
-      if (ric) ric(flush);
-      else setTimeout(flush, 50);
+      queueMicrotask(flush);
     };
 
     const obs = new MutationObserver((mutations) => {
