@@ -111,11 +111,18 @@ function walkAndTranslate(root: Node, lang: Lang) {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window === "undefined") return "en";
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === "ar" ? "ar" : "en";
-  });
+  // Always start in "en" on first render so client markup matches SSR exactly
+  // (SSR has no localStorage). We then upgrade to the stored language inside
+  // a useEffect — after hydration — to avoid React throwing away the tree.
+  const [lang, setLangState] = useState<Lang>("en");
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === "ar") setLangState("ar");
+    } catch { /* ignore */ }
+  }, []);
+
   const dir: "ltr" | "rtl" = lang === "ar" ? "rtl" : "ltr";
 
   const setLang = useCallback((l: Lang) => {
