@@ -17,6 +17,7 @@ type AuthState = {
   session: Session | null;
   role: Role | null;
   loading: boolean;
+  loadRoleForUser: (userId: string) => Promise<Role | null>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
 };
@@ -95,10 +96,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       role,
       loading,
+      loadRoleForUser: loadRole,
       signOut,
       refreshRole,
     }),
-    [session, role, loading, signOut, refreshRole],
+    [session, role, loading, loadRole, signOut, refreshRole],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
