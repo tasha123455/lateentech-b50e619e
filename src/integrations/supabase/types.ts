@@ -132,11 +132,16 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           currency: Json | null
+          customer_address: string | null
           customer_city: string | null
           customer_country: string | null
+          customer_country_code: string | null
           customer_name: string | null
+          customer_notes: string | null
           customer_phone: string | null
+          customer_whatsapp: string | null
           delivered_at: string | null
+          delivery_fee: number
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
@@ -146,6 +151,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           reviewed_at: string | null
+          shipping_fee: number
           size: string | null
           status: string
           unit_price: number
@@ -158,11 +164,16 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           currency?: Json | null
+          customer_address?: string | null
           customer_city?: string | null
           customer_country?: string | null
+          customer_country_code?: string | null
           customer_name?: string | null
+          customer_notes?: string | null
           customer_phone?: string | null
+          customer_whatsapp?: string | null
           delivered_at?: string | null
+          delivery_fee?: number
           id?: string
           marketer_confirmed_at?: string | null
           marketer_id: string
@@ -172,6 +183,7 @@ export type Database = {
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
           reviewed_at?: string | null
+          shipping_fee?: number
           size?: string | null
           status?: string
           unit_price?: number
@@ -184,11 +196,16 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           currency?: Json | null
+          customer_address?: string | null
           customer_city?: string | null
           customer_country?: string | null
+          customer_country_code?: string | null
           customer_name?: string | null
+          customer_notes?: string | null
           customer_phone?: string | null
+          customer_whatsapp?: string | null
           delivered_at?: string | null
+          delivery_fee?: number
           id?: string
           marketer_confirmed_at?: string | null
           marketer_id?: string
@@ -198,6 +215,7 @@ export type Database = {
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
           reviewed_at?: string | null
+          shipping_fee?: number
           size?: string | null
           status?: string
           unit_price?: number
@@ -437,11 +455,16 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           currency: Json | null
+          customer_address: string | null
           customer_city: string | null
           customer_country: string | null
+          customer_country_code: string | null
           customer_name: string | null
+          customer_notes: string | null
           customer_phone: string | null
+          customer_whatsapp: string | null
           delivered_at: string | null
+          delivery_fee: number
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
@@ -451,6 +474,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           reviewed_at: string | null
+          shipping_fee: number
           size: string | null
           status: string
           unit_price: number
@@ -489,11 +513,16 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           currency: Json | null
+          customer_address: string | null
           customer_city: string | null
           customer_country: string | null
+          customer_country_code: string | null
           customer_name: string | null
+          customer_notes: string | null
           customer_phone: string | null
+          customer_whatsapp: string | null
           delivered_at: string | null
+          delivery_fee: number
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
@@ -503,6 +532,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           reviewed_at: string | null
+          shipping_fee: number
           size: string | null
           status: string
           unit_price: number
@@ -524,11 +554,16 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           currency: Json | null
+          customer_address: string | null
           customer_city: string | null
           customer_country: string | null
+          customer_country_code: string | null
           customer_name: string | null
+          customer_notes: string | null
           customer_phone: string | null
+          customer_whatsapp: string | null
           delivered_at: string | null
+          delivery_fee: number
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
@@ -538,6 +573,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           reviewed_at: string | null
+          shipping_fee: number
           size: string | null
           status: string
           unit_price: number
@@ -597,11 +633,16 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           currency: Json | null
+          customer_address: string | null
           customer_city: string | null
           customer_country: string | null
+          customer_country_code: string | null
           customer_name: string | null
+          customer_notes: string | null
           customer_phone: string | null
+          customer_whatsapp: string | null
           delivered_at: string | null
+          delivery_fee: number
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
@@ -611,6 +652,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           reviewed_at: string | null
+          shipping_fee: number
           size: string | null
           status: string
           unit_price: number
@@ -643,11 +685,16 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           currency: Json | null
+          customer_address: string | null
           customer_city: string | null
           customer_country: string | null
+          customer_country_code: string | null
           customer_name: string | null
+          customer_notes: string | null
           customer_phone: string | null
+          customer_whatsapp: string | null
           delivered_at: string | null
+          delivery_fee: number
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
@@ -657,6 +704,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           reviewed_at: string | null
+          shipping_fee: number
           size: string | null
           status: string
           unit_price: number
