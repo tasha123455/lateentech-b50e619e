@@ -172,6 +172,12 @@ export function createLateenApi(userId: string) {
       customer_phone?: string;
       customer_city?: string;
       customer_country?: string;
+      customer_whatsapp?: string;
+      customer_address?: string;
+      customer_notes?: string;
+      customer_country_code?: string;
+      shipping_fee?: number;
+      delivery_fee?: number;
       size?: string;
       color?: string;
       receipt_url?: string;
