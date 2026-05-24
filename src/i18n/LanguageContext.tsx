@@ -231,7 +231,7 @@ export function FloatingLanguageToggle() {
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return null;
   const label = lang === "en" ? "العربية" : "English";
-  const side = dir === "rtl" ? { left: 16 } : { right: 16 };
+  const side = dir === "rtl" ? { right: 12 } : { left: 12 };
   return (
     <button
       type="button"
@@ -240,31 +240,29 @@ export function FloatingLanguageToggle() {
       aria-label="Toggle language"
       style={{
         position: "fixed",
-        top: 16,
+        bottom: 12,
         ...side,
-        zIndex: 99999,
-        height: 36,
-        padding: "0 14px",
-        borderRadius: 999,
-        border: "1px solid rgba(255,255,255,0.18)",
-        background: "rgba(20,20,20,0.85)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        zIndex: 50,
+        height: 32,
+        padding: "0 12px",
+        borderRadius: 6,
+        border: "1px solid rgba(255,255,255,0.12)",
+        background: "rgba(20,20,20,0.95)",
         color: "#f0eeeb",
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: 500,
         cursor: "pointer",
-        boxShadow: "0 6px 24px rgba(0,0,0,0.35)",
         display: "inline-flex",
         alignItems: "center",
-        gap: 8,
+        gap: 6,
         fontFamily: lang === "ar"
           ? "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, sans-serif"
           : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
-      <span aria-hidden style={{ fontSize: 14 }}>🌐</span>
+      <span aria-hidden style={{ fontSize: 12 }}>🌐</span>
       <span>{label}</span>
     </button>
   );
 }
+
