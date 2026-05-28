@@ -168,6 +168,6 @@ async function refreshProfile(){if(!window.LateenAPI||!window.LateenAPI.getProfi
 
 const today=new Date();const next=new Date(today.getFullYear(),today.getMonth()+1,1);
 document.getElementById('days-left').textContent=Math.ceil((next-today)/86400000)+' days';
-buildMainChart();buildRingChart();orders=loadDrafts();renderOrders();
+orders=loadDrafts();renderOrders();recomputeAnalytics();
 loadBrowse().then(()=>loadOrders());refreshWallet();refreshProfile();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();refreshWallet();});window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders);}
