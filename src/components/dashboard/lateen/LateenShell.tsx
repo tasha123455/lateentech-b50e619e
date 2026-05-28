@@ -13,21 +13,33 @@ import "@/styles/lateen-marketer.css";
 import "@/styles/lateen-admin.css";
 
 const CHART_SRC = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
+const HAMMER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js";
+const ZOOM_SRC = "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js";
 
-let chartPromise: Promise<void> | null = null;
-function loadChartJs(): Promise<void> {
+function loadScriptOnce(src: string, isReady: () => boolean): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
-  if ((window as unknown as { Chart?: unknown }).Chart) return Promise.resolve();
-  if (chartPromise) return chartPromise;
-  chartPromise = new Promise((resolve, reject) => {
+  if (isReady()) return Promise.resolve();
+  const w = window as unknown as { __lateenScriptPromises?: Record<string, Promise<void>> };
+  w.__lateenScriptPromises = w.__lateenScriptPromises || {};
+  if (w.__lateenScriptPromises[src]) return w.__lateenScriptPromises[src];
+  w.__lateenScriptPromises[src] = new Promise((resolve, reject) => {
     const s = document.createElement("script");
-    s.src = CHART_SRC;
+    s.src = src;
     s.async = true;
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Chart.js failed to load"));
+    s.onerror = () => reject(new Error("Failed to load " + src));
     document.head.appendChild(s);
   });
-  return chartPromise;
+  return w.__lateenScriptPromises[src];
+}
+
+async function loadChartJs(): Promise<void> {
+  await loadScriptOnce(CHART_SRC, () => !!(window as unknown as { Chart?: unknown }).Chart);
+  await loadScriptOnce(HAMMER_SRC, () => !!(window as unknown as { Hammer?: unknown }).Hammer);
+  await loadScriptOnce(ZOOM_SRC, () => {
+    const C = (window as unknown as { Chart?: { registry?: { plugins?: { get?: (n: string) => unknown } } } }).Chart;
+    try { return !!C?.registry?.plugins?.get?.("zoom"); } catch { return false; }
+  });
 }
 
 type Role = "business" | "marketer" | "admin";
