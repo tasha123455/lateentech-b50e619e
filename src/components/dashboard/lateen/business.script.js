@@ -4,10 +4,23 @@ const __AR_LBL={Sun:'الأحد',Mon:'الإثنين',Tue:'الثلاثاء',Wed
 const __ar=()=>document.documentElement.lang==='ar';
 const __tlbl=v=>(__ar()&&__AR_LBL[v])?__AR_LBL[v]:v;
 window.addEventListener('lateen-lang',()=>{try{if(typeof buildMainChart==='function')buildMainChart();if(typeof renderVariantGroups==='function')renderVariantGroups();if(typeof refreshProfile==='function')refreshProfile();}catch(e){}});
-const chartData={revenue:{D:{labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],values:[0,0,0,0,0,0,0]},M:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],values:[0,0,0,0,0,0,0,0,0,0,0,0]},Y:{labels:['2021','2022','2023','2024','2025','2026'],values:[0,0,0,0,0,0]}},pieces:{D:{labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],values:[0,0,0,0,0,0,0]},M:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],values:[0,0,0,0,0,0,0,0,0,0,0,0]},Y:{labels:['2021','2022','2023','2024','2025','2026'],values:[0,0,0,0,0,0]}}};
+const chartData={revenue:{D:{labels:[],sub:[],values:[]},M:{labels:[],sub:[],values:[]},Y:{labels:[],sub:[],values:[]}},pieces:{D:{labels:[],sub:[],values:[]},M:{labels:[],sub:[],values:[]},Y:{labels:[],sub:[],values:[]}}};
 const analyticsData={D:{ok:0,fail:0},M:{ok:0,fail:0},Y:{ok:0,fail:0}};
 let currentMetric='revenue',currentPeriod='D',mainChart,ringChart;
-function buildMainChart(){if(mainChart)mainChart.destroy();const d=chartData[currentMetric][currentPeriod];mainChart=new Chart(document.getElementById('mainChart'),{type:'bar',data:{labels:d.labels,datasets:[{data:d.values,backgroundColor:'#2dbd8f',borderRadius:5,hoverBackgroundColor:'#3dcfa0'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>currentMetric==='revenue'?' £'+ctx.raw.toLocaleString():' '+ctx.raw+' pcs'}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#5e5c58',maxRotation:0,callback:function(v){return __tlbl(this.getLabelForValue(v));}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#5e5c58',callback:v=>currentMetric==='revenue'?'£'+(v>=1000?(v/1000).toFixed(0)+'k':v):v}}}}});}
+const __VIS={D:7,M:6,Y:6};
+function __pad(n){return n<10?'0'+n:''+n;}
+function __ddmmyyyy(d){return __pad(d.getDate())+'/'+__pad(d.getMonth()+1)+'/'+d.getFullYear();}
+function buildMainChart(){
+  if(mainChart){try{mainChart.destroy();}catch(e){}mainChart=null;}
+  const canvas=document.getElementById('mainChart');if(!canvas||typeof Chart==='undefined')return;
+  const d=chartData[currentMetric][currentPeriod];
+  const labels=d.labels.map((v,i)=>d.sub&&d.sub[i]?[__tlbl(v),d.sub[i]]:__tlbl(v));
+  const n=d.values.length;const vis=Math.min(__VIS[currentPeriod]||7,n);
+  const maxIdx=n-1;const minIdx=Math.max(0,n-vis);
+  const hasZoom=!!(Chart.registry&&Chart.registry.plugins&&(()=>{try{return Chart.registry.plugins.get('zoom');}catch(e){return false;}})());
+  const zoomOpts=hasZoom?{zoom:{pan:{enabled:true,mode:'x',threshold:5},zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'x'},limits:{x:{min:-0.5,max:n-0.5,minRange:1}}}}:{};
+  mainChart=new Chart(canvas,{type:'bar',data:{labels,datasets:[{data:d.values,backgroundColor:'#2dbd8f',borderRadius:5,hoverBackgroundColor:'#3dcfa0'}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:Object.assign({legend:{display:false},tooltip:{callbacks:{title:items=>{const lab=items&&items[0]?items[0].label:'';return Array.isArray(lab)?lab.join(' · '):String(lab).replace(/,/g,' · ');},label:ctx=>currentMetric==='revenue'?' £'+ctx.raw.toLocaleString():' '+ctx.raw+' pcs'}}},zoomOpts),scales:{x:{min:minIdx,max:maxIdx,grid:{display:false},ticks:{font:{size:10},color:'#5e5c58',maxRotation:0,autoSkip:false}},y:{beginAtZero:true,grace:'5%',grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#5e5c58',callback:v=>currentMetric==='revenue'?'£'+(v>=1000?(v/1000).toFixed(0)+'k':v):v}}}}});
+}
 function buildRingChart(){const a=analyticsData[currentPeriod];const total=a.ok+a.fail;const okPct=total>0?Math.round((a.ok/total)*100):0;const failPct=total>0?100-okPct:0;document.getElementById('ring-pct').textContent=okPct+'%';document.getElementById('leg-ok').textContent=a.ok.toLocaleString();document.getElementById('leg-fail').textContent=a.fail.toLocaleString();if(ringChart)ringChart.destroy();ringChart=new Chart(document.getElementById('ringChart'),{type:'doughnut',data:{datasets:[{data:total>0?[okPct,failPct]:[0,100],backgroundColor:total>0?['#2dbd8f','#6b2424']:['#2a2a2a','#2a2a2a'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:500}}});}
 function switchMetric(m,el){currentMetric=m;document.querySelectorAll('.ctoggle').forEach(b=>b.classList.remove('active'));el.classList.add('active');buildMainChart();}
 function switchPeriod(p,el){currentPeriod=p;document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));el.classList.add('active');buildMainChart();buildRingChart();}
