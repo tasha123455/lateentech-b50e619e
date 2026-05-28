@@ -21,7 +21,8 @@ function loadScriptOnce(src: string, isReady: () => boolean): Promise<void> {
   if (isReady()) return Promise.resolve();
   const w = window as unknown as { __lateenScriptPromises?: Record<string, Promise<void>> };
   w.__lateenScriptPromises = w.__lateenScriptPromises || {};
-  if (w.__lateenScriptPromises[src]) return w.__lateenScriptPromises[src];
+  const existing = w.__lateenScriptPromises[src];
+  if (existing) return existing;
   w.__lateenScriptPromises[src] = new Promise((resolve, reject) => {
     const s = document.createElement("script");
     s.src = src;
