@@ -105,7 +105,56 @@ function editOrder(id){const o=orders.find(x=>x.id===id);if(o)openForm(o);}
 function deleteOrder(id){const o=orders.find(x=>x.id===id);if(o&&!o.dbId)removeDraft(id);orders=orders.filter(x=>x.id!==id);renderOrders();}
 function dbToOrder(r){const p=PRODUCTS[r.product_id]||{};const cur=r.currency||p.currency||{symbol:'£'};const sym=cur.symbol||'£';const name=p.name||'Product';const price=Number(r.unit_price)||0;const pct=p.pct||(price>0?Number(r.commission)/price:0);const q=Number(r.qty)||1;const commPerUnit=Number(r.commission)||0;const platformPerUnit=Number(r.platform_fee)||0;const feePerUnit=parseFloat((commPerUnit+platformPerUnit).toFixed(2));const totalFee=parseFloat((feePerUnit*q).toFixed(2));const di=p.delivery&&p.delivery[r.customer_country_code||r.customer_country]?p.delivery[r.customer_country_code||r.customer_country]:null;const per=Number(r.shipping_fee)||Number(r.delivery_fee)?{shipping:Number(r.shipping_fee)||0,delivery:Number(r.delivery_fee)||0}:(di&&di._per&&di._per[r.customer_city]?{shipping:di._per[r.customer_city].s,delivery:di._per[r.customer_city].d}:{shipping:di?di.shipping:0,delivery:di?di.delivery:0});const created=r.created_at?new Date(r.created_at):new Date();const reserveDate=created.getDate()+'/'+(created.getMonth()+1)+'/'+created.getFullYear();const confirmed=!!r.marketer_confirmed_at;const mc=r.marketer_confirmed_at?new Date(r.marketer_confirmed_at):null;return{id:'ORD-'+String(r.id).slice(0,6).toUpperCase(),dbId:r.id,reserveDate,customerName:r.customer_name||'',phone:r.customer_phone||'',whatsapp:r.customer_whatsapp||'',countryCode:r.customer_country_code||'',country:r.customer_country||'',city:r.customer_city||'',address:r.customer_address||'',productKey:r.product_id,productName:name,price,pct,earn:commPerUnit,shipping:per.shipping,delivery:per.delivery,size:r.size||'',color:r.color||'',qty:q,total:parseFloat((price*q+per.shipping+per.delivery).toFixed(2)),feePerUnit,totalFee,commPerUnit,platformPerUnit,notes:r.customer_notes||'',bizName:p.biz||'',bizPhone:p.bizPhone||'',hasReceipt:!!r.receipt_url,receiptUrl:r.receipt_url||'',depositConfirmed:confirmed?true:null,payDate:mc?(mc.getDate()+'/'+(mc.getMonth()+1)+'/'+mc.getFullYear()):null,_status:r.status,_sym:sym,_createdAt:created,adminNotes:r.admin_notes||'',receiptUploadedAt:r.receipt_uploaded_at||null,reviewedAt:r.reviewed_at||null};}
 async function loadOrders(){const drafts=loadDrafts();if(!window.LateenAPI||!window.LateenAPI.listMyOrders){orders=drafts;renderOrders();refreshWallet();return;}try{const rows=await window.LateenAPI.listMyOrders();const mine=rows.filter(r=>r.marketer_id===window.LateenAPI.userId);const sentDbIds=new Set(mine.map(r=>r.id));orders=[...drafts.filter(d=>!d.dbId||!sentDbIds.has(d.dbId)),...mine.map(dbToOrder)];renderOrders();recomputeAnalytics();refreshWallet();}catch(e){console.error('[Lateen] loadOrders',e);if(!orders.length)orders=drafts;renderOrders();refreshWallet();}}
-function recomputeAnalytics(){const now=new Date();const weekStart=new Date(now);const dow=now.getDay();weekStart.setDate(now.getDate()-dow);weekStart.setHours(0,0,0,0);const yearStart=new Date(now.getFullYear(),0,1);const earnD=[0,0,0,0,0,0,0],earnM=Array(12).fill(0),earnY=Array(6).fill(0);const pcsD=[0,0,0,0,0,0,0],pcsM=Array(12).fill(0),pcsY=Array(6).fill(0);const ringD={ok:0,fail:0},ringM={ok:0,fail:0},ringY={ok:0,fail:0};const baseY=now.getFullYear()-5;let totEarn=0,totPieces=0,totOk=0,totDone=0,totProducts=new Set();orders.forEach(o=>{const status=o._status||'pending';const created=o._createdAt||null;if(!created)return;const isEarn=status==='approved'||status==='confirmed'||status==='delivered';const isOk=status==='delivered';const isFail=status==='rejected';const earn=(o.commPerUnit||0)*(o.qty||0);if(isEarn)totEarn+=earn;if(isOk){totPieces+=(o.qty||0);totOk++;if(o.productKey)totProducts.add(o.productKey);}if(isOk||isFail)totDone++;if(created>=weekStart){const d=created.getDay();if(isEarn)earnD[d]+=earn;if(isOk){pcsD[d]+=o.qty;ringD.ok++;}if(isFail)ringD.fail++;}if(created>=yearStart){const m=created.getMonth();if(isEarn)earnM[m]+=earn;if(isOk){pcsM[m]+=o.qty;ringM.ok++;}if(isFail)ringM.fail++;}const yi=created.getFullYear()-baseY;if(yi>=0&&yi<6){if(isEarn)earnY[yi]+=earn;if(isOk){pcsY[yi]+=o.qty;ringY.ok++;}if(isFail)ringY.fail++;}});chartData.earnings.D.values=earnD.map(v=>+v.toFixed(2));chartData.earnings.M.values=earnM.map(v=>+v.toFixed(2));chartData.earnings.Y.values=earnY.map(v=>+v.toFixed(2));chartData.pieces.D.values=pcsD;chartData.pieces.M.values=pcsM;chartData.pieces.Y.values=pcsY;chartData.earnings.Y.labels=Array.from({length:6},(_,i)=>String(baseY+i));chartData.pieces.Y.labels=chartData.earnings.Y.labels;[['D',ringD],['M',ringM],['Y',ringY]].forEach(([k,r])=>{const t=r.ok+r.fail;analyticsData[k]={ok:r.ok,fail:r.fail,failPct:t>0?Math.round((r.fail/t)*100):0};});const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};set('stat-earned','£'+totEarn.toFixed(2));set('stat-ok',totOk.toLocaleString());set('stat-ok-sub','of '+totDone+' order'+(totDone===1?'':'s'));set('stat-pieces',totPieces.toLocaleString());set('stat-pieces-sub',totProducts.size+' product'+(totProducts.size===1?'':'s'));if(typeof buildMainChart==='function')buildMainChart();if(typeof buildRingChart==='function')buildRingChart();}
+const __DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const __MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function __buildSeries(){
+  const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  let earliest=null;orders.forEach(o=>{const c=o._createdAt;if(c&&(!earliest||c<earliest))earliest=c;});
+  const minDayStart=new Date(today);minDayStart.setDate(today.getDate()-29);
+  let dayStart=earliest?new Date(earliest.getFullYear(),earliest.getMonth(),earliest.getDate()):new Date(today);
+  if(dayStart>minDayStart)dayStart=minDayStart;
+  const dayCount=Math.floor((today-dayStart)/86400000)+1;
+  const minYear=now.getFullYear()-5;const startYear=earliest?Math.min(earliest.getFullYear(),minYear):minYear;
+  const endYear=now.getFullYear();const yearCount=endYear-startYear+1;
+  const monthsStart=new Date(startYear,0,1);const monthCount=(endYear-startYear)*12+now.getMonth()+1;
+  const dayLabels=[],daySub=[];
+  for(let i=0;i<dayCount;i++){const d=new Date(dayStart);d.setDate(dayStart.getDate()+i);dayLabels.push(__DOW[d.getDay()]);daySub.push(__ddmmyyyy(d));}
+  const monLabels=[],monSub=[];
+  for(let i=0;i<monthCount;i++){const m=new Date(monthsStart);m.setMonth(monthsStart.getMonth()+i);monLabels.push(__MON[m.getMonth()]);monSub.push(String(m.getFullYear()));}
+  const yrLabels=[],yrSub=[];for(let i=0;i<yearCount;i++){yrLabels.push(String(startYear+i));yrSub.push('');}
+  return{dayStart,dayCount,monthsStart,monthCount,startYear,yearCount,dayLabels,daySub,monLabels,monSub,yrLabels,yrSub};
+}
+function recomputeAnalytics(){
+  const s=__buildSeries();
+  const earnD=Array(s.dayCount).fill(0),earnM=Array(s.monthCount).fill(0),earnY=Array(s.yearCount).fill(0);
+  const pcsD=Array(s.dayCount).fill(0),pcsM=Array(s.monthCount).fill(0),pcsY=Array(s.yearCount).fill(0);
+  const ringD={ok:0,fail:0},ringM={ok:0,fail:0},ringY={ok:0,fail:0};
+  let totEarn=0,totPieces=0,totOk=0,totDone=0;const totProducts=new Set();
+  orders.forEach(o=>{
+    const status=o._status||'pending';const c=o._createdAt;if(!c)return;
+    const isEarn=status==='delivered';const isOk=status==='delivered';const isFail=status==='rejected';
+    const earn=(o.commPerUnit||0)*(o.qty||0);
+    if(isEarn)totEarn+=earn;
+    if(isOk){totPieces+=(o.qty||0);totOk++;if(o.productKey)totProducts.add(o.productKey);}
+    if(isOk||isFail)totDone++;
+    const di=Math.floor((new Date(c.getFullYear(),c.getMonth(),c.getDate())-s.dayStart)/86400000);
+    if(di>=0&&di<s.dayCount){if(isEarn)earnD[di]+=earn;if(isOk){pcsD[di]+=o.qty;ringD.ok++;}if(isFail)ringD.fail++;}
+    const mi=(c.getFullYear()-s.startYear)*12+c.getMonth();
+    if(mi>=0&&mi<s.monthCount){if(isEarn)earnM[mi]+=earn;if(isOk){pcsM[mi]+=o.qty;ringM.ok++;}if(isFail)ringM.fail++;}
+    const yi=c.getFullYear()-s.startYear;
+    if(yi>=0&&yi<s.yearCount){if(isEarn)earnY[yi]+=earn;if(isOk){pcsY[yi]+=o.qty;ringY.ok++;}if(isFail)ringY.fail++;}
+  });
+  chartData.earnings.D={labels:s.dayLabels,sub:s.daySub,values:earnD.map(v=>+v.toFixed(2))};
+  chartData.earnings.M={labels:s.monLabels,sub:s.monSub,values:earnM.map(v=>+v.toFixed(2))};
+  chartData.earnings.Y={labels:s.yrLabels,sub:s.yrSub,values:earnY.map(v=>+v.toFixed(2))};
+  chartData.pieces.D={labels:s.dayLabels,sub:s.daySub,values:pcsD};
+  chartData.pieces.M={labels:s.monLabels,sub:s.monSub,values:pcsM};
+  chartData.pieces.Y={labels:s.yrLabels,sub:s.yrSub,values:pcsY};
+  [['D',ringD],['M',ringM],['Y',ringY]].forEach(([k,r])=>{const t=r.ok+r.fail;analyticsData[k]={ok:r.ok,fail:r.fail,failPct:t>0?Math.round((r.fail/t)*100):0};});
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('stat-earned','£'+totEarn.toFixed(2));set('stat-ok',totOk.toLocaleString());set('stat-ok-sub','of '+totDone+' order'+(totDone===1?'':'s'));set('stat-pieces',totPieces.toLocaleString());set('stat-pieces-sub',totProducts.size+' product'+(totProducts.size===1?'':'s'));
+  if(typeof buildMainChart==='function')buildMainChart();if(typeof buildRingChart==='function')buildRingChart();
+}
 
 /* ── Nav + shared ── */
 function goTo(pageId){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(pageId).classList.add('active');const navMap={'pg-home':'nav-home','pg-browse':'nav-browse','pg-orders':'nav-orders','pg-saved':'nav-saved'};document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');n.querySelectorAll('svg').forEach(s=>s.setAttribute('stroke','var(--color-text-secondary)'));n.querySelector('.nav-label').style.color='';});if(navMap[pageId]){const nav=document.getElementById(navMap[pageId]);nav.classList.add('active');nav.querySelectorAll('svg').forEach(s=>s.setAttribute('stroke','#7f77dd'));nav.querySelector('.nav-label').style.color='#7f77dd';}if(pageId==='pg-browse')go();if(pageId==='pg-saved')renderSaved();if(pageId==='pg-notif')document.getElementById('notif-dot').style.display='none';}
