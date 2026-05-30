@@ -373,18 +373,19 @@
   <!-- ORDERS -->
   <div class="page orders-pg" id="pg-orders">
     <div class="page-header">Orders</div>
-    <div class="empty-center" id="empty-state">
-      <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
-      <div class="empty-text">No orders yet.<br>Tap the button below to add your first order.</div>
-    </div>
-    <div class="orders-list-pg" id="orders-list" style="display:none"></div>
-    <div style="display:flex;justify-content:center;margin-top:1rem;">
+    <div style="display:flex;justify-content:center;margin:0 0 14px;">
       <button class="add-order-btn" onclick="openForm()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add order
       </button>
     </div>
+    <div class="empty-center" id="empty-state">
+      <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+      <div class="empty-text">No orders yet.<br>Tap the button above to add your first order.</div>
+    </div>
+    <div class="orders-list-pg" id="orders-list" style="display:none"></div>
   </div>
+
 
   <!-- NOTIFICATIONS -->
   <div class="page" id="pg-notif">
