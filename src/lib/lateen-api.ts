@@ -144,6 +144,17 @@ export function createLateenApi(userId: string) {
       return new Set((data ?? []).map((r: { product_id: string }) => r.product_id));
     },
 
+    async listFavoriteIdsOrdered(): Promise<string[]> {
+      const { data, error } = await supabase
+        .from("favorites")
+        .select("product_id, created_at")
+        .eq("marketer_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((r: { product_id: string }) => r.product_id);
+    },
+
+
     async addFavorite(productId: string) {
       const { error } = await supabase
         .from("favorites")

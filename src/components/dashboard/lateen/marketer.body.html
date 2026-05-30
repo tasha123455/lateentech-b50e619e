@@ -373,18 +373,19 @@
   <!-- ORDERS -->
   <div class="page orders-pg" id="pg-orders">
     <div class="page-header">Orders</div>
-    <div class="empty-center" id="empty-state">
-      <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
-      <div class="empty-text">No orders yet.<br>Tap the button below to add your first order.</div>
-    </div>
-    <div class="orders-list-pg" id="orders-list" style="display:none"></div>
-    <div style="display:flex;justify-content:center;margin-top:1rem;">
+    <div style="display:flex;justify-content:center;margin:0 0 14px;">
       <button class="add-order-btn" onclick="openForm()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add order
       </button>
     </div>
+    <div class="empty-center" id="empty-state">
+      <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+      <div class="empty-text">No orders yet.<br>Tap the button above to add your first order.</div>
+    </div>
+    <div class="orders-list-pg" id="orders-list" style="display:none"></div>
   </div>
+
 
   <!-- NOTIFICATIONS -->
   <div class="page" id="pg-notif">
@@ -511,10 +512,19 @@
     <div class="section-label" style="margin-top:8px">Product</div>
     <div class="field">
       <label>Choose from your saved products</label>
-      <select id="f-product" onchange="onProductChange()">
+      <select id="f-product" onchange="onProductChange()" style="display:none">
         <option value="">— Select a product —</option>
       </select>
+      <button type="button" id="prod-picker-btn" onclick="openProductPicker()" style="width:100%;text-align:left;background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:10px;padding:10px 12px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);cursor:pointer;display:flex;align-items:center;gap:10px;min-height:48px;">
+        <div id="prod-picker-thumb" style="width:34px;height:34px;border-radius:8px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0;">📦</div>
+        <div style="flex:1;min-width:0;">
+          <div id="prod-picker-label" style="font-size:13px;color:var(--color-text-secondary);">— Select a saved product —</div>
+          <div id="prod-picker-sub" style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px;display:none;"></div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
     </div>
+
     <div class="auto-card prod-info-card" id="prod-info">
       <div class="ac-row"><span class="ac-label">Product price</span><span class="ac-value" id="pi-price">—</span></div>
       <div class="ac-row"><span class="ac-label">Commission rate</span><span class="ac-value" id="pi-pct">—</span></div>
@@ -612,8 +622,24 @@
     </div>
     <div style="background:#3a2a10;border-radius:12px;padding:12px 14px;font-size:12px;color:#c9923a;line-height:1.5;margin-bottom:1.25rem;">This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.</div>
     <button class="cancel-btn" onclick="closeInstr()">Close</button>
+</div>
+
+<!-- PRODUCT PICKER OVERLAY -->
+<div class="overlay" id="prod-picker-overlay" style="position:fixed;inset:0;z-index:1000;display:none;">
+  <div class="overlay-bg" onclick="closeProductPicker()" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#1e1e1e;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;border-top:0.5px solid #333;">
+    <div style="width:36px;height:4px;background:#333;border-radius:2px;margin:10px auto 12px;flex-shrink:0;"></div>
+    <div style="padding:0 1.25rem 12px;flex-shrink:0;">
+      <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;">Saved products</div>
+      <div style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="prod-picker-search" type="text" placeholder="Search saved products…" oninput="renderProductPicker(this.value)" style="width:100%;background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:10px;padding:10px 12px 10px 34px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);outline:none;" />
+      </div>
+    </div>
+    <div id="prod-picker-list" style="flex:1;overflow-y:auto;padding:0 1.25rem 1.25rem;display:flex;flex-direction:column;gap:8px;"></div>
   </div>
 </div>
 
 </div>
+
 
