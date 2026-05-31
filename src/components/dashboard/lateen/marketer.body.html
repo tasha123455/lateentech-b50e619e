@@ -625,9 +625,10 @@
 </div>
 
 <!-- PRODUCT PICKER OVERLAY -->
-<div class="overlay" id="prod-picker-overlay" style="position:fixed;inset:0;z-index:1000;display:none;">
-  <div class="overlay-bg" onclick="closeProductPicker()" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);"></div>
-  <div style="position:absolute;left:0;right:0;bottom:0;background:#1e1e1e;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;border-top:0.5px solid #333;">
+<div class="overlay" id="prod-picker-overlay" style="z-index:1000;">
+  <div class="overlay-bg" onclick="closeProductPicker()"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:520px;background:#1e1e1e;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;border-top:0.5px solid #333;">
+
     <div style="width:36px;height:4px;background:#333;border-radius:2px;margin:10px auto 12px;flex-shrink:0;"></div>
     <div style="padding:0 1.25rem 12px;flex-shrink:0;">
       <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;">Saved products</div>
