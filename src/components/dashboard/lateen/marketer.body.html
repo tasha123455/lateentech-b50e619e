@@ -631,13 +631,13 @@
 
     <div style="width:36px;height:4px;background:#333;border-radius:2px;margin:10px auto 12px;flex-shrink:0;"></div>
     <div style="padding:0 1.25rem 12px;flex-shrink:0;">
-      <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;">Saved products</div>
+      <div id="prod-picker-title" style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;">Saved products</div>
       <div style="position:relative;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input id="prod-picker-search" type="text" placeholder="Search saved products…" oninput="renderProductPicker(this.value)" style="width:100%;background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:10px;padding:10px 12px 10px 34px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);outline:none;" />
       </div>
     </div>
-    <div id="prod-picker-list" style="flex:1;overflow-y:auto;padding:0 1.25rem 1.25rem;display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="prod-picker-list" style="flex:1;overflow-y:auto;padding:0 1.25rem 1.25rem;display:flex;flex-direction:column;gap:10px;"></div>
   </div>
 </div>
 
