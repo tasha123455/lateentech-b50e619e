@@ -232,38 +232,40 @@ export function FloatingLanguageToggle() {
   if (!mounted) return null;
   const label = lang === "en" ? "العربية" : "English";
   return (
-    <button
-      type="button"
-      onClick={toggle}
+    <div
       data-no-i18n
-      aria-label="Toggle language"
       style={{
-        position: "fixed",
-        top: 0,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 1000,
-        height: 22,
-        padding: "0 10px",
-        borderRadius: "0 0 8px 8px",
-        border: "1px solid rgba(255,255,255,0.12)",
-        borderTop: "none",
-        background: "rgba(20,20,20,0.95)",
-        color: "#f0eeeb",
-        fontSize: 11,
-        fontWeight: 500,
-        cursor: "pointer",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        fontFamily: lang === "ar"
-          ? "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, sans-serif"
-          : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        display: "flex",
+        justifyContent: dir === "rtl" ? "flex-start" : "flex-end",
+        padding: "12px 16px 0",
       }}
     >
-      <span aria-hidden style={{ fontSize: 12 }}>🌐</span>
-      <span>{label}</span>
-    </button>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label="Toggle language"
+        style={{
+          height: 32,
+          padding: "0 12px",
+          borderRadius: 6,
+          border: "1px solid rgba(255,255,255,0.12)",
+          background: "rgba(20,20,20,0.92)",
+          color: "#f0eeeb",
+          fontSize: 12,
+          fontWeight: 500,
+          cursor: "pointer",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontFamily: lang === "ar"
+            ? "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, sans-serif"
+            : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        }}
+      >
+        <span aria-hidden style={{ fontSize: 14 }}>🌐</span>
+        <span>{label}</span>
+      </button>
+    </div>
   );
 }
 
