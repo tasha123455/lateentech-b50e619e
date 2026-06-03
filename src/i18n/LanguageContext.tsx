@@ -257,12 +257,15 @@ export function FloatingLanguageToggle() {
           display: "inline-flex",
           alignItems: "center",
           gap: 6,
-          fontFamily: lang === "ar"
-            ? "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, sans-serif"
-            : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontFamily:
+            lang === "ar"
+              ? "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, sans-serif"
+              : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         }}
       >
-        <span aria-hidden style={{ fontSize: 14 }}>🌐</span>
+        <span aria-hidden style={{ fontSize: 14 }}>
+          🌐
+        </span>
         <span>{label}</span>
       </button>
     </div>
