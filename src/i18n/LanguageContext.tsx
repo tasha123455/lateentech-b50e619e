@@ -231,7 +231,6 @@ export function FloatingLanguageToggle() {
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return null;
   const label = lang === "en" ? "العربية" : "English";
-  const side = dir === "rtl" ? { left: 12 } : { right: 12 };
   return (
     <button
       type="button"
@@ -240,8 +239,9 @@ export function FloatingLanguageToggle() {
       aria-label="Toggle language"
       style={{
         position: "fixed",
-        top: 12,
-        ...side,
+        top: 14,
+        left: "50%",
+        transform: "translateX(-50%)",
         zIndex: 50,
         height: 32,
         padding: "0 12px",
