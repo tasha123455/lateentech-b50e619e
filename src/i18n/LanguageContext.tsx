@@ -141,7 +141,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.body.classList.toggle("lang-en", lang === "en");
     walkAndTranslate(document.body, lang);
     try { window.dispatchEvent(new CustomEvent("lateen-lang", { detail: { lang } })); } catch { /* ignore */ }
+    // Update any in-page language toggle button label
+    try {
+      document.querySelectorAll('#lang-toggle-btn').forEach((el) => {
+        (el as HTMLElement).textContent = lang === "en" ? "ع" : "EN";
+      });
+    } catch { /* ignore */ }
   }, [lang, dir]);
+
+  // Listen for toggle requests from raw-HTML pages (e.g. lateen body)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onToggle = () => toggle();
+    window.addEventListener("lateen-lang-toggle", onToggle as EventListener);
+    return () => window.removeEventListener("lateen-lang-toggle", onToggle as EventListener);
+  }, [toggle]);
+
 
   // Observe dynamically inserted nodes — ONLY when Arabic is active.
   // In English (default) we skip all DOM observation to keep the app fast.
