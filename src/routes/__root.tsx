@@ -105,7 +105,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         <LanguageProvider>
           <AuthProvider>{children}</AuthProvider>
-          <FloatingLanguageToggle />
         </LanguageProvider>
         <Scripts />
       </body>
