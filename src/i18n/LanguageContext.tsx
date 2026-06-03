@@ -228,7 +228,9 @@ export function useLanguage() {
 export function FloatingLanguageToggle() {
   const { lang, dir, toggle } = useLanguage();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   if (!mounted) return null;
   const label = lang === "en" ? "العربية" : "English";
   return (
