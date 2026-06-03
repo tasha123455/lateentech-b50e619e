@@ -239,7 +239,7 @@ export function FloatingLanguageToggle() {
       aria-label="Toggle language"
       style={{
         position: "fixed",
-        top: 14,
+        top: 0,
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 1000,
