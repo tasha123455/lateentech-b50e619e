@@ -37,13 +37,30 @@ function rememberAttr(el: Element, name: string) {
 }
 
 function applyTextNode(node: Text, lang: Lang) {
+  const current = node.nodeValue ?? "";
   if (lang === "en") {
     const orig = ORIG_TEXT.get(node);
-    if (orig != null && node.nodeValue !== orig) node.nodeValue = orig;
+    if (orig != null && node.nodeValue !== orig) {
+      node.nodeValue = orig;
+      return;
+    }
+    // Fallback: node was inserted/rewritten while in AR — try reverse lookup.
+    const trimmed = current.trim();
+    if (!trimmed) return;
+    const back = reverseTranslate(current);
+    if (back == null) return;
+    const leading = current.match(/^\s*/)?.[0] ?? "";
+    const trailing = current.match(/\s*$/)?.[0] ?? "";
+    const next = leading + back + trailing;
+    if (node.nodeValue !== next) {
+      // Cache the restored English as the original for future toggles.
+      ORIG_TEXT.set(node, next);
+      node.nodeValue = next;
+    }
     return;
   }
   rememberText(node);
-  const orig = ORIG_TEXT.get(node) ?? node.nodeValue ?? "";
+  const orig = ORIG_TEXT.get(node) ?? current;
   const trimmed = orig.trim();
   if (!trimmed) return;
   const tr = translate(orig);
@@ -58,14 +75,23 @@ function applyTextNode(node: Text, lang: Lang) {
 function applyAttributes(el: Element, lang: Lang) {
   for (const name of TRANSLATABLE_ATTRS) {
     if (!el.hasAttribute(name)) continue;
+    const current = el.getAttribute(name) ?? "";
     if (lang === "en") {
       const m = ORIG_ATTR.get(el);
       const orig = m?.get(name);
-      if (orig != null) el.setAttribute(name, orig);
+      if (orig != null) {
+        el.setAttribute(name, orig);
+        continue;
+      }
+      const back = reverseTranslate(current);
+      if (back != null && back !== current) {
+        rememberAttr(el, name);
+        el.setAttribute(name, back);
+      }
       continue;
     }
     rememberAttr(el, name);
-    const orig = ORIG_ATTR.get(el)?.get(name) ?? el.getAttribute(name) ?? "";
+    const orig = ORIG_ATTR.get(el)?.get(name) ?? current;
     const tr = translate(orig);
     if (tr != null) el.setAttribute(name, tr);
   }
