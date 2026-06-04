@@ -297,12 +297,9 @@
         <div class="avatar" id="user-avatar">··</div>
         <div><div class="greet" id="user-greet">Hey there</div><div class="greet-sub" id="user-sub">Marketer</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button data-no-i18n onclick="window.dispatchEvent(new CustomEvent('lateen-lang-toggle'))" style="width:36px;height:36px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-sans);display:flex;align-items:center;justify-content:center;" aria-label="Toggle language" id="lang-toggle-btn">EN</button>
-        <div class="notif-btn" onclick="goTo('pg-notif')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <div class="notif-dot" id="notif-dot" style="display:none"></div>
-        </div>
+      <div class="notif-btn" onclick="goTo('pg-notif')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot" id="notif-dot" style="display:none"></div>
       </div>
     </div>
     <div class="wallet-card">

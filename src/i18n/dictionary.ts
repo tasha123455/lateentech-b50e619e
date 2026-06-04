@@ -789,28 +789,3 @@ export function translate(text: string): string | null {
 
   return null;
 }
-
-// Reverse lookup AR -> EN. Used when switching back to English to restore
-// strings on nodes whose original English value was never captured (e.g.
-// text injected by scripts while AR was already active).
-let REVERSE: Record<string, string> | null = null;
-function getReverse(): Record<string, string> {
-  if (REVERSE) return REVERSE;
-  const r: Record<string, string> = {};
-  for (const [en, ar] of Object.entries(DICT)) {
-    if (!(ar in r)) r[ar] = en;
-  }
-  REVERSE = r;
-  return r;
-}
-
-export function reverseTranslate(text: string): string | null {
-  const trimmed = text.trim();
-  if (!trimmed) return null;
-  const r = getReverse();
-  if (r[trimmed]) return r[trimmed];
-  const stripped = trimmed.replace(/[.,;:!?]+$/, "");
-  if (stripped !== trimmed && r[stripped]) return r[stripped];
-  return null;
-}
-

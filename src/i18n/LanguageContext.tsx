@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { translate, reverseTranslate } from "./dictionary";
+import { translate } from "./dictionary";
 
 export type Lang = "en" | "ar";
 
@@ -37,30 +37,13 @@ function rememberAttr(el: Element, name: string) {
 }
 
 function applyTextNode(node: Text, lang: Lang) {
-  const current = node.nodeValue ?? "";
   if (lang === "en") {
     const orig = ORIG_TEXT.get(node);
-    if (orig != null && node.nodeValue !== orig) {
-      node.nodeValue = orig;
-      return;
-    }
-    // Fallback: node was inserted/rewritten while in AR — try reverse lookup.
-    const trimmed = current.trim();
-    if (!trimmed) return;
-    const back = reverseTranslate(current);
-    if (back == null) return;
-    const leading = current.match(/^\s*/)?.[0] ?? "";
-    const trailing = current.match(/\s*$/)?.[0] ?? "";
-    const next = leading + back + trailing;
-    if (node.nodeValue !== next) {
-      // Cache the restored English as the original for future toggles.
-      ORIG_TEXT.set(node, next);
-      node.nodeValue = next;
-    }
+    if (orig != null && node.nodeValue !== orig) node.nodeValue = orig;
     return;
   }
   rememberText(node);
-  const orig = ORIG_TEXT.get(node) ?? current;
+  const orig = ORIG_TEXT.get(node) ?? node.nodeValue ?? "";
   const trimmed = orig.trim();
   if (!trimmed) return;
   const tr = translate(orig);
@@ -75,23 +58,14 @@ function applyTextNode(node: Text, lang: Lang) {
 function applyAttributes(el: Element, lang: Lang) {
   for (const name of TRANSLATABLE_ATTRS) {
     if (!el.hasAttribute(name)) continue;
-    const current = el.getAttribute(name) ?? "";
     if (lang === "en") {
       const m = ORIG_ATTR.get(el);
       const orig = m?.get(name);
-      if (orig != null) {
-        el.setAttribute(name, orig);
-        continue;
-      }
-      const back = reverseTranslate(current);
-      if (back != null && back !== current) {
-        rememberAttr(el, name);
-        el.setAttribute(name, back);
-      }
+      if (orig != null) el.setAttribute(name, orig);
       continue;
     }
     rememberAttr(el, name);
-    const orig = ORIG_ATTR.get(el)?.get(name) ?? current;
+    const orig = ORIG_ATTR.get(el)?.get(name) ?? el.getAttribute(name) ?? "";
     const tr = translate(orig);
     if (tr != null) el.setAttribute(name, tr);
   }
@@ -167,28 +141,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.body.classList.toggle("lang-en", lang === "en");
     walkAndTranslate(document.body, lang);
     try { window.dispatchEvent(new CustomEvent("lateen-lang", { detail: { lang } })); } catch { /* ignore */ }
-    // Update any in-page language toggle button label
-    try {
-      document.querySelectorAll('#lang-toggle-btn').forEach((el) => {
-        (el as HTMLElement).textContent = lang === "en" ? "ع" : "EN";
-      });
-    } catch { /* ignore */ }
   }, [lang, dir]);
 
-  // Listen for toggle requests from raw-HTML pages (e.g. lateen body)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onToggle = () => toggle();
-    window.addEventListener("lateen-lang-toggle", onToggle as EventListener);
-    return () => window.removeEventListener("lateen-lang-toggle", onToggle as EventListener);
-  }, [toggle]);
-
-
-  // Observe dynamically inserted nodes. Runs in both AR (to translate new
-  // English text) and EN (to restore residual Arabic via reverseTranslate).
+  // Observe dynamically inserted nodes — ONLY when Arabic is active.
+  // In English (default) we skip all DOM observation to keep the app fast.
   useEffect(() => {
     if (typeof document === "undefined") return;
-
+    if (lang !== "ar") return;
 
     let scheduled = false;
     let observing = true;
@@ -227,11 +186,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           if (!node.isConnected) continue;
           if (node.nodeType === Node.TEXT_NODE) {
             const parent = (node as Text).parentElement;
-            if (parent && !shouldSkip(parent)) applyTextNode(node as Text, lang);
+            if (parent && !shouldSkip(parent)) applyTextNode(node as Text, "ar");
           } else if (node.nodeType === Node.ELEMENT_NODE) {
-            walkAndTranslate(node, lang);
+            walkAndTranslate(node, "ar");
           }
-
         }
       } finally {
         pendingNodes.clear();

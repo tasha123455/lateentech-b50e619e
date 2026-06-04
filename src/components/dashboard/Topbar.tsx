@@ -1,5 +1,4 @@
 import { useAuth } from "@/auth/AuthContext";
-import { useLanguage } from "@/i18n/LanguageContext";
 
 type Props = { name: string; subtitle: string; accent: "marketer" | "business"; onMenu?: () => void };
 
@@ -15,27 +14,8 @@ export function Topbar({ name, subtitle, accent }: Props) {
           <div className="text-xs text-text-2">{subtitle}</div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <LanguageToggleButton />
-        <NotificationButton />
-      </div>
+      <NotificationButton />
     </div>
-  );
-}
-
-function LanguageToggleButton() {
-  const { lang, toggle } = useLanguage();
-  const label = lang === "en" ? "ع" : "EN";
-  return (
-    <button
-      data-no-i18n
-      onClick={toggle}
-      className="flex h-9 min-w-9 items-center justify-center rounded-full border border-border bg-surface px-2 text-xs font-medium text-text-1"
-      aria-label="Toggle language"
-      title="Toggle language"
-    >
-      {label}
-    </button>
   );
 }
 
