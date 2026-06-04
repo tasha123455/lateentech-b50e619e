@@ -184,11 +184,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [toggle]);
 
 
-  // Observe dynamically inserted nodes — ONLY when Arabic is active.
-  // In English (default) we skip all DOM observation to keep the app fast.
+  // Observe dynamically inserted nodes. Runs in both AR (to translate new
+  // English text) and EN (to restore residual Arabic via reverseTranslate).
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (lang !== "ar") return;
+
 
     let scheduled = false;
     let observing = true;
@@ -227,10 +227,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           if (!node.isConnected) continue;
           if (node.nodeType === Node.TEXT_NODE) {
             const parent = (node as Text).parentElement;
-            if (parent && !shouldSkip(parent)) applyTextNode(node as Text, "ar");
+            if (parent && !shouldSkip(parent)) applyTextNode(node as Text, lang);
           } else if (node.nodeType === Node.ELEMENT_NODE) {
-            walkAndTranslate(node, "ar");
+            walkAndTranslate(node, lang);
           }
+
         }
       } finally {
         pendingNodes.clear();
