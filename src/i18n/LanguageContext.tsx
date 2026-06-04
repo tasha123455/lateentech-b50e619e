@@ -131,6 +131,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggle = useCallback(() => setLang(lang === "en" ? "ar" : "en"), [lang, setLang]);
 
+  // Expose toggle + current lang globally so non-React HTML (dashboard bodies)
+  // can call it from inline onclick handlers.
+  useEffect(() => {
+    const w = window as unknown as { __lateenToggleLang?: () => void; __lateenLang?: Lang };
+    w.__lateenToggleLang = toggle;
+    w.__lateenLang = lang;
+  }, [toggle, lang]);
+
   // Synchronously flip dir/lang before paint, then translate the entire body
   useLayoutEffect(() => {
     if (typeof document === "undefined") return;
@@ -228,49 +236,52 @@ export function useLanguage() {
 export function FloatingLanguageToggle() {
   const { lang, dir, toggle } = useLanguage();
   const [mounted, setMounted] = useState(false);
+  const [show, setShow] = useState(false);
   useEffect(() => {
     setMounted(true);
+    const check = () => {
+      const p = window.location.pathname.replace(/\/+$/, "");
+      setShow(p === "" || p === "/");
+    };
+    check();
+    window.addEventListener("popstate", check);
+    const id = window.setInterval(check, 400);
+    return () => { window.removeEventListener("popstate", check); window.clearInterval(id); };
   }, []);
-  if (!mounted) return null;
+  if (!mounted || !show) return null;
   const label = lang === "en" ? "العربية" : "English";
   return (
-    <div
+    <button
       data-no-i18n
+      type="button"
+      onClick={toggle}
+      aria-label="Toggle language"
       style={{
-        display: "flex",
-        justifyContent: dir === "rtl" ? "flex-start" : "flex-end",
-        padding: "12px 16px 0",
+        position: "fixed",
+        top: 14,
+        [dir === "rtl" ? "left" : "right"]: 14,
+        zIndex: 60,
+        height: 32,
+        padding: "0 12px",
+        borderRadius: 6,
+        border: "1px solid rgba(255,255,255,0.12)",
+        background: "rgba(20,20,20,0.92)",
+        color: "#f0eeeb",
+        fontSize: 12,
+        fontWeight: 500,
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        fontFamily:
+          lang === "ar"
+            ? "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, sans-serif"
+            : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label="Toggle language"
-        style={{
-          height: 32,
-          padding: "0 12px",
-          borderRadius: 6,
-          border: "1px solid rgba(255,255,255,0.12)",
-          background: "rgba(20,20,20,0.92)",
-          color: "#f0eeeb",
-          fontSize: 12,
-          fontWeight: 500,
-          cursor: "pointer",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          fontFamily:
-            lang === "ar"
-              ? "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, sans-serif"
-              : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        }}
-      >
-        <span aria-hidden style={{ fontSize: 14 }}>
-          🌐
-        </span>
-        <span>{label}</span>
-      </button>
-    </div>
+      <span aria-hidden style={{ fontSize: 14 }}>🌐</span>
+      <span>{label}</span>
+    </button>
   );
 }
 
