@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { translate } from "./dictionary";
+import { translate, reverseTranslate } from "./dictionary";
 
 export type Lang = "en" | "ar";
 
