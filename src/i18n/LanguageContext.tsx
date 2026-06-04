@@ -131,6 +131,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggle = useCallback(() => setLang(lang === "en" ? "ar" : "en"), [lang, setLang]);
 
+  // Expose toggle + current lang globally so non-React HTML (dashboard bodies)
+  // can call it from inline onclick handlers.
+  useEffect(() => {
+    const w = window as unknown as { __lateenToggleLang?: () => void; __lateenLang?: Lang };
+    w.__lateenToggleLang = toggle;
+    w.__lateenLang = lang;
+  }, [toggle, lang]);
+
   // Synchronously flip dir/lang before paint, then translate the entire body
   useLayoutEffect(() => {
     if (typeof document === "undefined") return;
