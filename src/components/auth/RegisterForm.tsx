@@ -94,7 +94,7 @@ export function RegisterForm({ role }: { role: Role }) {
         {busy ? "Creating…" : "Create account"}
       </button>
       <Divider />
-      <GoogleButton>Continue with Google</GoogleButton>
+      <GoogleButton onClick={signUpGoogle}>Continue with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
         Already have an account?{" "}
         <Link to={role === "marketer" ? "/marketer/signin" : "/business/signin"} className={`font-medium ${s.link}`}>
