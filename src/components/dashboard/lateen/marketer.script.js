@@ -166,7 +166,7 @@ function recomputeAnalytics(){
   chartData.pieces.Y={labels:s.yrLabels,sub:s.yrSub,values:pcsY};
   [['D',ringD],['M',ringM],['Y',ringY]].forEach(([k,r])=>{const t=r.ok+r.fail;analyticsData[k]={ok:r.ok,fail:r.fail,failPct:t>0?Math.round((r.fail/t)*100):0};});
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('stat-earned','£'+totEarn.toFixed(2));set('stat-ok',totOk.toLocaleString());set('stat-ok-sub','of '+totDone+' order'+(totDone===1?'':'s'));set('stat-pieces',totPieces.toLocaleString());set('stat-pieces-sub',totProducts.size+' product'+(totProducts.size===1?'':'s'));
+  window.__lateenEarnByCur=earnByCur;const __ks=Object.keys(earnByCur);if(!window.__lateenWalletCur||!earnByCur[window.__lateenWalletCur])window.__lateenWalletCur=__ks[0]||'GBP';const __sc=window.__lateenWalletCur;const __sd=earnByCur[__sc]||{sym:'£',amount:0};set('stat-earned',fmtS(__sd.sym,__sd.amount));set('stat-ok',totOk.toLocaleString());set('stat-ok-sub','of '+totDone+' order'+(totDone===1?'':'s'));set('stat-pieces',totPieces.toLocaleString());set('stat-pieces-sub',totProducts.size+' product'+(totProducts.size===1?'':'s'));
   if(typeof buildMainChart==='function')buildMainChart();if(typeof buildRingChart==='function')buildRingChart();
 }
 
