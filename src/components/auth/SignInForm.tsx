@@ -71,7 +71,7 @@ export function SignInForm({ role }: { role: Role }) {
         {busy ? "Signing in…" : "Sign in"}
       </button>
       <Divider />
-      <GoogleButton onClick={() => alert("Google sign-in: enable in Lovable Cloud and we'll wire it up.")}>Continue with Google</GoogleButton>
+      <GoogleButton onClick={signInGoogle}>Continue with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
         No account?{" "}
         <Link to={role === "marketer" ? "/marketer/register" : "/business/register"} className={`font-medium ${s.link}`}>
