@@ -148,7 +148,7 @@ function recomputeAnalytics(){
     const status=o._status||'pending';const c=o._createdAt;if(!c)return;
     const isEarn=status==='delivered';const isOk=status==='delivered';const isFail=status==='rejected';
     const earn=(o.commPerUnit||0)*(o.qty||0);
-    if(isEarn)totEarn+=earn;
+    if(isEarn){totEarn+=earn;const cc=o._curCode||'GBP';const ss=o._sym||'£';if(!earnByCur[cc])earnByCur[cc]={sym:ss,amount:0};earnByCur[cc].amount+=earn;}
     if(isOk){totPieces+=(o.qty||0);totOk++;if(o.productKey)totProducts.add(o.productKey);}
     if(isOk||isFail)totDone++;
     const di=Math.floor((new Date(c.getFullYear(),c.getMonth(),c.getDate())-s.dayStart)/86400000);
