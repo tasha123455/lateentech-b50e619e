@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { Field, Divider } from "./SignInForm";
 import { useAuth } from "@/auth/AuthContext";
@@ -47,9 +48,20 @@ export function RegisterForm({ role }: { role: Role }) {
     nav({ to: "/dashboard" });
   };
 
+  const signUpGoogle = async () => {
+    setError(null);
+    try { sessionStorage.setItem("intended_role", role); } catch { /* ignore */ }
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/dashboard" });
+    if (result.redirected) return;
+    if (result.error) { setError(result.error.message); return; }
+    await refreshRole();
+    nav({ to: "/dashboard" });
+  };
+
   const subtitle = role === "marketer"
     ? "Free to join — earn on every sale you drive"
     : "List your products and let marketers grow your sales";
+
 
   return (
     <form onSubmit={submit} className="space-y-4">
@@ -82,7 +94,7 @@ export function RegisterForm({ role }: { role: Role }) {
         {busy ? "Creating…" : "Create account"}
       </button>
       <Divider />
-      <GoogleButton>Continue with Google</GoogleButton>
+      <GoogleButton onClick={signUpGoogle}>Continue with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
         Already have an account?{" "}
         <Link to={role === "marketer" ? "/marketer/signin" : "/business/signin"} className={`font-medium ${s.link}`}>

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { useAuth } from "@/auth/AuthContext";
 
@@ -37,6 +38,17 @@ export function SignInForm({ role }: { role: Role }) {
     }
   };
 
+  const signInGoogle = async () => {
+    setError(null);
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    if (result.redirected) return;
+    if (result.error) { setError(result.error.message); return; }
+    const session = (await supabase.auth.getSession()).data.session;
+    if (session?.user) {
+      try { await loadRoleForUser(session.user.id); nav({ to: "/dashboard" }); } catch { /* ignore */ }
+    }
+  };
+
   const subtitle = role === "marketer" ? "Sign in to your marketer account" : "Sign in to your business account";
 
   return (
@@ -59,7 +71,7 @@ export function SignInForm({ role }: { role: Role }) {
         {busy ? "Signing in…" : "Sign in"}
       </button>
       <Divider />
-      <GoogleButton onClick={() => alert("Google sign-in: enable in Lovable Cloud and we'll wire it up.")}>Continue with Google</GoogleButton>
+      <GoogleButton onClick={signInGoogle}>Continue with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
         No account?{" "}
         <Link to={role === "marketer" ? "/marketer/register" : "/business/register"} className={`font-medium ${s.link}`}>
