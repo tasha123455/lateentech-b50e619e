@@ -48,9 +48,20 @@ export function RegisterForm({ role }: { role: Role }) {
     nav({ to: "/dashboard" });
   };
 
+  const signUpGoogle = async () => {
+    setError(null);
+    try { sessionStorage.setItem("intended_role", role); } catch { /* ignore */ }
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/dashboard" });
+    if (result.redirected) return;
+    if (result.error) { setError(result.error.message); return; }
+    await refreshRole();
+    nav({ to: "/dashboard" });
+  };
+
   const subtitle = role === "marketer"
     ? "Free to join — earn on every sale you drive"
     : "List your products and let marketers grow your sales";
+
 
   return (
     <form onSubmit={submit} className="space-y-4">
