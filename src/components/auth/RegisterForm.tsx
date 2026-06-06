@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { Field, Divider } from "./SignInForm";
 import { useAuth } from "@/auth/AuthContext";
