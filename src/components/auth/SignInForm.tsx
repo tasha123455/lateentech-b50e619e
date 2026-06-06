@@ -38,6 +38,17 @@ export function SignInForm({ role }: { role: Role }) {
     }
   };
 
+  const signInGoogle = async () => {
+    setError(null);
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    if (result.redirected) return;
+    if (result.error) { setError(result.error.message); return; }
+    const session = (await supabase.auth.getSession()).data.session;
+    if (session?.user) {
+      try { await loadRoleForUser(session.user.id); nav({ to: "/dashboard" }); } catch { /* ignore */ }
+    }
+  };
+
   const subtitle = role === "marketer" ? "Sign in to your marketer account" : "Sign in to your business account";
 
   return (
