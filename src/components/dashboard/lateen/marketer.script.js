@@ -143,7 +143,7 @@ function recomputeAnalytics(){
   const earnD=Array(s.dayCount).fill(0),earnM=Array(s.monthCount).fill(0),earnY=Array(s.yearCount).fill(0);
   const pcsD=Array(s.dayCount).fill(0),pcsM=Array(s.monthCount).fill(0),pcsY=Array(s.yearCount).fill(0);
   const ringD={ok:0,fail:0},ringM={ok:0,fail:0},ringY={ok:0,fail:0};
-  let totEarn=0,totPieces=0,totOk=0,totDone=0;const totProducts=new Set();
+  let totEarn=0,totPieces=0,totOk=0,totDone=0;const totProducts=new Set();const earnByCur={};
   orders.forEach(o=>{
     const status=o._status||'pending';const c=o._createdAt;if(!c)return;
     const isEarn=status==='delivered';const isOk=status==='delivered';const isFail=status==='rejected';
