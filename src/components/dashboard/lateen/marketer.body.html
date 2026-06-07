@@ -571,16 +571,7 @@
     <input type="file" id="file-input-gallery" accept="image/*" style="display:none" onchange="onFileUpload(this)"/>
     <input type="file" id="file-input-files" accept="image/*,application/pdf" style="display:none" onchange="onFileUpload(this)"/>
     <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none" onchange="onFileUpload(this)"/>
-    <div class="deposit-section" id="deposit-section">
-      <div class="deposit-q">Did the customer pay the commitment fee?</div>
-      <div class="deposit-q-sub" id="deposit-q-sub">—</div>
-      <div class="deposit-btns">
-        <button class="dep-btn yes" id="dep-yes" onclick="setDeposit(true)">Yes, paid</button>
-        <button class="dep-btn no" id="dep-no" onclick="setDeposit(false)">No, not yet</button>
-      </div>
-    </div>
     <button class="submit-btn" onclick="submitOrder()" id="submit-btn">Save as Draft</button>
-    <button class="cancel-btn" onclick="saveDraftNow()" style="background:transparent;border:0.5px solid var(--color-border-secondary);color:var(--color-text-primary);margin-bottom:6px;">Save as Draft (keep editing later)</button>
     <button class="cancel-btn" onclick="closeForm()">Cancel</button>
   </div>
 </div>
