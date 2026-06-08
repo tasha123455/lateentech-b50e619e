@@ -22,6 +22,26 @@ export function SignInForm({ role }: { role: Role }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const otherRole: Role = role === "marketer" ? "business" : "marketer";
+  const _otherPath = role === "marketer" ? "/business/signin" : "/marketer/signin";
+  const _registerPath = role === "marketer" ? "/marketer/register" : "/business/register";
+  void _otherPath; void _registerPath;
+
+
+  const verifyRole = async (userId: string) => {
+    const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    if (error) throw error;
+    const roles = (data ?? []).map((r) => r.role as string);
+    if (roles.includes("admin")) return "admin" as const;
+    if (roles.includes(role)) return role;
+    if (roles.includes(otherRole)) {
+      await supabase.auth.signOut();
+      throw new Error(`This account is registered as a ${otherRole}. Please use the ${otherRole} sign-in page, or create a separate ${role} account.`);
+    }
+    await supabase.auth.signOut();
+    throw new Error(`No ${role} account found for this user. Please register first.`);
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true); setError(null);
@@ -30,24 +50,35 @@ export function SignInForm({ role }: { role: Role }) {
     const session = data.session ?? (await supabase.auth.getSession()).data.session;
     if (!session?.user) { setError("Sign in did not complete. Please try again."); setBusy(false); return; }
     try {
+      const picked = await verifyRole(session.user.id);
+      try { localStorage.setItem("active_role", picked === "admin" ? role : picked); } catch { /* ignore */ }
       await loadRoleForUser(session.user.id);
       nav({ to: "/dashboard" });
-    } catch {
-      setError("Sign in did not complete. Please try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed");
       setBusy(false);
     }
   };
 
   const signInGoogle = async () => {
     setError(null);
+    try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
+    try { sessionStorage.setItem("intended_role", role); } catch { /* ignore */ }
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.redirected) return;
     if (result.error) { setError(result.error.message); return; }
     const session = (await supabase.auth.getSession()).data.session;
     if (session?.user) {
-      try { await loadRoleForUser(session.user.id); nav({ to: "/dashboard" }); } catch { /* ignore */ }
+      try {
+        await verifyRole(session.user.id);
+        await loadRoleForUser(session.user.id);
+        nav({ to: "/dashboard" });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Sign in failed");
+      }
     }
   };
+
 
   const subtitle = role === "marketer" ? "Sign in to your marketer account" : "Sign in to your business account";
 

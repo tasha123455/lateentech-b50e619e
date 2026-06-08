@@ -26,10 +26,21 @@ export function RegisterForm({ role }: { role: Role }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const addRoleAndGo = async () => {
+    const { error: rpcErr } = await supabase.rpc("add_self_role", {
+      _role: role,
+      _business_name: role === "business" ? businessName : undefined,
+    });
+    if (rpcErr) throw rpcErr;
+    try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
+    await refreshRole();
+    nav({ to: "/dashboard" });
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true); setError(null);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -42,21 +53,61 @@ export function RegisterForm({ role }: { role: Role }) {
         },
       },
     });
+
+    // If user already exists, try signing in and add this role to the same account.
+    const alreadyRegistered = signUpErr && /already|registered|exists/i.test(signUpErr.message);
+    if (alreadyRegistered) {
+      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInErr || !signInData.session?.user) {
+        setBusy(false);
+        setError("An account already exists with this email. Enter the correct password to add a " + role + " account to it.");
+        return;
+      }
+      // Check existing roles
+      const uid = signInData.session.user.id;
+      const { data: rolesRows } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+      const roles = (rolesRows ?? []).map((r) => r.role as string);
+      if (roles.includes(role)) {
+        setBusy(false);
+        setError(`You already have a ${role} account. Please sign in instead.`);
+        return;
+      }
+      try {
+        await addRoleAndGo();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not add role");
+        setBusy(false);
+      }
+      return;
+    }
+
+    if (signUpErr) { setError(signUpErr.message); setBusy(false); return; }
+
+    // New signup — handle_new_user trigger created the chosen role already.
+    try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     setBusy(false);
-    if (error) { setError(error.message); return; }
-    await refreshRole();
-    nav({ to: "/dashboard" });
+    if (signUpData.session) {
+      await refreshRole();
+      nav({ to: "/dashboard" });
+    } else {
+      setError("Check your email to confirm your account, then sign in.");
+    }
   };
 
   const signUpGoogle = async () => {
     setError(null);
     try { sessionStorage.setItem("intended_role", role); } catch { /* ignore */ }
+    try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/dashboard" });
     if (result.redirected) return;
     if (result.error) { setError(result.error.message); return; }
-    await refreshRole();
-    nav({ to: "/dashboard" });
+    const session = (await supabase.auth.getSession()).data.session;
+    if (session?.user) {
+      try { await addRoleAndGo(); }
+      catch (err) { setError(err instanceof Error ? err.message : "Sign up failed"); }
+    }
   };
+
 
   const subtitle = role === "marketer"
     ? "Free to join — earn on every sale you drive"

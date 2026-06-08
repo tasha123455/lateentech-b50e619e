@@ -36,16 +36,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("user_id", userId);
     if (error) throw error;
     const roles = (data ?? []).map((r) => r.role as Role);
+    let preferred: Role | null = null;
+    try {
+      const stored = localStorage.getItem("active_role") as Role | null;
+      if (stored && roles.includes(stored)) preferred = stored;
+    } catch { /* ignore */ }
     const picked: Role | null = roles.includes("admin")
       ? "admin"
-      : roles.includes("business")
-        ? "business"
-        : roles.includes("marketer")
-          ? "marketer"
-          : null;
+      : preferred
+        ? preferred
+        : roles.includes("business")
+          ? "business"
+          : roles.includes("marketer")
+            ? "marketer"
+            : null;
     setRole(picked);
     return picked;
   }, []);
+
 
   useEffect(() => {
     let active = true;
@@ -83,8 +91,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadRole]);
 
   const signOut = useCallback(async () => {
+    try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
     await supabase.auth.signOut();
   }, []);
+
 
   const refreshRole = useCallback(async () => {
     if (session?.user) await loadRole(session.user.id);
