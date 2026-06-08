@@ -91,8 +91,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadRole]);
 
   const signOut = useCallback(async () => {
+    try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
     await supabase.auth.signOut();
   }, []);
+
 
   const refreshRole = useCallback(async () => {
     if (session?.user) await loadRole(session.user.id);
