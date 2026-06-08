@@ -35,11 +35,16 @@ export function SignInForm({ role }: { role: Role }) {
     if (roles.includes("admin")) return "admin" as const;
     if (roles.includes(role)) return role;
     if (roles.includes(otherRole)) {
-      await supabase.auth.signOut();
-      throw new Error(`This account is registered as a ${otherRole}. Please use the ${otherRole} sign-in page, or create a separate ${role} account.`);
+      // Same account can also work as the other role — add it on the fly.
+      const { error: addErr } = await supabase.rpc("add_self_role", { _role: role });
+      if (addErr) {
+        await supabase.auth.signOut();
+        throw new Error(addErr.message);
+      }
+      return role;
     }
     await supabase.auth.signOut();
-    throw new Error(`No ${role} account found for this user. Please register first.`);
+    throw new Error(`No account found for this user. Please register first.`);
   };
 
   const submit = async (e: FormEvent) => {
