@@ -23,8 +23,10 @@ export function SignInForm({ role }: { role: Role }) {
   const [busy, setBusy] = useState(false);
 
   const otherRole: Role = role === "marketer" ? "business" : "marketer";
-  const otherPath = role === "marketer" ? "/business/signin" : "/marketer/signin";
-  const registerPath = role === "marketer" ? "/marketer/register" : "/business/register";
+  const _otherPath = role === "marketer" ? "/business/signin" : "/marketer/signin";
+  const _registerPath = role === "marketer" ? "/marketer/register" : "/business/register";
+  void _otherPath; void _registerPath;
+
 
   const verifyRole = async (userId: string) => {
     const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
