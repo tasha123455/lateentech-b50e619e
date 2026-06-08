@@ -445,6 +445,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_self_role: {
+        Args: {
+          _business_name?: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       admin_approve_order: {
         Args: { _order_id: string }
         Returns: {
