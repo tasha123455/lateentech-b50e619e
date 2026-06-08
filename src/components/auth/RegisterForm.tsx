@@ -29,7 +29,7 @@ export function RegisterForm({ role }: { role: Role }) {
   const addRoleAndGo = async () => {
     const { error: rpcErr } = await supabase.rpc("add_self_role", {
       _role: role,
-      _business_name: role === "business" ? businessName : null,
+      _business_name: role === "business" ? businessName : undefined,
     });
     if (rpcErr) throw rpcErr;
     try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
