@@ -389,6 +389,14 @@ export function createLateenApi(userId: string) {
         const rmap = new Map((roles ?? []).map((r: { user_id: string; role: string }) => [r.user_id, r.role]));
         return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer" }));
       },
+      async deleteUser(userId: string) {
+        const { error } = await supabase.rpc("admin_delete_user" as never, { _user_id: userId } as never);
+        if (error) throw error;
+      },
+      async banUser(userId: string, reason?: string) {
+        const { error } = await supabase.rpc("admin_ban_user" as never, { _user_id: userId, _reason: reason ?? null } as never);
+        if (error) throw error;
+      },
       async listAllProducts() {
         const { data, error } = await supabase
           .from("products")
