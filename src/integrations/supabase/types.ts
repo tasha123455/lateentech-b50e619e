@@ -649,6 +649,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_remove_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       admin_set_product_status: {
         Args: { _product_id: string; _status: string }
         Returns: {
