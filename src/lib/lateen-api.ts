@@ -390,16 +390,12 @@ export function createLateenApi(userId: string) {
         return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer" }));
       },
       async deleteUser(userId: string) {
-        const { error } = await supabase.rpc("admin_delete_user" as never, { _user_id: userId } as never);
-        if (error) throw error;
+        const { adminDeleteUserFn } = await import("./admin-users.functions");
+        await adminDeleteUserFn({ data: { userId } });
       },
-      async removeRole(userId: string, role: "marketer" | "business" | "admin") {
-        const { error } = await supabase.rpc("admin_remove_role" as never, { _user_id: userId, _role: role } as never);
-        if (error) throw error;
-      },
-      async banUser(userId: string, reason?: string) {
-        const { error } = await supabase.rpc("admin_ban_user" as never, { _user_id: userId, _reason: reason ?? null } as never);
-        if (error) throw error;
+      async banUser(userId: string, reason?: string | null) {
+        const { adminBanUserFn } = await import("./admin-users.functions");
+        await adminBanUserFn({ data: { userId, reason: reason ?? null } });
       },
       async listAllProducts() {
         const { data, error } = await supabase
