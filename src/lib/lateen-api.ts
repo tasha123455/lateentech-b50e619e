@@ -393,6 +393,10 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.rpc("admin_delete_user" as never, { _user_id: userId } as never);
         if (error) throw error;
       },
+      async removeRole(userId: string, role: "marketer" | "business" | "admin") {
+        const { error } = await supabase.rpc("admin_remove_role" as never, { _user_id: userId, _role: role } as never);
+        if (error) throw error;
+      },
       async banUser(userId: string, reason?: string) {
         const { error } = await supabase.rpc("admin_ban_user" as never, { _user_id: userId, _reason: reason ?? null } as never);
         if (error) throw error;
