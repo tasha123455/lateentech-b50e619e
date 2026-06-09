@@ -533,6 +533,22 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_ban_user: {
+        Args: { _reason?: string; _user_id: string }
+        Returns: {
+          banned_by: string | null
+          created_at: string
+          email: string
+          id: string
+          reason: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_bans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_mark_payout_paid: {
         Args: { _payout_id: string }
