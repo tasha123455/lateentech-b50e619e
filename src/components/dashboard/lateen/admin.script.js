@@ -219,17 +219,17 @@ function admRenderUsers(list){
       <div class="adm-user-actions">
         <span class="adm-role-pill ${pillClass}">${admEsc(role)}</span>
         ${goBtn}
-        <button class="adm-go-btn" style="background:#fee;color:#c00;border-color:#fcc;" onclick="admDeleteUser('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}')">Remove</button>
+        <button class="adm-go-btn" style="background:#fee;color:#c00;border-color:#fcc;" onclick="admRemoveRole('${u.id}','${role}','${admEsc(name).replace(/'/g,"&#39;")}')">Remove ${admEsc(role)}</button>
         <button class="adm-go-btn" style="background:#fff3cd;color:#856404;border-color:#ffeeba;" onclick="admBanUser('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}')">Ban Email</button>
       </div>
     </div>`;
   }).join('');
 }
 
-async function admDeleteUser(userId,name){
-  if(!confirm('Permanently remove '+name+'\u2019s account?\n\nAll their data will be deleted. This cannot be undone.'))return;
+async function admRemoveRole(userId,role,name){
+  if(!confirm('Remove the '+role+' role from '+name+'?\n\nTheir account stays active and they keep any other roles. They can re-register for '+role+' anytime.'))return;
   try{
-    await window.LateenAPI.admin.deleteUser(userId);
+    await window.LateenAPI.admin.removeRole(userId, role);
     admLoadUsers(document.getElementById('user-search').value||'');
   }catch(e){alert('Failed: '+e.message);}
 }
