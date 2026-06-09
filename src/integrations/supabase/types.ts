@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_bans: {
+        Row: {
+          banned_by: string | null
+          created_at: string
+          email: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          banned_by?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          banned_by?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       employee_payments: {
         Row: {
           amount: number
@@ -493,6 +517,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_ban_email: {
+        Args: { _email: string; _reason?: string }
+        Returns: {
+          banned_by: string | null
+          created_at: string
+          email: string
+          id: string
+          reason: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_bans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_mark_payout_paid: {
         Args: { _payout_id: string }
         Returns: {
@@ -630,6 +671,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_unban_email: { Args: { _email: string }; Returns: undefined }
       confirm_order: {
         Args: { _order_id: string }
         Returns: {
