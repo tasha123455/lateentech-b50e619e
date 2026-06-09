@@ -242,8 +242,6 @@ async function admBanUser(userId,name){
     admLoadUsers(document.getElementById('user-search').value||'');
   }catch(e){alert('Failed: '+e.message);}
 }
-  }).join('');
-}
 
 function admGoToAccount(userId,role,name){
   if(!confirm('Open '+name+'\u2019s account?\n\nYou\u2019ll see their dashboard for support purposes. You can exit anytime via the banner at the top.'))return;
