@@ -13,6 +13,8 @@ const styles = (role: Role) =>
     ? { btn: "bg-marketer text-white hover:opacity-90", link: "text-marketer-foreground" }
     : { btn: "bg-business text-[#0d2a20] hover:opacity-90", link: "text-business" };
 
+type OtpMode = "signup" | "email";
+
 export function RegisterForm({ role }: { role: Role }) {
   const s = styles(role);
   const nav = useNavigate();
@@ -24,7 +26,13 @@ export function RegisterForm({ role }: { role: Role }) {
   const [phone, setPhone] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // OTP step state
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpMode, setOtpMode] = useState<OtpMode>("signup");
+  const [otp, setOtp] = useState("");
 
   const addRoleAndGo = async () => {
     const { error: rpcErr } = await supabase.rpc("add_self_role", {
@@ -39,7 +47,7 @@ export function RegisterForm({ role }: { role: Role }) {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    setBusy(true); setError(null);
+    setBusy(true); setError(null); setInfo(null);
     const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
       email,
       password,
@@ -54,7 +62,6 @@ export function RegisterForm({ role }: { role: Role }) {
       },
     });
 
-    // If user already exists, try signing in and add this role to the same account.
     const alreadyRegistered = signUpErr && /already|registered|exists/i.test(signUpErr.message);
     if (alreadyRegistered) {
       const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
@@ -63,7 +70,6 @@ export function RegisterForm({ role }: { role: Role }) {
         setError("An account already exists with this email. Enter the correct password to add a " + role + " account to it.");
         return;
       }
-      // Check existing roles
       const uid = signInData.session.user.id;
       const { data: rolesRows } = await supabase.from("user_roles").select("role").eq("user_id", uid);
       const roles = (rolesRows ?? []).map((r) => r.role as string);
@@ -72,43 +78,71 @@ export function RegisterForm({ role }: { role: Role }) {
         setError(`You already have a ${role} account. Please sign in instead.`);
         return;
       }
-      try {
-        const { error: rpcErr } = await supabase.rpc("add_self_role", {
-          _role: role,
-          _business_name: role === "business" ? businessName : undefined,
-        });
-        if (rpcErr) throw rpcErr;
-        try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
-        // Send a confirmation email for the newly added role, then sign out
-        // so the user must confirm via email before accessing it.
-        await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            shouldCreateUser: false,
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          },
-        });
-        await supabase.auth.signOut();
-        setBusy(false);
-        setError(`We've sent a confirmation email to ${email}. Please confirm it to activate your ${role} account.`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not add role");
-        setBusy(false);
-      }
+      // Send an OTP email to verify before adding the role
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false },
+      });
+      await supabase.auth.signOut();
+      setBusy(false);
+      if (otpErr) { setError(otpErr.message); return; }
+      setOtpMode("email");
+      setOtpStep(true);
+      setInfo(`We sent a 6-digit code to ${email}. Enter it below to activate your ${role} account.`);
       return;
     }
 
     if (signUpErr) { setError(signUpErr.message); setBusy(false); return; }
 
-    // New signup — handle_new_user trigger created the chosen role already.
     try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     setBusy(false);
     if (signUpData.session) {
       await refreshRole();
       nav({ to: "/dashboard" });
     } else {
-      setError(`Check your email (${email}) to confirm your account, then sign in.`);
+      setOtpMode("signup");
+      setOtpStep(true);
+      setInfo(`We sent a 6-digit code to ${email}. Enter it below to verify your account.`);
     }
+  };
+
+  const verifyOtp = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setError(null);
+    const { data, error: verErr } = await supabase.auth.verifyOtp({
+      email,
+      token: otp.trim(),
+      type: otpMode,
+    });
+    if (verErr || !data.session) {
+      setBusy(false);
+      setError(verErr?.message ?? "Invalid or expired code");
+      return;
+    }
+    try {
+      if (otpMode === "email") {
+        // Adding a new role to an existing account
+        await addRoleAndGo();
+      } else {
+        try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
+        await refreshRole();
+        nav({ to: "/dashboard" });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Verification failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    setError(null); setInfo(null); setBusy(true);
+    const { error: rErr } = otpMode === "signup"
+      ? await supabase.auth.resend({ type: "signup", email })
+      : await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+    setBusy(false);
+    if (rErr) { setError(rErr.message); return; }
+    setInfo(`A new code was sent to ${email}.`);
   };
 
   const signUpGoogle = async () => {
@@ -125,11 +159,46 @@ export function RegisterForm({ role }: { role: Role }) {
     }
   };
 
-
   const subtitle = role === "marketer"
     ? "Free to join — earn on every sale you drive"
     : "List your products and let marketers grow your sales";
 
+  if (otpStep) {
+    return (
+      <form onSubmit={verifyOtp} className="space-y-4">
+        <div>
+          <h1 className="text-xl font-medium text-text-1">Verify your email</h1>
+          <p className="mt-1 text-sm text-text-2">Enter the 6-digit code we sent to {email}.</p>
+        </div>
+        <Field label="Verification code">
+          <input
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            required
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+            placeholder="123456"
+            className="auth-input tracking-[0.5em] text-center text-lg"
+          />
+        </Field>
+        {info && <p className="text-xs text-text-2">{info}</p>}
+        {error && <p className="text-xs text-destructive">{error}</p>}
+        <button type="submit" disabled={busy || otp.length !== 6} className={`h-11 w-full rounded-xl text-sm font-medium transition disabled:opacity-60 ${s.btn}`}>
+          {busy ? "Verifying…" : "Verify & continue"}
+        </button>
+        <div className="flex items-center justify-between text-xs text-text-2">
+          <button type="button" onClick={resendOtp} disabled={busy} className={`font-medium ${s.link}`}>
+            Resend code
+          </button>
+          <button type="button" onClick={() => { setOtpStep(false); setOtp(""); setError(null); setInfo(null); }} className="underline">
+            Use a different email
+          </button>
+        </div>
+      </form>
+    );
+  }
 
   return (
     <form onSubmit={submit} className="space-y-4">
