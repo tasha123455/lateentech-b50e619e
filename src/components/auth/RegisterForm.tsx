@@ -73,7 +73,24 @@ export function RegisterForm({ role }: { role: Role }) {
         return;
       }
       try {
-        await addRoleAndGo();
+        const { error: rpcErr } = await supabase.rpc("add_self_role", {
+          _role: role,
+          _business_name: role === "business" ? businessName : undefined,
+        });
+        if (rpcErr) throw rpcErr;
+        try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
+        // Send a confirmation email for the newly added role, then sign out
+        // so the user must confirm via email before accessing it.
+        await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            shouldCreateUser: false,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+          },
+        });
+        await supabase.auth.signOut();
+        setBusy(false);
+        setError(`We've sent a confirmation email to ${email}. Please confirm it to activate your ${role} account.`);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not add role");
         setBusy(false);
@@ -90,7 +107,7 @@ export function RegisterForm({ role }: { role: Role }) {
       await refreshRole();
       nav({ to: "/dashboard" });
     } else {
-      setError("Check your email to confirm your account, then sign in.");
+      setError(`Check your email (${email}) to confirm your account, then sign in.`);
     }
   };
 
