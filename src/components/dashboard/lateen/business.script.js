@@ -131,7 +131,7 @@ function recomputeAnalytics(){
   orders.forEach(o=>{
     const st=o._status;const c=o._createdAt;if(!c)return;
     const net=(o.price*o.qty)-o.commission-o.platformFee;
-    const isOk=st==='delivered';const isFail=st==='rejected';
+    const isOk=st==='delivered';const isFail=st==='cancelled'||st==='rejected';
     if(isOk){totGross+=o.price*o.qty;totPieces+=o.qty;totComm+=o.commission;totPlat+=o.platformFee;totOk++;if(o.marketerId)marketerSet.add(o.marketerId);}
     if(isFail)totFail++;
     const di=Math.floor((new Date(c.getFullYear(),c.getMonth(),c.getDate())-s.dayStart)/86400000);
