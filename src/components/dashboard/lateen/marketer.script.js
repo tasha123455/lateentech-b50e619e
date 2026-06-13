@@ -146,7 +146,7 @@ function recomputeAnalytics(){
   let totEarn=0,totPieces=0,totOk=0,totDone=0;const totProducts=new Set();const earnByCur={};
   orders.forEach(o=>{
     const status=o._status||'pending';const c=o._createdAt;if(!c)return;
-    const isEarn=status==='approved'||status==='confirmed'||status==='delivered';const isOk=status==='delivered';const isFail=status==='rejected'||status==='cancelled';
+    const isEarn=status==='approved'||status==='confirmed'||status==='delivered'||status==='cancelled';const isOk=status==='delivered';const isFail=status==='rejected'||status==='cancelled';
     const earn=(o.commPerUnit||0)*(o.qty||0);
     if(isEarn){totEarn+=earn;const cc=o._curCode||'GBP';const ss=o._sym||'£';if(!earnByCur[cc])earnByCur[cc]={sym:ss,amount:0};earnByCur[cc].amount+=earn;}
     if(isOk){totPieces+=(o.qty||0);totOk++;if(o.productKey)totProducts.add(o.productKey);}
