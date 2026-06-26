@@ -77,10 +77,10 @@
 .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 1rem; }
 .nav-label { font-size: 10px; color: var(--color-text-secondary); }
 .nav-item.active .nav-label { color: #2dbd8f; font-weight: 500; }
-.menu-overlay { display: none; position: absolute; inset: 0; z-index: 30; }
+.menu-overlay { display: none; position: fixed; inset: 0; z-index: 30; }
 .menu-overlay.open { display: flex; }
 .menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-.menu-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 78%; background: #1e1e1e; padding: 2rem 1.5rem; display: flex; flex-direction: column; border-radius: 20px 0 0 20px; border-left: 0.5px solid var(--color-border-secondary); }
+.menu-drawer { position: fixed; top: 0; right: 0; bottom: 0; height: 100vh; height: 100dvh; width: min(78%, 340px); background: #1e1e1e; padding: 2rem 1.5rem; display: flex; flex-direction: column; border-radius: 20px 0 0 20px; border-left: 0.5px solid var(--color-border-secondary); overflow-y: auto; }
 .menu-close { align-self: flex-end; background: none; border: none; cursor: pointer; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
 .menu-user { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
 .menu-name { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
