@@ -31,8 +31,8 @@ function switchPeriod(p,el){currentPeriod=p;document.querySelectorAll('.ptab').f
 
 /* Nav */
 function goTo(pageId){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(pageId).classList.add('active');const navMap={'pg-home':'nav-home','pg-products':'nav-products','pg-orders':'nav-orders'};document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');n.querySelectorAll('svg').forEach(s=>s.setAttribute('stroke','var(--color-text-secondary)'));n.querySelector('.nav-label').style.color='';});if(navMap[pageId]){const nav=document.getElementById(navMap[pageId]);nav.classList.add('active');nav.querySelectorAll('svg').forEach(s=>s.setAttribute('stroke','#2dbd8f'));nav.querySelector('.nav-label').style.color='#2dbd8f';}if(pageId==='pg-products'){renderProducts();renderPhotoGrid();}if(pageId==='pg-orders'){updateSummary();applyFilters();}if(pageId==='pg-notif')document.getElementById('notif-dot').style.display='none';}
-function openMenu(){document.getElementById('menu-overlay').classList.add('open');}
-function closeMenu(){document.getElementById('menu-overlay').classList.remove('open');}
+function openMenu(){document.getElementById('menu-overlay').classList.add('open');document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';}
+function closeMenu(){document.getElementById('menu-overlay').classList.remove('open');document.body.style.overflow='';document.documentElement.style.overflow='';}
 function openPayout(){document.getElementById('payout-overlay').classList.add('open');}
 function closePayout(){document.getElementById('payout-overlay').classList.remove('open');}
 
