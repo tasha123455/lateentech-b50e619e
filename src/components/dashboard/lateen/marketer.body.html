@@ -69,7 +69,7 @@
 .save-btn { background: none; border: none; cursor: pointer; padding: 0; }
 .saved-empty { text-align: center; padding: 3rem 1rem; color: var(--color-text-secondary); font-size: 13px; }
 .saved-empty-icon { font-size: 32px; margin-bottom: 10px; }
-.bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #1a1a1a; border-top: 0.5px solid var(--color-border-tertiary); padding: 10px 0 16px; position: absolute; bottom: 0; left: 0; right: 0; }
+.bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #1a1a1a; border-top: 0.5px solid var(--color-border-tertiary); padding: 10px 0 16px; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; z-index: 20; }
 .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 1rem; }
 .nav-label { font-size: 10px; color: var(--color-text-secondary); }
 .nav-item.active .nav-label { color: #7f77dd; font-weight: 500; }
