@@ -28,3 +28,6 @@
 .lateen-business .page#pg-orders { padding-top: 0; }
 .lateen-business .page#pg-orders .summary-row { margin-bottom: 0.75rem !important; }
 .lateen-business .page#pg-orders .filter-row { margin-bottom: 0.75rem !important; }
+
+.lateen-business .bottom-nav{ transition: transform 0.25s ease; will-change: transform; }
+.lateen-business .bottom-nav.nav-hidden{ transform: translateX(-50%) translateY(120%); }
