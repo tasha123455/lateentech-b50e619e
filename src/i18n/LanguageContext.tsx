@@ -139,16 +139,35 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     w.__lateenLang = lang;
   }, [toggle, lang]);
 
-  // Synchronously flip dir/lang before paint, then translate the entire body
+  // Flip dir/lang and translate; smooth the swap with View Transitions when
+  // available, else a brief opacity crossfade.
   useLayoutEffect(() => {
     if (typeof document === "undefined") return;
     const html = document.documentElement;
-    html.setAttribute("lang", lang);
-    html.setAttribute("dir", dir);
-    document.body.classList.toggle("lang-ar", lang === "ar");
-    document.body.classList.toggle("lang-en", lang === "en");
-    walkAndTranslate(document.body, lang);
-    try { window.dispatchEvent(new CustomEvent("lateen-lang", { detail: { lang } })); } catch { /* ignore */ }
+    const body = document.body;
+    const apply = () => {
+      html.setAttribute("lang", lang);
+      html.setAttribute("dir", dir);
+      body.classList.toggle("lang-ar", lang === "ar");
+      body.classList.toggle("lang-en", lang === "en");
+      walkAndTranslate(body, lang);
+      try { window.dispatchEvent(new CustomEvent("lateen-lang", { detail: { lang } })); } catch { /* ignore */ }
+    };
+    const docAny = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+    if (typeof docAny.startViewTransition === "function") {
+      docAny.startViewTransition(apply);
+      return;
+    }
+    const prev = body.style.transition;
+    body.style.transition = "opacity 140ms ease";
+    body.style.opacity = "0.35";
+    requestAnimationFrame(() => {
+      apply();
+      requestAnimationFrame(() => {
+        body.style.opacity = "1";
+        window.setTimeout(() => { body.style.transition = prev; }, 180);
+      });
+    });
   }, [lang, dir]);
 
   // Observe dynamically inserted nodes — ONLY when Arabic is active.
