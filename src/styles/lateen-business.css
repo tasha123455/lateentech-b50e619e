@@ -31,3 +31,12 @@
 
 .lateen-business .bottom-nav{ transition: transform 0.25s ease; will-change: transform; }
 .lateen-business .bottom-nav.nav-hidden{ transform: translateX(-50%) translateY(120%); }
+
+.lateen-business .wallet-amount,
+.lateen-business .stat-value,
+.lateen-business #withdraw-amount,
+.lateen-business .oc-amt,
+.lateen-business .ea,
+.lateen-business .cpr,
+.lateen-business .leg-val,
+.lateen-business .product-meta { direction: ltr; unicode-bidi: bidi-override; }
