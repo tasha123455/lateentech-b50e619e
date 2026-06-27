@@ -1,15 +1,11 @@
 
-// Language-aware currency display.
-// Arabic page  → symbol BEFORE amount, forced visually as د.ل400.00 in RTL containers.
-// English page → amount + ' ' + uppercase ISO code, e.g. 400.00 LYD.
-const __AR_CUR_RX=/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;
+// Currency display. Keep this light: only normalize Libyan Dinar for now.
 const __SYM2CODE={};
-const __AR_CUR_SYMBOL_BY_CODE={AED:'د.إ',BHD:'د.ب',DZD:'دج',EGP:'ج.م',IQD:'ع.د',JOD:'د.أ',KWD:'د.ك',LBP:'ل.ل',LYD:'د.ل',MAD:'د.م.',MRU:'أوقية',OMR:'ر.ع.',QAR:'ر.ق',SAR:'ر.س',SDG:'ج.س.',SYP:'ل.س',TND:'د.ت',YER:'ر.ي'};
 function __stripDirMarks(s){return(!s||typeof s!=='string')?s:s.replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,'').trim();}
-function __normalizeCurSym(s,code){const r=__stripDirMarks(s||'');const compact=r.replace(/\s+/g,'');const cc=(code||'').toString().trim().toUpperCase();if(cc&&__AR_CUR_SYMBOL_BY_CODE[cc])return __AR_CUR_SYMBOL_BY_CODE[cc];if(compact==='ل.د'||compact==='د.ل')return'د.ل';if(compact==='.د.ب'||compact==='ب.د'||compact==='د.ب')return'د.ب';return r;}
+function __normalizeCurSym(s,code){const r=__stripDirMarks(s||'');const compact=r.replace(/\s+/g,'');const cc=(code||'').toString().trim().toUpperCase();if(cc==='LYD'||compact==='ل.د'||compact==='د.ل')return'د.ل';return r;}
 function __rawSym(s,code){return __normalizeCurSym(s,code);}
 function __wrapArSym(s,code){const cc=(code||'').toString().toUpperCase();const r=__rawSym(s,cc);if(cc&&r){__SYM2CODE[r]=cc;const old=__stripDirMarks(s||'');if(old)__SYM2CODE[old]=cc;}return r;}
-function __money(n,sym,code){const a=parseFloat(n||0).toFixed(2);const cc=(code||__SYM2CODE[__stripDirMarks(sym||'')]||'').toString().toUpperCase();const r=__rawSym(sym||'£',cc);const isAr=(typeof document!=='undefined'&&document.documentElement.lang==='ar');if(isAr){return '\u202D'+r+a+'\u202C';}return cc?(a+' '+cc):(r+a);}
+function __money(n,sym,code){const a=parseFloat(n||0).toFixed(2);const cc=(code||__SYM2CODE[__stripDirMarks(sym||'')]||'').toString().toUpperCase();const r=__rawSym(sym||'£',cc);return cc?(a+' '+cc):(r+a);}
 if(typeof window!=='undefined'){window.__money=__money;window.__rawSym=__rawSym;}
 
 /* Charts */
