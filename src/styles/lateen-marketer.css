@@ -17,3 +17,5 @@
 
 .lateen-marketer .bottom-nav{ transition: transform 0.25s ease; will-change: transform; }
 .lateen-marketer .bottom-nav.nav-hidden{ transform: translateX(-50%) translateY(120%); }
+
+.cur-tag{font-size:0.62em;font-weight:600;opacity:.75;margin-inline-end:3px;vertical-align:0.15em;letter-spacing:0.01em;}
