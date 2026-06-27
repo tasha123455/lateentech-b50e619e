@@ -17,14 +17,3 @@
 
 .lateen-marketer .bottom-nav{ transition: transform 0.25s ease; will-change: transform; }
 .lateen-marketer .bottom-nav.nav-hidden{ transform: translateX(-50%) translateY(120%); }
-
-/* Force LTR visual order for currency display so Arabic symbols like د.ل
-   render in logical order (د then ل) instead of being reversed to ل.د. */
-.lateen-marketer .wallet-amount,
-.lateen-marketer .stat-value,
-.lateen-marketer #withdraw-amount,
-.lateen-marketer .oc-amt,
-.lateen-marketer .ea,
-.lateen-marketer .cpr,
-.lateen-marketer .leg-val,
-.lateen-marketer .product-meta { direction: ltr; unicode-bidi: bidi-override; }
