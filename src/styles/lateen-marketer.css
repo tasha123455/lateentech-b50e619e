@@ -17,3 +17,7 @@
 
 .lateen-marketer .bottom-nav{ transition: transform 0.25s ease; will-change: transform; }
 .lateen-marketer .bottom-nav.nav-hidden{ transform: translateX(-50%) translateY(120%); }
+
+/* Currency symbol — smaller and ahead of the amount */
+.cur-sym{font-size:0.62em;opacity:0.82;font-weight:500;margin-inline-end:0.18em;letter-spacing:0.01em;display:inline-block;vertical-align:baseline;}
+
