@@ -1,7 +1,7 @@
 
-// Wrap Arabic-letter currency symbols with U+2067/U+2069 so they keep proper RTL order next to LTR digits.
+// Language-aware currency display: Arabic page → wrapped Arabic symbol (RTL-isolated); English page → ISO code.
 const __AR_CUR_RX=/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;
-function __wrapArSym(s){if(!s||typeof s!=='string')return s;if(!__AR_CUR_RX.test(s))return s;if(s.charCodeAt(0)===0x2067)return s;return '\u2067'+s+'\u2069';}
+function __wrapArSym(s,code){if(!s||typeof s!=='string')return s;if(!__AR_CUR_RX.test(s))return s;const isAr=(typeof document!=='undefined'&&document.documentElement.lang==='ar');if(isAr){if(s.charCodeAt(0)===0x2067)return s;return '\u2067'+s+'\u2069';}return code?(code+' '):s;}
 /* ── Charts ── */
 const __AR_LBL={Sun:'الأحد',Mon:'الإثنين',Tue:'الثلاثاء',Wed:'الأربعاء',Thu:'الخميس',Fri:'الجمعة',Sat:'السبت',Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر'};
 const __ar=()=>document.documentElement.lang==='ar';
