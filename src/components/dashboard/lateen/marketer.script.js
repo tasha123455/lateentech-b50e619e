@@ -233,23 +233,27 @@ function __pdMinHintTxt(){const el=document.getElementById('withdraw-min-hint');
 async function refreshPayoutState(){
   const stEl=document.getElementById('payout-status');const btn=document.getElementById('withdraw-btn');
   if(!stEl||!btn||!window.LateenAPI)return;
-  let prof=null,latest=null,paid=null,wallet=null;
+  let state=null,prof=null,latest=null,paid=null,wallet=null;
   try{
-    [prof,latest,paid,wallet]=await Promise.all([
+    [state,prof,latest,paid,wallet]=await Promise.all([
+      window.LateenAPI.getPayoutState?.(),
       window.LateenAPI.getProfile?.(),
       window.LateenAPI.getLatestPayout?.(),
       window.LateenAPI.getLastPaidPayout?.(),
       window.LateenAPI.getWallet?.(),
     ]);
   }catch(e){console.error('[Lateen] payout state',e);}
-  const bal=wallet?Number(wallet.balance)||0:Number(window.__lateenWalletBalance||0);
+  const bal=state&&state.balance!=null?Number(state.balance)||0:(wallet?Number(wallet.balance)||0:Number(window.__lateenWalletBalance||0));
   window.__lateenWalletBalance=bal;
   const hasPaid=!!(paid&&paid.paid_at);
   const anchor=hasPaid?new Date(paid.paid_at).getTime():(prof&&prof.created_at?new Date(prof.created_at).getTime():Date.now());
   const dueAt=anchor+__PAYOUT_PERIOD_MS;
   const now=Date.now();
-  const daysLeft=Math.max(0,Math.floor((dueAt-now)/86400000));
-  const pending=!!(latest&&latest.status==='requested');
+  const fallbackDaysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
+  const daysLeft=state&&state.days_left!=null?Math.max(0,Number(state.days_left)||0):fallbackDaysLeft;
+  const pending=state&&state.pending!=null?!!state.pending:!!(latest&&latest.status==='requested');
+  const serverCan=state&&state.can_withdraw!=null?!!state.can_withdraw:(bal>=20&&!pending&&daysLeft===0);
+  window.__lateenCanWithdraw=false;
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.classList.toggle('disabled',!enabled);btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
   if(bal<20){
     stEl.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');
@@ -257,13 +261,16 @@ async function refreshPayoutState(){
   }else if(pending){
     stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
     setBtn(false,__t('Withdraw','سحب'));
-  }else if(daysLeft>0 && hasPaid){
-    stEl.textContent=__t('Next payout in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
-    /* TEST MODE: keep button enabled so user can test */
-    setBtn(true,__t('Withdraw','سحب'));
-  }else{
+  }else if(serverCan){
     stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
+    window.__lateenCanWithdraw=true;
     setBtn(true,__t('Withdraw','سحب'));
+  }else if(daysLeft>0){
+    stEl.textContent=__t('Next payout in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
+    setBtn(false,__t('Withdraw','سحب'));
+  }else{
+    stEl.textContent=__t('Next payout in 0 days','تقدر تسحب بعد 0 يوم');
+    setBtn(false,__t('Withdraw','سحب'));
   }
   __pdMinHintTxt();
 }
