@@ -475,7 +475,7 @@
           <div class="pd-picker-item pd-picker-disabled"><span>More</span><span class="pd-soon-pill">Soon</span></div>
         </div>
       </label>
-      <label class="pd-lbl" id="pd-bank-wrap">Bank <span class="pd-req">*</span>
+      <label class="pd-lbl" id="pd-bank-wrap"><span class="pd-lbl-head">Bank <span class="pd-req">*</span></span>
         <select id="pd-bank" class="pd-inp" required>
           <option value="">Select…</option>
           <option>مصرف الجمهورية</option>
@@ -498,13 +498,14 @@
           <option>مصرف التضامن</option>
         </select>
       </label>
-      <label class="pd-lbl">Account holder <span class="pd-req">*</span><input id="pd-holder" class="pd-inp" placeholder="Full name on account" required /></label>
-      <label class="pd-lbl">Account number <span class="pd-req">*</span><input id="pd-acct" class="pd-inp" placeholder="Account number" required /></label>
+      <label class="pd-lbl"><span class="pd-lbl-head">Account holder <span class="pd-req">*</span></span><input id="pd-holder" class="pd-inp" placeholder="Full name on account" required /></label>
+      <label class="pd-lbl"><span class="pd-lbl-head">Account number <span class="pd-req">*</span></span><input id="pd-acct" class="pd-inp" placeholder="Account number" required /></label>
       <div class="pd-iban-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <label class="pd-lbl">IBAN<input id="pd-iban" class="pd-inp" placeholder="optional" /></label>
-        <label class="pd-lbl">SWIFT/BIC<input id="pd-swift" class="pd-inp" placeholder="optional" /></label>
+        <label class="pd-lbl"><span class="pd-lbl-head">IBAN</span><input id="pd-iban" class="pd-inp" placeholder="optional" /></label>
+        <label class="pd-lbl"><span class="pd-lbl-head">SWIFT/BIC</span><input id="pd-swift" class="pd-inp" placeholder="optional" /></label>
       </div>
-      <label class="pd-lbl">Notes (optional)<textarea id="pd-notes" class="pd-inp" rows="2" placeholder="Write any additional notes"></textarea></label>
+      <label class="pd-lbl"><span class="pd-lbl-head">Notes (optional)</span><textarea id="pd-notes" class="pd-inp" rows="2" placeholder="Write any additional notes"></textarea></label>
+
     </div>
     <button onclick="confirmWithdraw()" style="width:100%;height:44px;border-radius:12px;border:none;background:#f0eeeb;color:#0D0D0D;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);margin-bottom:10px;">Save &amp; request withdrawal</button>
     <button onclick="closeWithdraw()" style="width:100%;height:40px;border-radius:12px;border:0.5px solid #333;background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;font-family:var(--font-sans);">Cancel</button>
