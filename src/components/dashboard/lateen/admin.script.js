@@ -157,6 +157,7 @@ async function admLoadPayouts(){
         ${detail('SWIFT/BIC',u.payout_swift)}
         ${detail('Notes',u.payout_notes)}
       </div>`:`<div class="adm-pay-details adm-pay-details-empty">No payout details on file — contact the marketer.</div>`;
+      const liveBal=p.wallet&&p.wallet.balance!=null?Number(p.wallet.balance):Number(p.amount||0);
       return `<div class="adm-payout-card">
         <div class="adm-payout-row">
           <div class="adm-user-av">${admEsc(admInitials(name))}</div>
@@ -164,8 +165,8 @@ async function admLoadPayouts(){
             <div class="adm-pay-name">${admEsc(name)}</div>
             <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
           </div>
-          <div class="adm-pay-amt"><div>${admMoney(p.amount)}</div><div style="font-size:10px;color:#9e9b97;font-weight:400;margin-top:2px;white-space:nowrap;">Current wallet: ${admMoney(p.wallet&&p.wallet.balance!=null?p.wallet.balance:p.amount)}</div></div>
-          <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${p.amount})">Paid</button>
+          <div class="adm-pay-amt"><div>${admMoney(p.amount)}</div><div style="font-size:10px;color:#9e9b97;font-weight:400;margin-top:2px;white-space:nowrap;">Current wallet: ${admMoney(liveBal)}</div></div>
+          <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal})">Paid</button>
         </div>
         ${detailsHtml}
         <div style="display:flex;gap:6px;padding:10px 14px 12px;border-top:0.5px solid var(--border-2);">
