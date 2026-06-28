@@ -265,6 +265,7 @@ async function refreshPayoutState(){
   }
   __pdMinHintTxt();
 }
+async function __lateenRefreshWalletAndPayout(){try{if(typeof refreshWallet==='function')await refreshWallet();else await refreshPayoutState();}catch(e){console.error('[Lateen] wallet/payout refresh',e);}}
 async function refreshNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
@@ -290,21 +291,21 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
     const cur=window.__lateenWalletCur||'';
     const amt=Number(window.__lateenWalletBalance||0);
     if((cur||'').toUpperCase()==='LYD'&&amt<20){
-      alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));return;
+      alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));await __lateenRefreshWalletAndPayout();return;
     }
   }catch(e){}
   await _orig.apply(this,arguments);
-  refreshPayoutState();
+  await __lateenRefreshWalletAndPayout();
 };window.confirmWithdraw=confirmWithdraw;})();
 
 /* Wrap goTo: mark notifications read on opening notif page */
 (function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)window.LateenAPI.markNotificationsRead().catch(()=>{});}};window.goTo=goTo;})();
 
-refreshPayoutState();refreshNotifications();
-setInterval(refreshPayoutState,60000);
+__lateenRefreshWalletAndPayout();refreshNotifications();
+setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
 loadBrowse().then(()=>loadOrders());refreshWallet();refreshProfile();
-window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();refreshWallet();});const __unsubPay=window.LateenAPI.subscribe('payouts',()=>refreshPayoutState());const __unsubNotif=window.LateenAPI.subscribe('notifications',()=>refreshNotifications());window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders,__unsubPay,__unsubNotif);}
+window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>__lateenRefreshWalletAndPayout());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();__lateenRefreshWalletAndPayout();});const __unsubPay=window.LateenAPI.subscribe('payouts',()=>__lateenRefreshWalletAndPayout());const __unsubNotif=window.LateenAPI.subscribe('notifications',()=>{refreshNotifications();__lateenRefreshWalletAndPayout();});window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders,__unsubPay,__unsubNotif);}
 /* persist page + scroll across refresh */
 (function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
 
