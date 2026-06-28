@@ -337,7 +337,7 @@ export function createLateenApi(userId: string) {
     },
 
     subscribe(
-      key: "my-products" | "browse-products" | "favorites" | "orders" | "wallet",
+      key: "my-products" | "browse-products" | "favorites" | "orders" | "wallet" | "payouts" | "notifications",
       onChange: () => void,
     ) {
       const ch = supabase.channel(`lateen-${key}-${userId}-${crypto.randomUUID()}`);
@@ -347,6 +347,8 @@ export function createLateenApi(userId: string) {
       if (key === "favorites") filters.push({ table: "favorites", filter: `marketer_id=eq.${userId}` });
       if (key === "orders") filters.push({ table: "orders" });
       if (key === "wallet") filters.push({ table: "wallets", filter: `user_id=eq.${userId}` });
+      if (key === "payouts") filters.push({ table: "payouts", filter: `user_id=eq.${userId}` });
+      if (key === "notifications") filters.push({ table: "notifications", filter: `user_id=eq.${userId}` });
       for (const f of filters) {
         (ch as unknown as {
           on: (
