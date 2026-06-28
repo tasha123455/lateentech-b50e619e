@@ -164,7 +164,7 @@ export const DICT: Record<string, string> = {
   "success": "نسبة النجاح",
   "active": "نشط",
   "Marketers": "المسوّقين",
-  "Available balance": "الرصيد المتاح",
+  "Available balance": "رصيد المحفظه",
   "Updated just now": "تم التحديث الآن",
   "Payout": "السحب",
   "Payouts": "السحوبات",
