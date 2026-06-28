@@ -259,7 +259,8 @@ async function refreshPayoutState(){
     setBtn(false,__t('Withdraw','سحب'));
   }else if(daysLeft>0 && hasPaid){
     stEl.textContent=__t('Next payout in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
-    setBtn(false,__t('Withdraw','سحب'));
+    /* TEST MODE: keep button enabled so user can test */
+    setBtn(true,__t('Withdraw','سحب'));
   }else{
     stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
     setBtn(true,__t('Withdraw','سحب'));
@@ -341,6 +342,8 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 /* Wrap goTo: mark notifications read on opening notif page */
 (function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)window.LateenAPI.markNotificationsRead().catch(()=>{});}};window.goTo=goTo;})();
 
+/* Safety: clear any leaked scroll locks from previously-open overlays */
+(function(){const clear=()=>{try{const anyOpen=document.querySelector('.lateen-marketer .overlay.open, .lateen-marketer .menu-overlay.open, #form-overlay.open, #prod-picker-overlay.open, #receipt-picker-overlay.open, #withdraw-overlay.open');if(!anyOpen){document.body.style.overflow='';document.documentElement.style.overflow='';}};clear();setInterval(clear,1500);})();
 __lateenRefreshWalletAndPayout();refreshNotifications();
 setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
