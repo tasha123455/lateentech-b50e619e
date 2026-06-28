@@ -450,23 +450,53 @@
       <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">Confirm your payout details below</div>
     </div>
     <div style="display:grid;gap:10px;margin-bottom:14px;">
-      <label class="pd-lbl">Method
-        <select id="pd-method" class="pd-inp">
+      <label class="pd-lbl">Country <span class="pd-req">*</span>
+        <select id="pd-country" class="pd-inp" required>
           <option value="">Select…</option>
-          <option>Bank transfer</option>
-          <option>Mobile wallet</option>
-          <option>PayPal</option>
-          <option>Cash / Other</option>
+          <option value="Libya">Libya</option>
+          <option value="" disabled>More soon</option>
+        </select>
+        <span class="pd-soon-row"><span class="pd-soon-pill">Soon</span></span>
+      </label>
+      <label class="pd-lbl">Method <span class="pd-req">*</span>
+        <select id="pd-method" class="pd-inp" required onchange="__pdOnMethodChange()">
+          <option value="">Select…</option>
+          <option value="One pay">One pay</option>
+          <option value="Bank of Unity">Bank of Unity</option>
+          <option value="" disabled>More soon</option>
+        </select>
+        <span class="pd-soon-row"><span class="pd-soon-pill">Soon</span></span>
+      </label>
+      <label class="pd-lbl" id="pd-bank-wrap">Bank <span class="pd-req">*</span>
+        <select id="pd-bank" class="pd-inp" required>
+          <option value="">Select…</option>
+          <option>مصرف الجمهورية</option>
+          <option>مصرف الامان</option>
+          <option>مصرف التجارة والتنمية</option>
+          <option>مصرف ليبيا المركزي - بنغازي</option>
+          <option>مصرف الضمان الاسلامي</option>
+          <option>محفظة GPAY</option>
+          <option>مصرف التمويل الإسلامي</option>
+          <option>مصرف الاسلامي الليبي</option>
+          <option>مصرف المتوسط</option>
+          <option>مصرف شمال افريقيا</option>
+          <option>مصرف التجاري الوطني</option>
+          <option>مصرف الاتحاد الوطني</option>
+          <option>محفظة paynow</option>
+          <option>محفظة RUNPAY</option>
+          <option>مصرف الصحاري</option>
+          <option>مصرف السراج الاسلامي</option>
+          <option>تطبيق التداول</option>
+          <option>مصرف التضامن</option>
         </select>
       </label>
-      <label class="pd-lbl">Bank / Provider<input id="pd-bank" class="pd-inp" placeholder="e.g. Barclays" /></label>
-      <label class="pd-lbl">Account holder<input id="pd-holder" class="pd-inp" placeholder="Full name on account" /></label>
-      <label class="pd-lbl">Account number<input id="pd-acct" class="pd-inp" placeholder="Account number" /></label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <label class="pd-lbl">Account holder <span class="pd-req">*</span><input id="pd-holder" class="pd-inp" placeholder="Full name on account" required /></label>
+      <label class="pd-lbl">Account number <span class="pd-req">*</span><input id="pd-acct" class="pd-inp" placeholder="Account number" required /></label>
+      <div class="pd-iban-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <label class="pd-lbl">IBAN<input id="pd-iban" class="pd-inp" placeholder="optional" /></label>
         <label class="pd-lbl">SWIFT/BIC<input id="pd-swift" class="pd-inp" placeholder="optional" /></label>
       </div>
-      <label class="pd-lbl">Notes<textarea id="pd-notes" class="pd-inp" rows="2" placeholder="optional"></textarea></label>
+      <label class="pd-lbl">Notes (optional)<textarea id="pd-notes" class="pd-inp" rows="2" placeholder="Write any additional notes"></textarea></label>
     </div>
     <button onclick="confirmWithdraw()" style="width:100%;height:44px;border-radius:12px;border:none;background:#f0eeeb;color:#0D0D0D;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);margin-bottom:10px;">Save &amp; request withdrawal</button>
     <button onclick="closeWithdraw()" style="width:100%;height:40px;border-radius:12px;border:0.5px solid #333;background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;font-family:var(--font-sans);">Cancel</button>
@@ -476,6 +506,12 @@
 .pd-lbl{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;width:100%;}
 .pd-inp{background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:8px;padding:10px 12px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);outline:none;text-transform:none;letter-spacing:normal;width:100%;}
 .pd-inp:focus{border-color:#666;}
+.pd-inp:disabled{opacity:0.4;cursor:not-allowed;}
+.pd-req{color:#ff6b7a;margin-left:2px;}
+.pd-soon-row{display:inline-flex;align-items:center;gap:6px;margin-top:4px;}
+.pd-soon-pill{display:inline-block;background:#ff3b4a;color:#fff;font-size:9px;font-weight:600;letter-spacing:0.4px;padding:2px 6px;border-radius:6px;text-transform:uppercase;}
+body.lang-ar .pd-iban-row{display:none !important;}
+.pd-bank-disabled{opacity:0.4;pointer-events:none;}
 </style>
 
 <!-- BROWSE OVERLAYS -->
