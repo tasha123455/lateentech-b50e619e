@@ -114,7 +114,9 @@ export const DICT: Record<string, string> = {
   // ===== Dashboards: Stats & Wallet =====
   "Business Dashboard": "لوحة تحكم الشركة",
   "Marketer Dashboard": "لوحة تحكم المسوّق",
-  "WALLET BALANCE": "رصيد المحفظة",
+  "WALLET BALANCE": "الرصيد المتاح",
+  "Wallet Balance": "الرصيد المتاح",
+  "Available after admin receipt approval": "يصبح الرصيد متاحًا بعد اعتماد الإدارة",
   "Wallet": "المحفظة",
   "wallet": "المحفظة",
   "NET EARNINGS": "صافي الأرباح",
