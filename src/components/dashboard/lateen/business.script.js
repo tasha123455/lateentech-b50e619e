@@ -186,7 +186,41 @@ window.__bizSelectWalletCur=function(c){window.__bizWalletCur=c;recomputeAnalyti
 window.__bizSelSym=function(){const e=window.__bizEarnByCur||{};const k=window.__bizWalletCur||Object.keys(e)[0]||'GBP';return (e[k]&&e[k].sym)||'£';};
 function __ensureBizBreakdownDiv(){let wb=document.getElementById('biz-wallet-breakdown');if(wb)return wb;const sub=document.querySelector('.bal-sub');if(!sub)return null;wb=document.createElement('div');wb.id='biz-wallet-breakdown';wb.style.cssText='display:none;margin:8px 0 14px 0;padding:10px 12px;border-radius:12px;background:#141414;border:0.5px solid #232323;font-size:11px;color:rgba(255,255,255,0.7);line-height:1.6';sub.insertAdjacentElement('afterend',wb);return wb;}
 window.__toggleBizWalletCurList=function(){const l=document.getElementById('biz-wallet-cur-list');const c=document.getElementById('biz-wallet-cur-caret');if(!l)return;const open=l.style.display!=='none';l.style.display=open?'none':'block';if(c)c.style.transform=open?'rotate(0deg)':'rotate(180deg)';};
-const __origRecompute=recomputeAnalytics;recomputeAnalytics=function(){__origRecompute.apply(this,arguments);try{const byCur={};orders.forEach(o=>{if(o._status!=='delivered')return;const code=o.curCode||'GBP';const sym=o.sym||'£';if(!byCur[code])byCur[code]={sym,gross:0,comm:0,plat:0,net:0};const g=o.price*o.qty;byCur[code].gross+=g;byCur[code].comm+=o.commission;byCur[code].plat+=o.platformFee;byCur[code].net+=g-o.commission-o.platformFee;});window.__bizEarnByCur=byCur;Object.keys(byCur).forEach(k=>{byCur[k].amount=byCur[k].net;});const codes=Object.keys(byCur);if(!window.__bizWalletCur||!byCur[window.__bizWalletCur])window.__bizWalletCur=codes[0]||'GBP';const sel=window.__bizWalletCur;const sd=byCur[sel]||{sym:'£',gross:0,comm:0,plat:0,net:0};const setX=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(sd.net,sd.sym,sel);gross,sd.sym,sel));gross,sd.sym,sel));(()=>{const e=document.getElementById('brk-comm');if(e)e.innerHTML='−'+__moneyH(sd.comm,sd.sym,sel);})();(()=>{const e=document.getElementById('brk-plat');if(e)e.innerHTML='−'+__moneyH(sd.plat,sd.sym,sel);})();net,sd.sym,sel));const wb=__ensureBizBreakdownDiv();if(wb){if(codes.length>1){wb.style.display='block';const prev=document.getElementById('biz-wallet-cur-list');const wasOpen=prev&&prev.style.display!=='none';const rows=codes.map(c=>{const a=c===sel;return `<button data-no-i18n onclick="__bizSelectWalletCur('${c}')" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin:0 0 6px 0;padding:10px 12px;border-radius:10px;border:0.5px solid ${a?'#7f77dd':'#232323'};background:${a?'#1a1830':'#0f0f0f'};color:#fff;font-size:12px;cursor:pointer;font-family:inherit;text-align:left"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.7">${byCur[c].sym}</span><span>${c}</span></span><span style="font-weight:500">${__moneyH(byCur[c].net,byCur[c].sym,c)}</span></button>`;}).join('');wb.innerHTML=`<button data-no-i18n onclick="__toggleBizWalletCurList()" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid #232323;background:#141414;color:#fff;font-size:11px;cursor:pointer;font-family:inherit"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.55;letter-spacing:0.04em">NET EARNINGS BY CURRENCY</span><span style="opacity:0.5">·</span><span style="opacity:0.85">${codes.length} currencies</span></span><span id="biz-wallet-cur-caret" style="display:inline-block;transition:transform .15s;opacity:0.7">▾</span></button><div id="biz-wallet-cur-list" style="display:${wasOpen?'block':'none'};margin-top:8px">${rows}</div>`;const caret=document.getElementById('biz-wallet-cur-caret');if(caret&&wasOpen)caret.style.transform='rotate(180deg)';wb.style.background='transparent';wb.style.border='none';wb.style.padding='0';}else{wb.style.display='none';wb.innerHTML='';}}}catch(e){console.error('[Lateen] biz wallet',e);}};
+const __origRecompute=recomputeAnalytics;
+recomputeAnalytics=function(){
+  __origRecompute.apply(this,arguments);
+  try{
+    const byCur={};
+    orders.forEach(o=>{
+      if(o._status!=='delivered')return;
+      const code=o.curCode||'GBP';const sym=o.sym||'£';
+      if(!byCur[code])byCur[code]={sym,gross:0,comm:0,plat:0,net:0};
+      const gross=(Number(o.price)||0)*(Number(o.qty)||0);
+      const comm=Number(o.commission)||0;
+      const plat=Number(o.platformFee)||0;
+      byCur[code].gross+=gross;byCur[code].comm+=comm;byCur[code].plat+=plat;byCur[code].net+=gross-comm-plat;
+    });
+    window.__bizEarnByCur=byCur;Object.keys(byCur).forEach(k=>{byCur[k].amount=byCur[k].net;});
+    const codes=Object.keys(byCur);if(!window.__bizWalletCur||!byCur[window.__bizWalletCur])window.__bizWalletCur=codes[0]||'GBP';
+    const sel=window.__bizWalletCur;const sd=byCur[sel]||{sym:'£',gross:0,comm:0,plat:0,net:0};
+    const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(sd.net,sd.sym,sel);
+    const setH=(id,html)=>{const e=document.getElementById(id);if(e)e.innerHTML=html;};
+    setH('stat-gross',__moneyH(sd.gross,sd.sym,sel));
+    setH('brk-gross',__moneyH(sd.gross,sd.sym,sel));
+    setH('brk-comm','−'+__moneyH(sd.comm,sd.sym,sel));
+    setH('brk-plat','−'+__moneyH(sd.plat,sd.sym,sel));
+    setH('brk-net',__moneyH(sd.net,sd.sym,sel));
+    const wb=__ensureBizBreakdownDiv();
+    if(wb){
+      if(codes.length>1){
+        wb.style.display='block';const prev=document.getElementById('biz-wallet-cur-list');const wasOpen=prev&&prev.style.display!=='none';
+        const rows=codes.map(c=>{const a=c===sel;return `<button data-no-i18n onclick="__bizSelectWalletCur('${c}')" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin:0 0 6px 0;padding:10px 12px;border-radius:10px;border:0.5px solid ${a?'#7f77dd':'#232323'};background:${a?'#1a1830':'#0f0f0f'};color:#fff;font-size:12px;cursor:pointer;font-family:inherit;text-align:left"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.7">${__rawSym(byCur[c].sym,c)}</span><span>${c}</span></span><span style="font-weight:500">${__moneyH(byCur[c].net,byCur[c].sym,c)}</span></button>`;}).join('');
+        wb.innerHTML=`<button data-no-i18n onclick="__toggleBizWalletCurList()" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid #232323;background:#141414;color:#fff;font-size:11px;cursor:pointer;font-family:inherit"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.55;letter-spacing:0.04em">NET EARNINGS BY CURRENCY</span><span style="opacity:0.5">·</span><span style="opacity:0.85">${codes.length} currencies</span></span><span id="biz-wallet-cur-caret" style="display:inline-block;transition:transform .15s;opacity:0.7">▾</span></button><div id="biz-wallet-cur-list" style="display:${wasOpen?'block':'none'};margin-top:8px">${rows}</div>`;
+        const caret=document.getElementById('biz-wallet-cur-caret');if(caret&&wasOpen)caret.style.transform='rotate(180deg)';wb.style.background='transparent';wb.style.border='none';wb.style.padding='0';
+      }else{wb.style.display='none';wb.innerHTML='';}
+    }
+  }catch(e){console.error('[Lateen] biz wallet',e);}
+};
 (async()=>{await loadProducts();await loadOrders();await refreshProfile();})();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs.push(window.LateenAPI.subscribe('my-products',()=>loadProducts().then(loadOrders)));window.__lateenUnsubs.push(window.LateenAPI.subscribe('orders',()=>loadProducts().then(loadOrders)));}
 /* persist page + scroll across refresh */
