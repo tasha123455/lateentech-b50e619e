@@ -279,7 +279,7 @@ async function refreshNotifications(){
   const localize=(title,body)=>{
     if(title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
     if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
-    if(title==='Order failed')return{t:__t('Order marked failed by business','تم رفض الطلب من قبل التاجر'),b:body||''};
+    if(title==='Order failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
@@ -294,11 +294,11 @@ async function refreshNotifications(){
       let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
       if(d){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
-        detailsHtml=`<div class="notif-details" style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #2a1a1a">
-          ${row(__t('Order','الطلب'),d.order_code)}
+        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #2a1a1a">
+          ${row(__t('Order Code','كود الطلبيه'),d.order_code)}
           ${row(__t('Product','المنتج'),d.product_name)}
           ${row(__t('Qty','الكمية'),d.qty)}
-          ${row(__t('Customer','العميل'),d.customer_name)}
+          ${row(__t('Customer','الزبون'),d.customer_name)}
           ${row(__t('Phone','الهاتف'),d.customer_phone)}
           ${row(__t('WhatsApp','واتساب'),d.customer_whatsapp)}
           ${row(__t('City','المدينة'),d.customer_city)}
@@ -310,7 +310,8 @@ async function refreshNotifications(){
         </div>`;
       }
     }
-    return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+    const clickable=isFailed&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
+    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
   }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
