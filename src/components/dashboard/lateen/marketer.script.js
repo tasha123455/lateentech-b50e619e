@@ -249,9 +249,13 @@ async function refreshPayoutState(){
   const daysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
   const pending=!!(latest&&latest.status==='requested');
   const failed=!!(latest&&latest.status==='failed');
+  const paidLatest=!!(latest&&latest.status==='paid');
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.classList.toggle('disabled',!enabled);btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
   if(pending){
     stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
+    setBtn(false,__t('Withdraw','سحب'));
+  }else if(paidLatest){
+    stEl.innerHTML=__t('Next payout','تقدر تسحب بعد')+' <span id="days-left">'+daysLeft+' '+__t('days','أيام')+'</span>';
     setBtn(false,__t('Withdraw','سحب'));
   }else if((failed||daysLeft<=0)&&bal>=20){
     stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
