@@ -127,7 +127,7 @@
 .em { text-align: center; padding: 3rem 1rem; color: var(--color-text-secondary); font-size: 13px; grid-column: 1/-1; }
 .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1.25rem 0; }
 .pt { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1rem; }
-.ov { display: none; position: absolute; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
+.ov { display: none; position: fixed; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
 .ov.open { display: flex; }
 .ob { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
 .sh { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2.5rem; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--color-border-secondary); }
@@ -138,6 +138,10 @@
 .oa { display: flex; gap: 7px; flex-wrap: wrap; }
 .oo { font-size: 12px; padding: 6px 13px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); transition: all .15s; }
 .oo.s { background: #2d2b4e; color: #a89ee8; border-color: #534AB7; font-weight: 500; }
+.ol { display: flex; flex-direction: column; gap: 6px; }
+.oli { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 12px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-primary); font-size: 13px; cursor: pointer; font-family: var(--font-sans); width: 100%; }
+.oli.s { background: #2d2b4e; border-color: #534AB7; color: #a89ee8; font-weight: 500; }
+.oli.dis { opacity: .55; cursor: not-allowed; }
 .sa { display: flex; flex-direction: column; gap: 8px; }
 .so { display: flex; align-items: center; padding: 12px 14px; border-radius: 12px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); cursor: pointer; font-size: 13px; color: var(--color-text-primary); font-family: var(--font-sans); }
 .so.s { background: #2d2b4e; border-color: #534AB7; color: #a89ee8; font-weight: 500; }
@@ -176,7 +180,7 @@
 .bsv.sv { background: #3a1a1a; border-color: #6b2424; color: #e07070; }
 .blk { height: 46px; flex: 2; border-radius: 12px; border: none; background: #f0eeeb; color: #0D0D0D; font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
 .blk.cp { background: #1D9E75; color: #fff; }
-.cam { display: none; position: absolute; inset: 0; background: #000; z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
+.cam { display: none; position: fixed; inset: 0; background: #000; z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
 .cam.open { display: flex; }
 .cx { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,.15); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
 
@@ -209,7 +213,7 @@
 .pending-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: #c9923a; background: #3a2a10; padding: 3px 10px; border-radius: 20px; }
 .how-btn { font-size: 11px; padding: 4px 11px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); white-space: nowrap; }
 /* Orders overlays */
-.overlay { display: none; position: absolute; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
+.overlay { display: none; position: fixed; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
 .overlay.open { display: flex; }
 .overlay-bg { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
 .sheet { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2rem; width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--color-border-secondary); }
@@ -545,7 +549,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
   <div class="ob" onclick="closeF()"></div>
   <div class="sh">
     <div class="shh"></div><div class="sht">Filter &amp; sort</div>
-    <div class="shs">Country</div><div class="oa" id="co"></div>
+    <div class="shs">Country</div><div class="ol" id="co"></div>
     <div id="cis" style="display:none"><div class="shs">City</div><div class="oa" id="cio"></div></div>
     <div class="shs">Commission</div>
     <div class="sa"><div class="so" id="sch" onclick="pk('ch')">Highest commission first <div class="sr2"></div></div><div class="so" id="scl" onclick="pk('cl')">Lowest commission first <div class="sr2"></div></div></div>
