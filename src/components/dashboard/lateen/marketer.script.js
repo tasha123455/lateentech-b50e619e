@@ -224,7 +224,8 @@ async function refreshPayoutState(){
   )||Date.now();
   const dueAt=anchor+__PAYOUT_PERIOD_MS;
   const now=Date.now();
-  const daysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
+  // TEST MODE: allow withdraw any time
+  const daysLeft=0;
   const pending=!!(latest&&latest.status==='requested');
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
   if(pending){
@@ -254,7 +255,7 @@ async function refreshNotifications(){
     if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
     return{t:title,b:body||''};
   };
-  root.innerHTML=list.map(n=>{const L=localize(n.title,n.body);const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':'#7f77dd');return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(L.t)}</div><div class="notif-body">${esc(L.b)}</div><div class="notif-time">${ago(n.created_at)}</div></div></div>`;}).join('');
+  root.innerHTML=list.map(n=>{const L=localize(n.title,n.body);const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':'#7f77dd');const isNote=n.kind==='payout_note';const mainText=isNote?(L.b||L.t):L.t;const subText=isNote?'':L.b;return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;}).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
 

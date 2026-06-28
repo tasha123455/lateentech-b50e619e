@@ -394,7 +394,10 @@
 
   <!-- NOTIFICATIONS -->
   <div class="page" id="pg-notif">
-    <div class="page-header">Notifications</div>
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <span>Notifications</span>
+      <button type="button" aria-label="Close" onclick="goTo('pg-home')" style="width:34px;height:34px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;line-height:1;padding:0">×</button>
+    </div>
     <div class="notif-list" id="notif-list">
       <div class="empty-center" style="padding:60px 20px"><div class="empty-text" style="text-align:center;color:var(--color-text-secondary);font-size:13px">No notifications yet.</div></div>
     </div>
