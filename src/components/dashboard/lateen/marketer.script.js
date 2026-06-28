@@ -34,7 +34,7 @@ function buildMainChart(){
   const __guardZoomOut=({chart})=>{const sx=chart.scales.x;if((sx.max-sx.min)>=__curRange){sx.options.min=minIdx;sx.options.max=maxIdx;chart.update('none');return false;}};
   const zoomOpts=hasZoom?{zoom:{pan:{enabled:true,mode:'x',threshold:10},zoom:{wheel:{enabled:true,speed:0.05,modifierKey:null},pinch:{enabled:false},mode:'x',onZoom:__guardZoomOut,onZoomStart:({chart,event})=>{if(event&&event.deltaY!=null&&event.deltaY>0)return false;}},limits:{x:{min:-0.5,max:n-0.5,minRange:1,maxRange:__curRange}}}}:{};
   const ctx2d=canvas.getContext('2d');const grad=ctx2d.createLinearGradient(0,0,0,canvas.height||220);grad.addColorStop(0,color+'66');grad.addColorStop(1,color+'00');
-  mainChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{data:d.values,borderColor:color,backgroundColor:grad,fill:true,tension:0.4,cubicInterpolationMode:'monotone',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:8,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,devicePixelRatio:Math.min(window.devicePixelRatio||1,2),animation:false,transitions:{zoom:{animation:{duration:0}},pan:{animation:{duration:0}},active:{animation:{duration:0}},show:{animation:{duration:0}},hide:{animation:{duration:0}}},interaction:{mode:'point',intersect:true},plugins:Object.assign({legend:{display:false},decimation:{enabled:true,algorithm:'lttb',samples:80},tooltip:{animation:false,displayColors:false,padding:10,titleFont:{size:12,weight:'600'},bodyFont:{size:12},callbacks:{title:items=>{if(!items||!items[0])return '';const i=items[0].dataIndex;const lab=__tlbl(d.labels[i]||'');const s=subs[i]||'';return s?lab+' · '+s:lab;},label:ctx=>currentMetric==='earnings'?' '+__money(ctx.raw,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):' '+ctx.raw+' pcs'}}},zoomOpts),scales:{x:{min:minIdx,max:maxIdx,grid:{display:false},ticks:{font:{size:11},color:'#5e5c58',maxRotation:0,autoSkip:true,maxTicksLimit:vis+1}},y:{beginAtZero:true,grace:'5%',grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#5e5c58',maxTicksLimit:5,callback:v=>currentMetric==='earnings'?__money(v,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):v}}}}});canvas.style.touchAction='auto';if(canvas.parentElement)canvas.parentElement.style.touchAction='auto';
+  mainChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{data:d.values,borderColor:color,backgroundColor:grad,fill:true,tension:0.4,cubicInterpolationMode:'monotone',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:8,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,devicePixelRatio:Math.min(window.devicePixelRatio||1,2),animation:false,transitions:{zoom:{animation:{duration:0}},pan:{animation:{duration:0}},active:{animation:{duration:0}},show:{animation:{duration:0}},hide:{animation:{duration:0}}},interaction:{mode:'point',intersect:true},plugins:Object.assign({legend:{display:false},decimation:{enabled:true,algorithm:'lttb',samples:80},tooltip:{animation:false,displayColors:false,padding:10,titleFont:{size:12,weight:'600'},bodyFont:{size:12},callbacks:{title:items=>{if(!items||!items[0])return '';const i=items[0].dataIndex;const lab=__tlbl(d.labels[i]||'');const s=subs[i]||'';return s?lab+' · '+s:lab;},label:ctx=>currentMetric==='earnings'?' '+__money(ctx.raw,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):' '+ctx.raw+' pcs'}}},zoomOpts),scales:{x:{min:minIdx,max:maxIdx,grid:{display:false},ticks:{font:{size:11},color:'#5e5c58',maxRotation:0,autoSkip:true,maxTicksLimit:vis+1}},y:{beginAtZero:true,grace:'5%',grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#5e5c58',maxTicksLimit:5,callback:v=>currentMetric==='earnings'?__money(v,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):v}}}}});canvas.style.touchAction='pan-y';if(canvas.parentElement)canvas.parentElement.style.touchAction='pan-y';
 }
 function buildRingChart(){const a=analyticsData[currentPeriod];const total=a.ok+a.fail;const okPct=total>0?Math.round((a.ok/total)*100):0;const failPct=total>0?100-okPct:0;document.getElementById('ring-pct').textContent=okPct+'%';document.getElementById('leg-ok').textContent=a.ok.toLocaleString();document.getElementById('leg-fail').textContent=a.fail.toLocaleString();const badge=document.getElementById('fail-badge');if(badge){badge.style.display=a.failPct>0?'inline-flex':'none';badge.style.background='#3a1a1a';badge.style.color='#e07070';}const bt=document.getElementById('fail-badge-text');if(bt)bt.textContent='−'+a.failPct+'% failure rate';if(typeof Chart==='undefined')return;if(ringChart)ringChart.destroy();ringChart=new Chart(document.getElementById('ringChart'),{type:'doughnut',data:{datasets:[{data:total>0?[okPct,failPct]:[0,100],backgroundColor:total>0?['#2dbd8f','#6b2424']:['#2a2a2a','#2a2a2a'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:500}}});}
 function switchMetric(metric,el){currentMetric=metric;document.querySelectorAll('.ctoggle').forEach(b=>b.classList.remove('active'));el.classList.add('active');buildMainChart();}
@@ -104,8 +104,8 @@ function onCityChange(){const city=document.getElementById('f-city').value;const
 function changeQty(d){qty=Math.max(1,qty+d);document.getElementById('qty-display').textContent=qty;updateFeeCard();persistOpenDraft();}
 function selectVariant(type,val,el){const g=type==='size'?'size-chips':'color-chips';document.querySelectorAll('#'+g+' .vchip').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');if(type==='size')selectedSize=val;else selectedColor=val;persistOpenDraft();}
 function triggerUpload(){openReceiptPicker();}
-function openReceiptPicker(){const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.add('open');}
-function closeReceiptPicker(){const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.remove('open');}
+function openReceiptPicker(){const ov=document.getElementById('receipt-picker-overlay');if(ov){ov.classList.add('open');try{document.body.style.overflow='hidden';}catch(e){}}}
+function closeReceiptPicker(){const ov=document.getElementById('receipt-picker-overlay');if(ov){ov.classList.remove('open');try{document.body.style.overflow='';}catch(e){}}}
 function pickReceipt(src){closeReceiptPicker();const map={camera:'file-input-camera',gallery:'file-input-gallery',files:'file-input-files'};const el=document.getElementById(map[src]||'file-input');if(el){el.value='';el.click();}}
 async function onFileUpload(input){if(!input.files.length)return;const file=input.files[0];const box=document.getElementById('upload-box');const lbl=document.getElementById('upload-label');lbl.classList.remove('done','err');box.classList.remove('has-file','error');box.classList.add('uploading');lbl.innerHTML='<span class="upload-spinner"></span>Uploading '+file.name+'…';if(!window.LateenAPI||!window.LateenAPI.uploadReceipt){box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload service not ready — refresh and try again';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();return;}try{receiptUrl=await window.LateenAPI.uploadReceipt(file);hasReceipt=true;box.classList.remove('uploading');box.classList.add('has-file');lbl.classList.add('done');lbl.textContent='✓ Receipt ready · '+file.name;persistOpenDraft();updateSubmitState();}catch(e){console.error('[Lateen] uploadReceipt',e);box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload failed — tap to try again ('+(e.message||e)+')';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();}}
 function setDeposit(val){depositConfirmed=val;document.getElementById('dep-yes').classList.toggle('active',val===true);document.getElementById('dep-no').classList.toggle('active',val===false);updateSubmitState();}
@@ -227,7 +227,7 @@ async function refreshProfile(){if(!window.LateenAPI||!window.LateenAPI.getProfi
 const __PAYOUT_PERIOD_MS=30*86400000;
 function __isArLang(){try{return document.documentElement.getAttribute('dir')==='rtl'||document.documentElement.lang==='ar';}catch(e){return false;}}
 function __t(en,ar){return __isArLang()?ar:en;}
-function __pdMinHintTxt(){const el=document.getElementById('withdraw-min-hint');if(el)el.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');}
+function __pdMinHintTxt(){const el=document.getElementById('withdraw-min-hint');if(el)el.remove();}
 async function refreshPayoutState(){
   const stEl=document.getElementById('payout-status');const btn=document.getElementById('withdraw-btn');
   if(!stEl||!btn||!window.LateenAPI)return;
@@ -244,23 +244,24 @@ async function refreshPayoutState(){
   window.__lateenWalletBalance=bal;
   const hasPaid=!!(paid&&paid.paid_at);
   const anchor=hasPaid?new Date(paid.paid_at).getTime():(prof&&prof.created_at?new Date(prof.created_at).getTime():Date.now());
-  const dueAt=hasPaid?anchor+__PAYOUT_PERIOD_MS:Date.now();
+  const dueAt=anchor+__PAYOUT_PERIOD_MS;
   const now=Date.now();
   const daysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
   const pending=!!(latest&&latest.status==='requested');
-  const failed=!!(latest&&latest.status==='failed');
-  const paidLatest=!!(latest&&latest.status==='paid');
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.classList.toggle('disabled',!enabled);btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
-  /* TEST MODE: allow withdraw any day as long as no pending request */
-  if(pending){
-    stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
-    setBtn(false,__t('Withdraw','سحب'));
-  }else if(bal>=20){
-    stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
-    setBtn(true,__t('Withdraw','سحب'));
-  }else{
+  if(bal<20){
     stEl.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');
     setBtn(false,__t('Withdraw','سحب'));
+  }else if(pending){
+    stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
+    setBtn(false,__t('Withdraw','سحب'));
+  }else if(daysLeft>0 && hasPaid){
+    stEl.textContent=__t('Next payout in '+daysLeft+' days','الدفعة القادمة خلال '+daysLeft+' يوم');
+    /* TEST MODE: keep button enabled so user can test */
+    setBtn(true,__t('Withdraw','سحب'));
+  }else{
+    stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
+    setBtn(true,__t('Withdraw','سحب'));
   }
   __pdMinHintTxt();
 }
@@ -278,7 +279,7 @@ async function refreshNotifications(){
   const localize=(title,body)=>{
     if(title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
     if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
-    if(title==='Order failed')return{t:__t('Order marked failed by business','تم رفض الطلب من قبل التاجر'),b:body||''};
+    if(title==='Order failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
@@ -293,11 +294,11 @@ async function refreshNotifications(){
       let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
       if(d){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
-        detailsHtml=`<div class="notif-details" style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #2a1a1a">
-          ${row(__t('Order','الطلب'),d.order_code)}
+        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #2a1a1a">
+          ${row(__t('Order Code','كود الطلبيه'),d.order_code)}
           ${row(__t('Product','المنتج'),d.product_name)}
           ${row(__t('Qty','الكمية'),d.qty)}
-          ${row(__t('Customer','العميل'),d.customer_name)}
+          ${row(__t('Customer','الزبون'),d.customer_name)}
           ${row(__t('Phone','الهاتف'),d.customer_phone)}
           ${row(__t('WhatsApp','واتساب'),d.customer_whatsapp)}
           ${row(__t('City','المدينة'),d.customer_city)}
@@ -309,7 +310,8 @@ async function refreshNotifications(){
         </div>`;
       }
     }
-    return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+    const clickable=isFailed&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
+    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
   }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
