@@ -48,7 +48,8 @@
 .period-tabs { display: flex; gap: 4px; }
 .ptab { font-size: 11px; padding: 3px 9px; border-radius: 16px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); }
 .ptab.active { background: var(--color-background-secondary); color: var(--color-text-primary); font-weight: 500; }
-.chart-wrap { position: relative; height: 150px; width: 100%; }
+.chart-wrap { position: relative; height: 150px; width: 100%; touch-action: pan-y !important; }
+.chart-wrap canvas { touch-action: pan-y !important; }
 .analytics-row { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--color-border-tertiary); }
 .ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
 .ring-wrap canvas { position: absolute; top: 0; left: 0; }
@@ -339,7 +340,7 @@
         <button class="ptab" onclick="switchPeriod('Y',this)">Y</button>
       </div>
     </div>
-    <div class="chart-wrap"><canvas id="mainChart" style="touch-action:pan-y pinch-zoom;"></canvas></div>
+    <div class="chart-wrap"><canvas id="mainChart" style="touch-action:pan-y;"></canvas></div>
     <div class="analytics-row">
       <div class="ring-wrap"><canvas id="ringChart" width="80" height="80"></canvas><div class="ring-center"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-sub">success</div></div></div>
       <div class="analytics-legend">
