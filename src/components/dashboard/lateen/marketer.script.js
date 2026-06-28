@@ -248,7 +248,7 @@ async function refreshPayoutState(){
   const anchor=hasPaid?new Date(paid.paid_at).getTime():(prof&&prof.created_at?new Date(prof.created_at).getTime():Date.now());
   const dueAt=anchor+__PAYOUT_PERIOD_MS;
   const now=Date.now();
-  const daysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
+  const daysLeft=Math.max(0,Math.floor((dueAt-now)/86400000));
   const pending=!!(latest&&latest.status==='requested');
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.classList.toggle('disabled',!enabled);btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
   if(bal<20){
