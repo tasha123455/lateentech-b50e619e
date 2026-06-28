@@ -283,17 +283,17 @@ async function refreshNotifications(){
   const root=document.getElementById('notif-list');
   if(!root)return;
   if(!list.length){root.innerHTML='<div class="empty-center" style="padding:60px 20px"><div class="empty-text" style="text-align:center;color:var(--color-text-secondary);font-size:13px">'+__t('No notifications yet.','لا توجد إشعارات بعد.')+'</div></div>';return;}
-  const ago=(t)=>{const s=Math.max(1,Math.floor((Date.now()-new Date(t).getTime())/1000));if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d';};
+  const ago=(t)=>{const s=Math.max(1,Math.floor((Date.now()-new Date(t).getTime())/1000));const ar=__isArLang();if(s<60)return ar?s+'ث':s+'s';if(s<3600)return ar?Math.floor(s/60)+'د':Math.floor(s/60)+'m';if(s<86400)return ar?Math.floor(s/3600)+'س':Math.floor(s/3600)+'h';return ar?Math.floor(s/86400)+'يوم':Math.floor(s/86400)+'d';};
   const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const localize=(title,body)=>{
-    if(title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
-    if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
-    if(title==='Order failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
-    if(title==='Order Delivered')return{t:__t('Order Delivered','تم تسليم الطلب'),b:__t('The customer has received the product','استلم الزبون المنتج')};
+  const localize=(n)=>{const title=n.title,body=n.body;
+    if(n.kind==='payout_paid'||title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
+    if(n.kind==='payout_note'||title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
+    if(n.kind==='order_failed'||title==='Order failed'||title==='Cash on Delivery Failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
+    if(n.kind==='order_delivered'||title==='Order Delivered')return{t:__t('Order Delivered','تم تسليم الطلب'),b:__t('The customer has received the product','استلم الزبون المنتج')};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
-    const L=localize(n.title,n.body);
+    const L=localize(n);
     const isFailed=n.kind==='order_failed';
     const isDelivered=n.kind==='order_delivered';
     const expandable=isFailed||isDelivered;
