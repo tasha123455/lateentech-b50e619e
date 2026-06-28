@@ -221,7 +221,7 @@ recomputeAnalytics=function(){
     }
   }catch(e){console.error('[Lateen] biz wallet',e);}
 };
-try{loadProducts();loadOrders();refreshProfile();}catch(e){console.error('[Lateen] business boot',e);}
+(async()=>{try{await loadProducts();await loadOrders();await refreshProfile();}catch(e){console.error('[Lateen] business boot',e);}})();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs.push(window.LateenAPI.subscribe('my-products',()=>{loadProducts();loadOrders();}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('orders',()=>{loadProducts();loadOrders();}));}
 /* persist page + scroll across refresh */
 (function(){const K='lateen_bz_page',S='lateen_bz_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
