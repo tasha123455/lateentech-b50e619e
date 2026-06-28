@@ -259,8 +259,7 @@ async function refreshPayoutState(){
     setBtn(false,__t('Withdraw','سحب'));
   }else if(daysLeft>0 && hasPaid){
     stEl.textContent=__t('Next payout in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
-    /* TEST MODE: keep button enabled so user can test */
-    setBtn(true,__t('Withdraw','سحب'));
+    setBtn(false,__t('Withdraw','سحب'));
   }else{
     stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
     setBtn(true,__t('Withdraw','سحب'));
