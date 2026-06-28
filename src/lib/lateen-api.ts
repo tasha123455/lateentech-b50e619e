@@ -284,6 +284,12 @@ export function createLateenApi(userId: string) {
       return data;
     },
 
+    async getPayoutState() {
+      const { data, error } = await (supabase.rpc as any)("get_payout_state");
+      if (error) throw error;
+      return Array.isArray(data) ? (data[0] ?? null) : data;
+    },
+
     async requestPayout(amount: number) {
       const { data, error } = await supabase.rpc("request_payout", { _amount: amount });
       if (error) throw error;
