@@ -353,6 +353,7 @@ async function admOpenProduct(id){
 
 /* boot */
 admLoadMetrics();
+setInterval(()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}},10000);
 
 /* ========== Employees & Payroll ========== */
 let admEmpCache=[];
