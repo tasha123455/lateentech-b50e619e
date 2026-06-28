@@ -331,8 +331,7 @@ async function refreshNotifications(){
       }
     }
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
-    const isNew=__notifNewIds.has(n.id);
-    const statusCircle=`<div class="notif-status${isNew?' notif-status-new':''}">${isNew?'<span class="notif-new-dot"></span>':''}</div>`;
+    const statusCircle=`<div class="notif-status"></div>`;
     return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div>${statusCircle}</div>`;
   }).join('');
 }
