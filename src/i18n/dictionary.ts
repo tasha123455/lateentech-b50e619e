@@ -159,7 +159,7 @@ export const DICT: Record<string, string> = {
   "Manual (marketer)": "يدوي (المسوّق)",
   "(no customer yet)": "(لا يوجد زبون بعد)",
   "Failed (COD)": "طلبات لم يتم استلامها (فشل الدفع عند الاستلام)",
-  "Cash-on-delivery failures only": "إخفاقات الدفع عند الاستلام فقط",
+  "Cash-on-delivery failures only": "",
   "failure rate": "نسبة الطلبات غير المستلمة",
   "success": "نسبة النجاح",
   "active": "نشط",
@@ -704,6 +704,9 @@ const PATTERNS: Pattern[] = [
   // "of 12 orders" / "of 5 products"
   { re: /^of\s+(\d[\d,]*)\s+orders?\b\.?$/i, build: (m) => `من أصل ${m[1]} طلبيات` },
   { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من أصل ${m[1]} منتجات` },
+  // "out of N product(s)" / "out of N order(s)"
+  { re: /^out\s+of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من أصل ${m[1]} منتج` },
+  { re: /^out\s+of\s+(\d[\d,]*)\s+orders?\b\.?$/i, build: (m) => `من أصل ${m[1]} طلبية` },
   // "Delivered" variants like "Deliv." or "deliv"
   { re: /^Deliv\.?$/i, build: () => `التوصيل` },
 
