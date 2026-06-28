@@ -285,6 +285,12 @@ async function refreshNotifications(){
   if(dot)dot.style.display=list.some(n=>!n.read_at)?'block':'none';
   const root=document.getElementById('notif-list');
   if(!root)return;
+  // Always reflect unread server state so red dots show on first paint when opening the page.
+  // The goTo wrapper clears this set when leaving the notifications page.
+  if(!window.__notifKeepCleared){
+    __notifNewIds=new Set(list.filter(n=>!n.read_at).map(n=>n.id));
+    window.__notifNewIds=__notifNewIds;
+  }
   if(!list.length){root.innerHTML='<div class="empty-center" style="padding:60px 20px"><div class="empty-text" style="text-align:center;color:var(--color-text-secondary);font-size:13px">'+__t('No notifications yet.','لا توجد إشعارات بعد.')+'</div></div>';return;}
   const ago=(t)=>{const s=Math.max(1,Math.floor((Date.now()-new Date(t).getTime())/1000));const ar=__isArLang();if(s<60)return ar?s+'ث':s+'s';if(s<3600)return ar?Math.floor(s/60)+'د':Math.floor(s/60)+'m';if(s<86400)return ar?Math.floor(s/3600)+'س':Math.floor(s/3600)+'h';return ar?Math.floor(s/86400)+'يوم':Math.floor(s/86400)+'d';};
   const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -294,6 +300,7 @@ async function refreshNotifications(){
     if(n.kind==='order_failed'||title==='Order failed'||title==='Cash on Delivery Failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
     if(n.kind==='order_delivered'||title==='Order Delivered')return{t:__t('Order Delivered','تم تسليم الطلب'),b:__t('The customer has received the product','استلم الزبون المنتج')};
     if(n.kind==='receipt_verified'||title==='Receipt Verified')return{t:__t('Receipt Verified','تم اعتماد الإيصال'),b:__t('Your payment receipt has been verified. Your balance is now updated','تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.')};
+    if(n.kind==='receipt_rejected'||title==='Receipt rejected by the admin')return{t:__t('Receipt rejected by the admin','تم رفض الإيصال من قبل الأدمن'),b:''};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
@@ -301,8 +308,9 @@ async function refreshNotifications(){
     const isFailed=n.kind==='order_failed';
     const isDelivered=n.kind==='order_delivered';
     const isVerified=n.kind==='receipt_verified';
-    const expandable=isFailed||isDelivered||isVerified;
-    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':(isFailed?'#e07070':((isDelivered||isVerified)?'#2dbd8f':'#7f77dd')));
+    const isRejected=n.kind==='receipt_rejected';
+    const expandable=isFailed||isDelivered||isVerified||isRejected;
+    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected)?'#e07070':((isDelivered||isVerified)?'#2dbd8f':'#7f77dd')));
     const isNote=n.kind==='payout_note';
     const mainText=isNote?(L.b||L.t):L.t;
     const subText=isNote?'':L.b;
@@ -311,11 +319,14 @@ async function refreshNotifications(){
       let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
       if(d){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
-        const borderColor=isFailed?'#2a1a1a':'#142a20';
+        const borderColor=(isFailed||isRejected)?'#2a1a1a':'#142a20';
         const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;display:block"/></div>`:'';
+        const receiptImg=isRejected&&d.receipt_url&&/^(https?:|data:|\/)/.test(String(d.receipt_url))?`<div style="margin:0 0 10px 0"><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">${__t('Receipt','الإيصال')}</div><img src="${esc(d.receipt_url)}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:10px;display:block;background:#0f0f0f"/></div>`:'';
+        const adminNote=isRejected&&d.admin_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Admin note','ملاحظة الأدمن')}:</b> ${esc(d.admin_notes)}</div>`:'';
         const bizNotes=isFailed&&d.business_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Business owner notes','ملاحظات البائع')}:</b> ${esc(d.business_notes)}</div>`:'';
         detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid ${borderColor}">
           ${photo}
+          ${receiptImg}
           ${row(__t('Order Code','كود الطلبيه'),d.order_code)}
           ${row(__t('Product','المنتج'),d.product_name)}
           ${row(__t('Qty','الكمية'),d.qty)}
@@ -328,6 +339,7 @@ async function refreshNotifications(){
           ${row(__t('Size','المقاس'),d.size)}
           ${row(__t('Colour','اللون'),d.color)}
           ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> ${esc(d.customer_notes)}</div>`:''}
+          ${adminNote}
           ${bizNotes}
         </div>`;
       }
