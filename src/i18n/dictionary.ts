@@ -608,6 +608,7 @@ export const DICT: Record<string, string> = {
   "EMP-001": "EMP-001",
   "receipt": "إيصال",
   "More soon": "المزيد قريبا",
+  "More": "المزيد",
   "Soon": "قريبا",
   "One pay": "وان باي",
   "Bank of Unity": "مصرف الوحده",
