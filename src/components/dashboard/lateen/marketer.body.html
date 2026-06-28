@@ -312,9 +312,10 @@
       <div class="wallet-pending" id="wallet-pending">£0.00 pending</div>
       <div id="wallet-breakdown" style="display:none;margin:-4px 0 14px 0;padding:10px 12px;border-radius:12px;background:#141414;border:0.5px solid #232323;font-size:11px;color:rgba(255,255,255,0.7);line-height:1.6"></div>
       <div class="wallet-row">
-        <div class="wallet-meta">Next payout <span id="days-left">—</span></div>
-        <button class="withdraw-btn" onclick="openWithdraw()">Withdraw</button>
+        <div class="wallet-meta" id="payout-status">Next payout <span id="days-left">—</span></div>
+        <button class="withdraw-btn" id="withdraw-btn" onclick="openWithdraw()" disabled style="opacity:0.45;cursor:not-allowed;">Withdraw</button>
       </div>
+      <div id="withdraw-min-hint" style="font-size:10.5px;color:var(--color-text-tertiary);margin-top:6px;">Minimum withdraw amount 20 LYD</div>
     </div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-label">Total earned</div><div class="stat-value" id="stat-earned">£0.00</div><div class="stat-sub">all-time</div></div>
