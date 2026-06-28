@@ -334,8 +334,8 @@ async function refreshNotifications(){
     }
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
     const isNew=__notifNewIds.has(n.id);
-    const leftDot=isNew?'<div class="notif-new-dot" style="flex-shrink:0;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${leftDot}<div class="notif-icon" style="background:${color}22;color:${color}">•</div></div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+    const rightDot=isNew?'<div class="notif-new-dot" style="flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
+    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
@@ -344,7 +344,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 (function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){await _orig.apply(this,arguments);await __lateenRefreshWalletAndPayout();};window.confirmWithdraw=confirmWithdraw;})();
 
 /* Wrap goTo: mark notifications read on opening notif page */
-(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){(async()=>{try{const list=await window.LateenAPI.listNotifications();__notifNewIds=new Set(list.filter(n=>!n.read_at).map(n=>n.id));window.__notifNewIds=__notifNewIds;}catch(e){}await refreshNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}})();}else{__notifNewIds=new Set();window.__notifNewIds=__notifNewIds;}};window.goTo=goTo;})();
+(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){(async()=>{try{const list=await window.LateenAPI.listNotifications();__notifNewIds=new Set(list.filter(n=>!n.read_at).map(n=>n.id));window.__notifNewIds=__notifNewIds;}catch(e){}await refreshNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}})();}else{__notifNewIds=new Set();window.__notifNewIds=__notifNewIds;refreshNotifications();}};window.goTo=goTo;})();
 
 /* Safety: clear any leaked scroll locks from previously-open overlays */
 (function(){const clear=()=>{try{const anyOpen=document.querySelector('.lateen-marketer .overlay.open, .lateen-marketer .menu-overlay.open, #form-overlay.open, #prod-picker-overlay.open, #receipt-picker-overlay.open, #withdraw-overlay.open');if(!anyOpen){document.body.style.overflow='';document.documentElement.style.overflow='';}}catch(e){}};clear();setInterval(clear,1500);})();
