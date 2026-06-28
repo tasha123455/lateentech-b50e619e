@@ -607,15 +607,11 @@ export const DICT: Record<string, string> = {
   "Your commission (per unit)": "عمولتك (للوحدة)",
   "EMP-001": "EMP-001",
   "receipt": "إيصال",
-  "Bank": "المصرف",
-  "Country": "الدولة",
-  "Libya": "ليبيا",
   "More soon": "المزيد قريبا",
   "Soon": "قريبا",
   "One pay": "وان باي",
   "Bank of Unity": "مصرف الوحده",
   "Notes (optional)": "ملاحظات (اختياري)",
-  "Full name on account": "الاسم الكامل لصاحب الحساب",
   "Write any additional notes": "اكتب أي ملاحظات إضافية",
 
   // ===== Comprehensive audit additions =====
