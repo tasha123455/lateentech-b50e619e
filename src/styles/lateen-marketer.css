@@ -24,3 +24,10 @@
 .lateen-marketer .notif-status { width: 34px; height: 34px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
 .lateen-marketer .notif-status-new { background: #3a2a2a; }
 .lateen-marketer .notif-new-dot { width: 8px; height: 8px; border-radius: 50%; background: #e34b4b; display: block; }
+
+/* Force popup overlays to cover the full viewport regardless of scroll position */
+.lateen-marketer .ov { position: fixed !important; inset: 0 !important; }
+.lateen-marketer .cam { position: fixed !important; inset: 0 !important; }
+.lateen-marketer .overlay { position: fixed !important; inset: 0 !important; }
+/* Country dropdown inside filter sheet */
+.lateen-marketer .country-select { width: 100%; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: 12px; padding: 10px 12px; color: var(--color-text-primary); font-size: 13px; font-family: var(--font-sans); outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; padding-inline-end: 36px; }
