@@ -276,6 +276,8 @@ async function refreshPayoutState(){
   __pdMinHintTxt();
 }
 async function __lateenRefreshWalletAndPayout(){try{if(typeof refreshWallet==='function')await refreshWallet();else await refreshPayoutState();}catch(e){console.error('[Lateen] wallet/payout refresh',e);}}
+let __notifNewIds = (window.__notifNewIds instanceof Set) ? window.__notifNewIds : new Set();
+window.__notifNewIds = __notifNewIds;
 async function refreshNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
@@ -329,7 +331,8 @@ async function refreshNotifications(){
       }
     }
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
-    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+    const newDot=__notifNewIds.has(n.id)?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e34b4b;margin-inline-start:6px;vertical-align:middle"></span>':'';
+    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}${newDot}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
   }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
@@ -338,7 +341,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 (function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){await _orig.apply(this,arguments);await __lateenRefreshWalletAndPayout();};window.confirmWithdraw=confirmWithdraw;})();
 
 /* Wrap goTo: mark notifications read on opening notif page */
-(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)window.LateenAPI.markNotificationsRead().catch(()=>{});}};window.goTo=goTo;})();
+(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){(async()=>{try{const list=await window.LateenAPI.listNotifications();__notifNewIds=new Set(list.filter(n=>!n.read_at).map(n=>n.id));window.__notifNewIds=__notifNewIds;}catch(e){}await refreshNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}})();}else{__notifNewIds=new Set();window.__notifNewIds=__notifNewIds;}};window.goTo=goTo;})();
 
 /* Safety: clear any leaked scroll locks from previously-open overlays */
 (function(){const clear=()=>{try{const anyOpen=document.querySelector('.lateen-marketer .overlay.open, .lateen-marketer .menu-overlay.open, #form-overlay.open, #prod-picker-overlay.open, #receipt-picker-overlay.open, #withdraw-overlay.open');if(!anyOpen){document.body.style.overflow='';document.documentElement.style.overflow='';}}catch(e){}};clear();setInterval(clear,1500);})();
