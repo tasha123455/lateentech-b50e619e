@@ -259,7 +259,7 @@ export function createLateenApi(userId: string) {
     async getProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, business_name, phone, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
+        .select("full_name, business_name, phone, created_at, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
@@ -288,6 +288,51 @@ export function createLateenApi(userId: string) {
       const { error } = await supabase
         .from("payouts")
         .insert({ user_id: userId, amount });
+      if (error) throw error;
+    },
+
+    async getLatestPayout() {
+      const { data, error } = await supabase
+        .from("payouts")
+        .select("*")
+        .eq("user_id", userId)
+        .order("requested_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async getLastPaidPayout() {
+      const { data, error } = await supabase
+        .from("payouts")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("status", "paid")
+        .order("paid_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async listNotifications() {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+
+    async markNotificationsRead() {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .is("read_at", null);
       if (error) throw error;
     },
 
