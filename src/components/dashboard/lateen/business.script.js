@@ -67,8 +67,22 @@ let products=[];
 function dbToProduct(r){const cur=r.currency?{...r.currency,symbol:__wrapArSym(r.currency.symbol,r.currency.code)}:null;return{id:r.id,code:r.code,bizName:r.biz_name||'',bizPhone:r.biz_phone||'',currency:cur,photos:r.photos||[],name:r.name,desc:r.description||'',price:Number(r.price)||0,commPct:Number(r.comm_pct)||0,commFixed:Number(r.comm_fixed)||0,commMode:r.comm_mode||'pct',platformFee:Number(r.platform_fee)||0,totalFeePerUnit:Number(r.total_fee_per_unit)||0,qty:Number(r.qty)||0,category:r.category||'',sizes:r.sizes||[],colors:r.colors||[],variantGroups:r.variant_groups||[],sold:Number(r.sold)||0,revenue:Number(r.revenue)||0,status:r.status||'active',delivery:r.delivery||{}};}
 async function loadProducts(){if(!window.LateenAPI)return;try{const rows=await window.LateenAPI.listMyProducts();products=rows.map(dbToProduct);renderProducts();}catch(e){console.error('[Lateen] loadProducts',e);}}
 let __unsubProducts=null;
-function filterCurrencies(){const q=document.getElementById('curr-search').value.toLowerCase();const filtered=q?CURRENCIES.filter(c=>c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.symbol.includes(q)):CURRENCIES;renderCurrencyDropdown(filtered);}
-function renderCurrencyDropdown(list){document.getElementById('curr-dropdown').innerHTML=list.slice(0,200).map(c=>`<div class="currency-option" onclick="selectCurrency('${c.code}')"><span class="curr-flag">${c.flag}</span><span class="curr-label">${c.name}</span><span class="curr-sub">${c.code} · ${c.symbol}</span></div>`).join('');}
+function __soonBadge(){return '<span class="soon-badge">' + (__ar() ? 'قريباً' : 'soon') + '</span>';}
+function filterCurrencies(){renderCurrencyDropdown([]);}
+function renderCurrencyDropdown(list){
+  const ar=__ar();
+  const lyd=CURRENCIES.find(c=>c.code==='LYD');
+  const eur=CURRENCIES.find(c=>c.code==='EUR');
+  const usd=CURRENCIES.find(c=>c.code==='USD');
+  const sb=__soonBadge();
+  const moreLabel=ar?'عملات أخرى':'More currencies';
+  let html='';
+  if(lyd) html+=`<div class="currency-option" onclick="selectCurrency('LYD')"><span class="curr-flag">${lyd.flag}</span><span class="curr-label">${lyd.name}</span><span class="curr-sub">${lyd.code} · ${lyd.symbol}</span></div>`;
+  if(eur) html+=`<div class="currency-option disabled" onclick="event.stopPropagation();"><span class="curr-flag">${eur.flag}</span><span class="curr-label">${eur.name}</span><span class="curr-sub">${eur.code} · ${eur.symbol}</span><span style="margin-left:auto">${sb}</span></div>`;
+  if(usd) html+=`<div class="currency-option disabled" onclick="event.stopPropagation();"><span class="curr-flag">${usd.flag}</span><span class="curr-label">${usd.name}</span><span class="curr-sub">${usd.code} · ${usd.symbol}</span><span style="margin-left:auto">${sb}</span></div>`;
+  html+=`<div class="currency-option disabled" onclick="event.stopPropagation();"><span class="curr-label" style="color:var(--color-text-tertiary)">${moreLabel}</span><span style="margin-left:auto">${sb}</span></div>`;
+  document.getElementById('curr-dropdown').innerHTML=html;
+}
 function toggleCurrencyDropdown(){currDropdownOpen=!currDropdownOpen;document.getElementById('curr-dropdown').classList.toggle('open',currDropdownOpen);document.getElementById('curr-search-wrap').style.display=currDropdownOpen?'block':'none';if(currDropdownOpen){renderCurrencyDropdown(CURRENCIES);setTimeout(()=>document.getElementById('curr-search').focus(),50);}}
 function selectCurrency(code){selectedCurrency=CURRENCIES.find(c=>c.code===code);document.getElementById('curr-flag').textContent=selectedCurrency.flag;document.getElementById('curr-name').textContent=selectedCurrency.name+' ('+selectedCurrency.code+')';document.getElementById('curr-symbol-label').textContent=selectedCurrency.symbol;document.getElementById('price-prefix').textContent=selectedCurrency.symbol;document.getElementById('comm-curr-suffix').textContent=selectedCurrency.symbol;currDropdownOpen=false;document.getElementById('curr-dropdown').classList.remove('open');document.getElementById('curr-search-wrap').style.display='none';document.getElementById('curr-search').value='';updateFeeBreakdown();}
 function calcFees(price,pct,fixedComm,mode){const comm=mode==='pct'?pctOf(price,pct):parseFloat(fixedComm||0);const platform=parseFloat((price*PLATFORM_FEE_RATE).toFixed(2));const total=parseFloat((comm+platform).toFixed(2));const commPct=mode==='pct'?pct:parseFloat(((comm/price)*100).toFixed(1));return{comm,platform,total,commPct};}
