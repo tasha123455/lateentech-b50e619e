@@ -698,8 +698,8 @@ const PATTERNS: Pattern[] = [
   { re: /^(\d[\d,]*)\s+new$/i, build: (m) => `${m[1]} جديد` },
   // "£0.00 pending" / "£12.50 pending"
   { re: /^([£$€])\s*([\d.,]+)\s+pending$/i, build: (m) => `${m[1]}${m[2]} معلّق` },
-  // "0% failure rate" / "12.5% failure rate"
-  { re: /^([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة الطلبات غير المستلمة ${m[1]}%` },
+  // "0% failure rate" / "−70% failure rate"
+  { re: /^[−\-+]?\s*([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة الطلبات غير المستلمة ${m[1]}%` },
   // "per unit" / "per unit × 1"
   { re: /^per\s+unit$/i, build: () => `للوحدة` },
   { re: /^([£$€]?[\d.,]*)\s*per\s+unit\s*[×x]\s*(\d+)$/i,
