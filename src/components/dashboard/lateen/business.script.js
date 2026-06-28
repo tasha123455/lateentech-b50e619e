@@ -231,3 +231,56 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
 
 /* auto-hide bottom nav on scroll down, show on scroll up */
 (function(){const nav=document.querySelector('.lateen-business .bottom-nav');if(!nav)return;let lastY=window.scrollY||0,ticking=false;const TH=6;function upd(){const y=window.scrollY||0,d=y-lastY;if(Math.abs(d)>TH){if(d>0&&y>60)nav.classList.add('nav-hidden');else nav.classList.remove('nav-hidden');lastY=y;}ticking=false;}window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(upd);ticking=true;}},{passive:true});})();
+
+/* ── Notifications ── */
+let __bizNotifNewIds = (window.__bizNotifNewIds instanceof Set) ? window.__bizNotifNewIds : new Set();
+window.__bizNotifNewIds = __bizNotifNewIds;
+async function refreshBizNotifications(){
+  if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
+  let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
+  const dot=document.getElementById('notif-dot');
+  if(dot)dot.style.display=list.some(n=>!n.read_at)?'block':'none';
+  const root=document.getElementById('notif-list');
+  if(!root)return;
+  const tr=(en,ar)=>__ar()?ar:en;
+  if(!list.length){root.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--color-text-secondary);font-size:13px;">'+tr('No notifications yet.','لا توجد إشعارات بعد.')+'</div>';return;}
+  const ago=(t)=>{const s=Math.max(1,Math.floor((Date.now()-new Date(t).getTime())/1000));const ar=__ar();if(s<60)return ar?s+'ث':s+'s';if(s<3600)return ar?Math.floor(s/60)+'د':Math.floor(s/60)+'m';if(s<86400)return ar?Math.floor(s/3600)+'س':Math.floor(s/3600)+'h';return ar?Math.floor(s/86400)+'يوم':Math.floor(s/86400)+'d';};
+  const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  root.innerHTML=list.map(n=>{
+    let t=n.title,b=n.body||'';
+    if(n.kind==='new_order'||t==='New order'){t=tr('New order','طلب جديد');b=tr('A new order has been received. Check the Orders page.','وصلك طلب جديد. راجع صفحة الطلبات.');}
+    const expandable=n.kind==='new_order';
+    const color=expandable?'#2dbd8f':'#7f77dd';
+    let detailsHtml='';
+    if(expandable&&n.data){
+      let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
+      if(d){
+        const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
+        const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;display:block"/></div>`:'';
+        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #142a20">
+          ${photo}
+          ${row(tr('Order Code','كود الطلبيه'),d.order_code)}
+          ${row(tr('Product','المنتج'),d.product_name)}
+          ${row(tr('Qty','الكمية'),d.qty)}
+          ${row(tr('Customer','الزبون'),d.customer_name)}
+          ${row(tr('Phone','الهاتف'),d.customer_phone)}
+          ${row(tr('WhatsApp','واتساب'),d.customer_whatsapp)}
+          ${row(tr('City','المدينة'),d.customer_city)}
+          ${row(tr('Country','الدولة'),d.customer_country)}
+          ${row(tr('Address','العنوان'),d.customer_address)}
+          ${row(tr('Size','المقاس'),d.size)}
+          ${row(tr('Colour','اللون'),d.color)}
+          ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${tr('Notes','ملاحظات')}:</b> ${esc(d.customer_notes)}</div>`:''}
+        </div>`;
+      }
+    }
+    const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
+    const isNew=__bizNotifNewIds.has(n.id);
+    const leftDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
+    return `<div class="notif-item"${clickable}><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${leftDot}<div class="notif-icon" style="background:${color}22;color:${color}">•</div></div><div style="flex:1;min-width:0"><div class="notif-title">${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+  }).join('');
+}
+window.refreshBizNotifications=refreshBizNotifications;
+(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){(async()=>{try{const list=await window.LateenAPI.listNotifications();__bizNotifNewIds=new Set(list.filter(n=>!n.read_at).map(n=>n.id));window.__bizNotifNewIds=__bizNotifNewIds;}catch(e){}await refreshBizNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}})();}else{__bizNotifNewIds=new Set();window.__bizNotifNewIds=__bizNotifNewIds;}};window.goTo=goTo;})();
+if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('notifications',()=>refreshBizNotifications()));}
+refreshBizNotifications();
