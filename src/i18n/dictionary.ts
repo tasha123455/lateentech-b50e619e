@@ -531,7 +531,7 @@ export const DICT: Record<string, string> = {
   "📝 Draft · not sent": "📝 مسودة · لم تُرسل",
   "across payment": "عبر الدفعات",
   "Action failed:": "فشلت العملية:",
-  "all-time": "كل الوقت",
+  "all-time": "منذ إنشاء الحساب",
   "Approve failed:": "فشلت الموافقة:",
   "Approve this receipt? The order will be forwarded to the business owner and stock will be decremented.":
     "هل تريد الموافقة على هذا الإيصال؟ سيتم تحويل الطلبية لصاحب العمل وخصم المخزون.",
