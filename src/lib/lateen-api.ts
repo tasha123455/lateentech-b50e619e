@@ -423,6 +423,10 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.rpc("admin_mark_payout_paid", { _payout_id: id });
         if (error) throw error;
       },
+      async notePayout(id: string, note: string) {
+        const { error } = await supabase.rpc("admin_note_payout", { _payout_id: id, _note: note });
+        if (error) throw error;
+      },
       async listAllUsers(search?: string) {
         let q = supabase
           .from("profiles")
