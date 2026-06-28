@@ -331,8 +331,9 @@ async function refreshNotifications(){
       }
     }
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
-    const statusCircle=`<div class="notif-status"></div>`;
-    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div>${statusCircle}</div>`;
+    const isNew=__notifNewIds.has(n.id);
+    const leftDot=isNew?'<div class="notif-new-dot" style="flex-shrink:0;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
+    return `<div class="notif-item"${clickable}><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${leftDot}<div class="notif-icon" style="background:${color}22;color:${color}">•</div></div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
   }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
