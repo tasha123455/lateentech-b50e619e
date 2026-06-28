@@ -293,14 +293,16 @@ async function refreshNotifications(){
     if(n.kind==='payout_note'||title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
     if(n.kind==='order_failed'||title==='Order failed'||title==='Cash on Delivery Failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
     if(n.kind==='order_delivered'||title==='Order Delivered')return{t:__t('Order Delivered','تم تسليم الطلب'),b:__t('The customer has received the product','استلم الزبون المنتج')};
+    if(n.kind==='receipt_verified'||title==='Receipt Verified')return{t:__t('Receipt Verified','تم اعتماد الإيصال'),b:__t('Your payment receipt has been verified. Your balance is now updated','تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.')};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
     const L=localize(n);
     const isFailed=n.kind==='order_failed';
     const isDelivered=n.kind==='order_delivered';
-    const expandable=isFailed||isDelivered;
-    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':(isFailed?'#e07070':(isDelivered?'#2dbd8f':'#7f77dd')));
+    const isVerified=n.kind==='receipt_verified';
+    const expandable=isFailed||isDelivered||isVerified;
+    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':(isFailed?'#e07070':((isDelivered||isVerified)?'#2dbd8f':'#7f77dd')));
     const isNote=n.kind==='payout_note';
     const mainText=isNote?(L.b||L.t):L.t;
     const subText=isNote?'':L.b;
