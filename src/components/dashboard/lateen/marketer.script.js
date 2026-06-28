@@ -288,8 +288,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 (function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){
   try{
     const cur=window.__lateenWalletCur||'';
-    const totals=window.__lateenEarnByCur||{};
-    const amt=Number(totals[cur]?.amount||0);
+    const amt=Number(window.__lateenWalletBalance||0);
     if((cur||'').toUpperCase()==='LYD'&&amt<20){
       alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));return;
     }
