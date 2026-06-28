@@ -278,9 +278,39 @@ async function refreshNotifications(){
   const localize=(title,body)=>{
     if(title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
     if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
+    if(title==='Order failed')return{t:__t('Order marked failed by business','تم رفض الطلب من قبل التاجر'),b:body||''};
     return{t:title,b:body||''};
   };
-  root.innerHTML=list.map(n=>{const L=localize(n.title,n.body);const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':'#7f77dd');const isNote=n.kind==='payout_note';const mainText=isNote?(L.b||L.t):L.t;const subText=isNote?'':L.b;return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;}).join('');
+  root.innerHTML=list.map(n=>{
+    const L=localize(n.title,n.body);
+    const isFailed=n.kind==='order_failed';
+    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':(isFailed?'#e07070':'#7f77dd'));
+    const isNote=n.kind==='payout_note';
+    const mainText=isNote?(L.b||L.t):L.t;
+    const subText=isNote?'':L.b;
+    let detailsHtml='';
+    if(isFailed && n.data){
+      let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
+      if(d){
+        const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
+        detailsHtml=`<div class="notif-details" style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #2a1a1a">
+          ${row(__t('Order','الطلب'),d.order_code)}
+          ${row(__t('Product','المنتج'),d.product_name)}
+          ${row(__t('Qty','الكمية'),d.qty)}
+          ${row(__t('Customer','العميل'),d.customer_name)}
+          ${row(__t('Phone','الهاتف'),d.customer_phone)}
+          ${row(__t('WhatsApp','واتساب'),d.customer_whatsapp)}
+          ${row(__t('City','المدينة'),d.customer_city)}
+          ${row(__t('Country','الدولة'),d.customer_country)}
+          ${row(__t('Address','العنوان'),d.customer_address)}
+          ${row(__t('Size','المقاس'),d.size)}
+          ${row(__t('Colour','اللون'),d.color)}
+          ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> ${esc(d.customer_notes)}</div>`:''}
+        </div>`;
+      }
+    }
+    return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+  }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
 
