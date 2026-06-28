@@ -194,12 +194,33 @@ function closePdPickers(exceptKey){['country','method'].forEach(k=>{if(k===excep
 function pickPd(key,val){const inp=document.getElementById('pd-'+key);const txt=document.getElementById('pd-'+key+'-txt');const list=document.getElementById('pd-'+key+'-list');if(inp)inp.value=val;if(txt){let label=val||'Select…';if(__ar()){const map={'Libya':'ليبيا','One pay':'وان باي','Bank of Unity':'مصرف الوحده','Select…':'اختر…'};if(map[label])label=map[label];}txt.textContent=label;}if(list)list.style.display='none';if(key==='method')__pdOnMethodChange();__pdSaveDraft();}
 async function openWithdraw(){document.getElementById('withdraw-overlay').classList.add('open');__pdWireInputs();const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null)el.value=v;};try{if(window.LateenAPI&&window.LateenAPI.getProfile){const p=await window.LateenAPI.getProfile();if(p){set('pd-method',p.payout_method);set('pd-bank',p.payout_bank_name);set('pd-holder',p.payout_account_holder);set('pd-acct',p.payout_account_number);set('pd-iban',p.payout_iban);set('pd-swift',p.payout_swift);set('pd-notes',p.payout_notes);}}}catch(e){console.error('[Lateen] load payout details',e);}const d=__pdLoadDraft();Object.keys(d).forEach(id=>{if(d[id])set(id,d[id]);});['pd-country','pd-method'].forEach(id=>{const inp=document.getElementById(id);const txt=document.getElementById(id+'-txt');if(!inp||!txt)return;let label=inp.value||'Select…';if(__ar()){const map={'Libya':'ليبيا','One pay':'وان باي','Bank of Unity':'مصرف الوحده','Select…':'اختر…'};if(map[label])label=map[label];}txt.textContent=label;});__pdOnMethodChange();}
 function closeWithdraw(){closePdPickers();__pdSaveDraft();document.getElementById('withdraw-overlay').classList.remove('open');}
-async function confirmWithdraw(){const v=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};const country=v('pd-country'),method=v('pd-method'),holder=v('pd-holder'),acct=v('pd-acct');const bankRequired=method!=='Bank of Unity';const bank=v('pd-bank');if(!country||!method||!holder||!acct||(bankRequired&&!bank)){alert('Please fill in your payout method, bank, account holder, and account number so the admin can pay you.');return;}__pdSaveDraft();try{if(window.LateenAPI&&window.LateenAPI.updateProfile){await window.LateenAPI.updateProfile({payout_method:method,payout_bank_name:bank||null,payout_account_holder:holder,payout_account_number:acct,payout_iban:v('pd-iban')||null,payout_swift:v('pd-swift')||null,payout_notes:v('pd-notes')||null});}const w=await(window.LateenAPI&&window.LateenAPI.getWallet());const amt=w?Number(w.balance)||0:0;if(amt>0&&window.LateenAPI)await window.LateenAPI.requestPayout(amt);}catch(e){console.error('[Lateen] payout',e);alert('Failed: '+e.message);return;}closeWithdraw();const wb=document.querySelector('.withdraw-btn');if(wb){wb.textContent='Requested';wb.disabled=true;wb.style.opacity='0.5';}refreshWallet();}
+async function confirmWithdraw(){const v=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};const country=v('pd-country'),method=v('pd-method'),holder=v('pd-holder'),acct=v('pd-acct');const bankRequired=method!=='Bank of Unity';const bank=v('pd-bank');if(!country||!method||!holder||!acct||(bankRequired&&!bank)){alert('Please fill in your payout method, bank, account holder, and account number so the admin can pay you.');return;}__pdSaveDraft();try{if(window.LateenAPI&&window.LateenAPI.updateProfile){await window.LateenAPI.updateProfile({payout_method:method,payout_bank_name:bank||null,payout_account_holder:holder,payout_account_number:acct,payout_iban:v('pd-iban')||null,payout_swift:v('pd-swift')||null,payout_notes:v('pd-notes')||null});}const w=await(window.LateenAPI&&window.LateenAPI.getWallet());const amt=w?Number(w.balance)||0:Number(window.__lateenWalletBalance||0);if(amt<20){alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));return;}if(window.LateenAPI)await window.LateenAPI.requestPayout(amt);}catch(e){console.error('[Lateen] payout',e);alert('Failed: '+e.message);return;}closeWithdraw();const wb=document.querySelector('.withdraw-btn');if(wb){wb.textContent='Requested';wb.disabled=true;wb.style.opacity='0.5';}refreshWallet();}
 window.__pdOnMethodChange=__pdOnMethodChange;
 window.__lateenSelSym=function(){const e=window.__lateenEarnByCur||{};const k=window.__lateenWalletCur||Object.keys(e)[0]||'GBP';return (e[k]&&e[k].sym)||'£';};
 window.__selectWalletCur=function(c){window.__lateenWalletCur=c;refreshWallet();if(typeof recomputeAnalytics==='function')recomputeAnalytics();};
 window.__toggleWalletCurList=function(){const l=document.getElementById('wallet-cur-list');const c=document.getElementById('wallet-cur-caret');if(!l)return;const open=l.style.display!=='none';l.style.display=open?'none':'block';if(c)c.style.transform=open?'rotate(0deg)':'rotate(180deg)';};
-async function refreshWallet(){const totals=window.__lateenEarnByCur||{};const codes=Object.keys(totals);if(!window.__lateenWalletCur||!totals[window.__lateenWalletCur])window.__lateenWalletCur=codes[0]||'GBP';const sel=window.__lateenWalletCur;const sd=totals[sel]||{sym:'£',amount:0};const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(sd.amount,sd.sym,sel);const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=sd.amount>0?'Available after admin receipt approval':'No approved receipt earnings yet';const wb=document.getElementById('wallet-breakdown');if(wb){if(codes.length>1){wb.style.display='block';const prev=document.getElementById('wallet-cur-list');const wasOpen=prev&&prev.style.display!=='none';const rows=codes.map(c=>{const a=c===sel;return `<button data-no-i18n onclick="__selectWalletCur('${c}')" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin:0 0 6px 0;padding:10px 12px;border-radius:10px;border:0.5px solid ${a?'#7f77dd':'#232323'};background:${a?'#1a1830':'#0f0f0f'};color:#fff;font-size:12px;cursor:pointer;font-family:inherit;text-align:left"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.7">${__rawSym(totals[c].sym,c)}</span><span>${c}</span></span><span style="font-weight:500">${__moneyH(totals[c].amount,totals[c].sym,c)}</span></button>`;}).join('');wb.innerHTML=`<button data-no-i18n onclick="__toggleWalletCurList()" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid #232323;background:#141414;color:#fff;font-size:11px;cursor:pointer;font-family:inherit"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.55;letter-spacing:0.04em">EARNINGS BY CURRENCY</span><span style="opacity:0.5">·</span><span style="opacity:0.85">${codes.length} currencies</span></span><span id="wallet-cur-caret" style="display:inline-block;transition:transform .15s;opacity:0.7">▾</span></button><div id="wallet-cur-list" style="display:${wasOpen?'block':'none'};margin-top:8px">${rows}</div>`;const caret=document.getElementById('wallet-cur-caret');if(caret&&wasOpen)caret.style.transform='rotate(180deg)';}else{wb.style.display='none';wb.innerHTML='';}}const wd=document.getElementById('withdraw-amount');if(wd)wd.innerHTML=__moneyH(sd.amount,sd.sym,sel);}
+async function refreshWallet(){
+  const totals=window.__lateenEarnByCur||{};const codes=Object.keys(totals);
+  if(!window.__lateenWalletCur||!totals[window.__lateenWalletCur])window.__lateenWalletCur=codes[0]||'LYD';
+  const sel=window.__lateenWalletCur;const sd=totals[sel]||{sym:sel==='LYD'?'د.ل':'£',amount:0};
+  let dbBalance=null;
+  try{if(window.LateenAPI&&window.LateenAPI.getWallet){const w=await window.LateenAPI.getWallet();if(w)dbBalance=Number(w.balance)||0;}}catch(e){console.error('[Lateen] wallet',e);}
+  const available=dbBalance==null?Number(sd.amount||0):dbBalance;
+  window.__lateenWalletBalance=available;
+  const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(available,sd.sym,sel);
+  const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=available>0?'Available after admin receipt approval':'No approved receipt earnings yet';
+  const wb=document.getElementById('wallet-breakdown');
+  if(wb){
+    if(codes.length>1){
+      wb.style.display='block';const prev=document.getElementById('wallet-cur-list');const wasOpen=prev&&prev.style.display!=='none';
+      const rows=codes.map(c=>{const a=c===sel;const amount=a?available:totals[c].amount;return `<button data-no-i18n onclick="__selectWalletCur('${c}')" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin:0 0 6px 0;padding:10px 12px;border-radius:10px;border:0.5px solid ${a?'#7f77dd':'#232323'};background:${a?'#1a1830':'#0f0f0f'};color:#fff;font-size:12px;cursor:pointer;font-family:inherit;text-align:left"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.7">${__rawSym(totals[c].sym,c)}</span><span>${c}</span></span><span style="font-weight:500">${__moneyH(amount,totals[c].sym,c)}</span></button>`;}).join('');
+      wb.innerHTML=`<button data-no-i18n onclick="__toggleWalletCurList()" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid #232323;background:#141414;color:#fff;font-size:11px;cursor:pointer;font-family:inherit"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.55;letter-spacing:0.04em">EARNINGS BY CURRENCY</span><span style="opacity:0.5">·</span><span style="opacity:0.85">${codes.length} currencies</span></span><span id="wallet-cur-caret" style="display:inline-block;transition:transform .15s;opacity:0.7">▾</span></button><div id="wallet-cur-list" style="display:${wasOpen?'block':'none'};margin-top:8px">${rows}</div>`;
+      const caret=document.getElementById('wallet-cur-caret');if(caret&&wasOpen)caret.style.transform='rotate(180deg)';
+    }else{wb.style.display='none';wb.innerHTML='';}
+  }
+  const wd=document.getElementById('withdraw-amount');if(wd)wd.innerHTML=__moneyH(available,sd.sym,sel);
+  if(typeof refreshPayoutState==='function')refreshPayoutState();
+}
 async function refreshProfile(){if(!window.LateenAPI||!window.LateenAPI.getProfile)return;try{const p=await window.LateenAPI.getProfile();const name=(p&&p.full_name)||'';const initials=name?name.split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join(''):'··';const first=name?name.split(/\s+/)[0]:'there';['user-avatar','menu-avatar'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=initials;});const g=document.getElementById('user-greet');if(g)g.textContent='Hey, '+first;const mn=document.getElementById('menu-name');if(mn)mn.textContent=name||'Welcome';const bn=document.getElementById('bank-name');if(bn&&name)bn.textContent=name;}catch(e){console.error('[Lateen] profile',e);}}
 
 /* ── Payout countdown + notifications ── */
@@ -210,30 +231,34 @@ function __pdMinHintTxt(){const el=document.getElementById('withdraw-min-hint');
 async function refreshPayoutState(){
   const stEl=document.getElementById('payout-status');const btn=document.getElementById('withdraw-btn');
   if(!stEl||!btn||!window.LateenAPI)return;
-  let prof=null,latest=null,paid=null;
+  let prof=null,latest=null,paid=null,wallet=null;
   try{
-    [prof,latest,paid]=await Promise.all([
+    [prof,latest,paid,wallet]=await Promise.all([
       window.LateenAPI.getProfile?.(),
       window.LateenAPI.getLatestPayout?.(),
       window.LateenAPI.getLastPaidPayout?.(),
+      window.LateenAPI.getWallet?.(),
     ]);
   }catch(e){console.error('[Lateen] payout state',e);}
-  const anchor=Math.max(
-    paid&&paid.paid_at?new Date(paid.paid_at).getTime():0,
-    prof&&prof.created_at?new Date(prof.created_at).getTime():0,
-  )||Date.now();
-  const dueAt=anchor+__PAYOUT_PERIOD_MS;
+  const bal=wallet?Number(wallet.balance)||0:Number(window.__lateenWalletBalance||0);
+  window.__lateenWalletBalance=bal;
+  const hasPaid=!!(paid&&paid.paid_at);
+  const anchor=hasPaid?new Date(paid.paid_at).getTime():(prof&&prof.created_at?new Date(prof.created_at).getTime():Date.now());
+  const dueAt=hasPaid?anchor+__PAYOUT_PERIOD_MS:Date.now();
   const now=Date.now();
-  // TEST MODE: allow withdraw any time
-  const daysLeft=0;
+  const daysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
   const pending=!!(latest&&latest.status==='requested');
+  const failed=!!(latest&&latest.status==='failed');
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
   if(pending){
     stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
     setBtn(false,__t('Withdraw','سحب'));
-  }else if(daysLeft<=0){
+  }else if((failed||daysLeft<=0)&&bal>=20){
     stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
     setBtn(true,__t('Withdraw','سحب'));
+  }else if((failed||daysLeft<=0)&&bal<20){
+    stEl.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');
+    setBtn(false,__t('Withdraw','سحب'));
   }else{
     stEl.innerHTML=__t('Next payout','تقدر تسحب بعد')+' <span id="days-left">'+daysLeft+' '+__t('days','أيام')+'</span>';
     setBtn(false,__t('Withdraw','سحب'));
@@ -263,8 +288,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 (function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){
   try{
     const cur=window.__lateenWalletCur||'';
-    const totals=window.__lateenEarnByCur||{};
-    const amt=Number(totals[cur]?.amount||0);
+    const amt=Number(window.__lateenWalletBalance||0);
     if((cur||'').toUpperCase()==='LYD'&&amt<20){
       alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));return;
     }

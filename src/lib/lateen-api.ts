@@ -285,10 +285,22 @@ export function createLateenApi(userId: string) {
     },
 
     async requestPayout(amount: number) {
-      const { error } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from("payouts")
-        .insert({ user_id: userId, amount });
+        .select("id,status")
+        .eq("user_id", userId)
+        .eq("status", "requested")
+        .limit(1)
+        .maybeSingle();
+      if (existingError) throw existingError;
+      if (existing?.id) return existing;
+      const { data, error } = await supabase
+        .from("payouts")
+        .insert({ user_id: userId, amount })
+        .select("*")
+        .single();
       if (error) throw error;
+      return data;
     },
 
     async getLatestPayout() {
@@ -416,8 +428,12 @@ export function createLateenApi(userId: string) {
         const { data: profs } = ids.length
           ? await supabase.from("profiles").select("id, full_name, phone, business_name, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes").in("id", ids)
           : { data: [] as Array<Record<string, unknown> & { id: string }> };
+        const { data: wallets } = ids.length
+          ? await supabase.from("wallets").select("user_id, balance, pending, currency").in("user_id", ids)
+          : { data: [] as Array<Record<string, unknown> & { user_id: string }> };
         const m = new Map((profs ?? []).map((p) => [p.id as string, p]));
-        return rows.map((r) => ({ ...r, user: m.get(r.user_id) ?? null }));
+        const w = new Map((wallets ?? []).map((row) => [row.user_id as string, row]));
+        return rows.map((r) => ({ ...r, user: m.get(r.user_id) ?? null, wallet: w.get(r.user_id) ?? null }));
       },
       async markPayoutPaid(id: string) {
         const { error } = await supabase.rpc("admin_mark_payout_paid", { _payout_id: id });
