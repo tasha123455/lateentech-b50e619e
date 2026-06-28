@@ -224,7 +224,8 @@ async function refreshPayoutState(){
   )||Date.now();
   const dueAt=anchor+__PAYOUT_PERIOD_MS;
   const now=Date.now();
-  const daysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
+  // TEST MODE: allow withdraw any time
+  const daysLeft=0;
   const pending=!!(latest&&latest.status==='requested');
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
   if(pending){
