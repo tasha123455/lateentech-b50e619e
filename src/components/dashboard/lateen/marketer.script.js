@@ -210,7 +210,7 @@ async function refreshWallet(){
   const available=dbBalance==null?Number(sd.amount||0):dbBalance;
   window.__lateenWalletBalance=available;
   const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(available,sd.sym,sel);
-  const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=available>0?'Available after admin receipt approval':'';
+  const wp=document.getElementById('wallet-pending');if(wp)wp.textContent='';
   const wb=document.getElementById('wallet-breakdown');
   if(wb){
     if(codes.length>1){
@@ -258,7 +258,7 @@ async function refreshPayoutState(){
     stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
     setBtn(false,__t('Withdraw','سحب'));
   }else if(daysLeft>0 && hasPaid){
-    stEl.textContent=__t('Next payout in '+daysLeft+' days','الدفعة القادمة خلال '+daysLeft+' يوم');
+    stEl.textContent=__t('Next payout in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
     /* TEST MODE: keep button enabled so user can test */
     setBtn(true,__t('Withdraw','سحب'));
   }else{
@@ -282,21 +282,28 @@ async function refreshNotifications(){
     if(title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
     if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
     if(title==='Order failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
+    if(title==='Order Delivered')return{t:__t('Order Delivered','تم تسليم الطلب'),b:__t('The customer has received the product','استلم الزبون المنتج')};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
     const L=localize(n.title,n.body);
     const isFailed=n.kind==='order_failed';
-    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':(isFailed?'#e07070':'#7f77dd'));
+    const isDelivered=n.kind==='order_delivered';
+    const expandable=isFailed||isDelivered;
+    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':(isFailed?'#e07070':(isDelivered?'#2dbd8f':'#7f77dd')));
     const isNote=n.kind==='payout_note';
     const mainText=isNote?(L.b||L.t):L.t;
     const subText=isNote?'':L.b;
     let detailsHtml='';
-    if(isFailed && n.data){
+    if(expandable && n.data){
       let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
       if(d){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
-        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #2a1a1a">
+        const borderColor=isFailed?'#2a1a1a':'#142a20';
+        const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;display:block"/></div>`:'';
+        const bizNotes=isFailed&&d.business_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Business owner notes','ملاحظات البائع')}:</b> ${esc(d.business_notes)}</div>`:'';
+        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid ${borderColor}">
+          ${photo}
           ${row(__t('Order Code','كود الطلبيه'),d.order_code)}
           ${row(__t('Product','المنتج'),d.product_name)}
           ${row(__t('Qty','الكمية'),d.qty)}
@@ -309,10 +316,11 @@ async function refreshNotifications(){
           ${row(__t('Size','المقاس'),d.size)}
           ${row(__t('Colour','اللون'),d.color)}
           ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> ${esc(d.customer_notes)}</div>`:''}
+          ${bizNotes}
         </div>`;
       }
     }
-    const clickable=isFailed&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
+    const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
     return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
   }).join('');
 }

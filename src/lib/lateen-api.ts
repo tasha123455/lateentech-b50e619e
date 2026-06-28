@@ -250,8 +250,8 @@ export function createLateenApi(userId: string) {
       return data;
     },
 
-    async markFailed(id: string) {
-      const { data, error } = await supabase.rpc("mark_failed", { _order_id: id });
+    async markFailed(id: string, note?: string | null) {
+      const { data, error } = await supabase.rpc("mark_failed", { _order_id: id, _note: (note ?? null) as never });
       if (error) throw error;
       return data;
     },
