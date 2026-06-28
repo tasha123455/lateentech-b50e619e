@@ -355,7 +355,7 @@
     <div class="pt">Browse products</div>
     <div class="sr">
       <div class="sb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="si" placeholder="Search products…" oninput="go()"/></div>
-      <div class="cbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><input class="ci-inp" type="file" accept="image/*" capture="environment" onchange="onCam(this)"/></div>
+      <div class="cbtn cbtn-disabled" onclick="openSoon()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
     </div>
     <div class="fc-row">
       <div class="chip-btn" id="fbtn" onclick="openF()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filters</div>
@@ -535,6 +535,9 @@
 .pd-picker-disabled:active{background:transparent;}
 body.lang-ar .pd-iban-row{display:none !important;}
 .pd-bank-disabled{opacity:0.4;pointer-events:none;}
+.lateen-marketer .cbtn-disabled{opacity:0.5;cursor:pointer;}
+.lateen-marketer .soon-badge{display:inline-block;background:#E24B4A;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-inline-start:6px;vertical-align:middle;line-height:1.3;}
+.lateen-marketer .pd-picker-item.pd-picker-disabled{display:flex;align-items:center;justify-content:flex-start;gap:6px;}
 </style>
 
 <!-- BROWSE OVERLAYS -->
@@ -552,6 +555,14 @@ body.lang-ar .pd-iban-row{display:none !important;}
   </div>
 </div>
 <div class="ov" id="dov"><div class="ob" onclick="closeD()"></div><div class="ds" id="ds"></div></div>
+<div class="ov" id="soonOv">
+  <div class="ob" onclick="closeSoon()"></div>
+  <div class="sh" style="text-align:center;padding-bottom:1.75rem;">
+    <div class="shh"></div>
+    <div style="font-size:15px;color:var(--color-text-primary);line-height:1.6;margin-bottom:18px;"><span data-soon-msg>Browse with pictures</span> <span class="soon-badge">soon</span></div>
+    <button class="ab" style="margin-top:0;" onclick="closeSoon()">OK</button>
+  </div>
+</div>
 <div class="cam" id="cam">
   <button class="cx" onclick="closeCam()">×</button>
   <div style="font-size:14px;color:#fff;opacity:.8;margin-bottom:16px" id="clb">Analysing image…</div>
