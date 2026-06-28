@@ -13,7 +13,6 @@ import "@/styles/lateen-marketer.css";
 import "@/styles/lateen-admin.css";
 
 const CHART_SRC = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
-const HAMMER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js";
 const ZOOM_SRC = "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js";
 
 function loadScriptOnce(src: string, isReady: () => boolean): Promise<void> {
@@ -36,11 +35,13 @@ function loadScriptOnce(src: string, isReady: () => boolean): Promise<void> {
 
 async function loadChartJs(): Promise<void> {
   await loadScriptOnce(CHART_SRC, () => !!(window as unknown as { Chart?: unknown }).Chart);
-  await loadScriptOnce(HAMMER_SRC, () => !!(window as unknown as { Hammer?: unknown }).Hammer);
+  // Charts should never block the dashboards from opening. The zoom plugin is
+  // optional; if its CDN is unavailable the pages still render and the charts
+  // simply run without horizontal pan/zoom.
   await loadScriptOnce(ZOOM_SRC, () => {
     const C = (window as unknown as { Chart?: { registry?: { plugins?: { get?: (n: string) => unknown } } } }).Chart;
     try { return !!C?.registry?.plugins?.get?.("zoom"); } catch { return false; }
-  });
+  }).catch((err) => console.warn("[Lateen] chart zoom unavailable", err));
 }
 
 type Role = "business" | "marketer" | "admin";
@@ -85,6 +86,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     el.addEventListener("click", onClick);
 
     loadChartJs()
+      .catch((err) => console.error("[Lateen] chart library unavailable", err))
       .then(() => {
         if (cancelled) return;
         const script = document.createElement("script");
