@@ -168,7 +168,7 @@ async function admLoadPayouts(){
             <div class="adm-pay-name">${admEsc(name)}</div>
             <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
           </div>
-          <div class="adm-pay-amt"><div>${fmtAmt(p.amount)}</div><div style="font-size:10px;color:#9e9b97;font-weight:400;margin-top:2px;white-space:nowrap;">Current wallet: ${fmtAmt(liveBal)}</div></div>
+          <div class="adm-pay-amt"><div>${fmtAmt(liveBal)}</div></div>
           <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal},'${encodeURIComponent(fmtAmt(liveBal))}')">Paid</button>
         </div>
         ${detailsHtml}

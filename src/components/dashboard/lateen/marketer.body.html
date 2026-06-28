@@ -315,7 +315,7 @@
         <div class="wallet-meta" id="payout-status">Next payout <span id="days-left">—</span></div>
         <button class="withdraw-btn" id="withdraw-btn" onclick="openWithdraw()" disabled style="opacity:0.45;cursor:not-allowed;">Withdraw</button>
       </div>
-      <div id="withdraw-min-hint" style="font-size:10.5px;color:var(--color-text-tertiary);margin-top:6px;">Minimum withdraw amount 20 LYD</div>
+      
     </div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-label">Total earned</div><div class="stat-value" id="stat-earned">£0.00</div><div class="stat-sub">all-time</div></div>
@@ -633,7 +633,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
 </div>
 
 <!-- RECEIPT SOURCE PICKER -->
-<div class="overlay" id="receipt-picker-overlay">
+<div class="overlay" id="receipt-picker-overlay" style="z-index:1100;position:fixed;inset:0;">
   <div class="overlay-bg" onclick="closeReceiptPicker()"></div>
   <div class="sheet">
     <div class="sheet-handle"></div>
