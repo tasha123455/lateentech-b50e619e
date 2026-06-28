@@ -34,7 +34,7 @@ function buildMainChart(){
   const __guardZoomOut=({chart})=>{const sx=chart.scales.x;if((sx.max-sx.min)>=__curRange){sx.options.min=minIdx;sx.options.max=maxIdx;chart.update('none');return false;}};
   const zoomOpts=hasZoom?{zoom:{pan:{enabled:true,mode:'x',threshold:10},zoom:{wheel:{enabled:true,speed:0.05,modifierKey:null},pinch:{enabled:false},mode:'x',onZoom:__guardZoomOut,onZoomStart:({chart,event})=>{if(event&&event.deltaY!=null&&event.deltaY>0)return false;}},limits:{x:{min:-0.5,max:n-0.5,minRange:1,maxRange:__curRange}}}}:{};
   const ctx2d=canvas.getContext('2d');const grad=ctx2d.createLinearGradient(0,0,0,canvas.height||220);grad.addColorStop(0,color+'66');grad.addColorStop(1,color+'00');
-  mainChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{data:d.values,borderColor:color,backgroundColor:grad,fill:true,tension:0.4,cubicInterpolationMode:'monotone',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:8,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,devicePixelRatio:Math.min(window.devicePixelRatio||1,2),animation:false,transitions:{zoom:{animation:{duration:0}},pan:{animation:{duration:0}},active:{animation:{duration:0}},show:{animation:{duration:0}},hide:{animation:{duration:0}}},interaction:{mode:'point',intersect:true},plugins:Object.assign({legend:{display:false},decimation:{enabled:true,algorithm:'lttb',samples:80},tooltip:{animation:false,displayColors:false,padding:10,titleFont:{size:12,weight:'600'},bodyFont:{size:12},callbacks:{title:items=>{if(!items||!items[0])return '';const i=items[0].dataIndex;const lab=__tlbl(d.labels[i]||'');const s=subs[i]||'';return s?lab+' · '+s:lab;},label:ctx=>currentMetric==='earnings'?' '+__money(ctx.raw,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):' '+ctx.raw+' pcs'}}},zoomOpts),scales:{x:{min:minIdx,max:maxIdx,grid:{display:false},ticks:{font:{size:11},color:'#5e5c58',maxRotation:0,autoSkip:true,maxTicksLimit:vis+1}},y:{beginAtZero:true,grace:'5%',grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#5e5c58',maxTicksLimit:5,callback:v=>currentMetric==='earnings'?__money(v,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):v}}}}});canvas.style.touchAction='pan-y';if(canvas.parentElement)canvas.parentElement.style.touchAction='pan-y';
+  mainChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{data:d.values,borderColor:color,backgroundColor:grad,fill:true,tension:0.4,cubicInterpolationMode:'monotone',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:8,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,devicePixelRatio:Math.min(window.devicePixelRatio||1,2),animation:false,transitions:{zoom:{animation:{duration:0}},pan:{animation:{duration:0}},active:{animation:{duration:0}},show:{animation:{duration:0}},hide:{animation:{duration:0}}},interaction:{mode:'point',intersect:true},plugins:Object.assign({legend:{display:false},decimation:{enabled:true,algorithm:'lttb',samples:80},tooltip:{animation:false,displayColors:false,padding:10,titleFont:{size:12,weight:'600'},bodyFont:{size:12},callbacks:{title:items=>{if(!items||!items[0])return '';const i=items[0].dataIndex;const lab=__tlbl(d.labels[i]||'');const s=subs[i]||'';return s?lab+' · '+s:lab;},label:ctx=>currentMetric==='earnings'?' '+__money(ctx.raw,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):' '+ctx.raw+' pcs'}}},zoomOpts),scales:{x:{min:minIdx,max:maxIdx,grid:{display:false},ticks:{font:{size:11},color:'#5e5c58',maxRotation:0,autoSkip:true,maxTicksLimit:vis+1}},y:{beginAtZero:true,grace:'5%',grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#5e5c58',maxTicksLimit:5,callback:v=>currentMetric==='earnings'?__money(v,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):v}}}}});canvas.style.touchAction='auto';if(canvas.parentElement)canvas.parentElement.style.touchAction='auto';
 }
 function buildRingChart(){const a=analyticsData[currentPeriod];const total=a.ok+a.fail;const okPct=total>0?Math.round((a.ok/total)*100):0;const failPct=total>0?100-okPct:0;document.getElementById('ring-pct').textContent=okPct+'%';document.getElementById('leg-ok').textContent=a.ok.toLocaleString();document.getElementById('leg-fail').textContent=a.fail.toLocaleString();const badge=document.getElementById('fail-badge');if(badge){badge.style.display=a.failPct>0?'inline-flex':'none';badge.style.background='#3a1a1a';badge.style.color='#e07070';}const bt=document.getElementById('fail-badge-text');if(bt)bt.textContent='−'+a.failPct+'% failure rate';if(typeof Chart==='undefined')return;if(ringChart)ringChart.destroy();ringChart=new Chart(document.getElementById('ringChart'),{type:'doughnut',data:{datasets:[{data:total>0?[okPct,failPct]:[0,100],backgroundColor:total>0?['#2dbd8f','#6b2424']:['#2a2a2a','#2a2a2a'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:500}}});}
 function switchMetric(metric,el){currentMetric=metric;document.querySelectorAll('.ctoggle').forEach(b=>b.classList.remove('active'));el.classList.add('active');buildMainChart();}
@@ -208,7 +208,7 @@ async function refreshWallet(){
   const available=dbBalance==null?Number(sd.amount||0):dbBalance;
   window.__lateenWalletBalance=available;
   const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(available,sd.sym,sel);
-  const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=available>0?'Available after admin receipt approval':'No approved receipt earnings yet';
+  const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=available>0?'Available after admin receipt approval':'';
   const wb=document.getElementById('wallet-breakdown');
   if(wb){
     if(codes.length>1){
@@ -251,20 +251,15 @@ async function refreshPayoutState(){
   const failed=!!(latest&&latest.status==='failed');
   const paidLatest=!!(latest&&latest.status==='paid');
   const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.classList.toggle('disabled',!enabled);btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
+  /* TEST MODE: allow withdraw any day as long as no pending request */
   if(pending){
     stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
     setBtn(false,__t('Withdraw','سحب'));
-  }else if(paidLatest){
-    stEl.innerHTML=__t('Next payout','تقدر تسحب بعد')+' <span id="days-left">'+daysLeft+' '+__t('days','أيام')+'</span>';
-    setBtn(false,__t('Withdraw','سحب'));
-  }else if((failed||daysLeft<=0)&&bal>=20){
+  }else if(bal>=20){
     stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
     setBtn(true,__t('Withdraw','سحب'));
-  }else if((failed||daysLeft<=0)&&bal<20){
-    stEl.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');
-    setBtn(false,__t('Withdraw','سحب'));
   }else{
-    stEl.innerHTML=__t('Next payout','تقدر تسحب بعد')+' <span id="days-left">'+daysLeft+' '+__t('days','أيام')+'</span>';
+    stEl.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');
     setBtn(false,__t('Withdraw','سحب'));
   }
   __pdMinHintTxt();
@@ -283,9 +278,39 @@ async function refreshNotifications(){
   const localize=(title,body)=>{
     if(title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
     if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
+    if(title==='Order failed')return{t:__t('Order marked failed by business','تم رفض الطلب من قبل التاجر'),b:body||''};
     return{t:title,b:body||''};
   };
-  root.innerHTML=list.map(n=>{const L=localize(n.title,n.body);const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':'#7f77dd');const isNote=n.kind==='payout_note';const mainText=isNote?(L.b||L.t):L.t;const subText=isNote?'':L.b;return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;}).join('');
+  root.innerHTML=list.map(n=>{
+    const L=localize(n.title,n.body);
+    const isFailed=n.kind==='order_failed';
+    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':(isFailed?'#e07070':'#7f77dd'));
+    const isNote=n.kind==='payout_note';
+    const mainText=isNote?(L.b||L.t):L.t;
+    const subText=isNote?'':L.b;
+    let detailsHtml='';
+    if(isFailed && n.data){
+      let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
+      if(d){
+        const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
+        detailsHtml=`<div class="notif-details" style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #2a1a1a">
+          ${row(__t('Order','الطلب'),d.order_code)}
+          ${row(__t('Product','المنتج'),d.product_name)}
+          ${row(__t('Qty','الكمية'),d.qty)}
+          ${row(__t('Customer','العميل'),d.customer_name)}
+          ${row(__t('Phone','الهاتف'),d.customer_phone)}
+          ${row(__t('WhatsApp','واتساب'),d.customer_whatsapp)}
+          ${row(__t('City','المدينة'),d.customer_city)}
+          ${row(__t('Country','الدولة'),d.customer_country)}
+          ${row(__t('Address','العنوان'),d.customer_address)}
+          ${row(__t('Size','المقاس'),d.size)}
+          ${row(__t('Colour','اللون'),d.color)}
+          ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> ${esc(d.customer_notes)}</div>`:''}
+        </div>`;
+      }
+    }
+    return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+  }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
 
