@@ -169,7 +169,7 @@ async function admLoadPayouts(){
             <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
           </div>
           <div class="adm-pay-amt"><div>${fmtAmt(p.amount)}</div><div style="font-size:10px;color:#9e9b97;font-weight:400;margin-top:2px;white-space:nowrap;">Current wallet: ${fmtAmt(liveBal)}</div></div>
-          <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal})">Paid</button>
+          <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal},'${encodeURIComponent(fmtAmt(liveBal))}')">Paid</button>
         </div>
         ${detailsHtml}
         <div style="display:flex;gap:6px;padding:10px 14px 12px;border-top:0.5px solid var(--border-2);">
@@ -181,8 +181,9 @@ async function admLoadPayouts(){
   }catch(e){console.error('[admin] payouts',e);root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
-async function admMarkPaid(id,amt){
-  if(!confirm('Confirm you have manually transferred '+admMoney(amt)+'? This will reduce the marketer\'s balance.'))return;
+async function admMarkPaid(id,amt,label){
+  const shown=label?decodeURIComponent(label):admMoney(amt);
+  if(!confirm('Confirm you have manually transferred '+shown+'? This will reduce the marketer\'s balance.'))return;
   try{await window.LateenAPI.admin.markPayoutPaid(id);await admLoadPayouts();if(document.getElementById('adm-home')?.classList.contains('active'))admLoadMetrics();}catch(e){alert('Failed: '+e.message);}
 }
 async function admSendPayoutNote(id){
