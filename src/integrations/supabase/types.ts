@@ -848,47 +848,89 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      mark_failed: {
-        Args: { _order_id: string }
-        Returns: {
-          admin_notes: string | null
-          business_id: string
-          color: string | null
-          commission: number
-          confirmed_at: string | null
-          created_at: string
-          currency: Json | null
-          customer_address: string | null
-          customer_city: string | null
-          customer_country: string | null
-          customer_country_code: string | null
-          customer_name: string | null
-          customer_notes: string | null
-          customer_phone: string | null
-          customer_whatsapp: string | null
-          delivered_at: string | null
-          delivery_fee: number
-          id: string
-          marketer_confirmed_at: string | null
-          marketer_id: string
-          platform_fee: number
-          product_id: string
-          qty: number
-          receipt_uploaded_at: string | null
-          receipt_url: string | null
-          reviewed_at: string | null
-          shipping_fee: number
-          size: string | null
-          status: string
-          unit_price: number
-        }
-        SetofOptions: {
-          from: "*"
-          to: "orders"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      mark_failed:
+        | {
+            Args: { _order_id: string }
+            Returns: {
+              admin_notes: string | null
+              business_id: string
+              color: string | null
+              commission: number
+              confirmed_at: string | null
+              created_at: string
+              currency: Json | null
+              customer_address: string | null
+              customer_city: string | null
+              customer_country: string | null
+              customer_country_code: string | null
+              customer_name: string | null
+              customer_notes: string | null
+              customer_phone: string | null
+              customer_whatsapp: string | null
+              delivered_at: string | null
+              delivery_fee: number
+              id: string
+              marketer_confirmed_at: string | null
+              marketer_id: string
+              platform_fee: number
+              product_id: string
+              qty: number
+              receipt_uploaded_at: string | null
+              receipt_url: string | null
+              reviewed_at: string | null
+              shipping_fee: number
+              size: string | null
+              status: string
+              unit_price: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "orders"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { _note?: string; _order_id: string }
+            Returns: {
+              admin_notes: string | null
+              business_id: string
+              color: string | null
+              commission: number
+              confirmed_at: string | null
+              created_at: string
+              currency: Json | null
+              customer_address: string | null
+              customer_city: string | null
+              customer_country: string | null
+              customer_country_code: string | null
+              customer_name: string | null
+              customer_notes: string | null
+              customer_phone: string | null
+              customer_whatsapp: string | null
+              delivered_at: string | null
+              delivery_fee: number
+              id: string
+              marketer_confirmed_at: string | null
+              marketer_id: string
+              platform_fee: number
+              product_id: string
+              qty: number
+              receipt_uploaded_at: string | null
+              receipt_url: string | null
+              reviewed_at: string | null
+              shipping_fee: number
+              size: string | null
+              status: string
+              unit_price: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "orders"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       request_payout: {
         Args: { _amount: number }
         Returns: {
