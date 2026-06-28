@@ -450,22 +450,30 @@
       <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">Confirm your payout details below</div>
     </div>
     <div style="display:grid;gap:10px;margin-bottom:14px;">
-      <label class="pd-lbl">Country <span class="pd-req">*</span>
-        <select id="pd-country" class="pd-inp" required>
-          <option value="">Select…</option>
-          <option value="Libya">Libya</option>
-          <option value="" disabled>More soon</option>
-        </select>
-        <span class="pd-soon-row"><span class="pd-soon-pill">Soon</span></span>
+      <label class="pd-lbl">
+        <span class="pd-lbl-head">Country <span class="pd-req">*</span></span>
+        <button type="button" class="pd-inp pd-picker-btn" id="pd-country-btn" onclick="togglePdPicker('country')" style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="pd-country-txt" data-no-i18n>Select…</span>
+          <span style="opacity:.5;font-size:11px;">▾</span>
+        </button>
+        <input type="hidden" id="pd-country" required>
+        <div class="pd-picker-list" id="pd-country-list" style="display:none;">
+          <button type="button" class="pd-picker-item" onclick="pickPd('country','Libya')">Libya</button>
+          <div class="pd-picker-item pd-picker-disabled"><span>More</span><span class="pd-soon-pill">Soon</span></div>
+        </div>
       </label>
-      <label class="pd-lbl">Method <span class="pd-req">*</span>
-        <select id="pd-method" class="pd-inp" required onchange="__pdOnMethodChange()">
-          <option value="">Select…</option>
-          <option value="One pay">One pay</option>
-          <option value="Bank of Unity">Bank of Unity</option>
-          <option value="" disabled>More soon</option>
-        </select>
-        <span class="pd-soon-row"><span class="pd-soon-pill">Soon</span></span>
+      <label class="pd-lbl">
+        <span class="pd-lbl-head">Method <span class="pd-req">*</span></span>
+        <button type="button" class="pd-inp pd-picker-btn" id="pd-method-btn" onclick="togglePdPicker('method')" style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="pd-method-txt" data-no-i18n>Select…</span>
+          <span style="opacity:.5;font-size:11px;">▾</span>
+        </button>
+        <input type="hidden" id="pd-method" required>
+        <div class="pd-picker-list" id="pd-method-list" style="display:none;">
+          <button type="button" class="pd-picker-item" onclick="pickPd('method','One pay')">One pay</button>
+          <button type="button" class="pd-picker-item" onclick="pickPd('method','Bank of Unity')">Bank of Unity</button>
+          <div class="pd-picker-item pd-picker-disabled"><span>More</span><span class="pd-soon-pill">Soon</span></div>
+        </div>
       </label>
       <label class="pd-lbl" id="pd-bank-wrap">Bank <span class="pd-req">*</span>
         <select id="pd-bank" class="pd-inp" required>
