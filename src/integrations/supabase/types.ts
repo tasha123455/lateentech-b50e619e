@@ -486,6 +486,7 @@ export type Database = {
           pending: number
           updated_at: string
           user_id: string
+          withdraw_cycle_started_at: string | null
         }
         Insert: {
           balance?: number
@@ -493,6 +494,7 @@ export type Database = {
           pending?: number
           updated_at?: string
           user_id: string
+          withdraw_cycle_started_at?: string | null
         }
         Update: {
           balance?: number
@@ -500,6 +502,7 @@ export type Database = {
           pending?: number
           updated_at?: string
           user_id?: string
+          withdraw_cycle_started_at?: string | null
         }
         Relationships: []
       }
@@ -799,6 +802,21 @@ export type Database = {
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_payout_state: {
+        Args: never
+        Returns: {
+          balance: number
+          can_withdraw: boolean
+          cycle_started_at: string
+          days_left: number
+          eligible_at: string
+          latest_status: string
+          pending: boolean
+          pending_amount: number
+          server_now: string
+          wallet_currency: string
+        }[]
       }
       has_role: {
         Args: {
