@@ -176,8 +176,8 @@ export const DICT: Record<string, string> = {
   "Commissions": "العمولات",
 
   // ===== Products & Browse =====
-  "Filters": "الفلاتر",
-  "Filter & sort": "الفلاتر",
+  "Filters": "فلتره",
+  "Filter & sort": "فلتره",
   "All": "الكل",
   "Fashion": "ملابس وأحذية",
   "Fashion & footwear": "ملابس وأحذية",
