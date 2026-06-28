@@ -147,6 +147,36 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           admin_notes: string | null
@@ -256,24 +286,30 @@ export type Database = {
       }
       payouts: {
         Row: {
+          admin_note: string | null
           amount: number
           id: string
+          noted_at: string | null
           paid_at: string | null
           requested_at: string
           status: string
           user_id: string
         }
         Insert: {
+          admin_note?: string | null
           amount: number
           id?: string
+          noted_at?: string | null
           paid_at?: string | null
           requested_at?: string
           status?: string
           user_id: string
         }
         Update: {
+          admin_note?: string | null
           amount?: number
           id?: string
+          noted_at?: string | null
           paid_at?: string | null
           requested_at?: string
           status?: string
@@ -553,8 +589,29 @@ export type Database = {
       admin_mark_payout_paid: {
         Args: { _payout_id: string }
         Returns: {
+          admin_note: string | null
           amount: number
           id: string
+          noted_at: string | null
+          paid_at: string | null
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_note_payout: {
+        Args: { _note: string; _payout_id: string }
+        Returns: {
+          admin_note: string | null
+          amount: number
+          id: string
+          noted_at: string | null
           paid_at: string | null
           requested_at: string
           status: string

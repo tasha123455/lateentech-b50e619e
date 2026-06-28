@@ -259,7 +259,7 @@ export function createLateenApi(userId: string) {
     async getProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, business_name, phone, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
+        .select("full_name, business_name, phone, created_at, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
@@ -291,8 +291,53 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
+    async getLatestPayout() {
+      const { data, error } = await supabase
+        .from("payouts")
+        .select("*")
+        .eq("user_id", userId)
+        .order("requested_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async getLastPaidPayout() {
+      const { data, error } = await supabase
+        .from("payouts")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("status", "paid")
+        .order("paid_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async listNotifications() {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+
+    async markNotificationsRead() {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .is("read_at", null);
+      if (error) throw error;
+    },
+
     subscribe(
-      key: "my-products" | "browse-products" | "favorites" | "orders" | "wallet",
+      key: "my-products" | "browse-products" | "favorites" | "orders" | "wallet" | "payouts" | "notifications",
       onChange: () => void,
     ) {
       const ch = supabase.channel(`lateen-${key}-${userId}-${crypto.randomUUID()}`);
@@ -302,6 +347,8 @@ export function createLateenApi(userId: string) {
       if (key === "favorites") filters.push({ table: "favorites", filter: `marketer_id=eq.${userId}` });
       if (key === "orders") filters.push({ table: "orders" });
       if (key === "wallet") filters.push({ table: "wallets", filter: `user_id=eq.${userId}` });
+      if (key === "payouts") filters.push({ table: "payouts", filter: `user_id=eq.${userId}` });
+      if (key === "notifications") filters.push({ table: "notifications", filter: `user_id=eq.${userId}` });
       for (const f of filters) {
         (ch as unknown as {
           on: (
@@ -374,6 +421,10 @@ export function createLateenApi(userId: string) {
       },
       async markPayoutPaid(id: string) {
         const { error } = await supabase.rpc("admin_mark_payout_paid", { _payout_id: id });
+        if (error) throw error;
+      },
+      async notePayout(id: string, note: string) {
+        const { error } = await supabase.rpc("admin_note_payout", { _payout_id: id, _note: note });
         if (error) throw error;
       },
       async listAllUsers(search?: string) {

@@ -202,11 +202,84 @@ window.__toggleWalletCurList=function(){const l=document.getElementById('wallet-
 async function refreshWallet(){const totals=window.__lateenEarnByCur||{};const codes=Object.keys(totals);if(!window.__lateenWalletCur||!totals[window.__lateenWalletCur])window.__lateenWalletCur=codes[0]||'GBP';const sel=window.__lateenWalletCur;const sd=totals[sel]||{sym:'£',amount:0};const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(sd.amount,sd.sym,sel);const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=sd.amount>0?'Available after admin receipt approval':'No approved receipt earnings yet';const wb=document.getElementById('wallet-breakdown');if(wb){if(codes.length>1){wb.style.display='block';const prev=document.getElementById('wallet-cur-list');const wasOpen=prev&&prev.style.display!=='none';const rows=codes.map(c=>{const a=c===sel;return `<button data-no-i18n onclick="__selectWalletCur('${c}')" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin:0 0 6px 0;padding:10px 12px;border-radius:10px;border:0.5px solid ${a?'#7f77dd':'#232323'};background:${a?'#1a1830':'#0f0f0f'};color:#fff;font-size:12px;cursor:pointer;font-family:inherit;text-align:left"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.7">${__rawSym(totals[c].sym,c)}</span><span>${c}</span></span><span style="font-weight:500">${__moneyH(totals[c].amount,totals[c].sym,c)}</span></button>`;}).join('');wb.innerHTML=`<button data-no-i18n onclick="__toggleWalletCurList()" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid #232323;background:#141414;color:#fff;font-size:11px;cursor:pointer;font-family:inherit"><span style="display:inline-flex;align-items:center;gap:8px"><span style="opacity:0.55;letter-spacing:0.04em">EARNINGS BY CURRENCY</span><span style="opacity:0.5">·</span><span style="opacity:0.85">${codes.length} currencies</span></span><span id="wallet-cur-caret" style="display:inline-block;transition:transform .15s;opacity:0.7">▾</span></button><div id="wallet-cur-list" style="display:${wasOpen?'block':'none'};margin-top:8px">${rows}</div>`;const caret=document.getElementById('wallet-cur-caret');if(caret&&wasOpen)caret.style.transform='rotate(180deg)';}else{wb.style.display='none';wb.innerHTML='';}}const wd=document.getElementById('withdraw-amount');if(wd)wd.innerHTML=__moneyH(sd.amount,sd.sym,sel);}
 async function refreshProfile(){if(!window.LateenAPI||!window.LateenAPI.getProfile)return;try{const p=await window.LateenAPI.getProfile();const name=(p&&p.full_name)||'';const initials=name?name.split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join(''):'··';const first=name?name.split(/\s+/)[0]:'there';['user-avatar','menu-avatar'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=initials;});const g=document.getElementById('user-greet');if(g)g.textContent='Hey, '+first;const mn=document.getElementById('menu-name');if(mn)mn.textContent=name||'Welcome';const bn=document.getElementById('bank-name');if(bn&&name)bn.textContent=name;}catch(e){console.error('[Lateen] profile',e);}}
 
-const today=new Date();const next=new Date(today.getFullYear(),today.getMonth()+1,1);
-document.getElementById('days-left').textContent=Math.ceil((next-today)/86400000)+' days';
+/* ── Payout countdown + notifications ── */
+const __PAYOUT_PERIOD_MS=30*86400000;
+function __isArLang(){try{return document.documentElement.getAttribute('dir')==='rtl'||document.documentElement.lang==='ar';}catch(e){return false;}}
+function __t(en,ar){return __isArLang()?ar:en;}
+function __pdMinHintTxt(){const el=document.getElementById('withdraw-min-hint');if(el)el.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');}
+async function refreshPayoutState(){
+  const stEl=document.getElementById('payout-status');const btn=document.getElementById('withdraw-btn');
+  if(!stEl||!btn||!window.LateenAPI)return;
+  let prof=null,latest=null,paid=null;
+  try{
+    [prof,latest,paid]=await Promise.all([
+      window.LateenAPI.getProfile?.(),
+      window.LateenAPI.getLatestPayout?.(),
+      window.LateenAPI.getLastPaidPayout?.(),
+    ]);
+  }catch(e){console.error('[Lateen] payout state',e);}
+  const anchor=Math.max(
+    paid&&paid.paid_at?new Date(paid.paid_at).getTime():0,
+    prof&&prof.created_at?new Date(prof.created_at).getTime():0,
+  )||Date.now();
+  const dueAt=anchor+__PAYOUT_PERIOD_MS;
+  const now=Date.now();
+  const daysLeft=Math.max(0,Math.ceil((dueAt-now)/86400000));
+  const pending=!!(latest&&latest.status==='requested');
+  const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
+  if(pending){
+    stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
+    setBtn(false,__t('Withdraw','سحب'));
+  }else if(daysLeft<=0){
+    stEl.textContent=__t('You can withdraw today','تقدر تسحب اليوم');
+    setBtn(true,__t('Withdraw','سحب'));
+  }else{
+    stEl.innerHTML=__t('Next payout','تقدر تسحب بعد')+' <span id="days-left">'+daysLeft+' '+__t('days','أيام')+'</span>';
+    setBtn(false,__t('Withdraw','سحب'));
+  }
+  __pdMinHintTxt();
+}
+async function refreshNotifications(){
+  if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
+  let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
+  const dot=document.getElementById('notif-dot');
+  if(dot)dot.style.display=list.some(n=>!n.read_at)?'block':'none';
+  const root=document.getElementById('notif-list');
+  if(!root)return;
+  if(!list.length){root.innerHTML='<div class="empty-center" style="padding:60px 20px"><div class="empty-text" style="text-align:center;color:var(--color-text-secondary);font-size:13px">'+__t('No notifications yet.','لا توجد إشعارات بعد.')+'</div></div>';return;}
+  const ago=(t)=>{const s=Math.max(1,Math.floor((Date.now()-new Date(t).getTime())/1000));if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d';};
+  const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const localize=(title,body)=>{
+    if(title==='Withdrawal successful')return{t:__t('Withdrawal successful','تم السحب بنجاح'),b:__t('Your withdrawal has been paid.','تم تحويل المبلغ بنجاح.')};
+    if(title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
+    return{t:title,b:body||''};
+  };
+  root.innerHTML=list.map(n=>{const L=localize(n.title,n.body);const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':'#7f77dd');return `<div class="notif-item"><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(L.t)}</div><div class="notif-body">${esc(L.b)}</div><div class="notif-time">${ago(n.created_at)}</div></div></div>`;}).join('');
+}
+window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
+
+/* Wrap confirmWithdraw: enforce min 20 LYD when current currency is LYD */
+(function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){
+  try{
+    const cur=window.__lateenWalletCur||'';
+    const totals=window.__lateenEarnByCur||{};
+    const amt=Number(totals[cur]?.amount||0);
+    if((cur||'').toUpperCase()==='LYD'&&amt<20){
+      alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));return;
+    }
+  }catch(e){}
+  await _orig.apply(this,arguments);
+  refreshPayoutState();
+};window.confirmWithdraw=confirmWithdraw;})();
+
+/* Wrap goTo: mark notifications read on opening notif page */
+(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)window.LateenAPI.markNotificationsRead().catch(()=>{});}};window.goTo=goTo;})();
+
+refreshPayoutState();refreshNotifications();
+setInterval(refreshPayoutState,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
 loadBrowse().then(()=>loadOrders());refreshWallet();refreshProfile();
-window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();refreshWallet();});window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders);}
+window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();refreshWallet();});const __unsubPay=window.LateenAPI.subscribe('payouts',()=>refreshPayoutState());const __unsubNotif=window.LateenAPI.subscribe('notifications',()=>refreshNotifications());window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders,__unsubPay,__unsubNotif);}
 /* persist page + scroll across refresh */
 (function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
 

@@ -168,6 +168,10 @@ async function admLoadPayouts(){
           <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${p.amount})">Paid</button>
         </div>
         ${detailsHtml}
+        <div style="display:flex;gap:6px;padding:10px 14px 12px;border-top:0.5px solid var(--border-2);">
+          <input id="adm-note-${p.id}" type="text" placeholder="Send a note to the marketer (e.g. missing IBAN)" style="flex:1;height:34px;padding:0 10px;border-radius:8px;border:0.5px solid var(--border-2);background:#0f0f0f;color:#fff;font-size:12px;" />
+          <button class="adm-btn" style="padding:0 12px;" onclick="admSendPayoutNote('${p.id}')">Send note</button>
+        </div>
       </div>`;
     }).join('');
   }catch(e){console.error('[admin] payouts',e);root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
@@ -176,6 +180,13 @@ async function admLoadPayouts(){
 async function admMarkPaid(id,amt){
   if(!confirm('Confirm you have manually transferred '+admMoney(amt)+'? This will reduce the marketer\'s balance.'))return;
   try{await window.LateenAPI.admin.markPayoutPaid(id);admLoadPayouts();}catch(e){alert('Failed: '+e.message);}
+}
+async function admSendPayoutNote(id){
+  const el=document.getElementById('adm-note-'+id);
+  const note=el?el.value.trim():'';
+  if(!note){alert('Type a note first.');return;}
+  if(!confirm('Send this note to the marketer? Their request will be marked failed so they can fix it and re-request.'))return;
+  try{await window.LateenAPI.admin.notePayout(id,note);admLoadPayouts();}catch(e){alert('Failed: '+e.message);}
 }
 
 let admUserRoleFilter='';
