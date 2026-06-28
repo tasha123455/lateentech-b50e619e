@@ -208,7 +208,7 @@ async function refreshWallet(){
   const available=dbBalance==null?Number(sd.amount||0):dbBalance;
   window.__lateenWalletBalance=available;
   const wa=document.querySelector('.wallet-amount');if(wa)wa.innerHTML=__moneyH(available,sd.sym,sel);
-  const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=available>0?'Available after admin receipt approval':'No approved receipt earnings yet';
+  const wp=document.getElementById('wallet-pending');if(wp)wp.textContent=available>0?'Available after admin receipt approval':'';
   const wb=document.getElementById('wallet-breakdown');
   if(wb){
     if(codes.length>1){
