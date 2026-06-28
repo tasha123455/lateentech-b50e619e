@@ -245,6 +245,8 @@ async function refreshPayoutState(){
   }catch(e){console.error('[Lateen] payout state',e);}
   const bal=state&&state.balance!=null?Number(state.balance)||0:(wallet?Number(wallet.balance)||0:Number(window.__lateenWalletBalance||0));
   window.__lateenWalletBalance=bal;
+  const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.classList.toggle('disabled',!enabled);btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
+  if(!state){window.__lateenCanWithdraw=false;stEl.textContent=__t('Withdrawal is not available yet','السحب غير متاح الآن');setBtn(false,__t('Withdraw','سحب'));return;}
   const hasPaid=!!(paid&&paid.paid_at);
   const anchor=hasPaid?new Date(paid.paid_at).getTime():(prof&&prof.created_at?new Date(prof.created_at).getTime():Date.now());
   const dueAt=anchor+__PAYOUT_PERIOD_MS;
@@ -254,7 +256,6 @@ async function refreshPayoutState(){
   const pending=state&&state.pending!=null?!!state.pending:!!(latest&&latest.status==='requested');
   const serverCan=state&&state.can_withdraw!=null?!!state.can_withdraw:(bal>=20&&!pending&&daysLeft===0);
   window.__lateenCanWithdraw=false;
-  const setBtn=(enabled,label)=>{btn.disabled=!enabled;btn.classList.toggle('disabled',!enabled);btn.style.opacity=enabled?'1':'0.45';btn.style.cursor=enabled?'pointer':'not-allowed';if(label)btn.textContent=label;};
   if(bal<20){
     stEl.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');
     setBtn(false,__t('Withdraw','سحب'));
