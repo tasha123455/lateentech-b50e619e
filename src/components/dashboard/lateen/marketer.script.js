@@ -355,8 +355,8 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 /* Keep payout state refreshed after withdrawal attempts */
 (function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){await _orig.apply(this,arguments);await __lateenRefreshWalletAndPayout();};window.confirmWithdraw=confirmWithdraw;})();
 
-/* Wrap goTo: mark notifications read on opening notif page */
-(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){(async()=>{try{const list=await window.LateenAPI.listNotifications();__notifNewIds=new Set(list.filter(n=>!n.read_at).map(n=>n.id));window.__notifNewIds=__notifNewIds;}catch(e){}await refreshNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}})();}else{__notifNewIds=new Set();window.__notifNewIds=__notifNewIds;refreshNotifications();}};window.goTo=goTo;})();
+/* Wrap goTo: dots stay visible while viewing notifications, cleared on leave */
+(function(){const _g=goTo;goTo=function(id){const wasNotif=document.getElementById('pg-notif')&&document.getElementById('pg-notif').classList.contains('active');_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';refreshNotifications();}else if(wasNotif){(async()=>{try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}__notifNewIds=new Set();window.__notifNewIds=__notifNewIds;await refreshNotifications();})();}};window.goTo=goTo;})();
 
 /* Safety: clear any leaked scroll locks from previously-open overlays */
 (function(){const clear=()=>{try{const anyOpen=document.querySelector('.lateen-marketer .overlay.open, .lateen-marketer .menu-overlay.open, #form-overlay.open, #prod-picker-overlay.open, #receipt-picker-overlay.open, #withdraw-overlay.open');if(!anyOpen){document.body.style.overflow='';document.documentElement.style.overflow='';}}catch(e){}};clear();setInterval(clear,1500);})();
