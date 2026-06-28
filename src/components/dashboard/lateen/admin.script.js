@@ -164,7 +164,7 @@ async function admLoadPayouts(){
             <div class="adm-pay-name">${admEsc(name)}</div>
             <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
           </div>
-          <div class="adm-pay-amt">${admMoney(p.amount)}</div>
+          <div class="adm-pay-amt"><div>${admMoney(p.amount)}</div><div style="font-size:10px;color:#9e9b97;font-weight:400;margin-top:2px;white-space:nowrap;">Current wallet: ${admMoney(p.wallet&&p.wallet.balance!=null?p.wallet.balance:p.amount)}</div></div>
           <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${p.amount})">Paid</button>
         </div>
         ${detailsHtml}
@@ -179,14 +179,14 @@ async function admLoadPayouts(){
 
 async function admMarkPaid(id,amt){
   if(!confirm('Confirm you have manually transferred '+admMoney(amt)+'? This will reduce the marketer\'s balance.'))return;
-  try{await window.LateenAPI.admin.markPayoutPaid(id);admLoadPayouts();}catch(e){alert('Failed: '+e.message);}
+  try{await window.LateenAPI.admin.markPayoutPaid(id);await admLoadPayouts();if(document.getElementById('adm-home')?.classList.contains('active'))admLoadMetrics();}catch(e){alert('Failed: '+e.message);}
 }
 async function admSendPayoutNote(id){
   const el=document.getElementById('adm-note-'+id);
   const note=el?el.value.trim():'';
   if(!note){alert('Type a note first.');return;}
   if(!confirm('Send this note to the marketer? Their request will be marked failed so they can fix it and re-request.'))return;
-  try{await window.LateenAPI.admin.notePayout(id,note);admLoadPayouts();}catch(e){alert('Failed: '+e.message);}
+  try{await window.LateenAPI.admin.notePayout(id,note);await admLoadPayouts();}catch(e){alert('Failed: '+e.message);}
 }
 
 let admUserRoleFilter='';
