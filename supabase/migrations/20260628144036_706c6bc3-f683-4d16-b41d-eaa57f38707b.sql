@@ -1,6 +1,3 @@
--- Keep payout payment aligned with the marketer's live wallet balance.
--- If the wallet grows while a withdrawal is pending, the admin pays the latest balance,
--- then the wallet is reset to zero and the next 30-day cycle starts from paid_at.
 CREATE OR REPLACE FUNCTION public.admin_mark_payout_paid(_payout_id uuid)
  RETURNS public.payouts
  LANGUAGE plpgsql
