@@ -258,7 +258,7 @@ async function refreshPayoutState(){
     stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
     setBtn(false,__t('Withdraw','سحب'));
   }else if(daysLeft>0 && hasPaid){
-    stEl.textContent=__t('Next payout in '+daysLeft+' days','الدفعة القادمة خلال '+daysLeft+' يوم');
+    stEl.textContent=__t('Next payout in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
     /* TEST MODE: keep button enabled so user can test */
     setBtn(true,__t('Withdraw','سحب'));
   }else{
