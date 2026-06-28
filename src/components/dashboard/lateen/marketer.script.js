@@ -362,7 +362,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 (function(){const _g=goTo;goTo=function(id){const wasNotif=document.getElementById('pg-notif')&&document.getElementById('pg-notif').classList.contains('active');_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';refreshNotifications();}else if(wasNotif){(async()=>{try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}__notifNewIds=new Set();window.__notifNewIds=__notifNewIds;await refreshNotifications();})();}};window.goTo=goTo;})();
 
 /* Safety: clear any leaked scroll locks from previously-open overlays */
-(function(){const clear=()=>{try{const anyOpen=document.querySelector('.lateen-marketer .overlay.open, .lateen-marketer .menu-overlay.open, #form-overlay.open, #prod-picker-overlay.open, #receipt-picker-overlay.open, #withdraw-overlay.open');if(!anyOpen){document.body.style.overflow='';document.documentElement.style.overflow='';}}catch(e){}};clear();setInterval(clear,1500);})();
+(function(){const clear=()=>{try{const anyOpen=document.querySelector('.lateen-marketer .overlay.open, .lateen-marketer .menu-overlay.open, .lateen-marketer .ov.open, #form-overlay.open, #prod-picker-overlay.open, #receipt-picker-overlay.open, #withdraw-overlay.open');if(!anyOpen){document.body.style.overflow='';document.documentElement.style.overflow='';}}catch(e){}};clear();setInterval(clear,1500);})();
 __lateenRefreshWalletAndPayout();refreshNotifications();
 setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
