@@ -276,6 +276,8 @@ async function refreshPayoutState(){
   __pdMinHintTxt();
 }
 async function __lateenRefreshWalletAndPayout(){try{if(typeof refreshWallet==='function')await refreshWallet();else await refreshPayoutState();}catch(e){console.error('[Lateen] wallet/payout refresh',e);}}
+let __notifNewIds = (window.__notifNewIds instanceof Set) ? window.__notifNewIds : new Set();
+window.__notifNewIds = __notifNewIds;
 async function refreshNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
