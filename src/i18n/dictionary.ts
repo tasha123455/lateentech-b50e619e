@@ -114,13 +114,15 @@ export const DICT: Record<string, string> = {
   // ===== Dashboards: Stats & Wallet =====
   "Business Dashboard": "لوحة تحكم الشركة",
   "Marketer Dashboard": "لوحة تحكم المسوّق",
-  "WALLET BALANCE": "رصيد المحفظة",
+  "WALLET BALANCE": "الرصيد المتاح",
+  "Wallet Balance": "الرصيد المتاح",
+  "Available after admin receipt approval": "يصبح الرصيد متاحًا بعد اعتماد الإدارة",
   "Wallet": "المحفظة",
   "wallet": "المحفظة",
   "NET EARNINGS": "صافي الأرباح",
   "Net earnings": "صافي الأرباح",
-  "Next payout": "الدفعة الجاية",
-  "Next payout ": "الدفعة الجاية ",
+  "Next payout": "تقدر تسحب بعد",
+  "Next payout ": "تقدر تسحب بعد ",
   "Withdraw": "سحب",
   "Withdraw earnings": "طلب سحب الأرباح",
   "Confirm withdrawal": "تأكيد عملية السحب",
@@ -140,9 +142,9 @@ export const DICT: Record<string, string> = {
   "Financials": "الماليات",
   "Platform fee": "رسوم المنصة",
   "Platform fees": "رسوم المنصة",
-  "Pieces sold": "القطع المبيوعة",
+  "Pieces sold": "قطع",
   "Pieces": "القطع",
-  "Succeeded": "ناجحة",
+  "Succeeded": "الطلبات تم تسليمها",
   "Failed": "فاشلة",
   "Delivered": "تم التسليم",
   "✓ Delivered": "✓ تم التسليم",
@@ -150,10 +152,10 @@ export const DICT: Record<string, string> = {
   "Awaiting marketer confirmation": "بانتظار تأكيد المسوّق",
   "Manual (marketer)": "يدوي (المسوّق)",
   "(no customer yet)": "(لا يوجد زبون بعد)",
-  "Failed (COD)": "فشلت (الدفع عند الاستلام)",
+  "Failed (COD)": "طلبات لم يتم استلامها (فشل الدفع عند الاستلام)",
   "Cash-on-delivery failures only": "إخفاقات الدفع عند الاستلام فقط",
-  "failure rate": "نسبة الفشل",
-  "success": "نجاح",
+  "failure rate": "نسبة الطلبات غير المستلمة",
+  "success": "نسبة النجاح",
   "active": "نشط",
   "Marketers": "المسوّقين",
   "Available balance": "الرصيد المتاح",
@@ -529,7 +531,7 @@ export const DICT: Record<string, string> = {
   "📝 Draft · not sent": "📝 مسودة · لم تُرسل",
   "across payment": "عبر الدفعات",
   "Action failed:": "فشلت العملية:",
-  "all-time": "كل الوقت",
+  "all-time": "منذ إنشاء الحساب",
   "Approve failed:": "فشلت الموافقة:",
   "Approve this receipt? The order will be forwarded to the business owner and stock will be decremented.":
     "هل تريد الموافقة على هذا الإيصال؟ سيتم تحويل الطلبية لصاحب العمل وخصم المخزون.",
@@ -683,12 +685,12 @@ const PATTERNS: Pattern[] = [
   // "15 days" / "30 day"
   { re: /^(\d[\d,]*)\s+days?\b\.?$/i, build: (m) => `${m[1]} أيام` },
   // "5 products"
-  { re: /^(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `${m[1]} منتجات` },
+  { re: /^(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من ${m[1]} منتج` },
   // "3 cities"
   { re: /^(\d[\d,]*)\s+cities\b\.?$/i, build: (m) => `${m[1]} مدن` },
   // "of 12 orders" / "of 5 products"
-  { re: /^of\s+(\d[\d,]*)\s+orders?\b\.?$/i, build: (m) => `من ${m[1]} طلبيات` },
-  { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من ${m[1]} منتجات` },
+  { re: /^of\s+(\d[\d,]*)\s+orders?\b\.?$/i, build: (m) => `من أصل ${m[1]} طلبيات` },
+  { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من أصل ${m[1]} منتجات` },
   // "Delivered" variants like "Deliv." or "deliv"
   { re: /^Deliv\.?$/i, build: () => `التوصيل` },
 
@@ -697,7 +699,7 @@ const PATTERNS: Pattern[] = [
   // "£0.00 pending" / "£12.50 pending"
   { re: /^([£$€])\s*([\d.,]+)\s+pending$/i, build: (m) => `${m[1]}${m[2]} معلّق` },
   // "0% failure rate" / "12.5% failure rate"
-  { re: /^([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة فشل ${m[1]}%` },
+  { re: /^([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة الطلبات غير المستلمة ${m[1]}%` },
   // "per unit" / "per unit × 1"
   { re: /^per\s+unit$/i, build: () => `للوحدة` },
   { re: /^([£$€]?[\d.,]*)\s*per\s+unit\s*[×x]\s*(\d+)$/i,
