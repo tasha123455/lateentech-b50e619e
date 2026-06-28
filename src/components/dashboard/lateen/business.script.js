@@ -276,8 +276,8 @@ async function refreshBizNotifications(){
     }
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
     const isNew=__bizNotifNewIds.has(n.id);
-    const leftDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${leftDot}<div class="notif-icon" style="background:${color}22;color:${color}">•</div></div><div style="flex:1;min-width:0"><div class="notif-title">${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div></div>`;
+    const rightDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
+    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   }).join('');
 }
 window.refreshBizNotifications=refreshBizNotifications;
