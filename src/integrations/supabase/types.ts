@@ -886,6 +886,25 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      request_payout: {
+        Args: { _amount: number }
+        Returns: {
+          admin_note: string | null
+          amount: number
+          id: string
+          noted_at: string | null
+          paid_at: string | null
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "marketer" | "business" | "admin"
