@@ -333,18 +333,8 @@ async function refreshNotifications(){
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
 
-/* Wrap confirmWithdraw: enforce min 20 LYD when current currency is LYD */
-(function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){
-  try{
-    const cur=window.__lateenWalletCur||'';
-    const amt=Number(window.__lateenWalletBalance||0);
-    if((cur||'').toUpperCase()==='LYD'&&amt<20){
-      alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));await __lateenRefreshWalletAndPayout();return;
-    }
-  }catch(e){}
-  await _orig.apply(this,arguments);
-  await __lateenRefreshWalletAndPayout();
-};window.confirmWithdraw=confirmWithdraw;})();
+/* Keep payout state refreshed after withdrawal attempts */
+(function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){await _orig.apply(this,arguments);await __lateenRefreshWalletAndPayout();};window.confirmWithdraw=confirmWithdraw;})();
 
 /* Wrap goTo: mark notifications read on opening notif page */
 (function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)window.LateenAPI.markNotificationsRead().catch(()=>{});}};window.goTo=goTo;})();
