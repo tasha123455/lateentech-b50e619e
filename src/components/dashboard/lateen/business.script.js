@@ -21,6 +21,8 @@ let currentMetric='revenue',currentPeriod='D',mainChart,ringChart;
 const __VIS={D:7,M:6,Y:6};
 function __pad(n){return n<10?'0'+n:''+n;}
 function __ddmmyyyy(d){return __pad(d.getDate())+'/'+__pad(d.getMonth()+1)+'/'+d.getFullYear();}
+function __bindChartPan(canvas,getChart){if(!canvas||canvas.__panBound)return;canvas.__panBound=true;let sx=0,sy=0,lx=0,decided=0,active=false;const onStart=(e)=>{if(!e.touches||e.touches.length!==1){active=false;decided=0;return;}const t=e.touches[0];sx=lx=t.clientX;sy=t.clientY;decided=0;active=true;};const onMove=(e)=>{if(!active||!e.touches||e.touches.length!==1)return;const t=e.touches[0];const dx=t.clientX-sx,dy=t.clientY-sy;if(!decided){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){decided=1;}else if(Math.abs(dy)>8){decided=2;active=false;return;}else{return;}}if(decided===1){e.preventDefault();const ch=getChart&&getChart();if(ch&&typeof ch.pan==='function'){const d=t.clientX-lx;if(d)ch.pan({x:d},undefined,'none');}lx=t.clientX;}};const onEnd=()=>{active=false;decided=0;};canvas.addEventListener('touchstart',onStart,{passive:true});canvas.addEventListener('touchmove',onMove,{passive:false});canvas.addEventListener('touchend',onEnd,{passive:true});canvas.addEventListener('touchcancel',onEnd,{passive:true});}
+
 function buildMainChart(){
   if(mainChart){try{mainChart.destroy();}catch(e){}mainChart=null;}
   const canvas=document.getElementById('mainChart');if(!canvas||typeof Chart==='undefined')return;
