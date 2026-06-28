@@ -285,10 +285,22 @@ export function createLateenApi(userId: string) {
     },
 
     async requestPayout(amount: number) {
-      const { error } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from("payouts")
-        .insert({ user_id: userId, amount });
+        .select("id,status")
+        .eq("user_id", userId)
+        .eq("status", "requested")
+        .limit(1)
+        .maybeSingle();
+      if (existingError) throw existingError;
+      if (existing?.id) return existing;
+      const { data, error } = await supabase
+        .from("payouts")
+        .insert({ user_id: userId, amount })
+        .select("*")
+        .single();
       if (error) throw error;
+      return data;
     },
 
     async getLatestPayout() {
