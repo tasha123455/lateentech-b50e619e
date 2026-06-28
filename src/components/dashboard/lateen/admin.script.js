@@ -146,6 +146,9 @@ async function admLoadPayouts(){
       const u=p.user||{};
       const name=u.business_name||u.full_name||'Marketer';
       const phone=u.phone||'';
+      const cur=p.wallet&&p.wallet.currency&&p.wallet.currency.symbol?p.wallet.currency.symbol:'£';
+      const curCode=p.wallet&&p.wallet.currency&&p.wallet.currency.code?p.wallet.currency.code:'';
+      const fmtAmt=(n)=>typeof window.__money==='function'?window.__money(n,cur,curCode):admMoney(n);
       const detail=(label,val)=>val?`<div class="adm-pay-detail-row"><span class="adm-pay-detail-k">${admEsc(label)}</span><span class="adm-pay-detail-v">${admEsc(val)}</span></div>`:'';
       const hasAny=u.payout_method||u.payout_bank_name||u.payout_account_holder||u.payout_account_number||u.payout_iban||u.payout_swift||u.payout_notes;
       const detailsHtml=hasAny?`<div class="adm-pay-details">
@@ -165,7 +168,7 @@ async function admLoadPayouts(){
             <div class="adm-pay-name">${admEsc(name)}</div>
             <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
           </div>
-          <div class="adm-pay-amt"><div>${admMoney(p.amount)}</div><div style="font-size:10px;color:#9e9b97;font-weight:400;margin-top:2px;white-space:nowrap;">Current wallet: ${admMoney(liveBal)}</div></div>
+          <div class="adm-pay-amt"><div>${fmtAmt(p.amount)}</div><div style="font-size:10px;color:#9e9b97;font-weight:400;margin-top:2px;white-space:nowrap;">Current wallet: ${fmtAmt(liveBal)}</div></div>
           <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal})">Paid</button>
         </div>
         ${detailsHtml}
@@ -355,6 +358,7 @@ async function admOpenProduct(id){
 /* boot */
 admLoadMetrics();
 setInterval(()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}},10000);
+if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-wallets',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-payouts',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));}
 
 /* ========== Employees & Payroll ========== */
 let admEmpCache=[];
