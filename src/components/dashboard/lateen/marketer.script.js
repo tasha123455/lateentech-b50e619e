@@ -36,7 +36,7 @@ function buildMainChart(){
   const ctx2d=canvas.getContext('2d');const grad=ctx2d.createLinearGradient(0,0,0,canvas.height||220);grad.addColorStop(0,color+'66');grad.addColorStop(1,color+'00');
   mainChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{data:d.values,borderColor:color,backgroundColor:grad,fill:true,tension:0.4,cubicInterpolationMode:'monotone',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:8,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,devicePixelRatio:Math.min(window.devicePixelRatio||1,2),animation:false,transitions:{zoom:{animation:{duration:0}},pan:{animation:{duration:0}},active:{animation:{duration:0}},show:{animation:{duration:0}},hide:{animation:{duration:0}}},interaction:{mode:'point',intersect:true},plugins:Object.assign({legend:{display:false},decimation:{enabled:true,algorithm:'lttb',samples:80},tooltip:{animation:false,displayColors:false,padding:10,titleFont:{size:12,weight:'600'},bodyFont:{size:12},callbacks:{title:items=>{if(!items||!items[0])return '';const i=items[0].dataIndex;const lab=__tlbl(d.labels[i]||'');const s=subs[i]||'';return s?lab+' · '+s:lab;},label:ctx=>currentMetric==='earnings'?' '+__money(ctx.raw,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):' '+ctx.raw+' pcs'}}},zoomOpts),scales:{x:{min:minIdx,max:maxIdx,grid:{display:false},ticks:{font:{size:11},color:'#5e5c58',maxRotation:0,autoSkip:true,maxTicksLimit:vis+1}},y:{beginAtZero:true,grace:'5%',grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#5e5c58',maxTicksLimit:5,callback:v=>currentMetric==='earnings'?__money(v,window.__lateenSelSym?window.__lateenSelSym():'£',window.__lateenWalletCur):v}}}}});canvas.style.touchAction='pan-y';if(canvas.parentElement)canvas.parentElement.style.touchAction='pan-y';
 }
-function buildRingChart(){const a=analyticsData[currentPeriod];const total=a.ok+a.fail;const okPct=total>0?Math.round((a.ok/total)*100):0;const failPct=total>0?100-okPct:0;document.getElementById('ring-pct').textContent=okPct+'%';document.getElementById('leg-ok').textContent=a.ok.toLocaleString();document.getElementById('leg-fail').textContent=a.fail.toLocaleString();const badge=document.getElementById('fail-badge');if(badge){badge.style.display=a.failPct>0?'inline-flex':'none';badge.style.background='#3a1a1a';badge.style.color='#e07070';}const bt=document.getElementById('fail-badge-text');if(bt)bt.textContent='−'+a.failPct+'% failure rate';if(ringChart)ringChart.destroy();ringChart=new Chart(document.getElementById('ringChart'),{type:'doughnut',data:{datasets:[{data:total>0?[okPct,failPct]:[0,100],backgroundColor:total>0?['#2dbd8f','#6b2424']:['#2a2a2a','#2a2a2a'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:500}}});}
+function buildRingChart(){const a=analyticsData[currentPeriod];const total=a.ok+a.fail;const okPct=total>0?Math.round((a.ok/total)*100):0;const failPct=total>0?100-okPct:0;document.getElementById('ring-pct').textContent=okPct+'%';document.getElementById('leg-ok').textContent=a.ok.toLocaleString();document.getElementById('leg-fail').textContent=a.fail.toLocaleString();const badge=document.getElementById('fail-badge');if(badge){badge.style.display=a.failPct>0?'inline-flex':'none';badge.style.background='#3a1a1a';badge.style.color='#e07070';}const bt=document.getElementById('fail-badge-text');if(bt)bt.textContent='−'+a.failPct+'% failure rate';if(typeof Chart==='undefined')return;if(ringChart)ringChart.destroy();ringChart=new Chart(document.getElementById('ringChart'),{type:'doughnut',data:{datasets:[{data:total>0?[okPct,failPct]:[0,100],backgroundColor:total>0?['#2dbd8f','#6b2424']:['#2a2a2a','#2a2a2a'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:500}}});}
 function switchMetric(metric,el){currentMetric=metric;document.querySelectorAll('.ctoggle').forEach(b=>b.classList.remove('active'));el.classList.add('active');buildMainChart();}
 function switchPeriod(period,el){currentPeriod=period;document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));el.classList.add('active');buildMainChart();buildRingChart();}
 
@@ -265,6 +265,7 @@ async function refreshPayoutState(){
   }
   __pdMinHintTxt();
 }
+async function __lateenRefreshWalletAndPayout(){try{if(typeof refreshWallet==='function')await refreshWallet();else await refreshPayoutState();}catch(e){console.error('[Lateen] wallet/payout refresh',e);}}
 async function refreshNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
@@ -290,21 +291,21 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
     const cur=window.__lateenWalletCur||'';
     const amt=Number(window.__lateenWalletBalance||0);
     if((cur||'').toUpperCase()==='LYD'&&amt<20){
-      alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));return;
+      alert(__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل'));await __lateenRefreshWalletAndPayout();return;
     }
   }catch(e){}
   await _orig.apply(this,arguments);
-  refreshPayoutState();
+  await __lateenRefreshWalletAndPayout();
 };window.confirmWithdraw=confirmWithdraw;})();
 
 /* Wrap goTo: mark notifications read on opening notif page */
 (function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)window.LateenAPI.markNotificationsRead().catch(()=>{});}};window.goTo=goTo;})();
 
-refreshPayoutState();refreshNotifications();
-setInterval(refreshPayoutState,60000);
+__lateenRefreshWalletAndPayout();refreshNotifications();
+setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
 loadBrowse().then(()=>loadOrders());refreshWallet();refreshProfile();
-window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>refreshWallet());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();refreshWallet();});const __unsubPay=window.LateenAPI.subscribe('payouts',()=>refreshPayoutState());const __unsubNotif=window.LateenAPI.subscribe('notifications',()=>refreshNotifications());window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders,__unsubPay,__unsubNotif);}
+window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>__lateenRefreshWalletAndPayout());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();__lateenRefreshWalletAndPayout();});const __unsubPay=window.LateenAPI.subscribe('payouts',()=>__lateenRefreshWalletAndPayout());const __unsubNotif=window.LateenAPI.subscribe('notifications',()=>{refreshNotifications();__lateenRefreshWalletAndPayout();});window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders,__unsubPay,__unsubNotif);}
 /* persist page + scroll across refresh */
 (function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
 
