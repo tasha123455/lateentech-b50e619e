@@ -685,12 +685,12 @@ const PATTERNS: Pattern[] = [
   // "15 days" / "30 day"
   { re: /^(\d[\d,]*)\s+days?\b\.?$/i, build: (m) => `${m[1]} أيام` },
   // "5 products"
-  { re: /^(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `${m[1]} منتجات` },
+  { re: /^(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من ${m[1]} منتج` },
   // "3 cities"
   { re: /^(\d[\d,]*)\s+cities\b\.?$/i, build: (m) => `${m[1]} مدن` },
   // "of 12 orders" / "of 5 products"
-  { re: /^of\s+(\d[\d,]*)\s+orders?\b\.?$/i, build: (m) => `من ${m[1]} طلبيات` },
-  { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من ${m[1]} منتجات` },
+  { re: /^of\s+(\d[\d,]*)\s+orders?\b\.?$/i, build: (m) => `من أصل ${m[1]} طلبيات` },
+  { re: /^of\s+(\d[\d,]*)\s+products?\b\.?$/i, build: (m) => `من أصل ${m[1]} منتجات` },
   // "Delivered" variants like "Deliv." or "deliv"
   { re: /^Deliv\.?$/i, build: () => `التوصيل` },
 
@@ -699,7 +699,7 @@ const PATTERNS: Pattern[] = [
   // "£0.00 pending" / "£12.50 pending"
   { re: /^([£$€])\s*([\d.,]+)\s+pending$/i, build: (m) => `${m[1]}${m[2]} معلّق` },
   // "0% failure rate" / "12.5% failure rate"
-  { re: /^([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة فشل ${m[1]}%` },
+  { re: /^([\d.]+)%\s+failure\s+rate$/i, build: (m) => `نسبة الطلبات غير المستلمة ${m[1]}%` },
   // "per unit" / "per unit × 1"
   { re: /^per\s+unit$/i, build: () => `للوحدة` },
   { re: /^([£$€]?[\d.,]*)\s*per\s+unit\s*[×x]\s*(\d+)$/i,
