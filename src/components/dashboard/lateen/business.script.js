@@ -370,8 +370,11 @@ refreshBizNotifications();
         const wrap=document.createElement('div');
         wrap.setAttribute('data-reviews-block','1');
         wrap.style.cssText='margin:6px 0 14px 0';
+        const rid='rev-'+p.id;
+        const chev=`<svg id="${rid}-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s"><polyline points="6 9 12 15 18 9"/></svg>`;
+        const toggleFn=`(function(b){var c=document.getElementById('${rid}-body');var v=document.getElementById('${rid}-chev');if(!c)return;var o=c.style.display!=='none';c.style.display=o?'none':'block';if(v)v.style.transform=o?'':'rotate(180deg)';})(this)`;
         if(!list.length){
-          wrap.innerHTML=`<div class="zones-title">${t('Reviews','التقييمات')}</div><div style="padding:10px 12px;border-radius:10px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;text-align:center">${t('No reviews yet.','لا توجد تقييمات بعد.')}</div>`;
+          wrap.innerHTML=`<div class="zones-title" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="${toggleFn}"><span>${t('Reviews','التقييمات')}</span>${chev}</div><div id="${rid}-body" style="display:none"><div style="padding:10px 12px;border-radius:10px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;text-align:center">${t('No reviews yet.','لا توجد تقييمات بعد.')}</div></div>`;
         }else{
           const avg=list.reduce((s,r)=>s+r.rating,0)/list.length;
           const avgStars='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));
@@ -381,7 +384,7 @@ refreshBizNotifications();
             const ds=d.toLocaleDateString(ar?'ar-LY':'en-GB',{day:'numeric',month:'short',year:'numeric'});
             return `<div style="padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323;margin-bottom:6px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px"><div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">${esc(r.author)}</div><div style="font-size:10px;color:var(--color-text-secondary)">${esc(ds)}</div></div><div style="color:#e9b949;letter-spacing:2px;font-size:13px;margin-bottom:4px">${stars}</div>${r.text?`<div style="font-size:12px;color:var(--color-text-secondary);line-height:1.4">${esc(r.text)}</div>`:''}</div>`;
           }).join('');
-          wrap.innerHTML=`<div class="zones-title" style="display:flex;justify-content:space-between;align-items:center"><span>${t('Reviews','التقييمات')} (${list.length})</span><span style="color:#e9b949;letter-spacing:2px;font-size:12px">${avgStars} <span style="color:var(--color-text-secondary);letter-spacing:0;margin-left:4px">${avg.toFixed(1)}</span></span></div>${items}`;
+          wrap.innerHTML=`<div class="zones-title" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:8px" onclick="${toggleFn}"><span>${t('Reviews','التقييمات')} (${list.length})</span><span style="display:flex;align-items:center;gap:6px"><span style="color:#e9b949;letter-spacing:2px;font-size:12px">${avgStars}</span><span style="color:var(--color-text-secondary);font-size:12px">${avg.toFixed(1)}</span>${chev}</span></div><div id="${rid}-body" style="display:none;margin-top:8px">${items}</div>`;
         }
         if(actions)body.insertBefore(wrap,actions);else body.appendChild(wrap);
       }
