@@ -276,7 +276,8 @@ async function refreshBizNotifications(){
   window.__bizReviewsByProduct=rmap;
   try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
   const dot=document.getElementById('notif-dot');
-  if(dot)dot.style.display=list.some(n=>!n.read_at)?'block':'none';
+  const onNotifPage=document.getElementById('pg-notif')&&document.getElementById('pg-notif').classList.contains('active');
+  if(dot)dot.style.display=(!onNotifPage&&list.some(n=>!n.read_at))?'block':'none';
   const root=document.getElementById('notif-list');
   if(!root)return;
   const tr=(en,ar)=>__ar()?ar:en;
