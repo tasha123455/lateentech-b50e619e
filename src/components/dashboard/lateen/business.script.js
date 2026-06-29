@@ -338,8 +338,9 @@ window.refreshBizNotifications=refreshBizNotifications;
   const _g=goTo;
   let __lastPage=null;
   goTo=function(id){
-    /* When leaving notifications page, mark all as read so dots clear next render */
+    /* When leaving notifications page, immediately hide all red dots in the list, then sync to DB */
     if(__lastPage==='pg-notif'&&id!=='pg-notif'){
+      try{const root=document.getElementById('notif-list');if(root){root.querySelectorAll('div').forEach(el=>{const bg=el.style&&el.style.background;if(bg&&bg.indexOf('#E24B4A')!==-1)el.style.display='none';});}}catch(e){}
       (async()=>{try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}refreshBizNotifications();})();
     }
     __lastPage=id;
