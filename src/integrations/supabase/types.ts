@@ -949,6 +949,10 @@ export type Database = {
               isSetofReturn: false
             }
           }
+      notify_product_review: {
+        Args: { _product_id: string; _rating: number; _text: string }
+        Returns: undefined
+      }
       request_payout: {
         Args: { _amount: number }
         Returns: {

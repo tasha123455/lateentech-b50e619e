@@ -162,6 +162,15 @@ export function createLateenApi(userId: string) {
       if (error && error.code !== "23505") throw error;
     },
 
+    async notifyProductReview(productId: string, rating: number, text: string) {
+      const { error } = await supabase.rpc("notify_product_review" as never, {
+        _product_id: productId,
+        _rating: rating,
+        _text: text,
+      } as never);
+      if (error) throw error;
+    },
+
     async removeFavorite(productId: string) {
       const { error } = await supabase
         .from("favorites")
