@@ -261,9 +261,20 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
 /* ── Notifications ── */
 let __bizNotifNewIds = (window.__bizNotifNewIds instanceof Set) ? window.__bizNotifNewIds : new Set();
 window.__bizNotifNewIds = __bizNotifNewIds;
+window.__bizReviewsByProduct = window.__bizReviewsByProduct || {};
 async function refreshBizNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
+  /* Build review map from notifications so reviews show in product cards */
+  const rmap={};
+  for(const n of list){
+    if(n.kind!=='product_review')continue;
+    let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
+    if(!d||!d.product_id)continue;
+    (rmap[d.product_id]=rmap[d.product_id]||[]).push({author:d.author||'Marketer',rating:Number(d.rating)||0,text:d.text||'',ts:new Date(n.created_at).getTime()});
+  }
+  window.__bizReviewsByProduct=rmap;
+  try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
   const dot=document.getElementById('notif-dot');
   if(dot)dot.style.display=list.some(n=>!n.read_at)?'block':'none';
   const root=document.getElementById('notif-list');
@@ -275,8 +286,23 @@ async function refreshBizNotifications(){
   root.innerHTML=list.map(n=>{
     let t=n.title,b=n.body||'';
     if(n.kind==='new_order'||t==='New order'){t=tr('New order','طلب جديد');b=tr('A new order has been received. Check the Orders page.','وصلك طلب جديد. راجع صفحة الطلبات.');}
+    let reviewDetails='';
+    if(n.kind==='product_review'){
+      let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
+      const author=(d&&d.author)||'Marketer';
+      const pname=(d&&d.product_name)||'';
+      const rating=Number(d&&d.rating)||0;
+      t=tr('New product review','تقييم جديد للمنتج');
+      b=__ar()
+        ? `${author} قيّم المنتج ${pname} ${rating} ${rating===1?'نجمة':'نجوم'}`
+        : `${author} rated ${pname} ${rating} ${rating===1?'star':'stars'}`;
+      if(d&&d.text){
+        const stars='★'.repeat(rating)+'☆'.repeat(Math.max(0,5-rating));
+        reviewDetails=`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#181818;border:0.5px solid #232323;font-size:12px;color:var(--color-text-primary)"><div style="color:#e9b949;letter-spacing:2px;margin-bottom:4px">${stars}</div>${esc(d.text)}</div>`;
+      }
+    }
     const expandable=n.kind==='new_order';
-    const color=expandable?'#2dbd8f':'#7f77dd';
+    const color=expandable?'#2dbd8f':(n.kind==='product_review'?'#e9b949':'#7f77dd');
     let detailsHtml='';
     if(expandable&&n.data){
       let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
@@ -301,12 +327,64 @@ async function refreshBizNotifications(){
       }
     }
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
-    const isNew=__bizNotifNewIds.has(n.id);
+    const isNew=!n.read_at;
     const rightDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
+    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   }).join('');
 }
 window.refreshBizNotifications=refreshBizNotifications;
-(function(){const _g=goTo;goTo=function(id){_g.apply(this,arguments);if(id==='pg-notif'){(async()=>{try{const list=await window.LateenAPI.listNotifications();__bizNotifNewIds=new Set(list.filter(n=>!n.read_at).map(n=>n.id));window.__bizNotifNewIds=__bizNotifNewIds;}catch(e){}await refreshBizNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}})();}else{__bizNotifNewIds=new Set();window.__bizNotifNewIds=__bizNotifNewIds;refreshBizNotifications();}};window.goTo=goTo;})();
+(function(){
+  const _g=goTo;
+  let __lastPage=null;
+  goTo=function(id){
+    /* When leaving notifications page, mark all as read so dots clear next render */
+    if(__lastPage==='pg-notif'&&id!=='pg-notif'){
+      (async()=>{try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}refreshBizNotifications();})();
+    }
+    __lastPage=id;
+    _g.apply(this,arguments);
+    if(id==='pg-notif'){refreshBizNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';}
+  };
+  window.goTo=goTo;
+})();
 if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('notifications',()=>refreshBizNotifications()));}
 refreshBizNotifications();
+
+/* Inject reviews into product cards after each render */
+(function(){
+  const _rp=renderProducts;
+  renderProducts=function(){
+    _rp.apply(this,arguments);
+    try{
+      const rmap=window.__bizReviewsByProduct||{};
+      const ar=__ar();
+      const t=(en,a)=>ar?a:en;
+      const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      for(const p of products){
+        const body=document.getElementById('body-'+p.id);
+        if(!body)continue;
+        if(body.querySelector('[data-reviews-block]'))continue;
+        const list=rmap[p.id]||[];
+        const actions=body.querySelector('.pc-actions');
+        const wrap=document.createElement('div');
+        wrap.setAttribute('data-reviews-block','1');
+        wrap.style.cssText='margin:6px 0 14px 0';
+        if(!list.length){
+          wrap.innerHTML=`<div class="zones-title">${t('Reviews','التقييمات')}</div><div style="padding:10px 12px;border-radius:10px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;text-align:center">${t('No reviews yet.','لا توجد تقييمات بعد.')}</div>`;
+        }else{
+          const avg=list.reduce((s,r)=>s+r.rating,0)/list.length;
+          const avgStars='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));
+          const items=list.slice(0,10).map(r=>{
+            const stars='★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
+            const d=new Date(r.ts);
+            const ds=d.toLocaleDateString(ar?'ar-LY':'en-GB',{day:'numeric',month:'short',year:'numeric'});
+            return `<div style="padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323;margin-bottom:6px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px"><div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">${esc(r.author)}</div><div style="font-size:10px;color:var(--color-text-secondary)">${esc(ds)}</div></div><div style="color:#e9b949;letter-spacing:2px;font-size:13px;margin-bottom:4px">${stars}</div>${r.text?`<div style="font-size:12px;color:var(--color-text-secondary);line-height:1.4">${esc(r.text)}</div>`:''}</div>`;
+          }).join('');
+          wrap.innerHTML=`<div class="zones-title" style="display:flex;justify-content:space-between;align-items:center"><span>${t('Reviews','التقييمات')} (${list.length})</span><span style="color:#e9b949;letter-spacing:2px;font-size:12px">${avgStars} <span style="color:var(--color-text-secondary);letter-spacing:0;margin-left:4px">${avg.toFixed(1)}</span></span></div>${items}`;
+        }
+        if(actions)body.insertBefore(wrap,actions);else body.appendChild(wrap);
+      }
+    }catch(e){console.warn('[Lateen] reviews block',e);}
+  };
+  window.renderProducts=renderProducts;
+})();
