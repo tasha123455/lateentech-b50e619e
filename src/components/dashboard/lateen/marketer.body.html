@@ -567,6 +567,21 @@ body.lang-ar .pd-iban-row{display:none !important;}
     <button class="ab" style="margin-top:0;" onclick="closeSoon()">OK</button>
   </div>
 </div>
+<!-- Centered "soon" popup for affiliate link -->
+<div id="affSoon" style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;">
+  <div onclick="closeAffSoon()" style="position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);"></div>
+  <div style="position:relative;background:#1e1e1e;border:0.5px solid #333330;border-radius:18px;padding:28px 24px;max-width:300px;width:86%;text-align:center;z-index:1;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <div style="font-size:38px;margin-bottom:10px;">🔗</div>
+    <div id="affSoonMsg" style="font-size:15px;color:#f0eeeb;margin-bottom:16px;line-height:1.5;"></div>
+    <button onclick="closeAffSoon()" style="height:40px;padding:0 28px;border-radius:10px;border:none;background:#f0eeeb;color:#0D0D0D;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-sans);">OK</button>
+  </div>
+</div>
+<!-- Fullscreen photo lightbox -->
+<div id="photoLB" style="display:none;position:fixed;inset:0;z-index:1100;background:#000;flex-direction:column;align-items:center;justify-content:center;">
+  <button onclick="closePhoto()" style="position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:22px;cursor:pointer;z-index:2;">×</button>
+  <div id="photoLBTrack" style="position:relative;width:100%;height:100%;overflow:hidden;touch-action:pan-y;"></div>
+  <div id="photoLBDots" style="position:absolute;bottom:24px;left:0;right:0;display:flex;gap:6px;justify-content:center;z-index:2;"></div>
+</div>
 <div class="cam" id="cam">
   <button class="cx" onclick="closeCam()">×</button>
   <div style="font-size:14px;color:#fff;opacity:.8;margin-bottom:16px" id="clb">Analysing image…</div>
