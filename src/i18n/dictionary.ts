@@ -267,8 +267,8 @@ export const DICT: Record<string, string> = {
   // ===== Orders =====
   "Customer orders": "طلبات الزبائن",
   "All orders": "كل الطلبيات",
-  "New order": "إضافة طلبية",
-  "Add order": "إضافة طلبية",
+  "New order": "إضافة طلب جديد",
+  "Add order": "إضافة طلب جديد",
   "Customer details": "بيانات الزبون والتوصيل",
   "Customer & delivery": "بيانات الزبون والتوصيل",
   "WhatsApp (optional)": "واتساب (اختياري)",
