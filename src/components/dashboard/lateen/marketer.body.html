@@ -220,6 +220,16 @@
 .sheet-handle { width: 36px; height: 4px; background: var(--color-border-secondary); border-radius: 2px; margin: 0 auto 1.25rem; }
 .sheet-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
 .sheet-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+.ord-card { position: relative; background: #161616; border: 0.5px solid #2a2a2a; border-radius: 18px; padding: 18px 14px 14px; margin-bottom: 14px; }
+.ord-card .ord-num { position: absolute; top: 12px; left: 12px; width: 24px; height: 24px; border-radius: 50%; background: #7f77dd; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+.ord-card .ord-head { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 14px; font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+.ord-card .ord-head .ord-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(127,119,221,0.15); display: flex; align-items: center; justify-content: center; color: #7f77dd; }
+.ord-card .ord-head .ord-icon svg { width: 16px; height: 16px; }
+.ord-card .field:last-child, .ord-card .field-row:last-child { margin-bottom: 0; }
+.ord-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; color: var(--color-text-secondary); }
+.ord-summary-row .v { color: var(--color-text-primary); font-weight: 500; }
+.ord-summary-total { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 6px; border-top: 0.5px solid #2a2a2a; font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
+.ord-summary-total .v { color: #7f77dd; font-size: 20px; font-weight: 700; }
 .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; margin-top: 6px; }
 .field { margin-bottom: 13px; }
 .field label { display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 5px; }
