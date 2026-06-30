@@ -681,7 +681,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
   <div class="overlay-bg" onclick="closeForm()"></div>
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title" id="form-title">New order</div>
+    <div class="sheet-title" id="form-title" style="display:flex;align-items:center;gap:8px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent-primary,#7f77dd);flex-shrink:0;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span id="form-title-text">New order</span></div>
     <div class="section-label">Customer details</div>
     <div class="field"><label>Full name</label><input type="text" id="f-name" placeholder="e.g. Omar Hassan"/></div>
     <div class="field-row">
@@ -741,7 +741,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
     <div class="upload-box" id="upload-box" onclick="openReceiptPicker()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       <div class="upload-icon-label" id="upload-label">Tap to upload receipt</div>
-      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px;">Camera · Gallery · Files</div>
+      
     </div>
     <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display:none" onchange="onFileUpload(this)"/>
     <input type="file" id="file-input-gallery" accept="image/*" style="display:none" onchange="onFileUpload(this)"/>
