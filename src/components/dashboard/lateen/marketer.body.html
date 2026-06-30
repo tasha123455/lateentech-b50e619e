@@ -220,6 +220,16 @@
 .sheet-handle { width: 36px; height: 4px; background: var(--color-border-secondary); border-radius: 2px; margin: 0 auto 1.25rem; }
 .sheet-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
 .sheet-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+.ord-card { position: relative; background: #161616; border: 0.5px solid #2a2a2a; border-radius: 18px; padding: 18px 14px 14px; margin-bottom: 14px; }
+.ord-card .ord-num { position: absolute; top: 12px; left: 12px; width: 24px; height: 24px; border-radius: 50%; background: #7f77dd; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+.ord-card .ord-head { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 14px; font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+.ord-card .ord-head .ord-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(127,119,221,0.15); display: flex; align-items: center; justify-content: center; color: #7f77dd; }
+.ord-card .ord-head .ord-icon svg { width: 16px; height: 16px; }
+.ord-card .field:last-child, .ord-card .field-row:last-child { margin-bottom: 0; }
+.ord-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; color: var(--color-text-secondary); }
+.ord-summary-row .v { color: var(--color-text-primary); font-weight: 500; }
+.ord-summary-total { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 6px; border-top: 0.5px solid #2a2a2a; font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
+.ord-summary-total .v { color: #7f77dd; font-size: 20px; font-weight: 700; }
 .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; margin-top: 6px; }
 .field { margin-bottom: 13px; }
 .field label { display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 5px; }
@@ -682,47 +692,66 @@ body.lang-ar .pd-iban-row{display:none !important;}
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="form-title" style="display:flex;align-items:center;gap:8px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent-primary,#7f77dd);flex-shrink:0;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span id="form-title-text">New order</span></div>
-    <div class="section-label">Customer details</div>
-    <div class="field"><label>Full name</label><input type="text" id="f-name" placeholder="e.g. Omar Hassan"/></div>
-    <div class="field-row">
-      <div class="field"><label>Phone number</label><input type="tel" id="f-phone" placeholder="+234 800 000 0000"/></div>
-      <div class="field"><label>WhatsApp (optional)</label><input type="tel" id="f-whatsapp" placeholder="+234 …"/></div>
-    </div>
-    <div class="section-label" style="margin-top:8px" id="prod-section-label">Product</div>
-    <div class="field">
-      <label id="prod-field-label">Choose from your saved products</label>
-      <select id="f-product" onchange="onProductChange()" style="display:none">
-        <option value=""></option>
-      </select>
-      <button type="button" id="prod-picker-btn" onclick="openProductPicker()" style="width:100%;text-align:left;background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:10px;padding:10px 12px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);cursor:pointer;display:flex;align-items:center;gap:10px;min-height:48px;">
-        <div id="prod-picker-thumb" style="width:34px;height:34px;border-radius:8px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0;">📦</div>
-        <div style="flex:1;min-width:0;">
-          <div id="prod-picker-label" style="font-size:13px;color:var(--color-text-secondary);">Select a saved product</div>
-          <div id="prod-picker-sub" style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px;display:none;"></div>
-        </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
+    <div class="sheet-sub">Add the order details and create a new order</div>
+
+    <div class="ord-card">
+      <div class="ord-num">1</div>
+      <div class="ord-head"><span>Customer information</span><span class="ord-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span></div>
+      <div class="field"><label>Full name</label><input type="text" id="f-name" placeholder="e.g. Omar Hassan"/></div>
+      <div class="field-row">
+        <div class="field"><label>Phone number</label><input type="tel" id="f-phone" placeholder="+234 800 000 0000"/></div>
+        <div class="field"><label>WhatsApp (optional)</label><input type="tel" id="f-whatsapp" placeholder="+234 …"/></div>
+      </div>
+      <div class="field" style="margin-top:13px">
+        <label id="prod-field-label">Choose from your saved products</label>
+        <select id="f-product" onchange="onProductChange()" style="display:none">
+          <option value=""></option>
+        </select>
+        <button type="button" id="prod-picker-btn" onclick="openProductPicker()" style="width:100%;text-align:left;background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:10px;padding:10px 12px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);cursor:pointer;display:flex;align-items:center;gap:10px;min-height:48px;">
+          <div id="prod-picker-thumb" style="width:34px;height:34px;border-radius:8px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0;">📦</div>
+          <div style="flex:1;min-width:0;">
+            <div id="prod-picker-label" style="font-size:13px;color:var(--color-text-secondary);">Select a saved product</div>
+            <div id="prod-picker-sub" style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px;display:none;"></div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="auto-card prod-info-card" id="prod-info" style="margin-top:13px">
+        <div class="ac-row"><span class="ac-label">Product price</span><span class="ac-value" id="pi-price">—</span></div>
+        <div class="ac-row"><span class="ac-label">Commission rate</span><span class="ac-value" id="pi-pct">—</span></div>
+        <div class="ac-row"><span class="ac-label">Your earning per unit</span><span class="ac-value" id="pi-earn">—</span></div>
+      </div>
+      <div class="variant-group" id="size-group"><div class="variant-label">Select size</div><div class="variant-chips" id="size-chips"></div></div>
+      <div class="variant-group" id="color-group"><div class="variant-label">Select colour</div><div class="variant-chips" id="color-chips"></div></div>
+      <div class="qty-row" id="qty-row">
+        <span class="qty-label">Quantity</span>
+        <div class="qty-controls"><button class="qty-btn" onclick="changeQty(-1)">−</button><div class="qty-display" id="qty-display">1</div><button class="qty-btn" onclick="changeQty(1)">+</button></div>
+      </div>
     </div>
 
-    <div class="auto-card prod-info-card" id="prod-info">
-      <div class="ac-row"><span class="ac-label">Product price</span><span class="ac-value" id="pi-price">—</span></div>
-      <div class="ac-row"><span class="ac-label">Commission rate</span><span class="ac-value" id="pi-pct">—</span></div>
-      <div class="ac-row"><span class="ac-label">Your earning per unit</span><span class="ac-value" id="pi-earn">—</span></div>
+    <div class="ord-card">
+      <div class="ord-num">2</div>
+      <div class="ord-head"><span>Delivery address</span><span class="ord-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span></div>
+      <div class="field-row" id="location-fields" style="display:none">
+        <div class="field"><label>Country</label><select id="f-country" onchange="onCountryChange()"><option value="">— Select —</option></select><div class="field-hint" id="country-hint"></div></div>
+        <div class="field"><label>City</label><select id="f-city" onchange="onCityChange()" disabled><option value="">— Select country first —</option></select><div class="field-hint" id="city-hint"></div></div>
+      </div>
+      <div class="no-delivery-note" id="no-delivery-note"></div>
+      <div class="field" id="address-field" style="display:none;margin-top:13px"><label>Address description</label><input type="text" id="f-address" placeholder="Street, area, landmark, house number…"/></div>
+      <div class="field" style="margin-top:13px"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Special instructions, preferred delivery time, etc."></textarea></div>
     </div>
-    <div class="variant-group" id="size-group"><div class="variant-label">Select size</div><div class="variant-chips" id="size-chips"></div></div>
-    <div class="variant-group" id="color-group"><div class="variant-label">Select colour</div><div class="variant-chips" id="color-chips"></div></div>
-    <div class="qty-row" id="qty-row">
-      <span class="qty-label">Quantity</span>
-      <div class="qty-controls"><button class="qty-btn" onclick="changeQty(-1)">−</button><div class="qty-display" id="qty-display">1</div><button class="qty-btn" onclick="changeQty(1)">+</button></div>
+
+    <div class="ord-card" id="summary-card" style="display:none">
+      <div class="ord-num">3</div>
+      <div class="ord-head"><span>Order summary</span><span class="ord-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span></div>
+      <div class="ord-summary-row"><span id="sum-price-lbl">Product price (1 pc)</span><span class="v" id="sum-price">—</span></div>
+      <div class="ord-summary-row"><span id="sum-comm-lbl">Commission</span><span class="v" id="sum-comm">—</span></div>
+      <div class="ord-summary-row"><span>Shipping</span><span class="v" id="sum-ship">—</span></div>
+      <div class="ord-summary-row"><span>Delivery fee</span><span class="v" id="sum-deliv">—</span></div>
+      <div class="ord-summary-total"><span>Total</span><span class="v" id="sum-total">—</span></div>
     </div>
-    <div class="section-label" id="delivery-section-label" style="display:none;margin-top:4px">Delivery location</div>
-    <div class="field-row" id="location-fields" style="display:none">
-      <div class="field"><label>Country</label><select id="f-country" onchange="onCountryChange()"><option value="">— Select —</option></select><div class="field-hint" id="country-hint"></div></div>
-      <div class="field"><label>City</label><select id="f-city" onchange="onCityChange()" disabled><option value="">— Select country first —</option></select><div class="field-hint" id="city-hint"></div></div>
-    </div>
-    <div class="no-delivery-note" id="no-delivery-note"></div>
-    <div class="field" id="address-field" style="display:none"><label>Full delivery address</label><input type="text" id="f-address" placeholder="Street, area, landmark…"/></div>
-    <div class="auto-card biz-card-dark" id="biz-costs">
+
+    <div class="auto-card biz-card-dark" id="biz-costs" style="display:none">
       <div class="ac-row"><span class="ac-label">Shipping cost</span><span class="ac-value" id="bc-shipping">—</span></div>
       <div class="ac-row"><span class="ac-label">Delivery cost</span><span class="ac-value" id="bc-delivery">—</span></div>
       <div class="ac-note" id="bc-note">Set by the business owner</div>
@@ -736,12 +765,10 @@ body.lang-ar .pd-iban-row{display:none !important;}
       <div class="ac-row" style="display:none"><span class="ac-label">Platform fee (per unit)</span><span class="ac-value" id="fee-platform">—</span></div>
       <div class="ac-note">Collect this from the customer before shipping. Set by Lateen.</div>
     </div>
-    <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Special instructions, preferred delivery time, etc."></textarea></div>
     <div class="section-label">Payment receipt</div>
     <div class="upload-box" id="upload-box" onclick="openReceiptPicker()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       <div class="upload-icon-label" id="upload-label">Tap to upload receipt</div>
-      
     </div>
     <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display:none" onchange="onFileUpload(this)"/>
     <input type="file" id="file-input-gallery" accept="image/*" style="display:none" onchange="onFileUpload(this)"/>
