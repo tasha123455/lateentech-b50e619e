@@ -265,7 +265,9 @@
 .variant-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .vchip { font-size: 12px; padding: 5px 12px; border-radius: 8px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: pointer; transition: all .15s; }
 .vchip.selected { border-color: #7f77dd; background: #2d2b4e; color: #a89ee8; font-weight: 500; }
-.qty-row { display: flex; align-items: center; gap: 12px; margin-bottom: 13px; display: none; }
+.qty-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; margin-bottom: 13px; display: none; }
+.lateen-marketer select option.opt-soon { color: #fff; background: #E24B4A; font-weight: 600; }
+.lateen-marketer .cc-select { text-align: center; }
 .qty-label { font-size: 12px; color: var(--color-text-secondary); }
 .qty-controls { display: flex; align-items: center; border: 0.5px solid var(--color-border-secondary); border-radius: 10px; overflow: hidden; }
 .qty-btn { width: 38px; height: 38px; border: none; background: var(--color-background-secondary); color: var(--color-text-primary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -733,8 +735,8 @@ body.lang-ar .pd-iban-row{display:none !important;}
           <span style="color:#e07070">*</span>
         </label>
       </div>
-      <div class="field-row">
-        <div class="field"><select id="f-ccode"><option value="+218">+218</option><option value="+234">+234</option><option value="+20">+20</option><option value="+966">+966</option><option value="+971">+971</option></select></div>
+      <div class="field-row" style="grid-template-columns:96px 1fr;">
+        <div class="field"><select id="f-ccode" class="cc-select" dir="ltr"><option value="+218">&#x200E;+218</option><option value="+234">&#x200E;+234</option><option value="+20">&#x200E;+20</option><option value="+966">&#x200E;+966</option><option value="+971">&#x200E;+971</option><option value="" disabled class="opt-soon">— More — Soon</option></select></div>
         <div class="field"><input type="tel" id="f-phone" placeholder="091xxxxxxxx"/></div>
       </div>
       <button type="button" class="wa-toggle" id="wa-toggle" aria-expanded="false" onclick="toggleWhatsApp(event)">
@@ -743,9 +745,9 @@ body.lang-ar .pd-iban-row{display:none !important;}
         <svg id="wa-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="wa-section" class="wa-section" aria-hidden="true">
-        <div class="field-row" style="margin:10px 0 14px">
-          <div class="field" style="max-width:90px"><select id="f-wcode"><option value="+218">+218</option><option value="+234">+234</option><option value="+20">+20</option><option value="+966">+966</option><option value="+971">+971</option></select></div>
-          <div class="field" style="flex:1"><input type="tel" id="f-whatsapp" placeholder="091xxxxxxxx"/></div>
+        <div class="field-row" style="margin:10px 0 14px;grid-template-columns:96px 1fr;">
+          <div class="field"><select id="f-wcode" class="cc-select" dir="ltr"><option value="+218">&#x200E;+218</option><option value="+234">&#x200E;+234</option><option value="+20">&#x200E;+20</option><option value="+966">&#x200E;+966</option><option value="+971">&#x200E;+971</option><option value="" disabled class="opt-soon">— More — Soon</option></select></div>
+          <div class="field"><input type="tel" id="f-whatsapp" placeholder="091xxxxxxxx"/></div>
         </div>
       </div>
       <div class="field" style="margin-bottom:0">
@@ -785,7 +787,6 @@ body.lang-ar .pd-iban-row{display:none !important;}
 
     <!-- Card 3: Summary -->
     <div class="ord-card" id="summary-card" style="display:none">
-      <div class="ord-num">3</div>
       <div class="ord-head"><span data-i18n="Order summary">Order summary</span><span class="ord-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span></div>
       <div class="ord-summary-row"><span id="sum-price-lbl">Product price (1 pc)</span><span class="v" id="sum-price">—</span></div>
       <div class="ord-summary-row"><span id="sum-comm-lbl" data-i18n="Commission">Commission</span><span class="v" id="sum-comm">—</span></div>
@@ -811,6 +812,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
 
     <!-- Card: Receipt -->
     <div class="ord-card simple">
+      <div class="ord-num">3</div>
       <div class="ord-head"><span data-i18n="Payment receipt">Payment receipt</span> <span style="color:#e07070">*</span><span class="ord-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span></div>
       <div class="upload-box dashed-lg" id="upload-box" onclick="openReceiptPicker()">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
