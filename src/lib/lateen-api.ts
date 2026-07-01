@@ -27,7 +27,6 @@ export type LateenProduct = {
   sold: number;
   revenue: number;
   biz_name: string | null;
-  biz_phone: string | null;
   deleted_at: string | null;
 };
 
@@ -71,7 +70,6 @@ export function createLateenApi(userId: string) {
         photos: p.photos ?? [],
         status: p.status ?? "active",
         biz_name: p.biz_name ?? null,
-        biz_phone: p.biz_phone ?? null,
       };
       const { data, error } = await supabase
         .from("products")
