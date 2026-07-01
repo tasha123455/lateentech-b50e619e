@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               _role: p.role,
               _business_name: p.role === "business" ? p.business_name : undefined,
             });
-            const patch: Record<string, string> = {};
+            const patch: { full_name?: string; phone?: string; country?: string; business_name?: string } = {};
             if (p.full_name) patch.full_name = p.full_name;
             if (p.phone) patch.phone = p.phone;
             if (p.country) patch.country = p.country;
@@ -93,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (Object.keys(patch).length) {
               await supabase.from("profiles").update(patch).eq("id", nextSession.user.id);
             }
+
             try { localStorage.setItem("active_role", p.role); } catch { /* ignore */ }
           }
         } catch (e) { console.warn("[auth] pending_signup apply failed", e); }
