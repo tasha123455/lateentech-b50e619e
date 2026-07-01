@@ -218,16 +218,15 @@ export function RegisterForm({ role }: { role: Role }) {
 
       {error && <p className="text-xs text-destructive">{error}</p>}
 
-      <GoogleButton onClick={canSubmit && !busy ? () => submit(new Event("submit") as unknown as FormEvent) : undefined}>
-        <span className={!canSubmit || busy ? "opacity-60" : ""}>Create account</span>
-      </GoogleButton>
-      <button
-        type="submit"
-        disabled={!canSubmit || busy}
-        aria-hidden
-        tabIndex={-1}
-        style={{ display: "none" }}
-      />
+      <div
+        className={!canSubmit || busy ? "pointer-events-none opacity-60" : ""}
+        aria-disabled={!canSubmit || busy}
+      >
+        <GoogleButton onClick={() => submit(new Event("submit") as unknown as FormEvent)}>
+          {busy ? "Creating…" : "Create account"}
+        </GoogleButton>
+      </div>
+
 
       <p className="text-center text-xs text-text-2">
         Have an account?{" "}
