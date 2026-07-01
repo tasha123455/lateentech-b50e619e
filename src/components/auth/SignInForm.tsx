@@ -64,9 +64,9 @@ export function SignInForm({ role }: { role: Role }) {
       {error && <p className="text-xs text-destructive">{error}</p>}
       <GoogleButton onClick={signInGoogle}>Sign in with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
-        No account?{" "}
+        New here?{" "}
         <Link to={role === "marketer" ? "/marketer/register" : "/business/register"} className={`font-medium ${s.link}`}>
-          Create one
+          Create an account on the sign-up page
         </Link>
       </p>
     </div>
