@@ -41,6 +41,21 @@ export function RegisterForm({ role }: { role: Role }) {
       _business_name: role === "business" ? businessName : undefined,
     });
     if (rpcErr) throw rpcErr;
+    // Persist typed profile fields (name/phone/country) onto the profile row
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (uid) {
+        const patch: { full_name?: string; phone?: string; country?: string; business_name?: string } = {};
+        if (fullName.trim()) patch.full_name = fullName.trim();
+        if (phone.trim()) patch.phone = phone.trim();
+        if (country.trim()) patch.country = country.trim();
+        if (role === "business" && businessName.trim()) patch.business_name = businessName.trim();
+        if (Object.keys(patch).length > 0) {
+          await supabase.from("profiles").update(patch).eq("id", uid);
+        }
+      }
+    } catch { /* ignore profile patch errors */ }
     try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     await refreshRole();
     nav({ to: "/dashboard" });

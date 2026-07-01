@@ -500,6 +500,7 @@ export type Database = {
       profiles: {
         Row: {
           business_name: string | null
+          country: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -515,6 +516,7 @@ export type Database = {
         }
         Insert: {
           business_name?: string | null
+          country?: string | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -530,6 +532,7 @@ export type Database = {
         }
         Update: {
           business_name?: string | null
+          country?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
