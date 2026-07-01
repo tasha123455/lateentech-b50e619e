@@ -75,8 +75,6 @@ export const DICT: Record<string, string> = {
   "Already have an account?": "عندك حساب؟",
   "Have an account?": "عندك حساب؟",
   "Sign in with Google": "تسجيل الدخول بواسطة قوقل",
-  "Country": "الدولة",
-  "Libya": "ليبيا",
   "More countries soon": "دول أخرى قريباً",
   "Full name": "الاسم الكامل",
   "Name": "الاسم الكامل",
