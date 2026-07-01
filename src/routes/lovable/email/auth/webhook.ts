@@ -12,7 +12,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Your verification code',
+  signup: 'Confirm your email',
   invite: "You've been invited",
   magiclink: 'Your login link',
   recovery: 'Reset your password',
