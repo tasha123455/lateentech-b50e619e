@@ -24,6 +24,7 @@ export function RegisterForm({ role }: { role: Role }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("LY");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -57,6 +58,7 @@ export function RegisterForm({ role }: { role: Role }) {
           role,
           full_name: fullName,
           phone,
+          country,
           ...(role === "business" ? { business_name: businessName } : {}),
         },
       },
@@ -224,7 +226,18 @@ export function RegisterForm({ role }: { role: Role }) {
         </div>
       </Field>
       <Field label="Phone number">
-        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+44 7700 000000" className="auth-input" />
+        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+218 91 000 0000" className="auth-input" />
+      </Field>
+      <Field label="Country">
+        <select
+          required
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          className="auth-input"
+        >
+          <option value="LY">Libya — ليبيا</option>
+          <option value="__soon" disabled>More countries soon — المزيد قريباً</option>
+        </select>
       </Field>
       {error && <p className="text-xs text-destructive">{error}</p>}
       <button type="submit" disabled={busy} className={`h-11 w-full rounded-xl text-sm font-medium transition disabled:opacity-60 ${s.btn}`}>
