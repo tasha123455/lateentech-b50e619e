@@ -735,8 +735,8 @@ body.lang-ar .pd-iban-row{display:none !important;}
           <span style="color:#e07070">*</span>
         </label>
       </div>
-      <div class="field-row">
-        <div class="field"><select id="f-ccode"><option value="+218">+218</option><option value="+234">+234</option><option value="+20">+20</option><option value="+966">+966</option><option value="+971">+971</option></select></div>
+      <div class="field-row" style="grid-template-columns:96px 1fr;">
+        <div class="field"><select id="f-ccode" class="cc-select" dir="ltr"><option value="+218">&#x200E;+218</option><option value="+234">&#x200E;+234</option><option value="+20">&#x200E;+20</option><option value="+966">&#x200E;+966</option><option value="+971">&#x200E;+971</option><option value="" disabled class="opt-soon">— More — Soon</option></select></div>
         <div class="field"><input type="tel" id="f-phone" placeholder="091xxxxxxxx"/></div>
       </div>
       <button type="button" class="wa-toggle" id="wa-toggle" aria-expanded="false" onclick="toggleWhatsApp(event)">
