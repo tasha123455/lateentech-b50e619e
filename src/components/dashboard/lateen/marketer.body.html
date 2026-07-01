@@ -328,7 +328,7 @@
   <div class="page active" id="pg-home">
     <div class="topbar">
       <div class="topbar-left">
-        <div class="avatar" id="user-avatar">··</div>
+        <div class="avatar" id="user-avatar" onclick="openProfile()" style="cursor:pointer" role="button" tabindex="0">··</div>
         <div><div class="greet" id="user-greet">Hey there</div><div class="greet-sub" id="user-sub">Marketer</div></div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -479,8 +479,8 @@
 <!-- PROFILE OVERLAY -->
 <div class="menu-overlay" id="profile-overlay">
   <div class="menu-backdrop" onclick="closeProfile()"></div>
-  <div style="position:absolute;bottom:0;left:0;right:0;background:#1e1e1e;border-radius:20px 20px 0 0;padding:1.5rem;max-height:92vh;overflow-y:auto;border-top:0.5px solid #333;">
-    <div style="width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 1rem;"></div>
+  <div style="position:absolute;top:0;bottom:0;left:0;right:0;background:#1e1e1e;padding:1.5rem;overflow-y:auto;">
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
       <div style="font-size:17px;font-weight:500;color:var(--color-text-primary)" id="prof-title">Profile</div>
       <button onclick="closeProfile()" style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;padding:4px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -497,7 +497,7 @@
     </div>
     <div style="display:grid;gap:10px;">
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-name">Full name</span><input id="prof-name" class="pd-inp" placeholder="Your name"/></label>
-      <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-phone">Phone number</span><input id="prof-phone" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
+      <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-phone">Phone number</span><input id="prof-phone" class="pd-inp" readonly dir="ltr" style="opacity:.6;cursor:not-allowed;text-align:left;"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-email">Email</span><input id="prof-email" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span><input id="prof-whatsapp" class="pd-inp" placeholder="+218..."/></label>
     </div>
