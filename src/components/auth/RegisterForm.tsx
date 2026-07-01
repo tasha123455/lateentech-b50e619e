@@ -58,6 +58,7 @@ export function RegisterForm({ role }: { role: Role }) {
           role,
           full_name: fullName,
           phone,
+          country,
           ...(role === "business" ? { business_name: businessName } : {}),
         },
       },
