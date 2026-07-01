@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -17,6 +17,16 @@ export function SignInForm({ role }: { role: Role }) {
   const nav = useNavigate();
   const { loadRoleForUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const msg = sessionStorage.getItem("signin_error");
+      if (msg) {
+        setError(msg);
+        sessionStorage.removeItem("signin_error");
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const otherRole: Role = role === "marketer" ? "business" : "marketer";
 
@@ -38,6 +48,8 @@ export function SignInForm({ role }: { role: Role }) {
     setError(null);
     try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     try { sessionStorage.setItem("intended_role", role); } catch { /* ignore */ }
+    try { sessionStorage.setItem("signin_intent", role); } catch { /* ignore */ }
+    try { sessionStorage.removeItem("pending_signup"); } catch { /* ignore */ }
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.redirected) return;
     if (result.error) { setError(result.error.message); return; }
