@@ -410,7 +410,6 @@ export type Database = {
       products: {
         Row: {
           biz_name: string | null
-          biz_phone: string | null
           business_id: string
           category: string | null
           code: string
@@ -439,7 +438,6 @@ export type Database = {
         }
         Insert: {
           biz_name?: string | null
-          biz_phone?: string | null
           business_id: string
           category?: string | null
           code: string
@@ -468,7 +466,6 @@ export type Database = {
         }
         Update: {
           biz_name?: string | null
-          biz_phone?: string | null
           business_id?: string
           category?: string | null
           code?: string
@@ -843,7 +840,6 @@ export type Database = {
         Args: { _product_id: string; _status: string }
         Returns: {
           biz_name: string | null
-          biz_phone: string | null
           business_id: string
           category: string | null
           code: string
