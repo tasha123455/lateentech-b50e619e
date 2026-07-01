@@ -346,7 +346,7 @@ async function admOpenProduct(id){
       <div class="adm-pd-owner">
         <div class="adm-pd-owner-name">${admEsc(ownerName)}</div>
         ${ownerOther}
-        <div class="adm-pd-owner-row">Phone: <span>${admEsc(owner.phone||p.biz_phone||'—')}</span></div>
+        <div class="adm-pd-owner-row">Phone: <span>${admEsc(owner.phone||'—')}</span></div>
         <div class="adm-pd-owner-row">Joined: <span>${owner.created_at?admWhen(owner.created_at):'—'}</span></div>
         <div class="adm-pd-owner-row" style="margin-top:8px;">
           <button class="adm-go-btn" onclick="admGoToAccount('${p.business_id}','business','${admEsc(ownerName).replace(/'/g,'&#39;')}')">Go to Account</button>
