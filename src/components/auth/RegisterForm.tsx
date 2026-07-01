@@ -24,6 +24,7 @@ export function RegisterForm({ role }: { role: Role }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("LY");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
