@@ -711,6 +711,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
 .lateen-marketer .pd-hd-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .lateen-marketer .pd-hd-name{font-size:20px;font-weight:600;color:#fff;flex:1;min-width:0;overflow-wrap:anywhere;}
 .lateen-marketer .pd-hd-code{font-size:12px;font-weight:500;color:#c9c6c1;background:#0d0d0d;border:0.5px solid #2a2a2a;padding:5px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;letter-spacing:.3px;}
+.lateen-marketer .pd-hd-code-lbl{color:#8a8680;font-weight:400;margin-inline-end:4px;letter-spacing:0;}
 .lateen-marketer .pd-variant{display:flex;align-items:center;background:#191919;border:0.5px solid #232323;border-radius:14px;padding:10px 16px;margin:0 16px 8px;gap:12px;}
 .lateen-marketer .pd-variant-lbl{font-size:14px;color:#f0eeeb;flex:1;min-width:0;font-weight:500;}
 .lateen-marketer .pd-variant-sel-wrap{position:relative;display:flex;align-items:center;min-width:44%;}
@@ -823,12 +824,12 @@ body.lang-ar .pd-iban-row{display:none !important;}
         <div class="ac-row"><span class="ac-label" data-i18n="Commission rate">Commission rate</span><span class="ac-value" id="pi-pct">—</span></div>
         <div class="ac-row"><span class="ac-label" data-i18n="Your earning per unit">Your earning per unit</span><span class="ac-value" id="pi-earn">—</span></div>
       </div>
-      <div class="variant-group" id="size-group" style="display:none"><div class="variant-label"><span data-i18n="Select size">Select size</span><span class="req-ast">*</span></div><div class="variant-chips" id="size-chips"></div></div>
-      <div class="variant-group" id="color-group" style="display:none"><div class="variant-label"><span data-i18n="Select colour">Select colour</span><span class="req-ast">*</span></div><div class="variant-chips" id="color-chips"></div></div>
       <div class="qty-row" id="qty-row" style="display:none">
         <span class="qty-label" data-i18n="Quantity">Quantity</span>
         <div class="qty-controls"><button class="qty-btn" onclick="changeQty(-1)">−</button><div class="qty-display" id="qty-display">1</div><button class="qty-btn" onclick="changeQty(1)">+</button></div>
       </div>
+      <div class="variant-group" id="size-group" style="display:none"><div class="variant-label"><span data-i18n="Select size">Select size</span><span class="req-ast">*</span></div><div class="variant-chips" id="size-chips"></div></div>
+      <div class="variant-group" id="color-group" style="display:none"><div class="variant-label"><span data-i18n="Select colour">Select colour</span><span class="req-ast">*</span></div><div class="variant-chips" id="color-chips"></div></div>
     </div>
 
     <!-- Card 2: Delivery address + notes -->
