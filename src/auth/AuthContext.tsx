@@ -97,18 +97,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try { localStorage.setItem("active_role", p.role); } catch { /* ignore */ }
           }
         } catch (e) { console.warn("[auth] pending_signup apply failed", e); }
-        // Sign-in flow guard: if the user came from a sign-in page AND their
-        // auth account was just created (i.e. they don't actually have an
-        // existing account), delete the account entirely and bounce back.
+        // Sign-in flow guard: if the user came from a sign-in page AND has
+        // no roles yet (never completed sign-up), delete the account and
+        // bounce back. Uses role presence rather than account age so an
+        // existing user can sign in immediately after signing up.
         try {
           const intent = sessionStorage.getItem("signin_intent");
           const pending = sessionStorage.getItem("pending_signup");
           if (intent && !pending) {
-            const createdAt = nextSession.user.created_at
-              ? new Date(nextSession.user.created_at).getTime()
-              : 0;
-            const isBrandNew = createdAt > 0 && Date.now() - createdAt < 2 * 60 * 1000;
-            if (isBrandNew) {
+            const { data: rolesRow } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", nextSession.user.id)
+              .limit(1);
+            const hasAnyRole = Array.isArray(rolesRow) && rolesRow.length > 0;
+            if (!hasAnyRole) {
               sessionStorage.removeItem("signin_intent");
               sessionStorage.setItem(
                 "signin_error",
