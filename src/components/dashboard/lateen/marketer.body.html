@@ -745,9 +745,9 @@ body.lang-ar .pd-iban-row{display:none !important;}
         <svg id="wa-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="wa-section" class="wa-section" aria-hidden="true">
-        <div class="field-row" style="margin:10px 0 14px">
-          <div class="field" style="max-width:90px"><select id="f-wcode"><option value="+218">+218</option><option value="+234">+234</option><option value="+20">+20</option><option value="+966">+966</option><option value="+971">+971</option></select></div>
-          <div class="field" style="flex:1"><input type="tel" id="f-whatsapp" placeholder="091xxxxxxxx"/></div>
+        <div class="field-row" style="margin:10px 0 14px;grid-template-columns:96px 1fr;">
+          <div class="field"><select id="f-wcode" class="cc-select" dir="ltr"><option value="+218">&#x200E;+218</option><option value="+234">&#x200E;+234</option><option value="+20">&#x200E;+20</option><option value="+966">&#x200E;+966</option><option value="+971">&#x200E;+971</option><option value="" disabled class="opt-soon">— More — Soon</option></select></div>
+          <div class="field"><input type="tel" id="f-whatsapp" placeholder="091xxxxxxxx"/></div>
         </div>
       </div>
       <div class="field" style="margin-bottom:0">
