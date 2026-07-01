@@ -281,7 +281,7 @@ export function createLateenApi(userId: string) {
       const path = (data as { avatar_url?: string } | null)?.avatar_url;
       if (path) {
         try {
-          const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+          const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 7);
           avatarSignedUrl = s?.signedUrl ?? null;
         } catch { /* ignore */ }
       }
@@ -306,9 +306,10 @@ export function createLateenApi(userId: string) {
       if (upErr) throw upErr;
       const { error: updErr } = await supabase.from("profiles").update({ avatar_url: path } as never).eq("id", userId);
       if (updErr) throw updErr;
-      const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+      const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 7);
       return s?.signedUrl ?? "";
     },
+
 
     async getWallet() {
       const { data, error } = await supabase
