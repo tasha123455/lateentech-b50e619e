@@ -97,28 +97,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try { localStorage.setItem("active_role", p.role); } catch { /* ignore */ }
           }
         } catch (e) { console.warn("[auth] pending_signup apply failed", e); }
-        const picked = await loadRole(nextSession.user.id);
-
-        // Sign-in flow guard: if the user came from a sign-in page and has
-        // no role yet, this is a brand-new Google account — reject it and
-        // redirect back to the sign-in page with an error.
+        // Sign-in flow guard: if the user came from a sign-in page AND their
+        // auth account was just created (i.e. they don't actually have an
+        // existing account), delete the account entirely and bounce back.
         try {
           const intent = sessionStorage.getItem("signin_intent");
-          if (intent && !picked) {
-            sessionStorage.removeItem("signin_intent");
-            sessionStorage.setItem(
-              "signin_error",
-              "No existing account for this Google email. Please sign up first.",
-            );
-            await supabase.auth.signOut();
-            if (typeof window !== "undefined") {
-              const target = intent === "business" ? "/business/signin" : "/marketer/signin";
-              window.location.replace(target);
+          const pending = sessionStorage.getItem("pending_signup");
+          if (intent && !pending) {
+            const createdAt = nextSession.user.created_at
+              ? new Date(nextSession.user.created_at).getTime()
+              : 0;
+            const isBrandNew = createdAt > 0 && Date.now() - createdAt < 2 * 60 * 1000;
+            if (isBrandNew) {
+              sessionStorage.removeItem("signin_intent");
+              sessionStorage.setItem(
+                "signin_error",
+                "No existing account for this Google email. Please sign up first.",
+              );
+              try { await supabase.rpc("delete_self_if_just_created"); } catch (e) { console.warn("[auth] delete_self failed", e); }
+              await supabase.auth.signOut();
+              if (typeof window !== "undefined") {
+                const target = intent === "business" ? "/business/signin" : "/marketer/signin";
+                window.location.replace(target);
+              }
+              return;
             }
-            return;
+            sessionStorage.removeItem("signin_intent");
           }
-          if (intent && picked) sessionStorage.removeItem("signin_intent");
         } catch { /* ignore */ }
+        const picked = await loadRole(nextSession.user.id);
+
       } catch (error) {
         console.error("[auth] failed to load role", error);
         if (active) setRole(null);
