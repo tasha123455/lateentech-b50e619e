@@ -476,7 +476,39 @@
   </div>
 </div>
 
-<!-- WITHDRAW OVERLAY -->
+<!-- PROFILE OVERLAY -->
+<div class="menu-overlay" id="profile-overlay">
+  <div class="menu-backdrop" onclick="closeProfile()"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#1e1e1e;border-radius:20px 20px 0 0;padding:1.5rem;max-height:92vh;overflow-y:auto;border-top:0.5px solid #333;">
+    <div style="width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 1rem;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div style="font-size:17px;font-weight:500;color:var(--color-text-primary)" id="prof-title">Profile</div>
+      <button onclick="closeProfile()" style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;padding:4px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:1.25rem;">
+      <div style="position:relative;">
+        <div id="prof-avatar" style="width:88px;height:88px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:28px;color:#8b83e8;font-weight:500;background-size:cover;background-position:center;overflow:hidden;">··</div>
+        <label for="prof-avatar-file" style="position:absolute;bottom:-2px;right:-2px;width:30px;height:30px;border-radius:50%;background:#8b83e8;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #1e1e1e;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </label>
+        <input id="prof-avatar-file" type="file" accept="image/*" style="display:none;" onchange="pickAvatar(this)"/>
+      </div>
+      <div id="prof-avatar-hint" style="font-size:11px;color:var(--color-text-tertiary)">Tap the camera to change photo</div>
+    </div>
+    <div style="display:grid;gap:10px;">
+      <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-name">Full name</span><input id="prof-name" class="pd-inp" placeholder="Your name"/></label>
+      <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-phone">Phone number</span><input id="prof-phone" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
+      <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-email">Email</span><input id="prof-email" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
+      <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span><input id="prof-whatsapp" class="pd-inp" placeholder="+218..."/></label>
+    </div>
+    <button onclick="saveProfile()" id="prof-save" style="width:100%;margin-top:1.25rem;background:#8b83e8;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span id="prof-save-txt">Save</span>
+    </button>
+  </div>
+</div>
+
+
 <div class="menu-overlay" id="withdraw-overlay">
   <div class="menu-backdrop" onclick="closeWithdraw()"></div>
   <div style="position:absolute;bottom:0;left:0;right:0;background:#1e1e1e;border-radius:20px 20px 0 0;padding:1.5rem;border-top:0.5px solid #333;max-height:90vh;overflow-y:auto;">
