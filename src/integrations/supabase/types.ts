@@ -499,6 +499,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           business_name: string | null
           country: string | null
           created_at: string
@@ -513,8 +514,10 @@ export type Database = {
           payout_swift: string | null
           phone: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
+          avatar_url?: string | null
           business_name?: string | null
           country?: string | null
           created_at?: string
@@ -529,8 +532,10 @@ export type Database = {
           payout_swift?: string | null
           phone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
+          avatar_url?: string | null
           business_name?: string | null
           country?: string | null
           created_at?: string
@@ -545,6 +550,7 @@ export type Database = {
           payout_swift?: string | null
           phone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
