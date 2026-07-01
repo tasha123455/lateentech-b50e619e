@@ -48,6 +48,8 @@ export function SignInForm({ role }: { role: Role }) {
     setError(null);
     try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     try { sessionStorage.setItem("intended_role", role); } catch { /* ignore */ }
+    try { sessionStorage.setItem("signin_intent", role); } catch { /* ignore */ }
+    try { sessionStorage.removeItem("pending_signup"); } catch { /* ignore */ }
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.redirected) return;
     if (result.error) { setError(result.error.message); return; }
