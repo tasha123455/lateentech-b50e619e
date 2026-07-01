@@ -29,7 +29,7 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your verification code for {siteName}</Preview>
+    <Preview>Confirm your email for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Confirm your email</Heading>
@@ -40,15 +40,19 @@ export const SignupEmail = ({
           </Link>
           !
         </Text>
+        {token ? (
+          <>
+            <Text style={text}>Use this verification code to confirm your email address:</Text>
+            <Text style={codeStyle}>{token}</Text>
+          </>
+        ) : null}
         <Text style={text}>
-          Use this verification code for (
+          Please confirm your email address (
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
           </Link>
-          ):
+          ) {token ? 'or click the button below:' : 'by clicking the button below:'}
         </Text>
-        {token ? <Text style={codeStyle}>{token}</Text> : null}
-        <Text style={text}>You can also verify your email with the button below:</Text>
         <Button style={button} href={confirmationUrl}>
           Verify Email
         </Button>
@@ -77,14 +81,6 @@ const text = {
   margin: '0 0 25px',
 }
 const link = { color: 'inherit', textDecoration: 'underline' }
-const codeStyle = {
-  fontFamily: 'Courier, monospace',
-  fontSize: '28px',
-  fontWeight: 'bold' as const,
-  letterSpacing: '6px',
-  color: '#000000',
-  margin: '0 0 25px',
-}
 const button = {
   backgroundColor: '#000000',
   color: '#ffffff',
@@ -92,5 +88,17 @@ const button = {
   borderRadius: '8px',
   padding: '12px 20px',
   textDecoration: 'none',
+}
+const codeStyle = {
+  display: 'inline-block',
+  fontFamily: 'Courier, monospace',
+  fontSize: '28px',
+  fontWeight: 'bold' as const,
+  letterSpacing: '6px',
+  color: '#000000',
+  backgroundColor: '#f3f4f6',
+  borderRadius: '8px',
+  padding: '14px 18px',
+  margin: '0 0 24px',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
