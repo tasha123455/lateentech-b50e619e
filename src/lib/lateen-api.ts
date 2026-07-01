@@ -268,11 +268,24 @@ export function createLateenApi(userId: string) {
     async getProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, business_name, phone, created_at, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
+        .select("full_name, business_name, phone, whatsapp, avatar_url, created_at, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      let email: string | null = null;
+      try {
+        const { data: u } = await supabase.auth.getUser();
+        email = u?.user?.email ?? null;
+      } catch { /* ignore */ }
+      let avatarSignedUrl: string | null = null;
+      const path = (data as { avatar_url?: string } | null)?.avatar_url;
+      if (path) {
+        try {
+          const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+          avatarSignedUrl = s?.signedUrl ?? null;
+        } catch { /* ignore */ }
+      }
+      return { ...(data ?? {}), email, avatar_signed_url: avatarSignedUrl } as Record<string, unknown>;
     },
 
     async updateProfile(patch: Record<string, unknown>) {
@@ -281,6 +294,20 @@ export function createLateenApi(userId: string) {
         .update(patch as never)
         .eq("id", userId);
       if (error) throw error;
+    },
+
+    async uploadAvatar(file: File): Promise<string> {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
+        upsert: true,
+        contentType: file.type || "image/jpeg",
+      });
+      if (upErr) throw upErr;
+      const { error: updErr } = await supabase.from("profiles").update({ avatar_url: path } as never).eq("id", userId);
+      if (updErr) throw updErr;
+      const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+      return s?.signedUrl ?? "";
     },
 
     async getWallet() {
