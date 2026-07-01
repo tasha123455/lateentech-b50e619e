@@ -151,7 +151,7 @@ function renderSaved(){let saved=P.filter(p=>p.sv);const q=(document.getElementB
 const PLATFORM_FEE_RATE=0.05;
 let PRODUCTS={};
 const COUNTRY_NAMES={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa',LY:'Libya'};
-let currentProduct=null,currentDelivery=null,qty=1,selectedSize='',selectedColor='',depositConfirmed=null,hasReceipt=false,receiptUrl='',orders=[],editingId=null;
+let currentProduct=null,currentDelivery=null,qty=1,selectedSize='',selectedColor='',selectedVariants={},depositConfirmed=null,hasReceipt=false,receiptUrl='',orders=[],editingId=null;
 const fmt=n=>__money(n,'£','GBP');
 const fmtS=(sym,n,code)=>__money(n,sym,code);
 const fmtO=(o,n)=>__money(n,o&&o._sym,o&&o._curCode);
