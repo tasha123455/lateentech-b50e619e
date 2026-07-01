@@ -46,7 +46,7 @@ export function RegisterForm({ role }: { role: Role }) {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (uid) {
-        const patch: Record<string, string> = {};
+        const patch: { full_name?: string; phone?: string; country?: string; business_name?: string } = {};
         if (fullName.trim()) patch.full_name = fullName.trim();
         if (phone.trim()) patch.phone = phone.trim();
         if (country.trim()) patch.country = country.trim();
