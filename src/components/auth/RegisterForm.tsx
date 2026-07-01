@@ -96,6 +96,24 @@ export function RegisterForm({ role }: { role: Role }) {
 
     if (signUpErr) { setError(signUpErr.message); setBusy(false); return; }
 
+    const repeatedUnverifiedSignup = !signUpData.session
+      && signUpData.user
+      && Array.isArray(signUpData.user.identities)
+      && signUpData.user.identities.length === 0;
+
+    if (repeatedUnverifiedSignup) {
+      const { error: resendErr } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (resendErr) {
+        setBusy(false);
+        setError(resendErr.message);
+        return;
+      }
+    }
+
     try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     setBusy(false);
     if (signUpData.session) {
