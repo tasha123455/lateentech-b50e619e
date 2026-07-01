@@ -18,6 +18,16 @@ export function SignInForm({ role }: { role: Role }) {
   const { loadRoleForUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    try {
+      const msg = sessionStorage.getItem("signin_error");
+      if (msg) {
+        setError(msg);
+        sessionStorage.removeItem("signin_error");
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   const otherRole: Role = role === "marketer" ? "business" : "marketer";
 
   const verifyRole = async (userId: string) => {
