@@ -420,8 +420,8 @@ async function refreshNotifications(){
           ${row(__t('Product','المنتج'),d.product_name)}
           ${row(__t('Qty','الكمية'),d.qty)}
           ${row(__t('Customer','الزبون'),d.customer_name)}
-          ${row(__t('Phone','الهاتف'),d.customer_phone)}
-          ${row(__t('WhatsApp','واتساب'),d.customer_whatsapp)}
+          ${(function(){var p=__splitCC(d.customer_phone);return row(__t('Country code','رمز الدولة'),p.cc)+row(__t('Phone','الهاتف'),p.num);})()}
+          ${d.customer_whatsapp?(function(){var w=__splitCC(d.customer_whatsapp);return row(__t('WhatsApp code','رمز واتساب'),w.cc)+row(__t('WhatsApp','واتساب'),w.num);})():''}
           ${row(__t('City','المدينة'),d.customer_city)}
           ${row(__t('Country','الدولة'),d.customer_country)}
           ${row(__t('Address','العنوان'),d.customer_address)}
