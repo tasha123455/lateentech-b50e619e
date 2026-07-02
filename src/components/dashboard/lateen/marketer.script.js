@@ -1,4 +1,6 @@
 
+function __splitCC(p){var s=String(p||'').trim();if(!s)return{cc:'',num:''};var m=s.match(/^(\+\d{1,4})[\s-]*(.*)$/);if(m)return{cc:'\u200E'+m[1]+'\u200E',num:'\u200E'+m[2].replace(/\s+/g,'')+'\u200E'};return{cc:'',num:'\u200E'+s+'\u200E'};}
+
 // Currency display. Keep this light: only normalize Libyan Dinar for now.
 const __SYM2CODE={};
 function __stripDirMarks(s){return(!s||typeof s!=='string')?s:s.replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,'').trim();}
@@ -418,8 +420,8 @@ async function refreshNotifications(){
           ${row(__t('Product','المنتج'),d.product_name)}
           ${row(__t('Qty','الكمية'),d.qty)}
           ${row(__t('Customer','الزبون'),d.customer_name)}
-          ${row(__t('Phone','الهاتف'),d.customer_phone)}
-          ${row(__t('WhatsApp','واتساب'),d.customer_whatsapp)}
+          ${(function(){var p=__splitCC(d.customer_phone);return row(__t('Country code','رمز الدولة'),p.cc)+row(__t('Phone','الهاتف'),p.num);})()}
+          ${d.customer_whatsapp?(function(){var w=__splitCC(d.customer_whatsapp);return row(__t('WhatsApp code','رمز واتساب'),w.cc)+row(__t('WhatsApp','واتساب'),w.num);})():''}
           ${row(__t('City','المدينة'),d.customer_city)}
           ${row(__t('Country','الدولة'),d.customer_country)}
           ${row(__t('Address','العنوان'),d.customer_address)}
