@@ -226,13 +226,25 @@ export function createLateenApi(userId: string) {
 
     async uploadReceipt(file: File): Promise<string> {
       const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/receipts/${crypto.randomUUID()}.${ext}`;
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
-        .from("product-photos")
+        .from("receipts")
         .upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data } = supabase.storage.from("product-photos").getPublicUrl(path);
-      return data.publicUrl;
+      // Store an opaque marker; consumers resolve to a short-lived signed URL at read time.
+      return `receipts:${path}`;
+    },
+
+    async resolveReceiptUrl(url: string | null | undefined): Promise<string> {
+      if (!url) return "";
+      if (typeof url !== "string") return "";
+      if (!url.startsWith("receipts:")) return url; // legacy public URL
+      const path = url.slice("receipts:".length);
+      const { data, error } = await supabase.storage
+        .from("receipts")
+        .createSignedUrl(path, 60 * 60);
+      if (error || !data?.signedUrl) return "";
+      return data.signedUrl;
     },
 
     async listMyOrders() {
@@ -242,7 +254,18 @@ export function createLateenApi(userId: string) {
         .or(`marketer_id.eq.${userId},business_id.eq.${userId}`)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const rows = (data ?? []) as Array<{ receipt_url?: string | null } & Record<string, unknown>>;
+      // Resolve private receipt paths to short-lived signed URLs for the caller.
+      await Promise.all(
+        rows.map(async (r) => {
+          if (typeof r.receipt_url === "string" && r.receipt_url.startsWith("receipts:")) {
+            const path = r.receipt_url.slice("receipts:".length);
+            const { data: s } = await supabase.storage.from("receipts").createSignedUrl(path, 60 * 60);
+            r.receipt_url = s?.signedUrl ?? "";
+          }
+        }),
+      );
+      return rows;
     },
 
     async confirmOrder(id: string) {
