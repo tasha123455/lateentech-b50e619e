@@ -442,7 +442,17 @@ export function createLateenApi(userId: string) {
           .not("receipt_url", "is", null)
           .order("created_at", { ascending: false });
         if (error) throw error;
-        const list = (orders ?? []) as Array<Record<string, unknown> & { marketer_id: string; product_id: string }>;
+        const list = (orders ?? []) as Array<Record<string, unknown> & { marketer_id: string; product_id: string; receipt_url?: string | null }>;
+        // Resolve private receipt paths to short-lived signed URLs.
+        await Promise.all(
+          list.map(async (o) => {
+            if (typeof o.receipt_url === "string" && o.receipt_url.startsWith("receipts:")) {
+              const path = o.receipt_url.slice("receipts:".length);
+              const { data: s } = await supabase.storage.from("receipts").createSignedUrl(path, 60 * 60);
+              o.receipt_url = s?.signedUrl ?? "";
+            }
+          }),
+        );
         const marketerIds = [...new Set(list.map((o) => o.marketer_id))];
         const productIds = [...new Set(list.map((o) => o.product_id))];
         const [{ data: profs }, { data: prods }] = await Promise.all([
