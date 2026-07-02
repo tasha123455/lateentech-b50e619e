@@ -364,6 +364,7 @@ export const DICT: Record<string, string> = {
   "COMMITMENT FEE — COLLECT FROM CUSTOMER": "عربون الحجز — احصله من الزبون",
   "Tell the customer the fee": "خبر الزبون بقيمة العربون",
   "Share your payment details": "شارك بيانات حسابك",
+  "Payment details": "بيانات الدفع",
   "Ask the customer to send the fee to:": "اطلب من الزبون يبعت العربون لـ:",
   "Bank": "المصرف",
   "Account name": "اسم الحساب",
