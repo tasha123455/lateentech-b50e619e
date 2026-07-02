@@ -232,6 +232,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_marketer_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notifications: {
@@ -370,6 +377,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_marketer_view"
             referencedColumns: ["id"]
           },
         ]
@@ -625,7 +639,84 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      products_marketer_view: {
+        Row: {
+          biz_name: string | null
+          business_id: string | null
+          category: string | null
+          code: string | null
+          colors: Json | null
+          comm_fixed: number | null
+          comm_mode: string | null
+          comm_pct: number | null
+          created_at: string | null
+          currency: Json | null
+          deleted_at: string | null
+          delivery: Json | null
+          description: string | null
+          id: string | null
+          name: string | null
+          photos: string[] | null
+          platform_fee: number | null
+          price: number | null
+          qty: number | null
+          sizes: Json | null
+          status: string | null
+          updated_at: string | null
+          variant_groups: Json | null
+        }
+        Insert: {
+          biz_name?: string | null
+          business_id?: string | null
+          category?: string | null
+          code?: string | null
+          colors?: Json | null
+          comm_fixed?: number | null
+          comm_mode?: string | null
+          comm_pct?: number | null
+          created_at?: string | null
+          currency?: Json | null
+          deleted_at?: string | null
+          delivery?: Json | null
+          description?: string | null
+          id?: string | null
+          name?: string | null
+          photos?: string[] | null
+          platform_fee?: number | null
+          price?: number | null
+          qty?: number | null
+          sizes?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          variant_groups?: Json | null
+        }
+        Update: {
+          biz_name?: string | null
+          business_id?: string | null
+          category?: string | null
+          code?: string | null
+          colors?: Json | null
+          comm_fixed?: number | null
+          comm_mode?: string | null
+          comm_pct?: number | null
+          created_at?: string | null
+          currency?: Json | null
+          deleted_at?: string | null
+          delivery?: Json | null
+          description?: string | null
+          id?: string | null
+          name?: string | null
+          photos?: string[] | null
+          platform_fee?: number | null
+          price?: number | null
+          qty?: number | null
+          sizes?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          variant_groups?: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_self_role: {
