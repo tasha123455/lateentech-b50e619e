@@ -866,19 +866,19 @@ body.lang-ar .pd-iban-row{display:none !important;}
       <div class="ac-note" id="bc-note" data-i18n="Set by the business owner">Set by the business owner</div>
     </div>
     <div class="auto-card fee-card-dark" id="fee-card" style="display:none">
-      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;" data-i18n="Mandatory Upfront Deposit">Mandatory Upfront Deposit</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px;" data-i18n="An upfront payment is required before this order can be processed.">An upfront payment is required before this order can be processed.</div>
-      <div class="ac-row" style="margin-bottom:6px;">
-        <span class="ac-label" style="color:rgba(255,255,255,0.6);">
+      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:0.2px;" data-i18n="Mandatory Upfront Deposit">Mandatory Upfront Deposit</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:14px;line-height:1.5;" data-i18n="An upfront payment is required before this order can be processed.">An upfront payment is required before this order can be processed.</div>
+      <div class="ac-row" style="margin-bottom:8px;">
+        <span class="ac-label" style="color:rgba(255,255,255,0.78);font-size:13px;line-height:1.55;">
           <span data-i18n="Your Marketer Fee:">Your Marketer Fee:</span>
-          <span id="fee-comm-pct" style="color:#fff;font-weight:500;">—%</span>
+          <span id="fee-comm-pct" style="color:#fff;font-weight:600;">—%</span>
           <span data-i18n="of the product price.">of the product price.</span>
         </span>
       </div>
-      <div class="ac-row" style="margin-bottom:10px;">
-        <span class="ac-label" style="color:rgba(255,255,255,0.6);">
+      <div class="ac-row" style="margin-bottom:12px;">
+        <span class="ac-label" style="color:rgba(255,255,255,0.78);font-size:13px;line-height:1.55;">
           <span data-i18n="Platform Security Fee:">Platform Security Fee:</span>
-          <span id="fee-plat-pct" style="color:#fff;font-weight:500;">5%</span>
+          <span id="fee-plat-pct" style="color:#fff;font-weight:600;">5%</span>
           <span data-i18n="of the product price.">of the product price.</span>
         </span>
       </div>
@@ -888,8 +888,14 @@ body.lang-ar .pd-iban-row{display:none !important;}
         <span class="ac-value" style="color:#fff;font-size:20px;font-weight:600;" id="fee-total-amt">—</span>
       </div>
       <div class="fee-divider"></div>
-      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">
-        <span data-i18n="Payment receipt">Payment receipt</span> <span style="color:#e07070">*</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div style="font-size:13px;font-weight:600;color:#fff;">
+          <span data-i18n="Payment receipt">Payment receipt</span> <span style="color:#e07070">*</span>
+        </div>
+        <button type="button" onclick="openPayDetails()" style="background:#2a2a2a;border:0.5px solid #3a3a3a;color:#fff;font-size:11px;font-weight:500;padding:6px 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span data-i18n="Payment details">Payment details</span>
+        </button>
       </div>
       <div class="upload-box dashed-lg" id="upload-box" onclick="openReceiptPicker()" style="margin-bottom:0;">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -900,6 +906,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
       <input type="file" id="file-input-files" accept="image/*,application/pdf" style="display:none" onchange="onFileUpload(this)"/>
       <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none" onchange="onFileUpload(this)"/>
     </div>
+
 
     <button class="submit-btn primary" onclick="submitOrder()" id="submit-btn">
       <span class="spark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>
@@ -971,6 +978,23 @@ body.lang-ar .pd-iban-row{display:none !important;}
   </div>
 </div>
 
+<!-- PAYMENT DETAILS OVERLAY -->
+<div class="overlay" id="pay-details-overlay" style="z-index:1200;position:fixed;inset:0;">
+  <div class="overlay-bg" onclick="closePayDetails()"></div>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" data-i18n="Payment details">Payment details</div>
+    <div class="sheet-sub" data-i18n="Ask the customer to send the fee to:">Ask the customer to send the fee to:</div>
+    <div class="instr-card light" style="margin-bottom:14px;">
+      <div class="copy-row"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px" data-i18n="Account name">Account name</div><div class="copy-val" id="pd-bank-name">—</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('pd-bank-name').textContent)">Copy</button></div>
+      <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px" data-i18n="Account number">Account number</div><div class="copy-val" id="pd-bank-num">—</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('pd-bank-num').textContent)">Copy</button></div>
+      <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px" data-i18n="Bank">Bank</div><div class="copy-val" id="pd-bank-bank">—</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('pd-bank-bank').textContent)">Copy</button></div>
+    </div>
+    <button class="cancel-btn" onclick="closePayDetails()" data-i18n="Close">Close</button>
+  </div>
 </div>
+
+</div>
+
 
 
