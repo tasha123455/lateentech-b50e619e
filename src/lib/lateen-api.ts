@@ -110,27 +110,27 @@ export function createLateenApi(userId: string) {
 
     async listBrowse(): Promise<LateenProduct[]> {
       const { data, error } = await supabase
-        .from("products")
+        .from("products_marketer_view" as never)
         .select("*")
-        .eq("status", "active")
-        .is("deleted_at", null)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as LateenProduct[];
     },
 
     async listFavorites(): Promise<LateenProduct[]> {
-      const { data, error } = await supabase
+      const { data: favs, error } = await supabase
         .from("favorites")
-        .select("product:products(*)")
+        .select("product_id")
         .eq("marketer_id", userId);
       if (error) throw error;
-      const rows = (data ?? []) as unknown as { product: LateenProduct | null }[];
-      return rows
-        .map((r) => r.product)
-        .filter((p): p is LateenProduct =>
-          !!p && p.status === "active" && !p.deleted_at,
-        );
+      const ids = (favs ?? []).map((r: { product_id: string }) => r.product_id);
+      if (!ids.length) return [];
+      const { data: prods, error: pErr } = await supabase
+        .from("products_marketer_view" as never)
+        .select("*")
+        .in("id", ids);
+      if (pErr) throw pErr;
+      return (prods ?? []) as unknown as LateenProduct[];
     },
 
     async listFavoriteIds(): Promise<Set<string>> {
