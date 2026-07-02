@@ -866,13 +866,28 @@ body.lang-ar .pd-iban-row{display:none !important;}
       <div class="ac-note" id="bc-note" data-i18n="Set by the business owner">Set by the business owner</div>
     </div>
     <div class="auto-card fee-card-dark" id="fee-card" style="display:none">
-      <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.05em" data-i18n="COMMITMENT FEE TO COLLECT">COMMITMENT FEE TO COLLECT</div>
-      <div class="fee-highlight" id="fee-total">—</div>
-      <div class="fee-sub" id="fee-qty-note">per unit × 1</div>
+      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;" data-i18n="Mandatory Upfront Deposit">Mandatory Upfront Deposit</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px;" data-i18n="An upfront payment is required before this order can be processed.">An upfront payment is required before this order can be processed.</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:8px;" data-i18n="This payment consists of:">This payment consists of:</div>
+      <div class="ac-row" style="margin-bottom:6px;">
+        <span class="ac-label" style="color:rgba(255,255,255,0.6);">
+          <span data-i18n="Your Marketer Fee:">Your Marketer Fee:</span>
+          <span id="fee-comm-pct" style="color:#fff;font-weight:500;">—%</span>
+          <span data-i18n="of the product price.">of the product price.</span>
+        </span>
+      </div>
+      <div class="ac-row" style="margin-bottom:10px;">
+        <span class="ac-label" style="color:rgba(255,255,255,0.6);">
+          <span data-i18n="Platform Security Fee:">Platform Security Fee:</span>
+          <span id="fee-plat-pct" style="color:#fff;font-weight:500;">5%</span>
+          <span data-i18n="of the product price.">of the product price.</span>
+        </span>
+      </div>
       <div class="fee-divider"></div>
-      <div class="ac-row"><span class="ac-label" data-i18n="Your commission (per unit)">Your commission (per unit)</span><span class="ac-value" id="fee-commission">—</span></div>
-      <div class="ac-row" style="display:none"><span class="ac-label">Platform fee (per unit)</span><span class="ac-value" id="fee-platform">—</span></div>
-      <div class="ac-note" data-i18n="Collect this from the customer before shipping. Set by Lateen.">Collect this from the customer before shipping. Set by Lateen.</div>
+      <div class="ac-row">
+        <span class="ac-label" style="color:rgba(255,255,255,0.6);font-size:12px;"><span data-i18n="Total:">Total:</span></span>
+        <span class="ac-value" style="color:#fff;font-size:20px;font-weight:600;" id="fee-total-amt">—</span>
+      </div>
     </div>
 
     <!-- Card: Receipt -->
