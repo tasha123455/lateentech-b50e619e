@@ -328,7 +328,7 @@ export const DICT: Record<string, string> = {
   "Confirmed": "تم التأكيد",
   "awaiting": "في الانتظار",
   "completed": "مكتملة",
-  "Confirm, ship, deliver": "تأكيد، شحن، تسليم",
+  
   "Send order to business owner": "إرسال الطلبية لصاحب العمل",
   "Forwarded to Business": "تم التحويل للشركة",
   "Forwarded to business": "تم التحويل للشركة",
