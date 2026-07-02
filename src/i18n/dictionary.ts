@@ -72,7 +72,7 @@ export const DICT: Record<string, string> = {
   "Continue with Google": "الاستمرار باستخدام جوجل",
   "No account?": "ما عندكش حساب؟",
   "Create one": "دير حساب جديد",
-  "New here? Create an account": "معندكش حساب؟ إنشاء حساب جديد",
+  "New here? Create an account": "معندکش حساب ؟ إنشاء حساب جدید",
   "Already have an account?": "عندك حساب؟",
   "Have an account?": "عندك حساب؟",
   "Sign in with Google": "تسجيل الدخول بواسطة قوقل",
@@ -328,7 +328,7 @@ export const DICT: Record<string, string> = {
   "Confirmed": "تم التأكيد",
   "awaiting": "في الانتظار",
   "completed": "مكتملة",
-  "Confirm, ship, deliver": "تأكيد، شحن، تسليم",
+  
   "Send order to business owner": "إرسال الطلبية لصاحب العمل",
   "Forwarded to Business": "تم التحويل للشركة",
   "Forwarded to business": "تم التحويل للشركة",
