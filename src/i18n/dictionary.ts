@@ -416,6 +416,8 @@ export const DICT: Record<string, string> = {
   "Search by name, number, role, email…": "ابحث بالاسم أو الرقم أو الدور أو البريد…",
   "Search by name, phone, business…": "ابحث بالاسم أو الهاتف أو الشركة…",
   "Search products & marketers…": "ابحث عن المنتجات والمسوّقين…",
+  "Search orders (customer, product, city, ID)": "ابحث في الطلبات (العميل، المنتج، المدينة، رقم الطلب)",
+  "Search products (name, code, city)": "ابحث في المنتجات (الاسم، الكود، المدينة)",
   "Street, area, landmark…": "الشارع، المنطقة، علامة مميزة…",
   "Brief description for marketers…": "وصف موجز للمسوّقين…",
   "e.g. product name": "مثال: اسم المنتج",
