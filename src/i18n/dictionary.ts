@@ -401,6 +401,8 @@ export const DICT: Record<string, string> = {
   "Payments made outside the platform are not protected, and the platform accepts no responsibility for any off-platform transactions.": "أي دفعات تتم خارج المنصة تكون على مسؤولية أصحابها، والمنصة غير مسؤولة عنها بأي شكل.",
   "The amount shown is calculated per unit. If you increase the quantity, the required upfront payment increases accordingly.": "القيمة المعروضة تخص قطعة واحدة. وإذا زدت الكمية، قيمة العربون تزيد بنفس النسبة.",
   "After completing the payment, upload your payment receipt to continue.": "بعد إتمام التحويل، ارفع إيصال الدفع حتى يتم متابعة الطلب.",
+  "The fee is deducted from the product price, and is not an additional charge.": "قيمة العربون تُخصم من سعر المنتج، وليست مبلغاً إضافياً على سعر المنتج.",
+  "Amount customer pays on Delivery:": "المبلغ الذي يدفعه الزبون عند التسليم:",
 
   // ===== Empty States & Search =====
   "No orders found.": "لم يتم العثور على طلبيات.",
