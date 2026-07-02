@@ -346,7 +346,7 @@ export const DICT: Record<string, string> = {
   "Collect this from the customer before shipping. Set by Lateen.": "يتم تجميعه من الزبون قبل الشحن. محدد بواسطة لاتين.",
   "Mandatory Upfront Deposit": "العربون المطلوب (إجباري)",
   "An upfront payment is required before this order can be processed.": "لازم تدفع العربون قبل ما يتم إرسال الطلب.",
-  "This payment consists of:": "قيمة العربون تتكوّن من:",
+  
   "Your Marketer Fee:": "عمولتك كمسوّق:",
   "Platform Security Fee:": "رسوم المنصة:",
   "Total:": "الإجمالي:",
