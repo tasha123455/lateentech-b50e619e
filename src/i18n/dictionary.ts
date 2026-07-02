@@ -73,6 +73,8 @@ export const DICT: Record<string, string> = {
   "No account?": "ما عندكش حساب؟",
   "Create one": "دير حساب جديد",
   "New here? Create an account": "معندکش حساب ؟ إنشاء حساب جدید",
+  "New here?": "معندکش حساب ؟",
+  "Create an account": "إنشاء حساب جدید",
   "Already have an account?": "عندك حساب؟",
   "Have an account?": "عندك حساب؟",
   "Sign in with Google": "تسجيل الدخول بواسطة قوقل",
