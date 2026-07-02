@@ -390,6 +390,14 @@ export const DICT: Record<string, string> = {
   "Upfront fee paid": "تم دفع العربون",
   "Add receipt and send": "إضافة الإيصال والإرسال",
   "Receipt uploaded": "تم رفع الإيصال",
+  "!Important": "!هام",
+  "About the upfront deposit": "عن العربون المطلوب",
+  "Your order will not be sent to the business owner until you upload proof of the upfront payment.": "الطلب ما يوصلش لصاحب النشاط إلا بعد رفع إيصال دفع العربون.",
+  "Once your payment is reviewed and approved, the amount will appear in your Wallet as secured funds.": "بعد مراجعة الإيصال والموافقة عليه، قيمة العربون تنزل في محفظتك كرصد مضمون.",
+  "This system protects the rights and responsibilities of both marketers and business owners.": "النظام هذا يحفظ حقوق والتزامات المسوّق وصاحب النشاط.",
+  "Payments made outside the platform are not protected, and the platform accepts no responsibility for any off-platform transactions.": "أي دفعات تتم خارج المنصة تكون على مسؤولية أصحابها، والمنصة غير مسؤولة عنها بأي شكل.",
+  "The amount shown is calculated per unit. If you increase the quantity, the required upfront payment increases accordingly.": "القيمة المعروضة تخص قطعة واحدة. وإذا زدت الكمية، قيمة العربون تزيد بنفس النسبة.",
+  "After completing the payment, upload your payment receipt to continue.": "بعد إتمام التحويل، ارفع إيصال الدفع حتى يتم متابعة الطلب.",
 
   // ===== Empty States & Search =====
   "No orders found.": "لم يتم العثور على طلبيات.",

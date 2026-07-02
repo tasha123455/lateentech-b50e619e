@@ -321,6 +321,9 @@
 .copy-btn.done { background: #0d2a1f; color: #2dbd8f; border-color: #1D9E75; }
 .fee-amount-big { font-size: 28px; font-weight: 500; color: #fff; margin: 4px 0; }
 .fee-label-sm { font-size: 11px; color: rgba(255,255,255,0.45); }
+.deposit-info-body { background: var(--color-background-secondary); border-radius: 12px; padding: 14px; margin-bottom: 16px; border: 0.5px solid var(--color-border-secondary); }
+.deposit-info-body p { font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.65; margin-bottom: 10px; }
+.deposit-info-body p:last-child { margin-bottom: 0; }
 </style>
 
 <div style="position:relative;max-width:420px;margin:0 auto;min-height:860px;overflow:hidden;background:#141414;">
@@ -889,8 +892,11 @@ body.lang-ar .pd-iban-row{display:none !important;}
       </div>
       <div class="fee-divider"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
-        <div style="font-size:13px;font-weight:600;color:#fff;">
+      <div style="font-size:13px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;">
           <span data-i18n="Payment receipt">Payment receipt</span> <span style="color:#e07070">*</span>
+          <button type="button" onclick="openDepositInfo()" style="background:none;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;" aria-label="Important info about upfront deposit">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </button>
         </div>
         <button type="button" onclick="openPayDetails()" style="background:#2a2a2a;border:0.5px solid #3a3a3a;color:#fff;font-size:11px;font-weight:500;padding:6px 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -991,6 +997,28 @@ body.lang-ar .pd-iban-row{display:none !important;}
       <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px" data-i18n="Bank">Bank</div><div class="copy-val" id="pd-bank-bank">—</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('pd-bank-bank').textContent)">Copy</button></div>
     </div>
     <button class="cancel-btn" onclick="closePayDetails()" data-i18n="Close">Close</button>
+  </div>
+</div>
+
+<!-- DEPOSIT INFO OVERLAY -->
+<div class="overlay" id="deposit-info-overlay" style="z-index:1250;position:fixed;inset:0;">
+  <div class="overlay-bg" onclick="closeDepositInfo()"></div>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="sheet-title" style="margin-bottom:0;" data-i18n="!Important">!Important</div>
+    </div>
+    <div class="sheet-sub" data-i18n="About the upfront deposit">About the upfront deposit</div>
+    <div class="deposit-info-body" id="deposit-info-body">
+      <p data-i18n="Your order will not be sent to the business owner until you upload proof of the upfront payment.">Your order will not be sent to the business owner until you upload proof of the upfront payment.</p>
+      <p data-i18n="Once your payment is reviewed and approved, the amount will appear in your Wallet as secured funds.">Once your payment is reviewed and approved, the amount will appear in your Wallet as secured funds.</p>
+      <p data-i18n="This system protects the rights and responsibilities of both marketers and business owners.">This system protects the rights and responsibilities of both marketers and business owners.</p>
+      <p data-i18n="Payments made outside the platform are not protected, and the platform accepts no responsibility for any off-platform transactions.">Payments made outside the platform are not protected, and the platform accepts no responsibility for any off-platform transactions.</p>
+      <p data-i18n="The amount shown is calculated per unit. If you increase the quantity, the required upfront payment increases accordingly.">The amount shown is calculated per unit. If you increase the quantity, the required upfront payment increases accordingly.</p>
+      <p data-i18n="After completing the payment, upload your payment receipt to continue.">After completing the payment, upload your payment receipt to continue.</p>
+    </div>
+    <button class="cancel-btn" onclick="closeDepositInfo()" data-i18n="Close">Close</button>
   </div>
 </div>
 
