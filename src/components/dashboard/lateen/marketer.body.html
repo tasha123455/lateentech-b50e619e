@@ -868,7 +868,6 @@ body.lang-ar .pd-iban-row{display:none !important;}
     <div class="auto-card fee-card-dark" id="fee-card" style="display:none">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;" data-i18n="Mandatory Upfront Deposit">Mandatory Upfront Deposit</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px;" data-i18n="An upfront payment is required before this order can be processed.">An upfront payment is required before this order can be processed.</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:8px;" data-i18n="This payment consists of:">This payment consists of:</div>
       <div class="ac-row" style="margin-bottom:6px;">
         <span class="ac-label" style="color:rgba(255,255,255,0.6);">
           <span data-i18n="Your Marketer Fee:">Your Marketer Fee:</span>
@@ -884,17 +883,15 @@ body.lang-ar .pd-iban-row{display:none !important;}
         </span>
       </div>
       <div class="fee-divider"></div>
-      <div class="ac-row">
+      <div class="ac-row" style="margin-bottom:12px;">
         <span class="ac-label" style="color:rgba(255,255,255,0.6);font-size:12px;"><span data-i18n="Total:">Total:</span></span>
         <span class="ac-value" style="color:#fff;font-size:20px;font-weight:600;" id="fee-total-amt">—</span>
       </div>
-    </div>
-
-    <!-- Card: Receipt -->
-    <div class="ord-card simple">
-      <div class="ord-num">3</div>
-      <div class="ord-head"><span data-i18n="Payment receipt">Payment receipt</span> <span style="color:#e07070">*</span><span class="ord-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span></div>
-      <div class="upload-box dashed-lg" id="upload-box" onclick="openReceiptPicker()">
+      <div class="fee-divider"></div>
+      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">
+        <span data-i18n="Payment receipt">Payment receipt</span> <span style="color:#e07070">*</span>
+      </div>
+      <div class="upload-box dashed-lg" id="upload-box" onclick="openReceiptPicker()" style="margin-bottom:0;">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <div class="upload-icon-label" id="upload-label" data-i18n="Tap to upload receipt">Tap to upload receipt</div>
       </div>
