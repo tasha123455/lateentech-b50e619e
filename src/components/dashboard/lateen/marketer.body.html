@@ -820,7 +820,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
       <div id="wa-section" class="wa-section" aria-hidden="true">
         <div class="field-row" style="margin:10px 0 14px;grid-template-columns:96px 1fr;">
           <div class="field"><select id="f-wcode" class="cc-select" dir="ltr"><option value="+218">&#x200E;+218</option><option value="+234">&#x200E;+234</option><option value="+20">&#x200E;+20</option><option value="+966">&#x200E;+966</option><option value="+971">&#x200E;+971</option><option value="" disabled class="opt-soon">— More — Soon</option></select></div>
-          <div class="field"><input type="tel" id="f-whatsapp" placeholder="091xxxxxxxx"/></div>
+          <div class="field"><input type="tel" id="f-whatsapp" inputmode="numeric" maxlength="10" pattern="09[1-4][0-9]{7}" placeholder="091xxxxxxx" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"/></div>
         </div>
       </div>
       <div class="field" style="margin-bottom:0">
