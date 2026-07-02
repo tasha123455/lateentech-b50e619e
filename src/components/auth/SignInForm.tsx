@@ -78,7 +78,7 @@ export function SignInForm({ role }: { role: Role }) {
       <p className="text-center text-xs text-text-2">
         New here?{" "}
         <Link to={role === "marketer" ? "/marketer/register" : "/business/register"} className={`font-medium ${s.link}`}>
-          Create an account on the sign-up page
+          Create an account
         </Link>
       </p>
     </div>
