@@ -792,10 +792,20 @@ const PATTERNS: Pattern[] = [
   { re: /^(.+)\s+wallet$/i, build: (m) => `المحفظة ${m[1]}` },
   // "1 cities available" / "12 cities available"
   { re: /^(\d[\d,]*)\s+cities\s+available\b\.?$/i,
-    build: (m) => `${m[1]} مدن متاحة` },
+    build: (m) => {
+      const n = parseInt(m[1].replace(/,/g, ""), 10);
+      if (n === 1) return "مدينة واحدة متاحة لهذا المنتج";
+      if (n === 2) return "مدينتين متاحة لهذا المنتج";
+      return `${n} مدن متاحة لهذا المنتج`;
+    } },
   // "1 countries available for this product"
   { re: /^(\d[\d,]*)\s+countries\s+available(?:\s+for\s+this\s+product)?\b\.?$/i,
-    build: (m) => `${m[1]} دول متاحة لهذا المنتج` },
+    build: (m) => {
+      const n = parseInt(m[1].replace(/,/g, ""), 10);
+      if (n === 1) return "دولة واحدة متاحة لهذا المنتج";
+      if (n === 2) return "دولتين متاحة لهذا المنتج";
+      return `${n} دول متاحة لهذا المنتج`;
+    } },
   // "For Benghazi, LY · set by business owner"
   { re: /^For\s+(.+?)\s*[·\-]\s*set\s+by\s+business\s+owner\b\.?$/i,
     build: (m) => `لـ ${m[1]} · يحدده صاحب التاجر` },
