@@ -110,27 +110,27 @@ export function createLateenApi(userId: string) {
 
     async listBrowse(): Promise<LateenProduct[]> {
       const { data, error } = await supabase
-        .from("products")
+        .from("products_marketer_view" as never)
         .select("*")
-        .eq("status", "active")
-        .is("deleted_at", null)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as LateenProduct[];
     },
 
     async listFavorites(): Promise<LateenProduct[]> {
-      const { data, error } = await supabase
+      const { data: favs, error } = await supabase
         .from("favorites")
-        .select("product:products(*)")
+        .select("product_id")
         .eq("marketer_id", userId);
       if (error) throw error;
-      const rows = (data ?? []) as unknown as { product: LateenProduct | null }[];
-      return rows
-        .map((r) => r.product)
-        .filter((p): p is LateenProduct =>
-          !!p && p.status === "active" && !p.deleted_at,
-        );
+      const ids = (favs ?? []).map((r: { product_id: string }) => r.product_id);
+      if (!ids.length) return [];
+      const { data: prods, error: pErr } = await supabase
+        .from("products_marketer_view" as never)
+        .select("*")
+        .in("id", ids);
+      if (pErr) throw pErr;
+      return (prods ?? []) as unknown as LateenProduct[];
     },
 
     async listFavoriteIds(): Promise<Set<string>> {
@@ -226,13 +226,25 @@ export function createLateenApi(userId: string) {
 
     async uploadReceipt(file: File): Promise<string> {
       const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/receipts/${crypto.randomUUID()}.${ext}`;
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
-        .from("product-photos")
+        .from("receipts")
         .upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data } = supabase.storage.from("product-photos").getPublicUrl(path);
-      return data.publicUrl;
+      // Store an opaque marker; consumers resolve to a short-lived signed URL at read time.
+      return `receipts:${path}`;
+    },
+
+    async resolveReceiptUrl(url: string | null | undefined): Promise<string> {
+      if (!url) return "";
+      if (typeof url !== "string") return "";
+      if (!url.startsWith("receipts:")) return url; // legacy public URL
+      const path = url.slice("receipts:".length);
+      const { data, error } = await supabase.storage
+        .from("receipts")
+        .createSignedUrl(path, 60 * 60);
+      if (error || !data?.signedUrl) return "";
+      return data.signedUrl;
     },
 
     async listMyOrders() {
@@ -242,7 +254,18 @@ export function createLateenApi(userId: string) {
         .or(`marketer_id.eq.${userId},business_id.eq.${userId}`)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const rows = (data ?? []) as Array<{ receipt_url?: string | null } & Record<string, unknown>>;
+      // Resolve private receipt paths to short-lived signed URLs for the caller.
+      await Promise.all(
+        rows.map(async (r) => {
+          if (typeof r.receipt_url === "string" && r.receipt_url.startsWith("receipts:")) {
+            const path = r.receipt_url.slice("receipts:".length);
+            const { data: s } = await supabase.storage.from("receipts").createSignedUrl(path, 60 * 60);
+            r.receipt_url = s?.signedUrl ?? "";
+          }
+        }),
+      );
+      return rows;
     },
 
     async confirmOrder(id: string) {
@@ -419,7 +442,17 @@ export function createLateenApi(userId: string) {
           .not("receipt_url", "is", null)
           .order("created_at", { ascending: false });
         if (error) throw error;
-        const list = (orders ?? []) as Array<Record<string, unknown> & { marketer_id: string; product_id: string }>;
+        const list = (orders ?? []) as Array<Record<string, unknown> & { marketer_id: string; product_id: string; receipt_url?: string | null }>;
+        // Resolve private receipt paths to short-lived signed URLs.
+        await Promise.all(
+          list.map(async (o) => {
+            if (typeof o.receipt_url === "string" && o.receipt_url.startsWith("receipts:")) {
+              const path = o.receipt_url.slice("receipts:".length);
+              const { data: s } = await supabase.storage.from("receipts").createSignedUrl(path, 60 * 60);
+              o.receipt_url = s?.signedUrl ?? "";
+            }
+          }),
+        );
         const marketerIds = [...new Set(list.map((o) => o.marketer_id))];
         const productIds = [...new Set(list.map((o) => o.product_id))];
         const [{ data: profs }, { data: prods }] = await Promise.all([
