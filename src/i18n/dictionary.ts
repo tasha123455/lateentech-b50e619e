@@ -78,6 +78,7 @@ export const DICT: Record<string, string> = {
   "Already have an account?": "عندك حساب؟",
   "Have an account?": "عندك حساب؟",
   "Sign in with Google": "تسجيل الدخول بواسطة جوجل",
+  "No existing account for this Google email. Please sign up first.": "لا يوجد حساب موجود بهذا البريد الإلكتروني من جوجل. يرجى إنشاء حساب جديد أولاً.",
   "More countries soon": "دول أخرى قريباً",
   "Full name": "الاسم الكامل",
   "Name": "الاسم الكامل",
