@@ -404,7 +404,7 @@ async function refreshPayoutState(){
   const serverCan=state&&state.can_withdraw!=null?!!state.can_withdraw:(bal>=20&&!pending&&daysLeft===0);
   window.__lateenCanWithdraw=false;
   if(bal<20){
-    stEl.textContent=__t('Minimum withdraw amount 20 LYD','اقل قيمه يمكن سحبها 20 د.ل');
+    stEl.textContent=__t("You can't withdraw until your balance reaches 20 LYD. Withdrawals are processed every 30 days.","لا يمكنك السحب حتى يصل رصيدك إلى 20 د.ل. التحويل يتم كل 30 يوم.");
     setBtn(false,__t('Withdraw','سحب'));
   }else if(pending){
     stEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;">⏳ <span>'+__t('Pending withdrawal','طلب السحب قيد المراجعه')+'</span></span>';
