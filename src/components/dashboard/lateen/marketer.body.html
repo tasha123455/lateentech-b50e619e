@@ -571,6 +571,42 @@
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-phone">Phone number</span><input id="prof-phone" class="pd-inp" readonly dir="ltr" style="opacity:.6;cursor:not-allowed;text-align:left;"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-email">Email</span><input id="prof-email" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span><input id="prof-whatsapp" class="pd-inp" placeholder="+218..."/></label>
+
+      <div id="prof-bank-section" style="margin-top:14px;padding-top:14px;border-top:0.5px solid #2a2a2a;display:grid;gap:10px;">
+        <div style="font-size:12px;font-weight:600;color:var(--color-text-primary);text-transform:uppercase;letter-spacing:0.5px;" data-i18n="Payout / Bank details">Payout / Bank details</div>
+        <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Method">Method</span>
+          <select id="prof-pd-method" class="pd-inp">
+            <option value="">Select…</option>
+            <option>One pay</option>
+            <option>Bank of Unity</option>
+          </select>
+        </label>
+        <label class="pd-lbl" id="prof-pd-bank-wrap"><span class="pd-lbl-head" data-i18n="Bank">Bank</span>
+          <select id="prof-pd-bank" class="pd-inp">
+            <option value="">Select…</option>
+            <option>مصرف الجمهورية</option>
+            <option>مصرف الامان</option>
+            <option>مصرف التجارة والتنمية</option>
+            <option>مصرف ليبيا المركزي - بنغازي</option>
+            <option>مصرف الضمان الاسلامي</option>
+            <option>محفظة GPAY</option>
+            <option>مصرف التمويل الإسلامي</option>
+            <option>مصرف الاسلامي الليبي</option>
+            <option>مصرف المتوسط</option>
+            <option>مصرف شمال افريقيا</option>
+            <option>مصرف التجاري الوطني</option>
+            <option>مصرف الاتحاد الوطني</option>
+            <option>محفظة paynow</option>
+            <option>محفظة RUNPAY</option>
+            <option>مصرف الصحاري</option>
+            <option>مصرف السراج الاسلامي</option>
+            <option>تطبيق التداول</option>
+            <option>مصرف التضامن</option>
+          </select>
+        </label>
+        <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Account holder">Account holder</span><input id="prof-pd-holder" class="pd-inp" placeholder="Full name on account"/></label>
+        <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Account number">Account number</span><input id="prof-pd-acct" class="pd-inp" placeholder="Account number"/></label>
+      </div>
     </div>
     <button onclick="saveProfile()" id="prof-save" style="width:100%;margin-top:1.25rem;background:#8b83e8;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
