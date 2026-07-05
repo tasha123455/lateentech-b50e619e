@@ -418,6 +418,7 @@ export const DICT: Record<string, string> = {
   "Search products…": "ابحث عن منتجات...",
   "Search your orders": "ابحث عن طلبات",
   "Search your favorite products": "ابحث عن منتجاتك المفضله",
+  "Payout / Bank details": "تفاصيل السحب / البنك",
   "Search currencies…": "ابحث عن العملات...",
   "Search countries…": "ابحث عن الدول...",
   "Search by name, ID, city, product…": "ابحث بالاسم، رقم الطلبية، المدينة، المنتج...",
