@@ -1,4 +1,3 @@
-
 function __splitCC(p){var s=String(p||'').trim();if(!s)return{cc:'',num:''};var m=s.match(/^(\+\d{1,3})[\s-]*(.*)$/);if(m)return{cc:'\u200E'+m[1]+'\u200E',num:'\u200E'+m[2].replace(/\s+/g,'')+'\u200E'};return{cc:'',num:'\u200E'+s+'\u200E'};}
 
 // Currency display. Keep this light: only normalize Libyan Dinar for now.
@@ -60,7 +59,7 @@ const COUNTRIES=[{code:'AF',name:'Afghanistan',flag:'🇦🇫'},{code:'AL',name:
  const COUNTRY_NAMES=Object.fromEntries(COUNTRIES.map(c=>[c.code,c.name]));
  const BUSINESS={name:'Sunrise Kicks Ltd.',phone:'+44 20 1234 5678'};
  let photos=[],variantGroups=[],zones={},editingId=null,commMode='pct',currentCode='',variantIdCounter=0,groupIdCounter=0,selectedCurrency=null,currDropdownOpen=false,countryDropdownOpen=false,selectedCountry=null,__photoUploadJobs=[],__variantPhotoUploadJobs=[];
-const genCode=()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='LT-';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s;};
+const genCode=(existingCodes)=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const used=new Set(existingCodes||(products||[]).map(p=>p.code));let s,tries=0;do{s='LT-';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];tries++;}while(used.has(s)&&tries<100);return s;};
 const genId=()=>'p'+Math.random().toString(36).substr(2,5);
 const pctOf=(price,pct)=>parseFloat((price*(pct/100)).toFixed(2));
 let products=[];
@@ -88,18 +87,66 @@ function renderCurrencyDropdown(list){
 function toggleCurrencyDropdown(){currDropdownOpen=!currDropdownOpen;document.getElementById('curr-dropdown').classList.toggle('open',currDropdownOpen);document.getElementById('curr-search-wrap').style.display=currDropdownOpen?'block':'none';if(currDropdownOpen){renderCurrencyDropdown(CURRENCIES);setTimeout(()=>document.getElementById('curr-search').focus(),50);}}
 function selectCurrency(code){selectedCurrency=CURRENCIES.find(c=>c.code===code);document.getElementById('curr-flag').textContent=selectedCurrency.flag;document.getElementById('curr-name').textContent=selectedCurrency.name+' ('+selectedCurrency.code+')';document.getElementById('curr-symbol-label').textContent=selectedCurrency.symbol;document.getElementById('price-prefix').textContent=selectedCurrency.symbol;document.getElementById('comm-curr-suffix').textContent=selectedCurrency.symbol;currDropdownOpen=false;document.getElementById('curr-dropdown').classList.remove('open');document.getElementById('curr-search-wrap').style.display='none';document.getElementById('curr-search').value='';updateFeeBreakdown();}
 function calcFees(price,pct,fixedComm,mode){const comm=mode==='pct'?pctOf(price,pct):parseFloat(fixedComm||0);const platform=parseFloat((price*PLATFORM_FEE_RATE).toFixed(2));const total=parseFloat((comm+platform).toFixed(2));const commPct=mode==='pct'?pct:parseFloat(((comm/price)*100).toFixed(1));return{comm,platform,total,commPct};}
-function updateFeeBreakdown(){const price=parseFloat(document.getElementById('f-price').value)||0;const pct=parseFloat(document.getElementById('f-comm-pct').value)||0;const fixed=parseFloat(document.getElementById('f-comm-fixed').value)||0;const card=document.getElementById('fee-breakdown-card');if(!price||(!pct&&!fixed)){card.style.display='none';return;}const{comm,platform,total,commPct}=calcFees(price,pct,fixed,commMode);const sym=selectedCurrency?selectedCurrency.symbol:'';document.getElementById('fbc-total').innerHTML=__moneyH(total,sym,selectedCurrency&&selectedCurrency.code);document.getElementById('fbc-sub').textContent=`per unit · marketer ${__money(comm,sym,selectedCurrency&&selectedCurrency.code)} + platform ${__money(platform,sym,selectedCurrency&&selectedCurrency.code)}`;document.getElementById('fbc-comm').textContent=`${__money(comm,sym,selectedCurrency&&selectedCurrency.code)} (${commPct}%)`;document.getElementById('fbc-platform').innerHTML=__moneyH(platform,sym,selectedCurrency&&selectedCurrency.code);card.style.display='block';}
+function updateFeeBreakdown(){
+  const price=parseFloat(document.getElementById('f-price').value)||0;
+  const pct=parseFloat(document.getElementById('f-comm-pct').value)||0;
+  const fixed=parseFloat(document.getElementById('f-comm-fixed').value)||0;
+  const note=document.getElementById('comm-conversion-note');
+  const summaryCard=document.getElementById('summary-card');
+  if(!price||(!pct&&!fixed)){
+    if(note)note.style.display='none';
+    if(summaryCard)summaryCard.style.display='none';
+    return;
+  }
+  const sym=selectedCurrency?selectedCurrency.code:'LYD';
+  const{comm,platform,commPct}=calcFees(price,pct,fixed,commMode);
+  // Show conversion note under the active input
+  if(note){
+    if(commMode==='pct'){
+      note.innerHTML=`Fixed equivalent at current price: <b>${comm.toFixed(2)} ${sym}</b> per sale`;
+    }else{
+      const pctVal=price?((fixed/price)*100).toFixed(1):0;
+      note.innerHTML=`Percentage equivalent at current price: <b>${pctVal}%</b> per sale`;
+    }
+    note.style.display='block';
+  }
+  // Update summary card
+  if(summaryCard){
+    summaryCard.style.display='block';
+    const pctDisplay=commMode==='pct'?pct.toFixed(1):commPct;
+    const el_price=document.getElementById('sum-price');
+    const el_markLabel=document.getElementById('sum-marketer-label');
+    const el_markAmt=document.getElementById('sum-marketer-amt');
+    const el_platAmt=document.getElementById('sum-platform-amt');
+    const el_total=document.getElementById('sum-total');
+    if(el_price)el_price.textContent=`${price.toFixed(2)} ${sym}`;
+    if(el_markLabel)el_markLabel.textContent=`Marketer commission (${pctDisplay}%)`;
+    if(el_markAmt)el_markAmt.textContent=`${comm.toFixed(2)} ${sym}`;
+    if(el_platAmt)el_platAmt.textContent=`${platform.toFixed(2)} ${sym}`;
+    const yourTotal=price-comm-platform;
+    if(el_total)el_total.textContent=`${yourTotal.toFixed(2)} ${sym}`;
+  }
+}
 function onPriceChange(){const price=parseFloat(document.getElementById('f-price').value)||0;if(commMode==='pct'){const pct=parseFloat(document.getElementById('f-comm-pct').value)||0;if(pct)document.getElementById('f-comm-fixed').value=pctOf(price,pct);}else{const fixed=parseFloat(document.getElementById('f-comm-fixed').value)||0;if(price&&fixed)document.getElementById('f-comm-pct').value=((fixed/price)*100).toFixed(1);}updateFeeBreakdown();}
 function onCommPctChange(){const price=parseFloat(document.getElementById('f-price').value)||0;const pct=parseFloat(document.getElementById('f-comm-pct').value)||0;if(price&&pct)document.getElementById('f-comm-fixed').value=pctOf(price,pct);updateFeeBreakdown();}
 function onCommFixedChange(){const price=parseFloat(document.getElementById('f-price').value)||0;const fixed=parseFloat(document.getElementById('f-comm-fixed').value)||0;if(price&&fixed)document.getElementById('f-comm-pct').value=((fixed/price)*100).toFixed(1);updateFeeBreakdown();}
-function setCommMode(mode){commMode=mode;document.getElementById('mode-pct').classList.toggle('active',mode==='pct');document.getElementById('mode-fixed').classList.toggle('active',mode==='fixed');document.getElementById('f-comm-pct').disabled=mode==='fixed';document.getElementById('f-comm-fixed').disabled=mode==='pct';document.getElementById('f-comm-pct').style.opacity=mode==='fixed'?'0.4':'1';document.getElementById('f-comm-fixed').style.opacity=mode==='pct'?'0.4':'1';updateFeeBreakdown();}
-function refreshCode(){currentCode=genCode();document.getElementById('product-code-display').textContent=currentCode;}
+function setCommMode(mode){
+  commMode=mode;
+  document.getElementById('mode-pct').classList.toggle('active',mode==='pct');
+  document.getElementById('mode-fixed').classList.toggle('active',mode==='fixed');
+  const rowPct=document.getElementById('row-comm-pct');
+  const rowFixed=document.getElementById('row-comm-fixed');
+  if(rowPct)rowPct.style.display=mode==='pct'?'flex':'none';
+  if(rowFixed)rowFixed.style.display=mode==='fixed'?'flex':'none';
+  updateFeeBreakdown();
+}
+
 function __isBlobUrl(u){return typeof u==='string'&&u.startsWith('blob:');}
 async function __waitForProductPhotoUploads(){const jobs=[...__photoUploadJobs,...__variantPhotoUploadJobs].filter(Boolean);if(jobs.length)await Promise.allSettled(jobs);}
 function onPhotosSelected(input){const files=Array.from(input.files);input.value='';const slots=[];for(const file of files){if(photos.length>=6)break;const localUrl=URL.createObjectURL(file);photos.push(localUrl);slots.push({file,localUrl});}renderPhotoGrid();const job=(async()=>{await Promise.all(slots.map(async s=>{try{if(window.LateenAPI&&window.LateenAPI.uploadPhoto){const url=await window.LateenAPI.uploadPhoto(s.file);const curIdx=photos.indexOf(s.localUrl);if(curIdx!==-1)photos[curIdx]=url;}else{const url=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(s.file);});const curIdx=photos.indexOf(s.localUrl);if(curIdx!==-1)photos[curIdx]=url;}try{URL.revokeObjectURL(s.localUrl);}catch(e){}}catch(e){console.error('[Lateen] uploadPhoto',e);const curIdx=photos.indexOf(s.localUrl);if(curIdx!==-1)photos.splice(curIdx,1);alert('Photo upload failed.');}}));renderPhotoGrid();})();__photoUploadJobs.push(job);job.finally(()=>{__photoUploadJobs=__photoUploadJobs.filter(j=>j!==job);});}
 function removePhoto(i){photos.splice(i,1);renderPhotoGrid();}
 function renderPhotoGrid(){const g=document.getElementById('photo-grid');if(!g)return;g.innerHTML=photos.map((src,i)=>`<div class="photo-preview"><img src="${src}"/><button class="photo-remove" onclick="removePhoto(${i})">×</button></div>`).join('')+(photos.length<6?`<div class="add-photo-btn" onclick="document.getElementById('photo-input').click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><div class="add-photo-label">Add photo</div></div>`:'');}
-function addVariantGroup(){variantGroups.push({id:groupIdCounter++,name:'Variant',items:[]});renderVariantGroups();setTimeout(()=>{const ins=document.querySelectorAll('.vg-name-input');if(ins.length)ins[ins.length-1].focus();},50);}
+function addVariantGroup(){variantGroups.push({id:groupIdCounter++,name:'',items:[]});renderVariantGroups();setTimeout(()=>{const ins=document.querySelectorAll('.lp-variant-group-v2 input.lp-input');if(ins.length)ins[ins.length-1].focus();},50);}
 function removeVariantGroup(gid){variantGroups=variantGroups.filter(g=>g.id!==gid);renderVariantGroups();}
 function renameVariantGroup(gid,name){const g=variantGroups.find(x=>x.id===gid);if(g)g.name=name;}
 function addVariant(gid){const g=variantGroups.find(x=>x.id===gid);if(!g)return;g.items.push({id:variantIdCounter++,val:'',photo:''});renderVariantGroups();setTimeout(()=>{const ins=document.querySelectorAll(`#vg-list-${gid} input.vb-val-input`);if(ins.length)ins[ins.length-1].focus();},50);}
@@ -107,32 +154,108 @@ function removeVariant(gid,id){const g=variantGroups.find(x=>x.id===gid);if(g){g
 function updateVariant(gid,id,val){const g=variantGroups.find(x=>x.id===gid);if(!g)return;const it=g.items.find(x=>x.id===id);if(it)it.val=val;}
 function onVariantPhotoSelected(gid,id,input){const file=input.files&&input.files[0];input.value='';if(!file)return;const g=variantGroups.find(x=>x.id===gid);if(!g)return;const it=g.items.find(x=>x.id===id);if(!it)return;const localUrl=URL.createObjectURL(file);it.photo=localUrl;renderVariantGroups();const job=(async()=>{try{let url;if(window.LateenAPI&&window.LateenAPI.uploadPhoto){url=await window.LateenAPI.uploadPhoto(file);}else{url=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file);});}const g2=variantGroups.find(x=>x.id===gid);if(!g2)return;const it2=g2.items.find(x=>x.id===id);if(!it2)return;it2.photo=url;try{URL.revokeObjectURL(localUrl);}catch(e){}renderVariantGroups();}catch(e){console.error('[Lateen] variant photo upload',e);const g2=variantGroups.find(x=>x.id===gid);const it2=g2&&g2.items.find(x=>x.id===id);if(it2){it2.photo='';renderVariantGroups();}alert('Photo upload failed.');}})();__variantPhotoUploadJobs.push(job);job.finally(()=>{__variantPhotoUploadJobs=__variantPhotoUploadJobs.filter(j=>j!==job);});}
 function removeVariantPhoto(gid,id){const g=variantGroups.find(x=>x.id===gid);if(!g)return;const it=g.items.find(x=>x.id===id);if(!it)return;it.photo='';renderVariantGroups();}
-function renderVariantGroups(){const el=document.getElementById('variant-groups-container');if(!el)return;if(!variantGroups.length){el.innerHTML='<div class="vb-empty" style="border:0.5px dashed var(--color-border-secondary);border-radius:12px;margin-bottom:12px">No variants. Tap "Add another variant" below.</div>';return;}const ar=__ar();const addPhLbl=ar?'صورة':'Photo';el.innerHTML=variantGroups.map(g=>{const ph=/colou?r|اللون|لون/i.test(g.name)?(ar?'مثال: أسود أو كحلي':'e.g. Black or Navy Blue'):/size|مقاس/i.test(g.name)?(ar?'مثال: 38 أو M أو XL':'e.g. 38 or M or XL'):(ar?'مثال: قيمة':'e.g. value');return`<div class="variant-builder"><div class="vb-header"><input class="vg-name-input" type="text" value="${g.name.replace(/"/g,'&quot;')}" oninput="renameVariantGroup(${g.id},this.value)" placeholder="Variant name"/><div style="display:flex;gap:6px;align-items:center"><button class="vb-add-btn" onclick="addVariant(${g.id})">+ Add value</button><button class="vg-remove-btn" onclick="removeVariantGroup(${g.id})" title="Remove group">×</button></div></div><div id="vg-list-${g.id}">${g.items.length?g.items.map(it=>{const thumb=it.photo?`<div class="vb-thumb"><img src="${it.photo}"/><button class="vb-thumb-x" onclick="removeVariantPhoto(${g.id},${it.id})">×</button></div>`:`<label class="vb-thumb vb-thumb-add" title="${addPhLbl}"><input type="file" accept="image/*" style="display:none" onchange="onVariantPhotoSelected(${g.id},${it.id},this)"/><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></label>`;return`<div class="vb-item">${thumb}<input class="vb-val-input" type="text" value="${(it.val||'').replace(/"/g,'&quot;')}" placeholder="${ph}" oninput="updateVariant(${g.id},${it.id},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addVariant(${g.id});}"/><button class="vb-remove" onclick="removeVariant(${g.id},${it.id})">×</button></div>`;}).join(''):'<div class="vb-empty">Skip if not applicable</div>'}</div></div>`;}).join('');}
-function filterCountries(){renderCountryDropdown([]);}
-function renderCountryDropdown(list){
+function updateVariantQty(gid,id,val){const g=variantGroups.find(x=>x.id===gid);if(!g)return;const it=g.items.find(x=>x.id===id);if(it)it.qty=parseInt(val)||0;}
+function openAddValueInput(gid){const el=document.getElementById('vg-add-input-'+gid);if(!el)return;el.style.display='block';const inp=el.querySelector('input');if(inp){inp.value='';inp.focus();}}
+function commitAddValue(gid,inp){const val=(inp.value||'').trim();if(!val)return;const g=variantGroups.find(x=>x.id===gid);if(!g)return;g.items.push({id:variantIdCounter++,val,photo:'',qty:0});renderVariantGroups();const el2=document.getElementById('vg-add-input-'+gid);if(el2)el2.style.display='none';}
+function renderVariantGroups(){const el=document.getElementById('variant-groups-container');if(!el)return;if(!variantGroups.length){el.innerHTML='';return;}const ar=__ar();const valLbl=ar?'القيمة':'Value';const qtyLbl=ar?'الكمية':'Quantity';el.innerHTML=variantGroups.map(g=>{const ph=/colou?r|اللون|لون/i.test(g.name)?(ar?'مثال: أسود':'Example: Color'):/size|مقاس/i.test(g.name)?(ar?'مثال: M':'Example: Size'):(ar?'مثال: قيمة':'e.g. value');const namePh=/colou?r/i.test(g.name)?'Example: Color':/size/i.test(g.name)?'Example: Size':'Variant name';const items=g.items.length?g.items.map(it=>{const photoEl=it.photo?`<div class="lp-value-photo"><img src="${it.photo}"/><button class="lp-value-photo-x" onclick="removeVariantPhoto(${g.id},${it.id})">×</button></div>`:`<label class="lp-value-photo" title="Photo"><input type="file" accept="image/*" style="display:none" onchange="onVariantPhotoSelected(${g.id},${it.id},this)"/><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h7l1 1.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"/><circle cx="12" cy="13" r="3.2"/></svg></label>`;return`<div class="lp-value-row"><span class="lp-value-name">${(it.val||'').replace(/</g,'&lt;')||`<span style="color:var(--color-text-tertiary);font-weight:400;font-size:12px">${ph}</span>`} <span class="lp-value-x" onclick="removeVariant(${g.id},${it.id})">✕</span></span><input type="number" class="lp-qty-input" placeholder="Qty" value="${it.qty||''}" oninput="updateVariantQty(${g.id},${it.id},this.value)"/>${photoEl}</div>`;}).join(''):'';return`<div class="lp-variant-group-v2"><div class="lp-variant-group-head"><input class="lp-input" type="text" value="${g.name.replace(/"/g,'&quot;')}" placeholder="${namePh}" oninput="renameVariantGroup(${g.id},this.value)" style="font-weight:700;font-size:14px;"/><span class="lp-variant-remove-x" onclick="removeVariantGroup(${g.id})">✕</span></div><div class="lp-variant-col-header"><span class="lp-vcol-value">${valLbl}</span><span class="lp-vcol-qty">${qtyLbl}</span><span class="lp-vcol-photo"></span></div><div id="vg-list-${g.id}">${items}</div><div class="lp-add-value-row" onclick="openAddValueInput(${g.id})">+ Add value</div><div id="vg-add-input-${g.id}" style="display:none;margin-top:6px;"><input class="lp-input" type="text" placeholder="${ph}" style="font-size:14px;" onkeydown="if(event.key==='Enter'){event.preventDefault();commitAddValue(${g.id},this);}"/></div></div>`;}).join('');}
+function filterCountries(){renderCountryDropdown();}
+function renderCountryDropdown(){
   const ar=__ar();
   const ly=COUNTRIES.find(c=>c.code==='LY');
   const sb=__soonBadge();
   const moreLabel=ar?'دول أخرى':'More countries';
+  const searchVal=(document.getElementById('country-search')?.value||'').toLowerCase().trim();
   let html='';
-  if(ly) html+=`<div class="currency-option" onclick="selectCountry('LY')"><span class="curr-flag">${ly.flag}</span><span class="curr-label">${ly.name}</span><span class="curr-sub">${ly.code}</span></div>`;
-  html+=`<div class="currency-option disabled" onclick="event.stopPropagation();"><span class="curr-label" style="color:var(--color-text-tertiary)">${moreLabel}</span><span style="margin-left:auto">${sb}</span></div>`;
-  document.getElementById('country-dropdown').innerHTML=html;
+  if(ly&&(!searchVal||ly.name.toLowerCase().includes(searchVal)||ly.code.toLowerCase().includes(searchVal)))
+    html+=`<div class="lp-category-option" onclick="selectCountry('LY')">${ly.flag} ${ly.name}</div>`;
+  if(!searchVal) html+=`<div class="lp-category-option" style="opacity:0.45;pointer-events:none;">${moreLabel} ${sb}</div>`;
+  document.getElementById('country-dropdown').innerHTML=html||'<div class="lp-category-empty">No matching countries</div>';
 }
-function toggleCountryDropdown(){countryDropdownOpen=!countryDropdownOpen;document.getElementById('country-dropdown').classList.toggle('open',countryDropdownOpen);document.getElementById('country-search-wrap').style.display=countryDropdownOpen?'block':'none';if(countryDropdownOpen){renderCountryDropdown([]);setTimeout(()=>document.getElementById('country-search').focus(),50);}}
-function selectCountry(code){selectedCountry=COUNTRIES.find(c=>c.code===code);document.getElementById('country-flag').textContent=selectedCountry.flag;document.getElementById('country-name').textContent=selectedCountry.name+' ('+selectedCountry.code+')';countryDropdownOpen=false;document.getElementById('country-dropdown').classList.remove('open');document.getElementById('country-search-wrap').style.display='none';document.getElementById('country-search').value='';}
-function addZone(){if(!selectedCountry||zones[selectedCountry.code])return;zones[selectedCountry.code]={cities:{},shipping:''};selectedCountry=null;document.getElementById('country-flag').textContent='🌐';document.getElementById('country-name').textContent='Select a country';renderZoneBuilderList();}
+function openAddCountrySheet(){
+  const sheet=document.getElementById('add-country-sheet');
+  const btn=document.getElementById('add-country-btn');
+  if(!sheet)return;
+  sheet.style.display='block';
+  btn.style.display='none';
+  renderCountryDropdown();
+  setTimeout(()=>{const inp=document.getElementById('country-search');if(inp)inp.focus();},50);
+}
+function closeAddCountrySheet(){
+  const sheet=document.getElementById('add-country-sheet');
+  const btn=document.getElementById('add-country-btn');
+  if(sheet)sheet.style.display='none';
+  if(btn)btn.style.display='';
+  const inp=document.getElementById('country-search');
+  if(inp)inp.value='';
+}
+function selectCountry(code){
+  const c=COUNTRIES.find(x=>x.code===code);
+  if(!c)return;
+  if(!zones[code]){zones[code]={cities:{},shipping:''};}
+  closeAddCountrySheet();
+  renderZoneBuilderList();
+}
+function addZone(){
+  if(!selectedCountry||zones[selectedCountry.code])return;
+  zones[selectedCountry.code]={cities:{},shipping:''};
+  selectedCountry=null;
+  renderZoneBuilderList();
+}
 function removeZone(code){delete zones[code];renderZoneBuilderList();}
-const LIBYA_CITIES=[{en:'Suluq',ar:'سلوق'},{en:'Ghemines',ar:'قمينس'},{en:'Ajdabiya',ar:'اجدابيا'},{en:'Al Kuwayfiyah',ar:'الكويفيه'},{en:'Ras Al Minqar',ar:'راس المنقار'},{en:'Sidi Khalifa',ar:'سي خليفه'},{en:'Al Abyar',ar:'لبيار'},{en:'Driana',ar:'دريانه'},{en:'Bersis',ar:'برسس'},{en:'Al Mabni',ar:'المبني'},{en:'Tocra',ar:'توكره'},{en:'Istatah',ar:'اسطاطه'},{en:'Al Aweilia',ar:'لعويله'},{en:'Murad Masud',ar:'مراد مسعود'},{en:'Al Aquriyah',ar:'العقوريه'},{en:'Zueitina',ar:'زويتنه'},{en:'Al Bakkur',ar:'البكور'},{en:'Al Wardiyah',ar:'الورديه'},{en:'Farzughah',ar:'فرزوغه'},{en:'Tacnis',ar:'تاكنس'},{en:'Battah',ar:'بطه'},{en:'Al Marj',ar:'المرج'},{en:'Jardas',ar:'جردس'},{en:'Zawiyat al Arqub',ar:'زاوية العرقوب'},{en:'Belhadid',ar:'بلحديد'},{en:'Qasr Libya',ar:'قصر ليبيا'},{en:'Wadi al Kuf',ar:'وادي الكوف'},{en:'Al Bayadah',ar:'البياضه'},{en:'Marawah',ar:'مراوه'},{en:'Massah',ar:'مسه'},{en:'Al Bayda',ar:'البيضاء'},{en:'Shahat',ar:'شحات'},{en:'Wardamah',ar:'وردامه'},{en:'Ras Turab',ar:'راس تراب'},{en:'Qarnadah',ar:'قرناده'},{en:'Omar Al Mukhtar',ar:'عمر المختار'},{en:'Qandulah',ar:'قندوله'},{en:'Al Haniyah',ar:'الحنيه'},{en:'Al Wasitah',ar:'الوسيطه'},{en:'Al Faidiyah',ar:'الفايديه'},{en:'Al Abraq',ar:'الابرق'},{en:'Susa',ar:'سوسه'},{en:'Al Mansurah',ar:'المنصوره'},{en:'Al Qubbah',ar:'القبه'},{en:'Belkhather',ar:'بالخاثر'},{en:'Qardabah',ar:'قرضبه'},{en:'Tobruk',ar:'طبرق'},{en:'Bab al Zaytun',ar:'باب الزيتون'},{en:"Al Qa'rah",ar:'القعره'},{en:'Kamboot',ar:'كمبوت'},{en:'Al Watar',ar:'الوتر'},{en:'Bir al Ashhab',ar:'بئر الاشهب'},{en:'Bardia',ar:'البردي'},{en:'Emsaed',ar:'امساعد'},{en:'Al Jaghbub',ar:'الجغبوب'},{en:'Ain Marah',ar:'عين ماره'},{en:'Derna',ar:'درنه'},{en:'Umm al Rizam',ar:'ام رزم'},{en:'Martuba',ar:'مرتوبه'},{en:'Gulf of Bomba',ar:'خليج البمبه'},{en:'Ras al Helal',ar:'راس الهلال'},{en:'Kersa',ar:'كرسه'},{en:'Al Mikhili',ar:'المخيلي'},{en:'Al Aziyat',ar:'العزيات'},{en:'Al Tamimi',ar:'التميمي'},{en:'Ain al Ghazalah',ar:'عين الغزاله'},{en:'Brega',ar:'البريقه'},{en:'Al Uqaylah',ar:'العقيله'},{en:'Ras Lanuf',ar:'راس لانوف'},{en:'Bin Jawad',ar:'بن جواد'},{en:'Harawa',ar:'اهراوه'},{en:'Sirte',ar:'سرت'},{en:'Tawergha',ar:'تورغاء'},{en:'Misrata',ar:'مصراته'},{en:'Zliten',ar:'زليتن'},{en:'Wadi Kaam',ar:'وادي كعام'},{en:'Al Khums',ar:'الخمس'},{en:'Qasr Al Khiyar',ar:'قصر الخيار'},{en:'Al Alous',ar:'العلوص'},{en:'Garabulli',ar:'القرابولي'},{en:'Tripoli',ar:'طرابلس'},{en:'Msallata',ar:'مسلاته'},{en:'Tarhuna',ar:'ترهونه'},{en:'Bishr',ar:'بشر'},{en:'The South',ar:'الجنوب'},{en:'Sabha',ar:'سبها'},{en:'Al Kufra',ar:'الكفره'},{en:'Al Aziziyah',ar:'العزيزية'},{en:'Gharyan',ar:'غريان'},{en:'Al Asaba',ar:'الاصابعه'},{en:'Kikla',ar:'ككله'},{en:'Yafran',ar:'يفرن'},{en:'Ar Rayaynah',ar:'الريانيه'},{en:'Zintan',ar:'الزنتان'},{en:'Ar Rajban',ar:'الرجبان'},{en:'Jadu',ar:'جادو'},{en:'Ar Ruhaybat',ar:'الرحيبات'},{en:'Al Josh',ar:'الجوش'},{en:'Jalu',ar:'جالو'},{en:'Awjila',ar:'اوجله'},{en:'Bani Walid',ar:'بني وليد'},{en:'Brak Al Shati',ar:'براك الشاطي'},{en:'Samnu',ar:'سمنه'},{en:'Ghudwah',ar:'غدوة'},{en:'Ubari',ar:'اوباري'},{en:'Tmassah',ar:'تمسه'},{en:'Al Awaynat',ar:'العوينات'},{en:'Ghat',ar:'غات'},{en:'Murzuq',ar:'مرزق'},{en:'Traghen',ar:'تراغن'},{en:'Zawiya',ar:'الزاوية'},{en:'Al Zahra',ar:'الزهراء'},{en:'Surman',ar:'صرمان'},{en:'Sabratha',ar:'صبراته'},{en:'Al Ajelat',ar:'العجيلات'},{en:'Al Jumayl',ar:'الجميل'},{en:'Zuwara',ar:'زواره'},{en:'Riqdalin',ar:'راقده لين'},{en:'Zaltan',ar:'زلطن'},{en:'Badr',ar:'بدر'},{en:'Tiji',ar:'تيجي'},{en:'Tamzin',ar:'طمزين'},{en:'Kabo',ar:'كابو'},{en:'Nalut',ar:'نالوت'},{en:'Wazzan',ar:'وزان'},{en:"Al Qal'ah",ar:'القلعه'},{en:"Al Sa'diyah",ar:'الساعديه'}];
+const LIBYA_CITIES=[{en:'Suluq',ar:'سلوق'},{en:'Ghemines',ar:'قمينس'},{en:'Ajdabiya',ar:'اجدابيا'},{en:'Al Kuwayfiyah',ar:'الكويفيه'},{en:'Ras Al Minqar',ar:'راس المنقار'},{en:'Sidi Khalifa',ar:'سي خليفه'},{en:'Al Abyar',ar:'لبيار'},{en:'Driana',ar:'دريانه'},{en:'Bersis',ar:'برسس'},{en:'Al Mabni',ar:'المبني'},{en:'Tocra',ar:'توكره'},{en:'Istatah',ar:'اسطاطه'},{en:'Al Aweilia',ar:'لعويله'},{en:'Murad Masud',ar:'مراد مسعود'},{en:'Al Aquriyah',ar:'العقوريه'},{en:'Zueitina',ar:'زويتنه'},{en:'Al Bakkur',ar:'البكور'},{en:'Al Wardiyah',ar:'الورديه'},{en:'Farzughah',ar:'فرزوغه'},{en:'Tacnis',ar:'تاكنس'},{en:'Battah',ar:'بطه'},{en:'Al Marj',ar:'المرج'},{en:'Jardas',ar:'جردس'},{en:'Zawiyat al Arqub',ar:'زاوية العرقوب'},{en:'Belhadid',ar:'بلحديد'},{en:'Qasr Libya',ar:'قصر ليبيا'},{en:'Wadi al Kuf',ar:'وادي الكوف'},{en:'Al Bayadah',ar:'البياضه'},{en:'Marawah',ar:'مراوه'},{en:'Massah',ar:'مسه'},{en:'Al Bayda',ar:'البيضاء'},{en:'Shahat',ar:'شحات'},{en:'Wardamah',ar:'وردامه'},{en:'Ras Turab',ar:'راس تراب'},{en:'Qarnadah',ar:'قرناده'},{en:'Omar Al Mukhtar',ar:'عمر المختار'},{en:'Qandulah',ar:'قندوله'},{en:'Al Haniyah',ar:'الحنيه'},{en:'Al Wasitah',ar:'الوسيطه'},{en:'Al Faidiyah',ar:'الفايديه'},{en:'Al Abraq',ar:'الابرق'},{en:'Susa',ar:'سوسه'},{en:'Al Mansurah',ar:'المنصوره'},{en:'Al Qubbah',ar:'القبه'},{en:'Belkhather',ar:'بالخاثر'},{en:'Qardabah',ar:'قرضبه'},{en:'Tobruk',ar:'طبرق'},{en:'Bab al Zaytun',ar:'باب الزيتون'},{en:"Al Qa'rah",ar:'القعره'},{en:'Kamboot',ar:'كمبوت'},{en:'Al Watar',ar:'الوتر'},{en:'Bir al Ashhab',ar:'بئر الاشهب'},{en:'Bardia',ar:'البردي'},{en:'Emsaed',ar:'امساعد'},{en:'Al Jaghbub',ar:'الجغبوب'},{en:'Ain Marah',ar:'عين ماره'},{en:'Derna',ar:'درنه'},{en:'Umm al Rizam',ar:'ام رزم'},{en:'Martuba',ar:'مرتوبه'},{en:'Gulf of Bomba',ar:'خليج البمبه'},{en:'Ras al Helal',ar:'راس الهلال'},{en:'Kersa',ar:'كرسه'},{en:'Al Mikhili',ar:'المخيلي'},{en:'Al Aziyat',ar:'العزيات'},{en:'Al Tamimi',ar:'التميمي'},{en:'Ain al Ghazalah',ar:'عين الغزاله'},{en:'Brega',ar:'البريقه'},{en:'Al Uqaylah',ar:'العقيله'},{en:'Ras Lanuf',ar:'راس لانوف'},{en:'Bin Jawad',ar:'بن جواد'},{en:'Harawa',ar:'اهراوه'},{en:'Sirte',ar:'سرت'},{en:'Tawergha',ar:'تورغاء'},{en:'Misrata',ar:'مصراته'},{en:'Zliten',ar:'زليتن'},{en:'Wadi Kaam',ar:'وادي كعام'},{en:'Al Khums',ar:'الخمس'},{en:'Qasr Al Khiyar',ar:'قصر الخيار'},{en:'Al Alous',ar:'العلوص'},{en:'Garabulli',ar:'القرابولي'},{en:'Tripoli',ar:'طرابلس'},{en:'Msallata',ar:'مسلاطه'},{en:'Tarhuna',ar:'ترهونه'},{en:'Bishr',ar:'بشر'},{en:'The South',ar:'الجنوب'},{en:'Sabha',ar:'سبها'},{en:'Al Kufra',ar:'الكفره'},{en:'Al Aziziyah',ar:'العزيزية'},{en:'Gharyan',ar:'غريان'},{en:'Al Asaba',ar:'الاصابعه'},{en:'Kikla',ar:'ككله'},{en:'Yafran',ar:'يفرن'},{en:'Ar Rayaynah',ar:'الريانيه'},{en:'Zintan',ar:'الزنتان'},{en:'Ar Rajban',ar:'الرجبان'},{en:'Jadu',ar:'جادو'},{en:'Ar Ruhaybat',ar:'الرحيبات'},{en:'Al Josh',ar:'الجوش'},{en:'Jalu',ar:'جالو'},{en:'Awjila',ar:'اوجله'},{en:'Bani Walid',ar:'بني وليد'},{en:'Brak Al Shati',ar:'براك الشاطي'},{en:'Samnu',ar:'سمنه'},{en:'Ghudwah',ar:'غدوة'},{en:'Ubari',ar:'اوباري'},{en:'Tmassah',ar:'تمسه'},{en:'Al Awaynat',ar:'العوينات'},{en:'Ghat',ar:'غات'},{en:'Murzuq',ar:'مرزق'},{en:'Traghen',ar:'تراغن'},{en:'Zawiya',ar:'الزاوية'},{en:'Al Zahra',ar:'الزهراء'},{en:'Surman',ar:'صرمان'},{en:'Sabratha',ar:'صبراته'},{en:'Al Ajelat',ar:'العجيلات'},{en:'Al Jumayl',ar:'الجميل'},{en:'Zuwara',ar:'زواره'},{en:'Riqdalin',ar:'راقده لين'},{en:'Zaltan',ar:'زلطن'},{en:'Badr',ar:'بدر'},{en:'Tiji',ar:'تيجي'},{en:'Tamzin',ar:'طمزين'},{en:'Kabo',ar:'كابو'},{en:'Nalut',ar:'نالوت'},{en:'Wazzan',ar:'وزان'},{en:"Al Qal'ah",ar:'القلعه'},{en:"Al Sa'diyah",ar:'الساعديه'}];
 function __cityLbl(en){try{if(typeof __ar==='function'&&__ar()){const m=LIBYA_CITIES.find(c=>c.en===en);if(m)return m.ar;}}catch(e){}return en;}
 function addCity(code,cityVal){let city=cityVal;if(!city){const id='new-city-'+code;const el=document.getElementById(id);city=el?el.value.trim():'';if(el)el.value='';}if(!city||!zones[code]||zones[code].cities[city])return;zones[code].cities[city]={delivery:''};renderZoneBuilderList();}
 function removeCity(code,city){delete zones[code].cities[city];renderZoneBuilderList();}
 function updateCityCost(code,city,field,val){if(zones[code]&&zones[code].cities[city])zones[code].cities[city][field]=parseFloat(val)||0;}
 function updateZoneShipping(code,val){if(zones[code])zones[code].shipping=val===''?'':(parseFloat(val)||0);}
-function renderZoneBuilderList(){const el=document.getElementById('zone-builder-list');const keys=Object.keys(zones);if(!keys.length){el.innerHTML='';return;}const ar=(typeof __ar==='function'&&__ar());const shipLbl=ar?'الشحن للدولة (اختياري)':'Country shipping (optional)';const cityLbl=ar?'المدينة':'City';const dlvLbl=ar?'التوصيل':'Delivery';el.innerHTML=keys.map(code=>{const z=zones[code];const ck=Object.keys(z.cities);const isLY=code==='LY';let adder;if(isLY){const avail=LIBYA_CITIES.filter(c=>!z.cities[c.en]);const placeholder=ar?'اختر مدينة…':'Select a city…';adder=`<div style="padding:0 12px 10px"><select id="new-city-${code}" onchange="if(this.value){addCity('${code}',this.value);this.value='';}" style="width:100%;padding:8px 10px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;font-family:var(--font-sans);"><option value="">${placeholder}</option>${avail.map(c=>`<option value="${c.en.replace(/"/g,'&quot;')}">${__cityLbl(c.en)}</option>`).join('')}</select></div>`;}else{adder=`<div style="display:flex;gap:6px;padding:0 12px 10px"><input id="new-city-${code}" type="text" placeholder="Add a city…" style="flex:1;padding:7px 10px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;font-family:var(--font-sans);" onkeydown="if(event.key==='Enter'){event.preventDefault();addCity('${code}');}"/><button onclick="addCity('${code}')" style="height:34px;padding:0 12px;border-radius:8px;border:none;background:#2dbd8f;color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">Add</button></div>`;}const shipRow=`<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:0.5px solid var(--color-border-tertiary);"><label style="flex:1;font-size:12px;color:var(--color-text-secondary);">${shipLbl}</label><input type="number" value="${z.shipping===''||z.shipping==null?'':z.shipping}" placeholder="0.00" step="0.01" onchange="updateZoneShipping('${code}',this.value)" style="width:90px;padding:7px 8px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;font-family:var(--font-sans);"/></div>`;return`<div class="zone-builder-card"><div class="zbc-header"><span class="zbc-country">${COUNTRY_NAMES[code]||code}</span><button class="zbc-remove" onclick="removeZone('${code}')">Remove</button></div>${shipRow}${ck.length?`<div class="city-row-labels city-row-labels-2"><span class="city-row-label">${cityLbl}</span><span class="city-row-label">${dlvLbl}</span><span></span></div>`:''}${ck.map(city=>`<div class="city-row city-row-2"><input type="text" value="${isLY?__cityLbl(city):city}" readonly/><input type="number" value="${z.cities[city].delivery||''}" placeholder="0.00" step="0.01" onchange="updateCityCost('${code}','${city}','delivery',this.value)"/><button class="city-remove-btn" onclick="removeCity('${code}','${city}')">×</button></div>`).join('')}${!ck.length?`<div style="font-size:12px;color:var(--color-text-tertiary);padding:10px 12px">No cities yet</div>`:''}${adder}</div>`;}).join('');}
-function hydrateVariantGroups(p){const __sz=__ar()?'المقاسات':'Sizes';const __cl=__ar()?'الألوان':'Colours';const __norm=v=>({id:variantIdCounter++,val:typeof v==='string'?v:(v&&v.val)||'',photo:(v&&typeof v==='object'&&v.photo)||''});if(!p)return[{id:groupIdCounter++,name:__sz,items:[]},{id:groupIdCounter++,name:__cl,items:[]}];if(p.variantGroups&&p.variantGroups.length)return p.variantGroups.map(g=>({id:groupIdCounter++,name:g.name,items:(g.items||[]).map(__norm)}));const out=[];out.push({id:groupIdCounter++,name:__sz,items:(p.sizes||[]).map(__norm)});out.push({id:groupIdCounter++,name:__cl,items:(p.colors||[]).map(__norm)});return out;}
-function openAddForm(p){photos=p?[...(p.photos||[])]:[];variantGroups=hydrateVariantGroups(p);zones=p?JSON.parse(JSON.stringify(p.delivery)):{};Object.keys(zones).forEach(code=>{const z=zones[code];if(!z.cities)z.cities={};let s=0;Object.values(z.cities).forEach(c=>{const cs=Number(c.shipping)||0;if(cs>s)s=cs;});if(z.shipping==null||z.shipping==='')z.shipping=s||'';});commMode=p?.commMode||'pct';selectedCurrency=p?.currency||null;selectedCountry=null;currentCode=p?.code||genCode();document.getElementById('product-code-display').textContent=currentCode;document.getElementById('form-title').textContent=p?'Edit product':'Add a product';document.getElementById('f-name').value=p?.name||'';document.getElementById('f-desc').value=p?.desc||'';document.getElementById('f-price').value=p?.price||'';document.getElementById('f-qty').value=p?.qty||'';document.getElementById('f-category').value=p?.category||'';document.getElementById('f-comm-pct').value=p?.commPct||'';document.getElementById('f-comm-fixed').value=p?.commFixed||'';if(selectedCurrency){document.getElementById('curr-flag').textContent=selectedCurrency.flag;document.getElementById('curr-name').textContent=selectedCurrency.name+' ('+selectedCurrency.code+')';document.getElementById('curr-symbol-label').textContent=selectedCurrency.symbol;document.getElementById('price-prefix').textContent=selectedCurrency.symbol;document.getElementById('comm-curr-suffix').textContent=selectedCurrency.symbol;}else{document.getElementById('curr-flag').textContent='🌐';document.getElementById('curr-name').textContent='Select a currency';document.getElementById('curr-symbol-label').textContent='';document.getElementById('price-prefix').textContent='—';document.getElementById('comm-curr-suffix').textContent='—';}document.getElementById('country-flag').textContent='🌐';document.getElementById('country-name').textContent='Select a country';setCommMode(commMode);if(p)updateFeeBreakdown();else document.getElementById('fee-breakdown-card').style.display='none';renderPhotoGrid();renderVariantGroups();renderZoneBuilderList();document.getElementById('form-overlay').classList.add('open');}
-function closeForm(){document.getElementById('form-overlay').classList.remove('open');editingId=null;photos=[];variantGroups=[];zones={};selectedCurrency=null;selectedCountry=null;currDropdownOpen=false;countryDropdownOpen=false;}
+function renderZoneBuilderList(){
+  const el=document.getElementById('zone-builder-list');
+  if(!el)return;
+  const keys=Object.keys(zones);
+  if(!keys.length){el.innerHTML='';return;}
+  const ar=(typeof __ar==='function'&&__ar());
+  const symLabel=selectedCurrency?selectedCurrency.code:'LYD';
+  const shipLbl=ar?'تكلفة الشحن للدولة (اختياري)':`Shipping cost for ${''} (optional)`;
+  const cityH=ar?'المدينة':'City';
+  const dlvH=ar?'تكلفة التوصيل':'Delivery cost';
+  el.innerHTML=keys.map(code=>{
+    const z=zones[code];
+    const country=COUNTRIES.find(c=>c.code===code);
+    const cname=country?country.name:code;
+    const cflag=country?country.flag:'🌐';
+    const ck=Object.keys(z.cities);
+    const isLY=code==='LY';
+    let adder;
+    if(isLY){
+      const avail=LIBYA_CITIES.filter(c=>!z.cities[c.en]);
+      const placeholder=ar?'اختر مدينة…':'Select a city…';
+      adder=`<select id="new-city-${code}" onchange="if(this.value){addCity('${code}',this.value);this.value='';}" style="width:100%;padding:9px 10px;font-size:13px;border:1.5px dashed var(--color-border-secondary);border-radius:12px;background:transparent;color:#2dbd8f;outline:none;font-family:var(--font-sans);cursor:pointer;margin-top:8px;"><option value="">${placeholder}</option>${avail.map(c=>`<option value="${c.en.replace(/"/g,'&quot;')}">${__cityLbl(c.en)}</option>`).join('')}</select>`;
+    }else{
+      adder=`<button class="lp-add-city-btn" onclick="addCity('${code}')">+ Add a city</button><div id="new-city-wrap-${code}" style="display:none;margin-top:6px;"><input id="new-city-${code}" type="text" placeholder="City name…" class="lp-input" style="font-size:13px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCity('${code}');}"/></div>`;
+    }
+    return `<div class="lp-country-zone-card">
+      <div class="lp-country-zone-head">
+        <div class="lp-country-zone-flag-name"><span style="font-size:20px">${cflag}</span>${cname}</div>
+        <div class="lp-country-zone-x" onclick="removeZone('${code}')">×</div>
+      </div>
+      <div class="lp-zone-ship-row">
+        <span class="lp-zone-ship-label">Shipping cost for ${cname} <span style="font-size:11px;color:var(--color-text-tertiary)">(optional)</span></span>
+        <input type="number" class="lp-zone-ship-input" value="${z.shipping===''||z.shipping==null?'':z.shipping}" placeholder="0.00 ${symLabel}" step="0.01" onchange="updateZoneShipping('${code}',this.value)"/>
+      </div>
+      ${ck.length?`<div class="lp-zone-cities-header"><span>${cityH}</span><span>${dlvH}</span></div>`:''}
+      ${ck.map(city=>`<div class="lp-zone-city-row">
+        <span class="lp-zone-city-name">${isLY?__cityLbl(city):city} <span class="lp-zone-city-x" onclick="removeCity('${code}','${city}')">✕</span></span>
+        <input type="number" class="lp-zone-city-input" value="${z.cities[city].delivery||''}" placeholder="0.00 ${symLabel}" step="0.01" onchange="updateCityCost('${code}','${city}','delivery',this.value)"/>
+      </div>`).join('')}
+      ${adder}
+    </div>`;
+  }).join('');
+}
+function hydrateVariantGroups(p){const __sz=__ar()?'Example: Size':'Example: Size';const __cl=__ar()?'Example: Color':'Example: Color';const __norm=v=>({id:variantIdCounter++,val:typeof v==='string'?v:(v&&v.val)||'',photo:(v&&typeof v==='object'&&v.photo)||'',qty:(v&&typeof v==='object'&&v.qty)||0});if(!p)return[{id:groupIdCounter++,name:'',items:[]},{id:groupIdCounter++,name:'',items:[]}];if(p.variantGroups&&p.variantGroups.length)return p.variantGroups.map(g=>({id:groupIdCounter++,name:g.name,items:(g.items||[]).map(__norm)}));const out=[];out.push({id:groupIdCounter++,name:__sz,items:(p.sizes||[]).map(__norm)});out.push({id:groupIdCounter++,name:__cl,items:(p.colors||[]).map(__norm)});return out;}
+function openAddForm(p){photos=p?[...(p.photos||[])]:[];variantGroups=hydrateVariantGroups(p);zones=p?JSON.parse(JSON.stringify(p.delivery)):{};Object.keys(zones).forEach(code=>{const z=zones[code];if(!z.cities)z.cities={};let s=0;Object.values(z.cities).forEach(c=>{const cs=Number(c.shipping)||0;if(cs>s)s=cs;});if(z.shipping==null||z.shipping==='')z.shipping=s||'';});commMode=p?.commMode||'pct';selectedCurrency=p?.currency||null;selectedCountry=null;currentCode=p?.code||genCode((products||[]).map(pp=>pp.code));document.getElementById('product-code-display').textContent=currentCode;document.getElementById('form-title').textContent=p?'Edit product':'Add a product';document.getElementById('f-name').value=p?.name||'';document.getElementById('f-desc').value=p?.desc||'';document.getElementById('f-price').value=p?.price||'';document.getElementById('f-qty').value=p?.qty||'';document.getElementById('f-category').value=p?.category||'';
+  const cpv=document.getElementById('lp-category-picker-value');
+  if(cpv){if(p?.category){cpv.textContent=p.category;cpv.style.color='';}else{cpv.textContent='Select category';cpv.style.color='var(--color-text-tertiary)';}}document.getElementById('f-comm-pct').value=p?.commPct||'';document.getElementById('f-comm-fixed').value=p?.commFixed||'';if(selectedCurrency){document.getElementById('curr-flag').textContent=selectedCurrency.flag;document.getElementById('curr-name').textContent=selectedCurrency.name+' ('+selectedCurrency.code+')';document.getElementById('curr-symbol-label').textContent=selectedCurrency.symbol;document.getElementById('price-prefix').textContent=selectedCurrency.symbol;document.getElementById('comm-curr-suffix').textContent=selectedCurrency.symbol;}else{document.getElementById('curr-flag').textContent='🌐';document.getElementById('curr-name').textContent='Select a currency';document.getElementById('curr-symbol-label').textContent='';document.getElementById('price-prefix').textContent='—';document.getElementById('comm-curr-suffix').textContent='—';}closeAddCountrySheet();setCommMode(commMode);if(p)updateFeeBreakdown();else{const n=document.getElementById('comm-conversion-note');if(n)n.style.display='none';const s=document.getElementById('summary-card');if(s)s.style.display='none';}renderPhotoGrid();renderVariantGroups();renderZoneBuilderList();document.getElementById('form-overlay').classList.add('open');}
+function closeForm(){document.getElementById('form-overlay').classList.remove('open');editingId=null;photos=[];variantGroups=[];zones={};selectedCurrency=null;selectedCountry=null;currDropdownOpen=false;countryDropdownOpen=false;closeAddCountrySheet();}
 /* legacy submitProduct removed — see async version below */
 function toggleCard(id){document.getElementById('body-'+id).classList.toggle('open');document.getElementById('chev-'+id).classList.toggle('open');}
 let __submittingProduct=false;
@@ -269,6 +392,78 @@ recomputeAnalytics=function(){
     }
   }catch(e){console.error('[Lateen] biz wallet',e);}
 };
+
+/* ─── Category picker ─── */
+const LP_CATEGORY_DATA=[
+  {group:"Fashion & Style",items:["Activewear","Bags","Clothing","Intimates","Jewelry","Shoes","Sunglasses","Watches"]},
+  {group:"Health & Beauty",items:["Beauty","Fragrance","Grooming","Haircare","Makeup","Skincare","Supplements","Wellness"]},
+  {group:"Home & Living",items:["Appliances","Bath","Bedding","Decor","Furniture","Garden","Home","Kitchen","Lighting"]},
+  {group:"Kids & Play",items:["Baby","Crafts","Hobbies","Kids","Maternity","Toys"]},
+  {group:"Sports & Outdoors",items:["Camping","Cycling","Fishing","Fitness","Outdoors","Sports"]},
+  {group:"Tech & Electronics",items:["Accessories","Audio","Cameras","Computers","Electronics","Gaming","Phones","Tablets","Wearables"]},
+  {group:"Utility & Niche",items:["Automotive","Books","Groceries","Office","Pets","Stationery","Tools"]}
+];
+let __catPanelOpen=false;
+function renderLpCategoryList(filter){
+  const list=document.getElementById('lp-category-list');
+  if(!list)return;
+  const q=(filter||'').trim().toLowerCase();
+  list.innerHTML='';
+  let any=false;
+  LP_CATEGORY_DATA.forEach(sec=>{
+    const gm=sec.group.toLowerCase().includes(q);
+    const items=sec.items.filter(i=>gm||i.toLowerCase().includes(q));
+    if(!items.length)return;
+    any=true;
+    const gl=document.createElement('div');
+    gl.className='lp-category-group-label';
+    gl.textContent=sec.group;
+    list.appendChild(gl);
+    items.forEach(item=>{
+      const opt=document.createElement('div');
+      opt.className='lp-category-option';
+      opt.textContent=item;
+      opt.onclick=()=>{
+        document.getElementById('f-category').value=item;
+        const v=document.getElementById('lp-category-picker-value');
+        if(v){v.textContent=item;v.style.color='';}
+        closeLpCategoryPanel();
+      };
+      list.appendChild(opt);
+    });
+  });
+  if(!any){const e=document.createElement('div');e.className='lp-category-empty';e.textContent='No matching categories';list.appendChild(e);}
+}
+function openLpCategoryPanel(){
+  const panel=document.getElementById('lp-category-panel');
+  const input=document.getElementById('lp-category-picker-input');
+  if(!panel)return;
+  panel.style.display='flex';
+  if(input)input.style.borderColor='#2dbd8f';
+  __catPanelOpen=true;
+  const search=document.getElementById('lp-category-search');
+  if(search){search.value='';renderLpCategoryList('');}
+  setTimeout(()=>{if(search)search.focus();},50);
+}
+function closeLpCategoryPanel(){
+  const panel=document.getElementById('lp-category-panel');
+  const input=document.getElementById('lp-category-picker-input');
+  if(panel)panel.style.display='none';
+  if(input)input.style.borderColor='';
+  __catPanelOpen=false;
+}
+function toggleLpCategoryPanel(){if(__catPanelOpen)closeLpCategoryPanel();else openLpCategoryPanel();}
+(function(){
+  const picker=document.getElementById('lp-category-picker-input');
+  if(picker)picker.addEventListener('click',toggleLpCategoryPanel);
+  const search=document.getElementById('lp-category-search');
+  if(search){search.addEventListener('input',()=>renderLpCategoryList(search.value));search.addEventListener('click',e=>e.stopPropagation());}
+  document.addEventListener('click',e=>{
+    const picker=document.getElementById('lp-category-picker');
+    if(picker&&!picker.contains(e.target))closeLpCategoryPanel();
+  });
+})();
+
 (async()=>{try{await loadProducts();await loadOrders();await refreshProfile();}catch(e){console.error('[Lateen] business boot',e);}})();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs.push(window.LateenAPI.subscribe('my-products',()=>{loadProducts();loadOrders();}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('orders',()=>{loadProducts();loadOrders();}));}
 /* persist page + scroll across refresh */
@@ -302,113 +497,4 @@ async function refreshBizNotifications(){
   const tr=(en,ar)=>__ar()?ar:en;
   if(!list.length){root.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--color-text-secondary);font-size:13px;">'+tr('No notifications yet.','لا توجد إشعارات بعد.')+'</div>';return;}
   const ago=(t)=>{const s=Math.max(1,Math.floor((Date.now()-new Date(t).getTime())/1000));const ar=__ar();if(s<60)return ar?s+'ث':s+'s';if(s<3600)return ar?Math.floor(s/60)+'د':Math.floor(s/60)+'m';if(s<86400)return ar?Math.floor(s/3600)+'س':Math.floor(s/3600)+'h';return ar?Math.floor(s/86400)+'يوم':Math.floor(s/86400)+'d';};
-  const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  root.innerHTML=list.map(n=>{
-    let t=n.title,b=n.body||'';
-    if(n.kind==='new_order'||t==='New order'){t=tr('New order','طلب جديد');b=tr('A new order has been received. Check the Orders page.','وصلك طلب جديد. راجع صفحة الطلبات.');}
-    let reviewDetails='';
-    if(n.kind==='product_review'){
-      let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
-      const author=(d&&d.author)||'Marketer';
-      const pname=(d&&d.product_name)||'';
-      const rating=Number(d&&d.rating)||0;
-      t=tr('New product review','تقييم جديد للمنتج');
-      b=__ar()
-        ? `${author} قيّم المنتج ${pname} ${rating} ${rating===1?'نجمة':'نجوم'}`
-        : `${author} rated ${pname} ${rating} ${rating===1?'star':'stars'}`;
-      if(d&&d.text){
-        const stars='★'.repeat(rating)+'☆'.repeat(Math.max(0,5-rating));
-        reviewDetails=`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#181818;border:0.5px solid #232323;font-size:12px;color:var(--color-text-primary)"><div style="color:#e9b949;letter-spacing:2px;margin-bottom:4px">${stars}</div>${esc(d.text)}</div>`;
-      }
-    }
-    const expandable=n.kind==='new_order';
-    const color=expandable?'#2dbd8f':(n.kind==='product_review'?'#e9b949':'#7f77dd');
-    let detailsHtml='';
-    if(expandable&&n.data){
-      let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
-      if(d){
-        const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
-        const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;display:block"/></div>`:'';
-        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #142a20">
-          ${photo}
-          ${row(tr('Order Code','كود الطلبيه'),d.order_code)}
-          ${row(tr('Product','المنتج'),d.product_name)}
-          ${row(tr('Qty','الكمية'),d.qty)}
-          ${row(tr('Customer','الزبون'),d.customer_name)}
-          ${(function(){var p=__splitCC(d.customer_phone);return row(tr('Country code','رمز الدولة'),p.cc)+row(tr('Phone','الهاتف'),p.num);})()}
-          ${d.customer_whatsapp?(function(){var w=__splitCC(d.customer_whatsapp);return row(tr('WhatsApp code','رمز واتساب'),w.cc)+row(tr('WhatsApp','واتساب'),w.num);})():''}
-          ${row(tr('City','المدينة'),d.customer_city)}
-          ${row(tr('Country','الدولة'),d.customer_country)}
-          ${row(tr('Address','العنوان'),d.customer_address)}
-          ${row(tr('Size','المقاس'),d.size)}
-          ${row(tr('Colour','اللون'),d.color)}
-          ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${tr('Notes','ملاحظات')}:</b> ${esc(d.customer_notes)}</div>`:''}
-        </div>`;
-      }
-    }
-    const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
-    const isNew=!n.read_at;
-    const rightDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
-  }).join('');
-}
-window.refreshBizNotifications=refreshBizNotifications;
-(function(){
-  const _g=goTo;
-  let __lastPage=null;
-  goTo=function(id){
-    /* When leaving notifications page, immediately hide all red dots in the list, then sync to DB */
-    if(__lastPage==='pg-notif'&&id!=='pg-notif'){
-      try{const root=document.getElementById('notif-list');if(root){root.querySelectorAll('div').forEach(el=>{const bg=el.style&&el.style.background;if(bg&&bg.indexOf('#E24B4A')!==-1)el.style.display='none';});}}catch(e){}
-      (async()=>{try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}refreshBizNotifications();})();
-    }
-    __lastPage=id;
-    _g.apply(this,arguments);
-    if(id==='pg-notif'){refreshBizNotifications();const dot=document.getElementById('notif-dot');if(dot)dot.style.display='none';}
-  };
-  window.goTo=goTo;
-})();
-if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('notifications',()=>refreshBizNotifications()));}
-refreshBizNotifications();
-
-/* Inject reviews into product cards after each render */
-(function(){
-  const _rp=renderProducts;
-  renderProducts=function(){
-    _rp.apply(this,arguments);
-    try{
-      const rmap=window.__bizReviewsByProduct||{};
-      const ar=__ar();
-      const t=(en,a)=>ar?a:en;
-      const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      for(const p of products){
-        const body=document.getElementById('body-'+p.id);
-        if(!body)continue;
-        if(body.querySelector('[data-reviews-block]'))continue;
-        const list=rmap[p.id]||[];
-        const actions=body.querySelector('.pc-actions');
-        const wrap=document.createElement('div');
-        wrap.setAttribute('data-reviews-block','1');
-        wrap.style.cssText='margin:6px 0 14px 0';
-        const rid='rev-'+p.id;
-        const chev=`<svg id="${rid}-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s"><polyline points="6 9 12 15 18 9"/></svg>`;
-        const toggleFn=`(function(b){var c=document.getElementById('${rid}-body');var v=document.getElementById('${rid}-chev');if(!c)return;var o=c.style.display!=='none';c.style.display=o?'none':'block';if(v)v.style.transform=o?'':'rotate(180deg)';})(this)`;
-        if(!list.length){
-          wrap.innerHTML=`<div class="zones-title" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="${toggleFn}"><span>${t('Reviews','التقييمات')}</span>${chev}</div><div id="${rid}-body" style="display:none"><div style="padding:10px 12px;border-radius:10px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;text-align:center">${t('No reviews yet.','لا توجد تقييمات بعد.')}</div></div>`;
-        }else{
-          const avg=list.reduce((s,r)=>s+r.rating,0)/list.length;
-          const avgStars='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));
-          const items=list.slice(0,10).map(r=>{
-            const stars='★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
-            const d=new Date(r.ts);
-            const ds=d.toLocaleDateString(ar?'ar-LY':'en-GB',{day:'numeric',month:'short',year:'numeric'});
-            return `<div style="padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323;margin-bottom:6px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px"><div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">${esc(r.author)}</div><div style="font-size:10px;color:var(--color-text-secondary)">${esc(ds)}</div></div><div style="color:#e9b949;letter-spacing:2px;font-size:13px;margin-bottom:4px">${stars}</div>${r.text?`<div style="font-size:12px;color:var(--color-text-secondary);line-height:1.4">${esc(r.text)}</div>`:''}</div>`;
-          }).join('');
-          wrap.innerHTML=`<div class="zones-title" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:8px" onclick="${toggleFn}"><span>${t('Reviews','التقييمات')} (${list.length})</span><span style="display:flex;align-items:center;gap:6px"><span style="color:#e9b949;letter-spacing:2px;font-size:12px">${avgStars}</span><span style="color:var(--color-text-secondary);font-size:12px">${avg.toFixed(1)}</span>${chev}</span></div><div id="${rid}-body" style="display:none;margin-top:8px">${items}</div>`;
-        }
-        if(actions)body.insertBefore(wrap,actions);else body.appendChild(wrap);
-      }
-    }catch(e){console.warn('[Lateen] reviews block',e);}
-  };
-  window.renderProducts=renderProducts;
-})();
+  const esc=(s)=>String(s||'').replace(/[&<>"'
