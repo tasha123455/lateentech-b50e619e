@@ -416,6 +416,8 @@ export const DICT: Record<string, string> = {
   "No cities yet": "لا توجد مدن مضافة بعد",
   "No notifications yet.": "لا توجد إشعارات بعد.",
   "Search products…": "ابحث عن منتجات...",
+  "Search your orders": "ابحث عن طلبات",
+  "Search your favorite products": "ابحث عن منتجاتك المفضله",
   "Search currencies…": "ابحث عن العملات...",
   "Search countries…": "ابحث عن الدول...",
   "Search by name, ID, city, product…": "ابحث بالاسم، رقم الطلبية، المدينة، المنتج...",
