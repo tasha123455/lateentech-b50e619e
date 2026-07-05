@@ -1,0 +1,5 @@
+-- Add cost_price to products (replaces the old top-level "Stock qty" field in the
+-- list-a-product form, which is now "Cost price"; stock is tracked per variant value instead).
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS cost_price NUMERIC NOT NULL DEFAULT 0;
+
