@@ -11,6 +11,7 @@ export type LateenProduct = {
   description: string | null;
   category: string | null;
   price: number;
+  cost_price: number;
   qty: number;
   currency: { code: string; name: string; symbol: string; flag: string } | null;
   comm_pct: number;
@@ -18,7 +19,7 @@ export type LateenProduct = {
   comm_mode: string;
   platform_fee: number;
   total_fee_per_unit: number;
-  variant_groups: { name: string; items: string[] }[];
+  variant_groups: { name: string; items: { val: string; qty?: number; photo?: string }[] }[];
   sizes: string[];
   colors: string[];
   delivery: Record<string, { cities: Record<string, { shipping: number; delivery: number }> }>;
@@ -56,6 +57,7 @@ export function createLateenApi(userId: string) {
         description: p.description ?? null,
         category: p.category ?? null,
         price: p.price ?? 0,
+        cost_price: p.cost_price ?? 0,
         qty: p.qty ?? 0,
         currency: p.currency ?? null,
         comm_pct: p.comm_pct ?? 0,
@@ -81,10 +83,7 @@ export function createLateenApi(userId: string) {
     },
 
     async setStatus(id: string, status: "active" | "paused") {
-      const { error } = await supabase
-        .from("products")
-        .update({ status })
-        .eq("id", id);
+      const { error } = await supabase.from("products").update({ status }).eq("id", id);
       if (error) throw error;
     },
 
@@ -118,10 +117,7 @@ export function createLateenApi(userId: string) {
     },
 
     async listFavorites(): Promise<LateenProduct[]> {
-      const { data: favs, error } = await supabase
-        .from("favorites")
-        .select("product_id")
-        .eq("marketer_id", userId);
+      const { data: favs, error } = await supabase.from("favorites").select("product_id").eq("marketer_id", userId);
       if (error) throw error;
       const ids = (favs ?? []).map((r: { product_id: string }) => r.product_id);
       if (!ids.length) return [];
@@ -134,10 +130,7 @@ export function createLateenApi(userId: string) {
     },
 
     async listFavoriteIds(): Promise<Set<string>> {
-      const { data, error } = await supabase
-        .from("favorites")
-        .select("product_id")
-        .eq("marketer_id", userId);
+      const { data, error } = await supabase.from("favorites").select("product_id").eq("marketer_id", userId);
       if (error) throw error;
       return new Set((data ?? []).map((r: { product_id: string }) => r.product_id));
     },
@@ -152,29 +145,25 @@ export function createLateenApi(userId: string) {
       return (data ?? []).map((r: { product_id: string }) => r.product_id);
     },
 
-
     async addFavorite(productId: string) {
-      const { error } = await supabase
-        .from("favorites")
-        .insert({ marketer_id: userId, product_id: productId });
+      const { error } = await supabase.from("favorites").insert({ marketer_id: userId, product_id: productId });
       if (error && error.code !== "23505") throw error;
     },
 
     async notifyProductReview(productId: string, rating: number, text: string) {
-      const { error } = await supabase.rpc("notify_product_review" as never, {
-        _product_id: productId,
-        _rating: rating,
-        _text: text,
-      } as never);
+      const { error } = await supabase.rpc(
+        "notify_product_review" as never,
+        {
+          _product_id: productId,
+          _rating: rating,
+          _text: text,
+        } as never,
+      );
       if (error) throw error;
     },
 
     async removeFavorite(productId: string) {
-      const { error } = await supabase
-        .from("favorites")
-        .delete()
-        .eq("marketer_id", userId)
-        .eq("product_id", productId);
+      const { error } = await supabase.from("favorites").delete().eq("marketer_id", userId).eq("product_id", productId);
       if (error) throw error;
     },
 
@@ -240,9 +229,7 @@ export function createLateenApi(userId: string) {
       if (typeof url !== "string") return "";
       if (!url.startsWith("receipts:")) return url; // legacy public URL
       const path = url.slice("receipts:".length);
-      const { data, error } = await supabase.storage
-        .from("receipts")
-        .createSignedUrl(path, 60 * 60);
+      const { data, error } = await supabase.storage.from("receipts").createSignedUrl(path, 60 * 60);
       if (error || !data?.signedUrl) return "";
       return data.signedUrl;
     },
@@ -289,7 +276,9 @@ export function createLateenApi(userId: string) {
     async getProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, business_name, phone, whatsapp, avatar_url, created_at, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes")
+        .select(
+          "full_name, business_name, phone, whatsapp, avatar_url, created_at, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes",
+        )
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
@@ -297,14 +286,18 @@ export function createLateenApi(userId: string) {
       try {
         const { data: u } = await supabase.auth.getUser();
         email = u?.user?.email ?? null;
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       let avatarSignedUrl: string | null = null;
       const path = (data as { avatar_url?: string } | null)?.avatar_url;
       if (path) {
         try {
           const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 7);
           avatarSignedUrl = s?.signedUrl ?? null;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
       return { ...(data ?? {}), email, avatar_signed_url: avatarSignedUrl } as Record<string, unknown>;
     },
@@ -325,19 +318,17 @@ export function createLateenApi(userId: string) {
         contentType: file.type || "image/jpeg",
       });
       if (upErr) throw upErr;
-      const { error: updErr } = await supabase.from("profiles").update({ avatar_url: path } as never).eq("id", userId);
+      const { error: updErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path } as never)
+        .eq("id", userId);
       if (updErr) throw updErr;
       const { data: s } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 7);
       return s?.signedUrl ?? "";
     },
 
-
     async getWallet() {
-      const { data, error } = await supabase
-        .from("wallets")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
+      const { data, error } = await supabase.from("wallets").select("*").eq("user_id", userId).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -400,7 +391,16 @@ export function createLateenApi(userId: string) {
     },
 
     subscribe(
-      key: "my-products" | "browse-products" | "favorites" | "orders" | "wallet" | "payouts" | "notifications" | "admin-wallets" | "admin-payouts",
+      key:
+        | "my-products"
+        | "browse-products"
+        | "favorites"
+        | "orders"
+        | "wallet"
+        | "payouts"
+        | "notifications"
+        | "admin-wallets"
+        | "admin-payouts",
       onChange: () => void,
     ) {
       const ch = supabase.channel(`lateen-${key}-${userId}-${crypto.randomUUID()}`);
@@ -415,17 +415,15 @@ export function createLateenApi(userId: string) {
       if (key === "admin-wallets") filters.push({ table: "wallets" });
       if (key === "admin-payouts") filters.push({ table: "payouts" });
       for (const f of filters) {
-        (ch as unknown as {
-          on: (
-            ev: string,
-            cfg: { event: string; schema: string; table: string; filter?: string },
-            cb: () => void,
-          ) => void;
-        }).on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: f.table, filter: f.filter },
-          () => onChange(),
-        );
+        (
+          ch as unknown as {
+            on: (
+              ev: string,
+              cfg: { event: string; schema: string; table: string; filter?: string },
+              cb: () => void,
+            ) => void;
+          }
+        ).on("postgres_changes", { event: "*", schema: "public", table: f.table, filter: f.filter }, () => onChange());
       }
       ch.subscribe();
       return () => {
@@ -442,7 +440,9 @@ export function createLateenApi(userId: string) {
           .not("receipt_url", "is", null)
           .order("created_at", { ascending: false });
         if (error) throw error;
-        const list = (orders ?? []) as Array<Record<string, unknown> & { marketer_id: string; product_id: string; receipt_url?: string | null }>;
+        const list = (orders ?? []) as Array<
+          Record<string, unknown> & { marketer_id: string; product_id: string; receipt_url?: string | null }
+        >;
         // Resolve private receipt paths to short-lived signed URLs.
         await Promise.all(
           list.map(async (o) => {
@@ -476,7 +476,10 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
       },
       async rejectOrder(id: string, notes?: string) {
-        const { error } = await supabase.rpc("admin_reject_order_with_notes", { _order_id: id, _notes: (notes ?? "") as string });
+        const { error } = await supabase.rpc("admin_reject_order_with_notes", {
+          _order_id: id,
+          _notes: (notes ?? "") as string,
+        });
         if (error) throw error;
       },
       async listPayoutRequests() {
@@ -489,7 +492,12 @@ export function createLateenApi(userId: string) {
         const rows = (data ?? []) as Array<Record<string, unknown> & { user_id: string }>;
         const ids = [...new Set(rows.map((r) => r.user_id))];
         const { data: profs } = ids.length
-          ? await supabase.from("profiles").select("id, full_name, phone, business_name, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes").in("id", ids)
+          ? await supabase
+              .from("profiles")
+              .select(
+                "id, full_name, phone, business_name, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes",
+              )
+              .in("id", ids)
           : { data: [] as Array<Record<string, unknown> & { id: string }> };
         const { data: wallets } = ids.length
           ? await supabase.from("wallets").select("user_id, balance, pending, currency").in("user_id", ids)
@@ -507,21 +515,28 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
       },
       async listAllUsers(search?: string) {
-        let q = supabase
-          .from("profiles")
-          .select("id, full_name, phone, business_name, created_at");
+        let q = supabase.from("profiles").select("id, full_name, phone, business_name, created_at");
         if (search && search.trim()) {
           const s = `%${search.trim()}%`;
           q = q.or(`full_name.ilike.${s},phone.ilike.${s},business_name.ilike.${s}`);
         }
         const { data, error } = await q.order("created_at", { ascending: false });
         if (error) throw error;
-        const profiles = (data ?? []) as Array<{ id: string; full_name: string | null; phone: string | null; business_name: string | null; created_at: string }>;
+        const profiles = (data ?? []) as Array<{
+          id: string;
+          full_name: string | null;
+          phone: string | null;
+          business_name: string | null;
+          created_at: string;
+        }>;
         if (!profiles.length) return [];
         const { data: roles } = await supabase
           .from("user_roles")
           .select("user_id, role")
-          .in("user_id", profiles.map((p) => p.id));
+          .in(
+            "user_id",
+            profiles.map((p) => p.id),
+          );
         const rmap = new Map((roles ?? []).map((r: { user_id: string; role: string }) => [r.user_id, r.role]));
         return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer" }));
       },
@@ -547,11 +562,7 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
       },
       async getProductDetail(id: string) {
-        const { data: product, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle();
+        const { data: product, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
         if (error) throw error;
         if (!product) return null;
         const { data: owner } = await supabase
@@ -574,7 +585,10 @@ export function createLateenApi(userId: string) {
         const { data: pays } = await supabase
           .from("employee_payments")
           .select("*")
-          .in("employee_id", emps.map((e) => e.id))
+          .in(
+            "employee_id",
+            emps.map((e) => e.id),
+          )
           .order("period_year", { ascending: false })
           .order("period_month", { ascending: false });
         const map = new Map<string, Array<Record<string, unknown>>>();
@@ -607,7 +621,13 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.from("employees").delete().eq("id", id);
         if (error) throw error;
       },
-      async payEmployee(input: { employee_id: string; period_year: number; period_month: number; amount: number; notes?: string | null }) {
+      async payEmployee(input: {
+        employee_id: string;
+        period_year: number;
+        period_month: number;
+        amount: number;
+        notes?: string | null;
+      }) {
         const { data, error } = await supabase
           .from("employee_payments")
           .insert(input as never)
@@ -627,15 +647,22 @@ export function createLateenApi(userId: string) {
         const yearStart = new Date(monthStart.getFullYear(), 0, 1);
 
         const [feesRes, todayRes, activeRes, profilesRes, productsRes] = await Promise.all([
-          supabase.from("orders").select("platform_fee, qty, status, created_at").in("status", ["approved", "confirmed", "delivered", "cancelled"]),
-          supabase.from("orders").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
+          supabase
+            .from("orders")
+            .select("platform_fee, qty, status, created_at")
+            .in("status", ["approved", "confirmed", "delivered", "cancelled"]),
+          supabase
+            .from("orders")
+            .select("id", { count: "exact", head: true })
+            .gte("created_at", todayStart.toISOString()),
           supabase.from("orders").select("marketer_id, business_id, created_at").gte("created_at", monthAgo),
           supabase.from("profiles").select("id", { count: "exact", head: true }),
           supabase.from("products").select("id", { count: "exact", head: true }).is("deleted_at", null),
         ]);
 
         const feeRows = (feesRes.data ?? []) as Array<{ platform_fee: number; qty: number; created_at: string }>;
-        const calc = (rows: typeof feeRows) => rows.reduce((sum, r) => sum + Number(r.platform_fee || 0) * Number(r.qty || 0), 0);
+        const calc = (rows: typeof feeRows) =>
+          rows.reduce((sum, r) => sum + Number(r.platform_fee || 0) * Number(r.qty || 0), 0);
         const fees = calc(feeRows);
         const monthMs = monthStart.getTime();
         const yearMs = yearStart.getTime();
@@ -663,4 +690,3 @@ export function createLateenApi(userId: string) {
     },
   };
 }
-
