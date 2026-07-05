@@ -1,3 +1,4 @@
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -374,51 +375,11 @@
 .lp-summary-row { display:flex; justify-content:space-between; font-size:14px; color:var(--color-text-secondary); padding:8px 0; }
 .lp-summary-row.total { color:var(--color-text-primary); font-weight:800; font-size:16px; padding-top:12px; border-top:0.5px solid var(--color-border-tertiary); margin-top:4px; }
 .lp-summary-row.total .lp-val { color:#2dbd8f; }
-/* Country card that appears after adding a country - matching the screenshot */
-.lp-country-zone-card { background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); border-radius:14px; padding:14px; margin-top:10px; }
-.lp-country-zone-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.lp-country-zone-flag-name { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; color:var(--color-text-primary); }
-.lp-country-zone-x { width:30px; height:30px; border-radius:9px; background:var(--color-background-primary); border:0.5px solid var(--color-border-secondary); color:#e07070; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; flex-shrink:0; }
-.lp-zone-ship-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-.lp-zone-ship-label { flex:1; font-size:13px; color:var(--color-text-secondary); }
-.lp-zone-ship-input { width:120px; text-align:right; padding:9px 10px; font-size:13px; background:var(--color-background-primary); border:0.5px solid var(--color-border-secondary); border-radius:10px; color:var(--color-text-primary); font-family:var(--font-sans); outline:none; }
-.lp-zone-ship-input:focus { border-color:#2dbd8f; }
-.lp-zone-cities-header { display:flex; justify-content:space-between; font-size:12px; color:var(--color-text-secondary); margin-bottom:8px; }
-.lp-zone-city-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-top:0.5px solid var(--color-border-tertiary); }
-.lp-zone-city-name { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--color-text-primary); flex:1; }
-.lp-zone-city-x { color:var(--color-text-tertiary); font-size:12px; cursor:pointer; }
-.lp-zone-city-input { width:110px; text-align:right; padding:8px 10px; font-size:13px; background:var(--color-background-primary); border:0.5px solid var(--color-border-secondary); border-radius:10px; color:var(--color-text-primary); font-family:var(--font-sans); outline:none; }
-.lp-zone-city-input:focus { border-color:#2dbd8f; }
-.lp-add-city-btn { width:100%; background:transparent; border:1.5px dashed var(--color-border-secondary); color:#2dbd8f; border-radius:12px; padding:11px; font-size:13px; font-weight:700; cursor:pointer; font-family:var(--font-sans); margin-top:10px; }
 .lp-pf-hint { font-size:12px; color:var(--color-text-secondary); line-height:1.5; margin-bottom:12px; }
 .lp-variant-group { background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); border-radius:16px; padding:16px; margin-bottom:14px; }
 .lp-add-variant-btn { width:100%; background:transparent; border:1.5px dashed var(--color-border-secondary); color:#2dbd8f; border-radius:14px; padding:13px; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--font-sans); }
 .lp-country-card { background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); border-radius:14px; padding:14px; margin-top:10px; }
 .lp-add-zone-btn { width:100%; background:transparent; border:1.5px dashed var(--color-border-secondary); color:#2dbd8f; border-radius:14px; padding:13px; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--font-sans); margin-top:12px; }
-.lp-category-picker { position:relative; }
-/* Variant group redesign matching reference */
-.lp-variant-group-v2 { background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); border-radius:16px; padding:16px; margin-bottom:14px; }
-.lp-variant-group-head { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-.lp-variant-group-head input { flex:1; font-weight:700; font-size:14px; }
-.lp-variant-remove-x { width:30px; height:30px; border-radius:9px; background:var(--color-background-primary); border:0.5px solid var(--color-border-secondary); color:#e07070; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; font-size:14px; }
-.lp-variant-col-header { display:flex; align-items:center; gap:10px; padding:0 10px 0 14px; font-size:12px; color:var(--color-text-secondary); margin-bottom:10px; }
-.lp-vcol-value { flex:1; }
-.lp-vcol-qty { width:64px; text-align:center; }
-.lp-vcol-photo { width:38px; flex-shrink:0; }
-.lp-value-row { display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:12px; padding:9px 10px 9px 14px; margin-bottom:8px; }
-.lp-value-name { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--color-text-primary); flex:1; }
-.lp-value-x { color:var(--color-text-tertiary); font-size:12px; cursor:pointer; }
-.lp-qty-input { width:64px; text-align:center; padding:8px 6px; font-size:13px; background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); border-radius:8px; color:var(--color-text-primary); font-family:var(--font-sans); outline:none; flex-shrink:0; }
-.lp-qty-input:focus { border-color:#2dbd8f; }
-.lp-value-photo { width:38px; height:38px; border-radius:9px; border:1.5px dashed var(--color-border-secondary); color:#2dbd8f; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; background:var(--color-background-tertiary); overflow:hidden; position:relative; }
-.lp-value-photo img { width:100%; height:100%; object-fit:cover; display:block; border-radius:9px; }
-.lp-value-photo-x { position:absolute; top:1px; right:1px; width:15px; height:15px; border-radius:50%; background:rgba(0,0,0,0.75); color:#fff; border:none; font-size:10px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
-.lp-add-value-row { display:flex; align-items:center; gap:8px; color:#2dbd8f; font-size:13px; font-weight:700; cursor:pointer; padding:9px 4px; }
-.lp-category-group-label { font-size:11px; font-weight:800; letter-spacing:0.5px; text-transform:uppercase; color:#2dbd8f; background:rgba(45,189,143,0.14); border:1px solid rgba(45,189,143,0.3); border-radius:8px; padding:7px 10px; margin:8px 0 6px; }
-.lp-category-group-label:first-child { margin-top:0; }
-.lp-category-option { padding:10px 8px 10px 16px; border-radius:8px; font-size:14px; color:var(--color-text-secondary); cursor:pointer; }
-.lp-category-option:hover, .lp-category-option.active { background:rgba(45,189,143,0.14); color:#2dbd8f; }
-.lp-category-empty { padding:16px 8px; text-align:center; color:var(--color-text-tertiary); font-size:13px; }
 .lp-bottom { padding:24px 0 4px; }
 .lp-btn-primary { width:100%; background:#2dbd8f; color:#06150e; border:none; border-radius:14px; padding:16px; font-size:16px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; font-family:var(--font-sans); margin-bottom:4px; }
 .lp-btn-primary:active { background:#1f8f56; }
@@ -684,8 +645,8 @@
           </div>
         </div>
         <div>
-          <label class="lp-field-label">Cost price</label>
-          <input class="lp-input" type="number" id="f-qty" placeholder="0.00" min="0" step="0.01"/>
+          <label class="lp-field-label">Stock qty</label>
+          <input class="lp-input" type="number" id="f-qty" placeholder="100" min="0"/>
         </div>
       </div>
 
@@ -710,27 +671,27 @@
 
       <!-- Category -->
       <label class="lp-field-label">Category <span class="lp-req">*</span></label>
-      <div class="lp-category-picker" id="lp-category-picker">
-        <div class="lp-category-picker-input lp-input" id="lp-category-picker-input" tabindex="0" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;position:relative;padding-right:38px;">
-          <span id="lp-category-picker-value" style="color:var(--color-text-tertiary);">Select category</span>
-          <span style="position:absolute;right:14px;top:50%;width:9px;height:9px;border-right:2px solid var(--color-text-secondary);border-bottom:2px solid var(--color-text-secondary);transform:translateY(-65%) rotate(45deg);display:block;pointer-events:none;"></span>
-        </div>
-        <div id="lp-category-panel" style="display:none;flex-direction:column;position:absolute;left:0;right:0;background:#1e1e1e;border:0.5px solid var(--color-border-secondary);border-radius:14px;padding:10px;z-index:50;box-shadow:0 12px 32px rgba(0,0,0,0.45);max-height:300px;margin-top:4px;">
-          <div style="display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:10px;padding:9px 12px;margin-bottom:6px;flex-shrink:0;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="lp-category-search" placeholder="Search category..." style="border:none;background:transparent;padding:0;font-size:14px;color:var(--color-text-primary);outline:none;width:100%;font-family:var(--font-sans);" onclick="event.stopPropagation()"/>
-          </div>
-          <div id="lp-category-list" style="overflow-y:auto;max-height:220px;"></div>
-        </div>
+      <div class="lp-select-wrap">
+        <select class="lp-input" id="f-category">
+          <option value="">— Select —</option>
+          <option>Fashion &amp; footwear</option>
+          <option>Health &amp; fitness</option>
+          <option>Beauty &amp; skincare</option>
+          <option>Tech &amp; gadgets</option>
+          <option>Home &amp; living</option>
+          <option>Food &amp; nutrition</option>
+        </select>
       </div>
-      <input type="hidden" id="f-category" value=""/>
 
       <!-- Product code -->
       <label class="lp-field-label lp-field-label-row">
         Product code
         <span class="lp-badge">Auto-generated</span>
       </label>
-      <input class="lp-input" type="text" id="product-code-display" value="—" disabled style="font-family:var(--font-mono);letter-spacing:0.05em;font-weight:600;color:var(--color-text-primary);"/>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input class="lp-input" type="text" id="product-code-display" value="—" disabled style="flex:1;font-family:var(--font-mono);letter-spacing:0.05em;"/>
+        <button onclick="refreshCode()" style="height:46px;padding:0 14px;border-radius:12px;border:0.5px solid var(--color-border-secondary);background:transparent;color:#2dbd8f;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;">Regenerate</button>
+      </div>
     </div>
 
     <!-- STEP 2: Variants & Inventory -->
@@ -744,6 +705,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 7 12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
+      <p class="lp-pf-hint">Sizes and colours are added by default. Rename, remove, or add your own (e.g. Material, Flavour, Style).</p>
       <div id="variant-groups-container"></div>
       <button type="button" class="lp-add-variant-btn" onclick="addVariantGroup()">+ Add another variant</button>
     </div>
@@ -759,19 +721,20 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
-      <label class="lp-field-label">Countries and cities available for delivery <span class="lp-req">*</span></label>
+      <p class="lp-pf-hint">Add countries and cities where you deliver. Set shipping costs per city.</p>
 
-      <div id="zone-builder-list"></div>
-      <button class="lp-add-variant-btn" onclick="openAddCountrySheet()" style="margin-bottom:0;margin-top:0;" id="add-country-btn">+ Add a country</button>
-
-      <!-- Add country sheet (hidden, shown inline) -->
-      <div id="add-country-sheet" style="display:none;margin-top:10px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:14px;padding:12px;">
-        <div style="display:flex;align-items:center;gap:8px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:10px;padding:9px 12px;margin-bottom:8px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="country-search" placeholder="Search countries…" oninput="filterCountries()" style="border:none;background:transparent;padding:0;font-size:14px;color:var(--color-text-primary);outline:none;width:100%;font-family:var(--font-sans);"/>
-        </div>
-        <div id="country-dropdown" style="max-height:200px;overflow-y:auto;"></div>
+      <!-- Country selector -->
+      <div class="lp-currency-static" id="country-selected" onclick="toggleCountryDropdown()" style="margin-bottom:8px">
+        <span style="font-size:18px;line-height:1;" id="country-flag">🌐</span>
+        <span id="country-name" style="color:var(--color-text-primary);">Select a country</span>
       </div>
+      <div class="currency-search-wrap" id="country-search-wrap" style="display:none">
+        <svg class="currency-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="currency-search" id="country-search" type="text" placeholder="Search countries…" oninput="filterCountries()"/>
+      </div>
+      <div class="currency-dropdown" id="country-dropdown"></div>
+      <button class="lp-add-variant-btn" onclick="addZone()" style="margin-bottom:0">+ Add country to zones</button>
+      <div id="zone-builder-list"></div>
     </div>
 
     <!-- STEP 4: Marketer profit -->
@@ -804,29 +767,21 @@
         </div>
         <div class="lp-comm-row" id="row-comm-fixed" style="display:none">
           <div class="comm-input-wrap" style="flex:1">
-            <input class="lp-input" type="number" id="f-comm-fixed" placeholder="0.00" min="0" step="0.01" oninput="onCommFixedChange()"/>
+            <input class="lp-input" type="number" id="f-comm-fixed" placeholder="0.00" min="0" step="0.01" oninput="onCommFixedChange()" style="padding-right:44px"/>
             <span class="comm-suffix" id="comm-curr-suffix">—</span>
           </div>
           <span class="lp-comm-unit">per sale</span>
         </div>
 
-        <!-- Conversion note: shown below the active input -->
-        <div class="lp-conversion-note" id="comm-conversion-note" style="display:none"></div>
-      </div>
-    </div>
-
-    <!-- Summary card -->
-    <div class="lp-card" id="summary-card" style="display:none">
-      <div class="lp-card-head">
-        <div class="lp-card-title" style="font-size:16px;font-weight:700;">Summary</div>
-        <div class="lp-icon-chip">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12h6m-6 4h6M9 8h1M7 4h10a2 2 0 0 1 2 2v13l-3-2-2 2-2-2-2 2-2-2-2 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="lp-conversion-note" id="fee-breakdown-card" style="display:none">
+          <div style="font-size:11px;color:var(--color-text-tertiary);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;">Fee breakdown</div>
+          <div style="font-size:22px;font-weight:700;color:var(--color-text-primary);margin-bottom:2px;" id="fbc-total">—</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;" id="fbc-sub">per unit</div>
+          <div style="height:0.5px;background:var(--color-border-tertiary);margin:8px 0;"></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--color-text-secondary)">Marketer commission</span><span style="font-weight:600;color:var(--color-text-primary);" id="fbc-comm">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--color-text-secondary)">Platform fee (5%)</span><span style="font-weight:600;color:var(--color-text-primary);" id="fbc-platform">—</span></div>
         </div>
       </div>
-      <div class="lp-summary-row"><span>Product price</span><span id="sum-price">—</span></div>
-      <div class="lp-summary-row"><span id="sum-marketer-label">Marketer commission</span><span id="sum-marketer-amt">—</span></div>
-      <div class="lp-summary-row"><span>Platform commission (5%)</span><span id="sum-platform-amt">—</span></div>
-      <div class="lp-summary-row total"><span>Your total</span><span class="lp-val" id="sum-total">—</span></div>
     </div>
 
     <!-- Bottom actions -->
@@ -841,5 +796,4 @@
   </div>
 </div>
 </div>
-
 
