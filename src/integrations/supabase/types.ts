@@ -1166,6 +1166,10 @@ export type Database = {
               isSetofReturn: false
             }
           }
+      marketer_reupload_receipt: {
+        Args: { _order_id: string; _receipt_url: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
