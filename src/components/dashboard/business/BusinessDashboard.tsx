@@ -2,7 +2,7 @@ import { DashboardShell } from "../DashboardShell";
 import { BalanceCard } from "../BalanceCard";
 import { StatsRow } from "../StatsRow";
 import { RevenueChart } from "../RevenueChart";
-import { ProductList } from "../ProductList";
+import { ProductsPageEmbed } from "./ProductsPageEmbed";
 import { NotificationsPage } from "../NotificationsPage";
 import { businessMock } from "@/lib/mock-data";
 
@@ -30,7 +30,7 @@ export function BusinessDashboard({ name }: { name: string }) {
             <RevenueChart title="Revenue" accent="business" />
           </>
         ),
-        products: <ProductList products={m.products} label="Your products" />,
+        products: <ProductsPageEmbed />,
         alerts: <NotificationsPage items={m.notifications} />,
         menu: null,
       }}
