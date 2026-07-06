@@ -213,6 +213,14 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
+    async reuploadReceipt(orderId: string, receiptUrl: string) {
+      const { error } = await supabase.rpc("marketer_reupload_receipt" as never, {
+        _order_id: orderId,
+        _receipt_url: receiptUrl,
+      } as never);
+      if (error) throw error;
+    },
+
     async uploadReceipt(file: File): Promise<string> {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `${userId}/${crypto.randomUUID()}.${ext}`;
