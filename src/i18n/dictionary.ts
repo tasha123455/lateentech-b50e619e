@@ -371,7 +371,6 @@ export const DICT: Record<string, string> = {
   "Once the deposit is made, upload a photo of the receipt so it can be reviewed.": "بعد إتمام التحويل، ارفع صورة الإيصال ليتم مراجعته.",
   "The company will verify the deposit, then credit your funds to your wallet for withdrawal.": "ستقوم الشركة بالتحقق من التحويل، ثم تُضاف أموالك إلى محفظتك للسحب.",
   "Your fee": "رسومك",
-  "Platform fee": "رسوم المنصة",
   "Total deposit required": "إجمالي العربون المطلوب",
   "Important notes": "ملاحظات مهمة",
   "Step-by-step deposit instructions": "خطوات التحويل بالتفصيل",
