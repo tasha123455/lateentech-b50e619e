@@ -58,7 +58,6 @@ const CURRENCIES=[{code:'AED',name:'UAE Dirham',symbol:'د.إ',flag:'🇦🇪'},
 (function(){CURRENCIES.forEach(c=>{c.symbol=__wrapArSym(c.symbol,c.code);});})();
 const COUNTRIES=[{code:'AF',name:'Afghanistan',flag:'🇦🇫'},{code:'AL',name:'Albania',flag:'🇦🇱'},{code:'DZ',name:'Algeria',flag:'🇩🇿'},{code:'AD',name:'Andorra',flag:'🇦🇩'},{code:'AO',name:'Angola',flag:'🇦🇴'},{code:'AG',name:'Antigua and Barbuda',flag:'🇦🇬'},{code:'AR',name:'Argentina',flag:'🇦🇷'},{code:'AM',name:'Armenia',flag:'🇦🇲'},{code:'AU',name:'Australia',flag:'🇦🇺'},{code:'AT',name:'Austria',flag:'🇦🇹'},{code:'AZ',name:'Azerbaijan',flag:'🇦🇿'},{code:'BS',name:'Bahamas',flag:'🇧🇸'},{code:'BH',name:'Bahrain',flag:'🇧🇭'},{code:'BD',name:'Bangladesh',flag:'🇧🇩'},{code:'BB',name:'Barbados',flag:'🇧🇧'},{code:'BY',name:'Belarus',flag:'🇧🇾'},{code:'BE',name:'Belgium',flag:'🇧🇪'},{code:'BZ',name:'Belize',flag:'🇧🇿'},{code:'BJ',name:'Benin',flag:'🇧🇯'},{code:'BT',name:'Bhutan',flag:'🇧🇹'},{code:'BO',name:'Bolivia',flag:'🇧🇴'},{code:'BA',name:'Bosnia and Herzegovina',flag:'🇧🇦'},{code:'BW',name:'Botswana',flag:'🇧🇼'},{code:'BR',name:'Brazil',flag:'🇧🇷'},{code:'BN',name:'Brunei',flag:'🇧🇳'},{code:'BG',name:'Bulgaria',flag:'🇧🇬'},{code:'BF',name:'Burkina Faso',flag:'🇧🇫'},{code:'BI',name:'Burundi',flag:'🇧🇮'},{code:'CV',name:'Cabo Verde',flag:'🇨🇻'},{code:'KH',name:'Cambodia',flag:'🇰🇭'},{code:'CM',name:'Cameroon',flag:'🇨🇲'},{code:'CA',name:'Canada',flag:'🇨🇦'},{code:'CF',name:'Central African Republic',flag:'🇨🇫'},{code:'TD',name:'Chad',flag:'🇹🇩'},{code:'CL',name:'Chile',flag:'🇨🇱'},{code:'CN',name:'China',flag:'🇨🇳'},{code:'CO',name:'Colombia',flag:'🇨🇴'},{code:'KM',name:'Comoros',flag:'🇰🇲'},{code:'CG',name:'Congo',flag:'🇨🇬'},{code:'CD',name:'Congo (DRC)',flag:'🇨🇩'},{code:'CR',name:'Costa Rica',flag:'🇨🇷'},{code:'CI',name:"Côte d'Ivoire",flag:'🇨🇮'},{code:'HR',name:'Croatia',flag:'🇭🇷'},{code:'CU',name:'Cuba',flag:'🇨🇺'},{code:'CY',name:'Cyprus',flag:'🇨🇾'},{code:'CZ',name:'Czechia',flag:'🇨🇿'},{code:'DK',name:'Denmark',flag:'🇩🇰'},{code:'DJ',name:'Djibouti',flag:'🇩🇯'},{code:'DM',name:'Dominica',flag:'🇩🇲'},{code:'DO',name:'Dominican Republic',flag:'🇩🇴'},{code:'EC',name:'Ecuador',flag:'🇪🇨'},{code:'EG',name:'Egypt',flag:'🇪🇬'},{code:'SV',name:'El Salvador',flag:'🇸🇻'},{code:'GQ',name:'Equatorial Guinea',flag:'🇬🇶'},{code:'ER',name:'Eritrea',flag:'🇪🇷'},{code:'EE',name:'Estonia',flag:'🇪🇪'},{code:'SZ',name:'Eswatini',flag:'🇸🇿'},{code:'ET',name:'Ethiopia',flag:'🇪🇹'},{code:'FJ',name:'Fiji',flag:'🇫🇯'},{code:'FI',name:'Finland',flag:'🇫🇮'},{code:'FR',name:'France',flag:'🇫🇷'},{code:'GA',name:'Gabon',flag:'🇬🇦'},{code:'GM',name:'Gambia',flag:'🇬🇲'},{code:'GE',name:'Georgia',flag:'🇬🇪'},{code:'DE',name:'Germany',flag:'🇩🇪'},{code:'GH',name:'Ghana',flag:'🇬🇭'},{code:'GR',name:'Greece',flag:'🇬🇷'},{code:'GD',name:'Grenada',flag:'🇬🇩'},{code:'GT',name:'Guatemala',flag:'🇬🇹'},{code:'GN',name:'Guinea',flag:'🇬🇳'},{code:'GW',name:'Guinea-Bissau',flag:'🇬🇼'},{code:'GY',name:'Guyana',flag:'🇬🇾'},{code:'HT',name:'Haiti',flag:'🇭🇹'},{code:'HN',name:'Honduras',flag:'🇭🇳'},{code:'HU',name:'Hungary',flag:'🇭🇺'},{code:'IS',name:'Iceland',flag:'🇮🇸'},{code:'IN',name:'India',flag:'🇮🇳'},{code:'ID',name:'Indonesia',flag:'🇮🇩'},{code:'IR',name:'Iran',flag:'🇮🇷'},{code:'IQ',name:'Iraq',flag:'🇮🇶'},{code:'IE',name:'Ireland',flag:'🇮🇪'},{code:'IL',name:'Israel',flag:'🇮🇱'},{code:'IT',name:'Italy',flag:'🇮🇹'},{code:'JM',name:'Jamaica',flag:'🇯🇲'},{code:'JP',name:'Japan',flag:'🇯🇵'},{code:'JO',name:'Jordan',flag:'🇯🇴'},{code:'KZ',name:'Kazakhstan',flag:'🇰🇿'},{code:'KE',name:'Kenya',flag:'🇰🇪'},{code:'KI',name:'Kiribati',flag:'🇰🇮'},{code:'KW',name:'Kuwait',flag:'🇰🇼'},{code:'KG',name:'Kyrgyzstan',flag:'🇰🇬'},{code:'LA',name:'Laos',flag:'🇱🇦'},{code:'LV',name:'Latvia',flag:'🇱🇻'},{code:'LB',name:'Lebanon',flag:'🇱🇧'},{code:'LS',name:'Lesotho',flag:'🇱🇸'},{code:'LR',name:'Liberia',flag:'🇱🇷'},{code:'LY',name:'Libya',flag:'🇱🇾'},{code:'LI',name:'Liechtenstein',flag:'🇱🇮'},{code:'LT',name:'Lithuania',flag:'🇱🇹'},{code:'LU',name:'Luxembourg',flag:'🇱🇺'},{code:'MG',name:'Madagascar',flag:'🇲🇬'},{code:'MW',name:'Malawi',flag:'🇲🇼'},{code:'MY',name:'Malaysia',flag:'🇲🇾'},{code:'MV',name:'Maldives',flag:'🇲🇻'},{code:'ML',name:'Mali',flag:'🇲🇱'},{code:'MT',name:'Malta',flag:'🇲🇹'},{code:'MH',name:'Marshall Islands',flag:'🇲🇭'},{code:'MR',name:'Mauritania',flag:'🇲🇷'},{code:'MU',name:'Mauritius',flag:'🇲🇺'},{code:'MX',name:'Mexico',flag:'🇲🇽'},{code:'FM',name:'Micronesia',flag:'🇫🇲'},{code:'MD',name:'Moldova',flag:'🇲🇩'},{code:'MC',name:'Monaco',flag:'🇲🇨'},{code:'MN',name:'Mongolia',flag:'🇲🇳'},{code:'ME',name:'Montenegro',flag:'🇲🇪'},{code:'MA',name:'Morocco',flag:'🇲🇦'},{code:'MZ',name:'Mozambique',flag:'🇲🇿'},{code:'MM',name:'Myanmar',flag:'🇲🇲'},{code:'NA',name:'Namibia',flag:'🇳🇦'},{code:'NR',name:'Nauru',flag:'🇳🇷'},{code:'NP',name:'Nepal',flag:'🇳🇵'},{code:'NL',name:'Netherlands',flag:'🇳🇱'},{code:'NZ',name:'New Zealand',flag:'🇳🇿'},{code:'NI',name:'Nicaragua',flag:'🇳🇮'},{code:'NE',name:'Niger',flag:'🇳🇪'},{code:'NG',name:'Nigeria',flag:'🇳🇬'},{code:'KP',name:'North Korea',flag:'🇰🇵'},{code:'MK',name:'North Macedonia',flag:'🇲🇰'},{code:'NO',name:'Norway',flag:'🇳🇴'},{code:'OM',name:'Oman',flag:'🇴🇲'},{code:'PK',name:'Pakistan',flag:'🇵🇰'},{code:'PW',name:'Palau',flag:'🇵🇼'},{code:'PS',name:'Palestine',flag:'🇵🇸'},{code:'PA',name:'Panama',flag:'🇵🇦'},{code:'PG',name:'Papua New Guinea',flag:'🇵🇬'},{code:'PY',name:'Paraguay',flag:'🇵🇾'},{code:'PE',name:'Peru',flag:'🇵🇪'},{code:'PH',name:'Philippines',flag:'🇵🇭'},{code:'PL',name:'Poland',flag:'🇵🇱'},{code:'PT',name:'Portugal',flag:'🇵🇹'},{code:'QA',name:'Qatar',flag:'🇶🇦'},{code:'RO',name:'Romania',flag:'🇷🇴'},{code:'RU',name:'Russia',flag:'🇷🇺'},{code:'RW',name:'Rwanda',flag:'🇷🇼'},{code:'KN',name:'Saint Kitts and Nevis',flag:'🇰🇳'},{code:'LC',name:'Saint Lucia',flag:'🇱🇨'},{code:'VC',name:'Saint Vincent and the Grenadines',flag:'🇻🇨'},{code:'WS',name:'Samoa',flag:'🇼🇸'},{code:'SM',name:'San Marino',flag:'🇸🇲'},{code:'ST',name:'São Tomé and Príncipe',flag:'🇸🇹'},{code:'SA',name:'Saudi Arabia',flag:'🇸🇦'},{code:'SN',name:'Senegal',flag:'🇸🇳'},{code:'RS',name:'Serbia',flag:'🇷🇸'},{code:'SC',name:'Seychelles',flag:'🇸🇨'},{code:'SL',name:'Sierra Leone',flag:'🇸🇱'},{code:'SG',name:'Singapore',flag:'🇸🇬'},{code:'SK',name:'Slovakia',flag:'🇸🇰'},{code:'SI',name:'Slovenia',flag:'🇸🇮'},{code:'SB',name:'Solomon Islands',flag:'🇸🇧'},{code:'SO',name:'Somalia',flag:'🇸🇴'},{code:'ZA',name:'South Africa',flag:'🇿🇦'},{code:'KR',name:'South Korea',flag:'🇰🇷'},{code:'SS',name:'South Sudan',flag:'🇸🇸'},{code:'ES',name:'Spain',flag:'🇪🇸'},{code:'LK',name:'Sri Lanka',flag:'🇱🇰'},{code:'SD',name:'Sudan',flag:'🇸🇩'},{code:'SR',name:'Suriname',flag:'🇸🇷'},{code:'SE',name:'Sweden',flag:'🇸🇪'},{code:'CH',name:'Switzerland',flag:'🇨🇭'},{code:'SY',name:'Syria',flag:'🇸🇾'},{code:'TW',name:'Taiwan',flag:'🇹🇼'},{code:'TJ',name:'Tajikistan',flag:'🇹🇯'},{code:'TZ',name:'Tanzania',flag:'🇹🇿'},{code:'TH',name:'Thailand',flag:'🇹🇭'},{code:'TL',name:'Timor-Leste',flag:'🇹🇱'},{code:'TG',name:'Togo',flag:'🇹🇬'},{code:'TO',name:'Tonga',flag:'🇹🇴'},{code:'TT',name:'Trinidad and Tobago',flag:'🇹🇹'},{code:'TN',name:'Tunisia',flag:'🇹🇳'},{code:'TR',name:'Turkey',flag:'🇹🇷'},{code:'TM',name:'Turkmenistan',flag:'🇹🇲'},{code:'TV',name:'Tuvalu',flag:'🇹🇻'},{code:'UG',name:'Uganda',flag:'🇺🇬'},{code:'UA',name:'Ukraine',flag:'🇺🇦'},{code:'AE',name:'United Arab Emirates',flag:'🇦🇪'},{code:'GB',name:'United Kingdom',flag:'🇬🇧'},{code:'US',name:'United States',flag:'🇺🇸'},{code:'UY',name:'Uruguay',flag:'🇺🇾'},{code:'UZ',name:'Uzbekistan',flag:'🇺🇿'},{code:'VU',name:'Vanuatu',flag:'🇻🇺'},{code:'VA',name:'Vatican City',flag:'🇻🇦'},{code:'VE',name:'Venezuela',flag:'🇻🇪'},{code:'VN',name:'Vietnam',flag:'🇻🇳'},{code:'YE',name:'Yemen',flag:'🇾🇪'},{code:'ZM',name:'Zambia',flag:'🇿🇲'},{code:'ZW',name:'Zimbabwe',flag:'🇿🇼'}];
  const COUNTRY_NAMES=Object.fromEntries(COUNTRIES.map(c=>[c.code,c.name]));
-const COUNTRY_FLAGS=Object.fromEntries(COUNTRIES.map(c=>[c.code,c.flag]));
 const CATEGORY_DATA=[
   {group:"Fashion & Style",items:["Activewear","Bags","Clothing","Intimates","Jewelry","Shoes","Sunglasses","Watches"]},
   {group:"Health & Beauty",items:["Beauty","Fragrance","Grooming","Haircare","Makeup","Skincare","Supplements","Wellness"]},
@@ -175,51 +174,6 @@ const LOW_STOCK_THRESHOLD=20;
 let mpActiveFilter='all';
 const mpPhotoIndex={};
 const mpAnalyticsOpen={};
-const mpAnalyticsPeriod={};
-
-function mpPhotosOf(p){return (p.photos||[]).filter(Boolean);}
-
-function mpMatchesProduct(o,p){if(o.productId&&p.id)return o.productId===p.id;return o.productCode===p.code;}
-
-function mpPeriodStart(period){
-  const now=new Date();
-  if(period==='day')return new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  if(period==='month')return new Date(now.getFullYear(),now.getMonth(),1);
-  if(period==='year')return new Date(now.getFullYear(),0,1);
-  return null;
-}
-
-function mpProductPeriodTotals(p,period){
-  const start=mpPeriodStart(period);
-  let sold=0,revenue=0;
-  orders.forEach(o=>{
-    if(o._status!=='delivered'||!mpMatchesProduct(o,p))return;
-    if(start&&(!o._createdAt||o._createdAt<start))return;
-    sold+=o.qty||0;revenue+=(o.price||0)*(o.qty||0);
-  });
-  return {sold,revenue};
-}
-
-function mpVariantPeriodStat(p,groupName,value,period){
-  const isSize=/size/i.test(groupName||''),isColor=/colou?r/i.test(groupName||'');
-  if(!isSize&&!isColor)return null;
-  const start=mpPeriodStart(period);
-  let sold=0,revenue=0;
-  orders.forEach(o=>{
-    if(o._status!=='delivered'||!mpMatchesProduct(o,p))return;
-    if(start&&(!o._createdAt||o._createdAt<start))return;
-    const match=isSize?(o.size===value):(o.color===value);
-    if(!match)return;
-    sold+=o.qty||0;revenue+=(o.price||0)*(o.qty||0);
-  });
-  return {sold,revenue};
-}
-
-function mpActiveMarketerCount(p){
-  const set=new Set();
-  orders.forEach(o=>{if(mpMatchesProduct(o,p)&&o.marketerId)set.add(o.marketerId);});
-  return set.size;
-}
 
 function mpEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
@@ -237,7 +191,7 @@ function mpStatusBadges(p){
 }
 
 function mpSlidesHtml(p){
-  const photos=mpPhotosOf(p);
+  const photos=(p.photos||[]).filter(Boolean);
   if(!photos.length){
     const icon=p.currency?(p.currency.flag||'📦'):'📦';
     return `<div class="mp-p-thumb-slide mp-p-thumb-empty">${icon}</div>`;
@@ -246,16 +200,28 @@ function mpSlidesHtml(p){
 }
 
 function mpDotsHtml(p){
-  const photos=mpPhotosOf(p);
+  const photos=(p.photos||[]).filter(Boolean);
   if(photos.length<=1)return '';
   const dots=photos.map((_,i)=>`<span class="mp-thumb-dot${i===0?' active':''}" onclick="event.stopPropagation();mpSlidePhoto('${p.id}',${i})"></span>`).join('');
   return `<div class="mp-thumb-dots">${dots}</div>`;
 }
 
-function mpVariantAnalyticsBoxes(p,period){
+function mpAnalyticsSection(p){
+  const fmtP=mpFmt(p);
+  const stockClass=p.qty===0?'warn':(p.qty<=LOW_STOCK_THRESHOLD?'warn':'accent');
+  return `<div class="mp-analytics-panel-inner">
+    <div class="mp-stat-grid">
+      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'المباع':'Sold'}</div><div class="mp-stat-val">${(p.sold||0).toLocaleString()}</div></div>
+      <div class="mp-stat-tile ${stockClass}"><div class="mp-stat-label">${__ar()?'المخزون':'In stock'}</div><div class="mp-stat-val">${p.qty||0}</div></div>
+      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'الإيرادات':'Revenue'}</div><div class="mp-stat-val">${fmtP(p.revenue||0)}</div></div>
+      <div class="mp-stat-tile fee"><div class="mp-stat-label">${__ar()?'الرسوم/وحدة':'Fee/unit'}</div><div class="mp-stat-val">${fmtP(p.totalFeePerUnit||0)}</div></div>
+    </div>
+  </div>`;
+}
+
+function mpVariantBoxes(p){
   const realGroups=(p.variantGroups||[]).filter(g=>g.items&&g.items.length);
   if(realGroups.length){
-    const fmtP=mpFmt(p);
     return realGroups.map(g=>{
       const items=g.items;
       const total=items.reduce((s,x)=>s+(Number(x.qty)||0),0);
@@ -264,19 +230,13 @@ function mpVariantAnalyticsBoxes(p,period){
         const qty=Number(x.qty)||0;
         const pct=Math.max(6,Math.round(qty/maxQty*100));
         const low=qty===0?'mp-empty':(qty<=LOW_STOCK_THRESHOLD?'mp-low':'');
-        const stat=mpVariantPeriodStat(p,g.name,x.val,period);
-        const vSold=stat?stat.sold:0,vRevenue=stat?stat.revenue:0;
-        const swatch=x.photo?`<img class="mp-vg-swatch" src="${mpEsc(x.photo)}" alt="" onclick="event.stopPropagation();mpOpenLightbox([this.src],0)"/>`:`<span class="mp-vg-swatch mp-vg-swatch-empty"></span>`;
+        const swatch=x.photo?`<img class="mp-vg-swatch" src="${mpEsc(x.photo)}" alt=""/>`:'';
         return `<div class="mp-vg-value-row">
           <div class="mp-vg-value-top">
             ${swatch}
             <span class="mp-vg-value-name">${mpEsc(x.val)}</span>
             <div class="mp-vg-bar-track"><div class="mp-vg-bar-fill ${low}" style="width:${pct}%"></div></div>
-          </div>
-          <div class="mp-vg-mini-grid">
-            <div class="mp-vg-mini ${low?'mp-warn':''}"><div class="l">${__ar()?'المخزون':'In stock'}</div><div class="v">${qty}</div></div>
-            <div class="mp-vg-mini"><div class="l">${__ar()?'المباع':'Sold'}</div><div class="v">${vSold}</div></div>
-            <div class="mp-vg-mini"><div class="l">${__ar()?'الإيرادات':'Revenue'}</div><div class="v">${fmtP(vRevenue)}</div></div>
+            <span class="mp-vg-value-qty">${qty}</span>
           </div>
         </div>`;
       }).join('');
@@ -293,46 +253,9 @@ function mpVariantAnalyticsBoxes(p,period){
   return `<div class="mp-variant-chip-row">${chips.join('')}</div>`;
 }
 
-function mpAnalyticsBody(p,period){
-  const fmtP=mpFmt(p);
-  const stockClass=p.qty===0?'warn':(p.qty<=LOW_STOCK_THRESHOLD?'warn':'accent');
-  const pt=mpProductPeriodTotals(p,period);
-  return `<div class="mp-stat-grid">
-      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'المباع':'Sold'}</div><div class="mp-stat-val">${(pt.sold||0).toLocaleString()}</div></div>
-      <div class="mp-stat-tile ${stockClass}"><div class="mp-stat-label">${__ar()?'المخزون':'In stock'}</div><div class="mp-stat-val">${p.qty||0}</div></div>
-      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'الإيرادات':'Revenue'}</div><div class="mp-stat-val">${fmtP(pt.revenue||0)}</div></div>
-    </div>
-    ${mpVariantAnalyticsBoxes(p,period)}`;
-}
-
-function mpAnalyticsSection(p){
-  const period=mpAnalyticsPeriod[p.id]||'all';
-  const chip=(key,label)=>`<div class="mp-period-chip${period===key?' sel':''}" data-period="${key}" onclick="event.stopPropagation();mpSetAnalyticsPeriod('${p.id}','${key}')">${label}</div>`;
-  return `<div class="mp-analytics-panel-inner">
-    <div class="mp-analytics-period-row" id="mp-period-row-${p.id}">
-      ${chip('day',__ar()?'اليوم':'Today')}
-      ${chip('month',__ar()?'هذا الشهر':'This month')}
-      ${chip('year',__ar()?'هذا العام':'This year')}
-      ${chip('all',__ar()?'كل الوقت':'All time')}
-    </div>
-    <div id="mp-analytics-body-${p.id}">${mpAnalyticsBody(p,period)}</div>
-  </div>`;
-}
-
-function mpSetAnalyticsPeriod(pid,period){
-  mpAnalyticsPeriod[pid]=period;
-  const p=products.find(x=>x.id===pid);
-  if(!p)return;
-  const row=document.getElementById(`mp-period-row-${pid}`);
-  if(row)row.querySelectorAll('[data-period]').forEach(el=>el.classList.toggle('sel',el.dataset.period===period));
-  const body=document.getElementById(`mp-analytics-body-${pid}`);
-  if(body)body.innerHTML=mpAnalyticsBody(p,period);
-}
-
 function mpMarketerFold(p){
   const fmtP=mpFmt(p);
   const feeLabel=p.commMode==='fixed'?fmtP(p.commFixed||0):`${p.commPct||0}%`;
-  const activeCount=mpActiveMarketerCount(p);
   return `<div class="mp-fold-section mp-marketer-fold">
     <div class="mp-fold-head" onclick="event.stopPropagation();mpToggleFold('marketer-${p.id}')">
       <div><div class="mp-fold-label">${__ar()?'معلومات المسوّق':'Marketer info'}</div></div>
@@ -343,7 +266,6 @@ function mpMarketerFold(p){
         <div class="mp-mb-grid">
           <div class="mp-mb-tile"><div class="l">${__ar()?'عمولة المسوّق':'Marketer fee'}</div><div class="v">${feeLabel}</div></div>
           <div class="mp-mb-tile"><div class="l">${__ar()?'أرباح البيع الواحد':'Earnings per sale'}</div><div class="v">${fmtP(p.commFixed||0)}</div></div>
-          <div class="mp-mb-tile"><div class="l">${__ar()?'المسوّقون النشطون':'Active marketers'}</div><div class="v">${activeCount}</div></div>
         </div>
       </div>
     </div>
@@ -357,10 +279,9 @@ function mpShippingFold(p){
   const boxes=codes.map(code=>{
     const z=p.delivery[code]||{};const cities=z.cities||{};
     const rows=Object.entries(cities).map(([city,c])=>`<div class="mp-city-row"><span><b>${mpEsc(city)}</b></span><span class="mp-dfee">${__ar()?'التوصيل':'Delivery'} <b>${fmtP((c&&c.delivery)||0)}</b></span></div>`).join('');
-    const flag=COUNTRY_FLAGS[code]||'';
     return `<div class="mp-country-box">
       <div class="mp-country-head">
-        <span class="mp-cname">${flag?flag+' ':''}${mpEsc(COUNTRY_NAMES[code]||code)}</span>
+        <span class="mp-cname">${mpEsc(COUNTRY_NAMES[code]||code)}</span>
         <span class="mp-cship">${__ar()?'الشحن':'Shipping'}<br><b>${fmtP(z.shipping||0)}</b></span>
       </div>
       ${rows}
@@ -452,6 +373,8 @@ function mpRenderCard(p){
           </div>
         </div>
         <div class="mp-analytics-panel" id="mp-analytics-panel-${p.id}">${mpAnalyticsSection(p)}</div>
+        ${p.currency?`<div class="mp-currency-box"><span class="mp-currency-flag">${p.currency.flag||'🌐'}</span><span class="mp-currency-name">${mpEsc(p.currency.name||'')}</span><span class="mp-currency-code">${mpEsc(p.currency.code||'')} · ${mpEsc(p.currency.symbol||'')}</span></div>`:''}
+        ${(()=>{const v=mpVariantBoxes(p);return v?`<div class="mp-fold-label" style="margin-bottom:8px">${__ar()?'الخيارات':'Variants'}</div>${v}`:'';})()}
         ${mpMarketerFold(p)}
         ${mpShippingFold(p)}
         ${mpReviewsFold(p)}
@@ -479,108 +402,21 @@ function mpInitSwipe(pid){
   const wrap=document.getElementById(`mp-thumb-${pid}`);
   if(!wrap||wrap.__mpSwipeBound)return;
   wrap.__mpSwipeBound=true;
-  let startX=0,startY=0,dragging=false,moved=false;
-  wrap.addEventListener('touchstart',e=>{
-    if(!e.touches||!e.touches.length)return;
-    startX=e.touches[0].clientX;startY=e.touches[0].clientY;dragging=true;moved=false;
-  },{passive:true});
-  wrap.addEventListener('touchmove',e=>{
-    if(!dragging||!e.touches||!e.touches.length)return;
-    const t=e.touches[0];
-    if(Math.abs(t.clientX-startX)>10||Math.abs(t.clientY-startY)>10)moved=true;
-  },{passive:true});
+  let startX=0,startY=0,dragging=false;
+  wrap.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;startY=e.touches[0].clientY;dragging=true;},{passive:true});
   wrap.addEventListener('touchend',e=>{
     if(!dragging)return;dragging=false;
     const dx=e.changedTouches[0].clientX-startX;
     const dy=e.changedTouches[0].clientY-startY;
     if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
       const p=products.find(x=>x.id===pid);
-      const photos=p?mpPhotosOf(p):[];
-      if(photos.length){
-        const cur=mpPhotoIndex[pid]||0;
-        const next=dx<0?Math.min(cur+1,photos.length-1):Math.max(cur-1,0);
-        mpSlidePhoto(pid,next);
-      }
+      if(!p||!p.photos)return;
+      const cur=mpPhotoIndex[pid]||0;
+      const next=dx<0?Math.min(cur+1,p.photos.length-1):Math.max(cur-1,0);
+      mpSlidePhoto(pid,next);
     }
   },{passive:true});
-  // Tapping the photo opens it full-screen instead of expanding/collapsing the card.
-  wrap.addEventListener('click',e=>{
-    e.stopPropagation();
-    if(moved)return;
-    mpOpenLightbox(pid,mpPhotoIndex[pid]||0);
-  });
 }
-
-/* ── Photo lightbox (product photos & variant swatches) ── */
-let mpLightboxPhotos=[],mpLightboxIndex=0,__mpLightboxSwipeBound=false;
-function mpOpenLightbox(photosOrId,idx){
-  let list;
-  if(Array.isArray(photosOrId))list=photosOrId.filter(Boolean);
-  else{const p=products.find(x=>x.id===photosOrId);list=p?mpPhotosOf(p):[];}
-  if(!list.length)return;
-  mpLightboxPhotos=list;
-  mpLightboxIndex=Math.max(0,Math.min(idx||0,list.length-1));
-  mpRenderLightbox();
-  const lb=document.getElementById('mp-lightbox');
-  if(lb)lb.classList.add('open');
-  __mpInitLightboxSwipe();
-}
-function mpRenderLightbox(){
-  const track=document.getElementById('mp-lightbox-track');
-  if(track){
-    track.innerHTML=mpLightboxPhotos.map(u=>`<div class="mp-lightbox-slide"><img src="${mpEsc(u)}" alt=""/></div>`).join('');
-    track.style.transform=`translateX(-${mpLightboxIndex*100}%)`;
-  }
-  const multi=mpLightboxPhotos.length>1;
-  const dotsWrap=document.getElementById('mp-lightbox-dots');
-  if(dotsWrap){
-    dotsWrap.style.display=multi?'flex':'none';
-    dotsWrap.innerHTML=mpLightboxPhotos.map((_,i)=>`<span class="mp-lightbox-dot${i===mpLightboxIndex?' active':''}"></span>`).join('');
-  }
-  const prevBtn=document.getElementById('mp-lightbox-prev'),nextBtn=document.getElementById('mp-lightbox-next');
-  if(prevBtn)prevBtn.style.display=multi?'flex':'none';
-  if(nextBtn)nextBtn.style.display=multi?'flex':'none';
-}
-function mpLightboxNav(dir){
-  mpLightboxIndex=Math.max(0,Math.min(mpLightboxIndex+dir,mpLightboxPhotos.length-1));
-  mpRenderLightbox();
-}
-function mpCloseLightbox(){
-  const lb=document.getElementById('mp-lightbox');
-  if(lb)lb.classList.remove('open');
-}
-function __mpInitLightboxSwipe(){
-  if(__mpLightboxSwipeBound)return;
-  __mpLightboxSwipeBound=true;
-  const stage=document.getElementById('mp-lightbox-stage');
-  if(!stage)return;
-  let startX=0,startY=0,dragging=false,moved=false;
-  stage.addEventListener('touchstart',e=>{
-    if(!e.touches||!e.touches.length)return;
-    startX=e.touches[0].clientX;startY=e.touches[0].clientY;dragging=true;moved=false;
-  },{passive:true});
-  stage.addEventListener('touchmove',e=>{
-    if(!dragging||!e.touches||!e.touches.length)return;
-    const t=e.touches[0];
-    if(Math.abs(t.clientX-startX)>10||Math.abs(t.clientY-startY)>10)moved=true;
-  },{passive:true});
-  stage.addEventListener('touchend',e=>{
-    if(!dragging)return;dragging=false;
-    const dx=e.changedTouches[0].clientX-startX;
-    const dy=e.changedTouches[0].clientY-startY;
-    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40)mpLightboxNav(dx<0?1:-1);
-  },{passive:true});
-  // A swipe still fires a synthetic click afterwards on touch devices — swallow
-  // it so swiping through photos doesn't also close the viewer.
-  stage.addEventListener('click',e=>{if(moved)e.stopPropagation();});
-}
-document.addEventListener('keydown',e=>{
-  const lb=document.getElementById('mp-lightbox');
-  if(!lb||!lb.classList.contains('open'))return;
-  if(e.key==='Escape')mpCloseLightbox();
-  else if(e.key==='ArrowLeft')mpLightboxNav(-1);
-  else if(e.key==='ArrowRight')mpLightboxNav(1);
-});
 let __submittingProduct=false;
 async function submitProduct(){if(__submittingProduct)return;const btn=document.querySelector('#form-overlay .submit-btn');const name=document.getElementById('f-name').value.trim();const price=parseFloat(document.getElementById('f-price').value)||0;const costPrice=parseFloat(document.getElementById('f-cost').value)||0;const commPct=parseFloat(document.getElementById('f-comm-pct').value)||0;const commFixed=parseFloat(document.getElementById('f-comm-fixed').value)||0;console.log('[Lateen] submitProduct fired',{name,price,costPrice,commPct,commFixed,selectedCurrency,zones});if(!name||!price||(!commPct&&!commFixed)){alert('Please fill in name, price and commission.');return;}if(!selectedCurrency){alert('Please select a currency.');return;}if(!Object.keys(zones).length){alert('Please add at least one delivery zone.');return;}const validZones={};for(const[code,z]of Object.entries(zones)){const zShip=Number(z.shipping)||0;const vc={};for(const[city,costs]of Object.entries(z.cities||{})){const dlv=Number(costs.delivery)||0;if(dlv>0)vc[city]={shipping:zShip,delivery:dlv};}if(Object.keys(vc).length)validZones[code]={cities:vc,shipping:zShip};}if(!Object.keys(validZones).length){alert('Please add at least one city with a delivery price.');return;}currentCode=ensureUniqueCode(editingId?currentCode:null);__submittingProduct=true;if(btn){btn.disabled=true;btn.style.opacity='0.6';btn.style.pointerEvents='none';btn.dataset.origText=btn.textContent;btn.textContent='Uploading photos…';}try{await __waitForProductPhotoUploads();const{comm,platform,total,commPct:finalPct}=calcFees(price,commPct,commFixed,commMode);const cleanGroups=variantGroups.map(g=>({name:(g.name||'Variant').trim()||'Variant',items:g.items.map(x=>({val:(x.val||'').trim(),qty:Number(x.qty)||0,photo:(typeof x.photo==='string'&&!__isBlobUrl(x.photo))?x.photo:''})).filter(x=>x.val)})).filter(g=>g.items.length);const sizesGroup=cleanGroups.find(g=>/size/i.test(g.name));const colorsGroup=cleanGroups.find(g=>/colou?r/i.test(g.name));const qty=cleanGroups.length?cleanGroups[0].items.reduce((s,x)=>s+(Number(x.qty)||0),0):0;const cleanPhotos=(photos||[]).filter(u=>typeof u==='string'&&!__isBlobUrl(u));const payload={code:currentCode,name,description:document.getElementById('f-desc').value.trim(),category:selectedCategory,price,cost_price:costPrice,qty,currency:selectedCurrency,comm_pct:finalPct,comm_fixed:comm,comm_mode:commMode,platform_fee:platform,total_fee_per_unit:total,variant_groups:cleanGroups,sizes:sizesGroup?sizesGroup.items.map(x=>x.val):[],colors:colorsGroup?colorsGroup.items.map(x=>x.val):[],delivery:validZones,photos:cleanPhotos,biz_name:(typeof BUSINESS!=='undefined'?BUSINESS.name:null)};if(editingId)payload.id=editingId;console.log('[Lateen] payload ready',payload);if(btn)btn.textContent='Saving…';await window.LateenAPI.upsertProduct(payload);closeForm();await loadProducts();}catch(e){console.error('[Lateen] upsertProduct',e);alert('Could not save product: '+(e.message||e));}finally{__submittingProduct=false;if(btn){btn.disabled=false;btn.style.opacity='';btn.style.pointerEvents='';if(btn.dataset.origText){btn.textContent=btn.dataset.origText;delete btn.dataset.origText;}}}}
 async function toggleStatus(id){const p=products.find(x=>x.id===id);if(!p)return;const next=p.status==='active'?'paused':'active';try{await window.LateenAPI.setStatus(id,next);await loadProducts();}catch(e){console.error(e);alert('Failed to update status');}}
@@ -616,8 +452,8 @@ const fmt=(n,sym,code)=>__money(n,sym,code);
 let activeFilter='all',expandedId=null;
 let orders=[];
 function dbStatusToUi(s){return s==='confirmed'?'confirmed':s==='delivered'?'delivered':s==='cancelled'?'failed':'new';}
-function dbToOrder(r){const curCode=(r.currency&&r.currency.code)||'GBP';const sym=__wrapArSym((r.currency&&r.currency.symbol)||'£',curCode);const prod=products.find(p=>p.id===r.product_id);const ph=prod&&prod.photos&&prod.photos.length?prod.photos:[(prod&&prod.currency&&prod.currency.flag)||'📦'];const dt=new Date(r.created_at);const d=dt.getDate()+' '+dt.toLocaleString('en',{month:'short'})+' '+dt.getFullYear();const q=Number(r.qty)||1;const shipping=Number(r.shipping_fee)||0;const delivery=Number(r.delivery_fee)||0;const total=Number(r.unit_price)*q+shipping+delivery;const mc=r.marketer_confirmed_at?new Date(r.marketer_confirmed_at):null;const mcDate=mc?(mc.getDate()+' '+mc.toLocaleString('en',{month:'short'})+' '+mc.getFullYear()):'';return{id:'#'+r.id.slice(0,8).toUpperCase(),dbId:r.id,productId:r.product_id||'',marketerId:r.marketer_id||'',source:'affiliate',paymentType:'upfront',paymentAmount:Number(r.commission)*q+Number(r.platform_fee)*q,paymentDate:d,photos:ph,productEmoji:'📦',customerName:r.customer_name||'',customerPhone:r.customer_phone||'',customerWhatsapp:r.customer_whatsapp||'',country:r.customer_country||'',city:r.customer_city||'',address:r.customer_address||'',product:prod?prod.name:'(product)',productCode:prod?prod.code:'',sym,curCode,size:r.size||'',color:r.color||'',qty:q,price:Number(r.unit_price)||0,shipping,delivery,total,commission:Number(r.commission)*q,platformFee:Number(r.platform_fee)*q,status:dbStatusToUi(r.status),date:d,notes:r.customer_notes||'',receiptUrl:r.receipt_url||'',marketerConfirmed:!!r.marketer_confirmed_at,marketerConfirmedDate:mcDate,_createdAt:dt,_status:r.status};}
-async function loadOrders(){if(!window.LateenAPI)return;let rows=[];try{rows=await window.LateenAPI.listMyOrders();}catch(e){console.error('[Lateen] loadOrders fetch',e);}try{orders=(rows||[]).filter(r=>r&&r.business_id).map(dbToOrder);}catch(e){console.error('[Lateen] loadOrders map',e);orders=orders||[];}try{updateSummary();}catch(e){console.error('[Lateen] updateSummary',e);}try{applyFilters();}catch(e){console.error('[Lateen] applyFilters',e);try{renderOrders([]);}catch(_){}}try{recomputeAnalytics();}catch(e){console.error('[Lateen] recomputeAnalytics',e);}try{renderProducts();}catch(e){console.error('[Lateen] renderProducts after orders',e);}}
+function dbToOrder(r){const curCode=(r.currency&&r.currency.code)||'GBP';const sym=__wrapArSym((r.currency&&r.currency.symbol)||'£',curCode);const prod=products.find(p=>p.id===r.product_id);const ph=prod&&prod.photos&&prod.photos.length?prod.photos:[(prod&&prod.currency&&prod.currency.flag)||'📦'];const dt=new Date(r.created_at);const d=dt.getDate()+' '+dt.toLocaleString('en',{month:'short'})+' '+dt.getFullYear();const q=Number(r.qty)||1;const shipping=Number(r.shipping_fee)||0;const delivery=Number(r.delivery_fee)||0;const total=Number(r.unit_price)*q+shipping+delivery;const mc=r.marketer_confirmed_at?new Date(r.marketer_confirmed_at):null;const mcDate=mc?(mc.getDate()+' '+mc.toLocaleString('en',{month:'short'})+' '+mc.getFullYear()):'';return{id:'#'+r.id.slice(0,8).toUpperCase(),dbId:r.id,marketerId:r.marketer_id||'',source:'affiliate',paymentType:'upfront',paymentAmount:Number(r.commission)*q+Number(r.platform_fee)*q,paymentDate:d,photos:ph,productEmoji:'📦',customerName:r.customer_name||'',customerPhone:r.customer_phone||'',customerWhatsapp:r.customer_whatsapp||'',country:r.customer_country||'',city:r.customer_city||'',address:r.customer_address||'',product:prod?prod.name:'(product)',productCode:prod?prod.code:'',sym,curCode,size:r.size||'',color:r.color||'',qty:q,price:Number(r.unit_price)||0,shipping,delivery,total,commission:Number(r.commission)*q,platformFee:Number(r.platform_fee)*q,status:dbStatusToUi(r.status),date:d,notes:r.customer_notes||'',receiptUrl:r.receipt_url||'',marketerConfirmed:!!r.marketer_confirmed_at,marketerConfirmedDate:mcDate,_createdAt:dt,_status:r.status};}
+async function loadOrders(){if(!window.LateenAPI)return;let rows=[];try{rows=await window.LateenAPI.listMyOrders();}catch(e){console.error('[Lateen] loadOrders fetch',e);}try{orders=(rows||[]).filter(r=>r&&r.business_id).map(dbToOrder);}catch(e){console.error('[Lateen] loadOrders map',e);orders=orders||[];}try{updateSummary();}catch(e){console.error('[Lateen] updateSummary',e);}try{applyFilters();}catch(e){console.error('[Lateen] applyFilters',e);try{renderOrders([]);}catch(_){}}try{recomputeAnalytics();}catch(e){console.error('[Lateen] recomputeAnalytics',e);}}
 const __DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const __MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function __buildSeries(){
