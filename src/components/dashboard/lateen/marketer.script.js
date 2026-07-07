@@ -302,7 +302,8 @@ function renderOrders(){
     else if(isRejected)receiptBtn=`<button class="receipt-btn urgent" onclick="event.stopPropagation();uploadOrderReceipt('${o.id}')">${UP_ICO}${T.reupload}</button>`;
     else if(o.hasReceipt&&o.receiptUrl)receiptBtn=`<button class="receipt-btn" onclick="event.stopPropagation();viewOrderReceipt('${o.id}')">${EYE_ICO}${T.view}</button>`;
     else receiptBtn=`<button class="receipt-btn" onclick="event.stopPropagation();uploadOrderReceipt('${o.id}')">${UP_ICO}${T.upload}</button>`;
-    const howto=`<button class="howto-link" onclick="event.stopPropagation();showHowToCollectFee()">${T.how}</button>`;
+    const howto=`<button class="howto-link" onclick="event.stopPropagation();openInstr('${o.id}')">${T.how}</button>`;
+    const receiptCard=`<div class="receipt-card">${receiptBtn}${howto}</div>`;
     const editCls='icon-btn'+(canEdit?'':' disabled');
     const delCls='icon-btn danger'+(canEdit?'':' disabled');
     const editAttr=canEdit?`onclick="event.stopPropagation();editOrder('${o.id}')"`:'';
