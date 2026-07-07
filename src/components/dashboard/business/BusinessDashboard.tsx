@@ -30,7 +30,7 @@ export function BusinessDashboard({ name }: { name: string }) {
             <RevenueChart title="Revenue" accent="business" />
           </>
         ),
-        products: <ProductsPageEmbed />,
+        products: <ProductList products={m.products} />,
         alerts: <NotificationsPage items={m.notifications} />,
         menu: null,
       }}
