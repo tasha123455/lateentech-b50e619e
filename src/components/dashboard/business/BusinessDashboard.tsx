@@ -2,7 +2,7 @@ import { DashboardShell } from "../DashboardShell";
 import { BalanceCard } from "../BalanceCard";
 import { StatsRow } from "../StatsRow";
 import { RevenueChart } from "../RevenueChart";
-import { ProductsPageEmbed } from "./ProductsPageEmbed";
+import { ProductList } from "../ProductList";
 import { NotificationsPage } from "../NotificationsPage";
 import { businessMock } from "@/lib/mock-data";
 
