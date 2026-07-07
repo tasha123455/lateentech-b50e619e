@@ -1095,25 +1095,51 @@ body.lang-ar .pd-iban-row{display:none !important;}
   <div class="overlay-bg" onclick="closeInstr()"></div>
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">How to collect the fee</div>
-    <div class="sheet-sub" id="instr-sub">Step-by-step deposit instructions</div>
-    <div class="instr-card dark">
-      <div class="fee-label-sm">COMMITMENT FEE — COLLECT FROM CUSTOMER</div>
-      <div class="fee-amount-big" id="instr-fee-amt">—</div>
-      <div class="fee-label-sm" id="instr-fee-breakdown">—</div>
-    </div>
+    <div class="sheet-title" data-i18n="How to collect fee">How to collect fee</div>
+    <div class="sheet-sub" id="instr-sub"></div>
     <div class="instr-card light">
-      <div class="instr-step"><div class="step-num">1</div><div><div class="step-title">Tell the customer the fee</div><div class="step-body">Explain that a small commitment fee is required before their order is placed. This reserves the product and confirms they are serious.</div></div></div>
-      <div class="instr-step"><div class="step-num">2</div><div><div class="step-title">Share your payment details</div><div class="step-body">Ask the customer to send the fee to:</div>
-        <div class="copy-row"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px">Account name</div><div class="copy-val" id="bank-name">— Add in profile —</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('bank-name').textContent)">Copy</button></div>
-        <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px">Account number</div><div class="copy-val" id="bank-num">— Add in profile —</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('bank-num').textContent)">Copy</button></div>
-        <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px">Bank</div><div class="copy-val" id="bank-bank">— Add in profile —</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('bank-bank').textContent)">Copy</button></div>
+      <div class="instr-step"><div class="step-num">1</div><div style="flex:1;min-width:0;">
+        <div class="step-title" data-i18n="Request a deposit from the customer">Request a deposit from the customer</div>
+        <div class="step-body">
+          <span data-i18n="Ask the customer to deposit">Ask the customer to deposit</span>
+          <strong id="instr-deposit-amt" style="color:var(--color-text-primary);">—</strong>
+          <span>LYD</span>
+          <span data-i18n="into this account.">into this account.</span>
+        </div>
+        <div class="copy-row" style="margin-top:8px;"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px" data-i18n="Account name">Account name</div><div class="copy-val" id="bank-name">—</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('bank-name').textContent)">Copy</button></div>
+        <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px" data-i18n="Account number">Account number</div><div class="copy-val" id="bank-num">—</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('bank-num').textContent)">Copy</button></div>
+        <div class="copy-row" style="margin-top:6px"><div><div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px" data-i18n="Bank">Bank</div><div class="copy-val" id="bank-bank">—</div></div><button class="copy-btn" onclick="copyText(this,document.getElementById('bank-bank').textContent)">Copy</button></div>
       </div></div>
-      <div class="instr-step"><div class="step-num">3</div><div><div class="step-title">Ask for a screenshot</div><div class="step-body">Once sent, ask the customer to share a screenshot of the bank transfer confirmation.</div></div></div>
-      <div class="instr-step"><div class="step-num">4</div><div><div class="step-title">Upload and confirm</div><div class="step-body">Upload the screenshot in the order form and tap "Yes, paid." The order is then sent to the business for processing and shipping.</div></div></div>
+      <div class="instr-step"><div class="step-num">2</div><div style="flex:1;min-width:0;">
+        <div class="step-title" data-i18n="Send the payment receipt">Send the payment receipt</div>
+        <div class="step-body" data-i18n="Once the deposit is made, upload a photo of the receipt so it can be reviewed.">Once the deposit is made, upload a photo of the receipt so it can be reviewed.</div>
+        <div class="upload-box dashed-lg" onclick="instrUpload()" style="margin-top:10px;cursor:pointer;text-align:center;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div class="upload-icon-label" data-i18n="Tap to upload receipt">Tap to upload receipt</div>
+        </div>
+        <div class="step-body" style="margin-top:8px;" data-i18n="The company will verify the deposit, then credit your funds to your wallet for withdrawal.">The company will verify the deposit, then credit your funds to your wallet for withdrawal.</div>
+      </div></div>
     </div>
-    <div style="background:#3a2a10;border-radius:12px;padding:12px 14px;font-size:12px;color:#c9923a;line-height:1.5;margin-bottom:1.25rem;">This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.</div>
-    <button class="cancel-btn" onclick="closeInstr()">Close</button>
+    <div class="instr-card dark" style="padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:rgba(255,255,255,0.72);margin-bottom:6px;">
+        <span><span data-i18n="Your fee">Your fee</span> (<span id="instr-your-pct">—</span>%)</span>
+        <span id="instr-your-amt" style="color:#fff;">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:rgba(255,255,255,0.72);margin-bottom:6px;">
+        <span><span data-i18n="Platform fee">Platform fee</span> (<span id="instr-plat-pct">5</span>%)</span>
+        <span id="instr-plat-amt" style="color:#fff;">—</span>
+      </div>
+      <div style="height:0.5px;background:#2a2a2a;margin:8px 0;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:#fff;">
+        <span data-i18n="Total deposit required">Total deposit required</span>
+        <span id="instr-total-amt">—</span>
+      </div>
+    </div>
+    <button type="button" onclick="openDepositInfo(window.__instrOrder||null)" style="width:100%;padding:11px;border-radius:10px;border:0.5px solid #e07070;background:rgba(224,112,112,0.12);color:#e07070;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-sans);cursor:pointer;margin-bottom:10px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span data-i18n="Important notes">Important notes</span>
+    </button>
+    <button class="cancel-btn" onclick="closeInstr()" data-i18n="Close">Close</button>
   </div>
 </div>
 
