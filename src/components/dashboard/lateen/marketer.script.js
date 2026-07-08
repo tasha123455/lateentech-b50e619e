@@ -270,7 +270,7 @@ function renderOrders(){
     const isApproved=st==='approved'||st==='confirmed'||st==='delivered';
     const isRejected=st==='rejected';
     const isFailed=st==='cancelled';
-    const canEdit=!isApproved&&!isFailed;
+    const canEdit=!isApproved&&!isFailed&&!isPending;
     const photos=__ocPhotos(o);const emo=__ocEmoji(o);
     const variants=__ocVariants(o);
     let pill='';
