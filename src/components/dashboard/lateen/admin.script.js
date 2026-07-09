@@ -1,6 +1,6 @@
 /* Admin dashboard logic — all data calls go through window.LateenAPI.admin */
 function admEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function admMoney(n){const v=Number(n||0);return '£'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function admMoney(n){const v=Number(n||0);return '$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 function admInitials(name){if(!name)return '?';return name.trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();}
 function admWhen(iso){if(!iso)return '';const d=new Date(iso);const diff=Date.now()-d.getTime();const m=Math.floor(diff/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 
@@ -146,7 +146,7 @@ async function admLoadPayouts(){
       const u=p.user||{};
       const name=u.business_name||u.full_name||'Marketer';
       const phone=u.phone||'';
-      const cur=p.wallet&&p.wallet.currency&&p.wallet.currency.symbol?p.wallet.currency.symbol:'£';
+      const cur=p.wallet&&p.wallet.currency&&p.wallet.currency.symbol?p.wallet.currency.symbol:'$';
       const curCode=p.wallet&&p.wallet.currency&&p.wallet.currency.code?p.wallet.currency.code:'';
       const fmtAmt=(n)=>typeof window.__money==='function'?window.__money(n,cur,curCode):admMoney(n);
       const detail=(label,val)=>val?`<div class="adm-pay-detail-row"><span class="adm-pay-detail-k">${admEsc(label)}</span><span class="adm-pay-detail-v">${admEsc(val)}</span></div>`:'';
@@ -314,7 +314,7 @@ async function admOpenProduct(id){
     const res=await window.LateenAPI.admin.getProductDetail(id);
     if(!res||!res.product){body.innerHTML='<div class="adm-empty">Product not found.</div>';return;}
     const p=res.product, owner=res.owner||{};
-    const cur=(p.currency&&p.currency.symbol)||'£';
+    const cur=(p.currency&&p.currency.symbol)||'$';
     const photos=Array.isArray(p.photos)?p.photos:[];
     const mainImg=photos[0]?`<img class="adm-pd-img" src="${admEsc(photos[0])}" alt="${admEsc(p.name)}" onclick="admLightbox('${admEsc(photos[0])}')"/>`:`<div class="adm-pd-img" style="display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--txt-3);">📦</div>`;
     const thumbs=photos.length>1?`<div class="adm-pd-imgrow">${photos.map(u=>`<img src="${admEsc(u)}" alt="" onclick="admLightbox('${admEsc(u)}')"/>`).join('')}</div>`:'';

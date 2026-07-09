@@ -14,7 +14,7 @@ export function ProductList({ products, label = "Products" }: { products: Produc
                 <div className="text-[10px] text-text-2">{p.code}</div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-medium text-text-1">£{p.price}</div>
+                <div className="text-sm font-medium text-text-1">${p.price}</div>
                 <div className="text-[10px] text-text-2">{p.sales} sold</div>
               </div>
             </div>

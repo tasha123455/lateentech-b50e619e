@@ -22,7 +22,7 @@ export function BusinessDashboard({ name }: { name: string }) {
               sub="Updated just now"
               cta="Payout"
               meta={[
-                { label: "Pending", value: `£${m.pendingPayout}` },
+                { label: "Pending", value: `$${m.pendingPayout}` },
                 { label: "Next payout", value: "Fri" },
               ]}
             />
