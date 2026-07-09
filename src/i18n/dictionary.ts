@@ -596,7 +596,7 @@ export const DICT: Record<string, string> = {
   "Joined:": "انضم في:",
   "Last 30 days": "آخر 30 يوماً",
   "Method": "الطريقة",
-  "Monthly salary (£)": "الراتب الشهري (£)",
+  "Monthly salary ($)": "الراتب الشهري ($)",
 
   // ===== Final sweep additions =====
   "· Deliv": "· التوصيل",
