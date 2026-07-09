@@ -136,7 +136,7 @@ export const DICT: Record<string, string> = {
   "Wallet": "المحفظة",
   "wallet": "المحفظة",
   "NET EARNINGS": "صافي الأرباح منذ إنشاء الحساب",
-  "Net earnings": "صافي الأرباح منذ إنشاء الحساب",
+  "Net earnings": "صافي الأرباح",
   "Next payout": "تقدر تسحب بعد",
   "Next payout ": "تقدر تسحب بعد ",
   "Withdraw": "سحب",
@@ -164,7 +164,7 @@ export const DICT: Record<string, string> = {
   "Financials": "الماليات",
   "Platform fee": "رسوم المنصة",
   "Platform fees": "رسوم المنصة",
-  "Pieces sold": "قطع تم بيعها",
+  "Pieces sold": "قطع",
   "Pieces": "القطع",
   "Succeeded": "الطلبات تم تسليمها",
   "Failed": "فشل",
@@ -180,7 +180,7 @@ export const DICT: Record<string, string> = {
   "success": "نسبة النجاح",
   "active": "نشط",
   "Marketers": "المسوّقين",
-  "Marketers active:": "المسوقون النشطون:",
+  "Marketers active:": "المسوقون النشطون",
   "Available balance": "رصيد المحفظه",
   "Updated just now": "تم التحديث الآن",
   "Payout": "السحب",
@@ -248,7 +248,6 @@ export const DICT: Record<string, string> = {
   "QTY": "الكمية",
   "Qty": "الكمية",
   "Product name": "اسم المنتج",
-  "Selling price": "سعر المنتج",
   "Description": "الوصف",
   "Product details": "تفاصيل المنتج",
   "Product photos": "صور المنتج",
@@ -418,7 +417,7 @@ export const DICT: Record<string, string> = {
   "The amount shown is calculated per unit. If you increase the quantity, the required upfront payment increases accordingly.": "القيمة المعروضة تخص قطعة واحدة. وإذا زدت الكمية، قيمة العربون تزيد بنفس النسبة.",
   "After completing the payment, upload your payment receipt to continue.": "بعد إتمام التحويل، ارفع إيصال الدفع حتى يتم متابعة الطلب.",
   "The fee is deducted from the product price, and is not an additional charge.": "قيمة العربون تُخصم من سعر المنتج، وليست مبلغاً إضافياً على سعر المنتج.",
-  "Amount customer pays on Delivery:": "المبلغ الذي يدفعه الزبون عند الإستلام:",
+  "Amount customer pays on Delivery:": "المبلغ الذي يدفعه الزبون عند التسليم:",
 
   // ===== Empty States & Search =====
   "No orders found.": "لم يتم العثور على طلبيات.",
@@ -721,7 +720,7 @@ export const DICT: Record<string, string> = {
   "Marketer profit": "ارباح المسوق",
   "Percentage": "النسبه",
   "Set what marketers earn": "حدد مكسب المسوقين",
-  "The higher the commission, the more marketers you'll attract to promote your product.": "كل ما زادت العمولة، زاد عدد المسوقين ليُرَوِّجو منتجاتك.",
+  "The higher the commission, the more marketers you'll attract to promote your product.": "كل ما زادت العمولة، زاد عدد المسوقين يروجو لمنتجاتك.",
   "LYD per sale": "د.ل لكل قطعه",
   "% of product price": "% من سعر المنتج",
   "Platform commission (5%)": "عمولة المنصه (5%)",
@@ -761,10 +760,6 @@ const PATTERNS: Pattern[] = [
 
   // "New (2)" -> "جديد (2)"
   { re: /^New\s*\((\d+)\)$/i, build: (m) => `جديد (${m[1]})` },
-  // "Failed (2)" -> "فشل (2)"
-  { re: /^Failed\s*\((\d+)\)$/i, build: (m) => `فشل (${m[1]})` },
-  // "Quantity (2)" -> "الكميه (2)"
-  { re: /^Quantity\s*\((\d+)\)$/i, build: (m) => `الكميه (${m[1]})` },
   // "Qty: 1" / "QTY 1" -> "الكمية: 1"
   { re: /^Qty\s*[:.]?\s*(\d[\d,]*)$/i, build: (m) => `الكمية: ${m[1]}` },
   { re: /^Quantity\s*[:.]?\s*(\d[\d,]*)$/i, build: (m) => `الكمية: ${m[1]}` },
