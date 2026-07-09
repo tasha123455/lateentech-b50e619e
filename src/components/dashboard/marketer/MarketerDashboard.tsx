@@ -22,7 +22,7 @@ export function MarketerDashboard({ name }: { name: string }) {
               sub="Lifetime commission"
               cta="Payout"
               meta={[
-                { label: "Pending", value: `£${m.pendingPayout}` },
+                { label: "Pending", value: `$${m.pendingPayout}` },
                 { label: "Next payout", value: "Fri" },
               ]}
             />
