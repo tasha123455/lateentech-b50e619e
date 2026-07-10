@@ -856,7 +856,7 @@ async function refreshBizNotifications(){
       let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
       if(d){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
-        const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;display:block"/></div>`:'';
+        const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
         detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #142a20">
           ${photo}
           ${row(tr('Order Code','كود الطلبيه'),d.order_code)}
