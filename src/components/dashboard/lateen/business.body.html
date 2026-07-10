@@ -626,7 +626,7 @@
 .lp-upload-box .lp-sub { font-size:12px; color:var(--color-text-tertiary); margin-top:4px; }
 .lp-photo-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:10px; }
 .lp-photo-slot { aspect-ratio:1; border-radius:10px; background:var(--color-background-secondary); border:0.5px solid var(--color-border-tertiary); overflow:hidden; position:relative; }
-.lp-photo-slot img { width:100%; height:100%; object-fit:cover; display:block; }
+.lp-photo-slot img { width:100%; height:100%; object-fit:contain; display:block; background:#0d0d0d; }
 .lp-photo-slot.cover { border:1.5px solid #34c77b; }
 .lp-photo-slot.cover::after { content:"Cover"; position:absolute; bottom:4px; left:4px; font-size:9px; font-weight:700; background:#34c77b; color:#06150e; padding:2px 6px; border-radius:6px; }
 .lp-photo-slot.add-tile { background:var(--color-background-secondary); border:1.5px dashed var(--color-border-secondary); display:flex; align-items:center; justify-content:center; cursor:pointer; }

@@ -431,6 +431,7 @@ export type Database = {
           comm_fixed: number
           comm_mode: string
           comm_pct: number
+          cost_price: number
           created_at: string
           currency: Json | null
           deleted_at: string | null
@@ -459,6 +460,7 @@ export type Database = {
           comm_fixed?: number
           comm_mode?: string
           comm_pct?: number
+          cost_price?: number
           created_at?: string
           currency?: Json | null
           deleted_at?: string | null
@@ -487,6 +489,7 @@ export type Database = {
           comm_fixed?: number
           comm_mode?: string
           comm_pct?: number
+          cost_price?: number
           created_at?: string
           currency?: Json | null
           deleted_at?: string | null
@@ -719,6 +722,10 @@ export type Database = {
       }
     }
     Functions: {
+      _adjust_variant_qty: {
+        Args: { _delta: number; _match: string; _product_id: string }
+        Returns: undefined
+      }
       add_self_role: {
         Args: {
           _business_name?: string
@@ -938,6 +945,7 @@ export type Database = {
           comm_fixed: number
           comm_mode: string
           comm_pct: number
+          cost_price: number
           created_at: string
           currency: Json | null
           deleted_at: string | null
