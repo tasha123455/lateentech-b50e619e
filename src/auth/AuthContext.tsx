@@ -143,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               try { await supabase.rpc("delete_self_if_just_created"); } catch (e) { console.warn("[auth] delete_self failed", e); }
               await supabase.auth.signOut();
               if (typeof window !== "undefined") {
-                const target = intent === "business" ? "/business/signin" : "/marketer/signin";
+                const target = intent === "business" ? "/business/register" : "/marketer/register";
                 window.location.replace(target);
               }
               return;
@@ -171,6 +171,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } catch { /* ignore */ }
         const picked = await loadRole(nextSession.user.id);
+        if (picked && picked !== "admin") {
+          try {
+            const { data: prof } = await supabase
+              .from("profiles")
+              .select("banned_at")
+              .eq("id", nextSession.user.id)
+              .maybeSingle();
+            if (prof?.banned_at) {
+              setRole(null);
+              try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
+              await supabase.auth.signOut();
+              if (typeof window !== "undefined") window.location.replace("/");
+              return;
+            }
+          } catch { /* ignore */ }
+        }
 
       } catch (error) {
         console.error("[auth] failed to load role", error);
