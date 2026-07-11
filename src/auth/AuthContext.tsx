@@ -58,15 +58,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    const applySession = async (nextSession: Session | null) => {
+    const applySession = async (nextSession: Session | null, opts?: { silent?: boolean }) => {
       if (!active) return;
-      setLoading(true);
+      const silent = !!opts?.silent;
+      if (!silent) setLoading(true);
       setSession(nextSession);
       if (!nextSession?.user) {
         setRole(null);
         setLoading(false);
         return;
       }
+
 
       try {
         // Consume any pending post-OAuth signup payload (Google sign-up flow).
