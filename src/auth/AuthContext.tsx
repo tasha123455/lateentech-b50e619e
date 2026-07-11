@@ -199,12 +199,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     };
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setTimeout(() => { void applySession(s); }, 0);
+    // Only surface the "Loading…" screen for genuine identity transitions
+    // and the initial getSession(). Background refreshes (TOKEN_REFRESHED,
+    // INITIAL_SESSION firing on tab return) must NOT flip loading back to
+    // true — that was the "loading screen on return" bug.
+    const IDENTITY_EVENTS = new Set(["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"]);
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      const silent = !IDENTITY_EVENTS.has(event);
+      setTimeout(() => { void applySession(s, { silent }); }, 0);
     });
     supabase.auth.getSession().then(({ data }) => {
       void applySession(data.session);
     });
+
     return () => {
       active = false;
       sub.subscription.unsubscribe();
