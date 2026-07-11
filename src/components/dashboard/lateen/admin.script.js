@@ -1,6 +1,6 @@
 /* Admin dashboard logic — all data calls go through window.LateenAPI.admin */
 function admEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function admMoney(n){const v=Number(n||0);return '$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function admMoney(n){const v=Number(n||0);return '\u2066د.ل\u2069'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 function admInitials(name){if(!name)return '?';return name.trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();}
 function admWhen(iso){if(!iso)return '';const d=new Date(iso);const diff=Date.now()-d.getTime();const m=Math.floor(diff/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 
@@ -76,6 +76,7 @@ async function admLoadMetrics(){
     document.getElementById('m-leads').textContent=m.leadsToday.toLocaleString();
     document.getElementById('m-users').textContent=m.totalUsers.toLocaleString();
     document.getElementById('m-products').textContent=m.totalProducts.toLocaleString();
+    document.getElementById('m-upfronts-ok').textContent=(m.succeededUpfronts||0).toLocaleString();
   }catch(e){console.error('[admin] metrics',e);}
 }
 
@@ -226,17 +227,24 @@ function admRenderUsers(list){
     const pillClass=role==='admin'?'adm-role-admin':role==='business'?'adm-role-business':'adm-role-marketer';
     const canImpersonate=role==='marketer'||role==='business';
     const goBtn=canImpersonate?`<button class="adm-go-btn" onclick="admGoToAccount('${u.id}','${role}','${admEsc(name).replace(/'/g,"&#39;")}')">Go to Account</button>`:'';
+    const isBanned=!!u.banned_at;
+    const isFrozen=!!u.frozen_at;
+    const freezeBtn=canImpersonate?`<button class="adm-go-btn" style="background:${isFrozen?'#cce5ff':'#e2e3e5'};color:${isFrozen?'#004085':'#495057'};border-color:${isFrozen?'#b8daff':'#d6d8db'};" onclick="admToggleFreeze('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}',${isFrozen})">${isFrozen?'Unfreeze':'Freeze'}</button>`:'';
+    const banBtn=`<button class="adm-go-btn" style="background:${isBanned?'#e2e3e5':'#fff3cd'};color:${isBanned?'#495057':'#856404'};border-color:${isBanned?'#d6d8db':'#ffeeba'};" onclick="admToggleBan('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}',${isBanned})">${isBanned?'Unban':'Ban Email'}</button>`;
+    const flags=(isBanned?'<span style="font-size:11px;color:#c00;font-weight:600;margin-inline-end:8px;">Banned</span>':'')+(isFrozen?'<span style="font-size:11px;color:#004085;font-weight:600;">Frozen</span>':'');
     return `<div class="adm-user-row">
       <div class="adm-user-av">${admEsc(admInitials(name))}</div>
       <div style="flex:1;min-width:0;">
         <div class="adm-row-name">${admEsc(name)}</div>
-        <div class="adm-row-sub">${admEsc(u.phone||'no phone')} · ${admWhen(u.created_at)}</div>
+        <div class="adm-row-sub">${admEsc(u.email||'no email')} · ${admEsc(u.phone||'no phone')} · ${admWhen(u.created_at)}</div>
+        ${flags?`<div style="margin-top:2px;">${flags}</div>`:''}
       </div>
       <div class="adm-user-actions">
         <span class="adm-role-pill ${pillClass}">${admEsc(role)}</span>
         ${goBtn}
+        ${freezeBtn}
         <button class="adm-go-btn" style="background:#fee;color:#c00;border-color:#fcc;" onclick="admDeleteUser('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}')">Remove</button>
-        <button class="adm-go-btn" style="background:#fff3cd;color:#856404;border-color:#ffeeba;" onclick="admBanUser('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}')">Ban Email</button>
+        ${banBtn}
       </div>
     </div>`;
   }).join('');
@@ -250,13 +258,24 @@ async function admDeleteUser(userId,name){
   }catch(e){alert('Failed: '+e.message);}
 }
 
-async function admBanUser(userId,name){
-  const reason=prompt('Ban '+name+'\u2019s email?\n\nTheir account will be deleted and the email blocked from signing up again.\n\nReason (optional):');
-  if(reason===null)return;
-  try{
-    await window.LateenAPI.admin.banUser(userId, reason||null);
-    admLoadUsers(document.getElementById('user-search').value||'');
-  }catch(e){alert('Failed: '+e.message);}
+async function admToggleBan(userId,name,isBanned){
+  if(isBanned){
+    if(!confirm('Unban '+name+'\u2019s account? They\u2019ll be able to sign in again.'))return;
+    try{await window.LateenAPI.admin.unbanUser(userId);admLoadUsers(document.getElementById('user-search').value||'');}catch(e){alert('Failed: '+e.message);}
+  }else{
+    if(!confirm('Ban '+name+'\u2019s account?\n\nThey\u2019ll be signed out immediately and won\u2019t be able to sign back in until you unban them.'))return;
+    try{await window.LateenAPI.admin.banUser(userId);admLoadUsers(document.getElementById('user-search').value||'');}catch(e){alert('Failed: '+e.message);}
+  }
+}
+
+async function admToggleFreeze(userId,name,isFrozen){
+  if(isFrozen){
+    if(!confirm('Unfreeze '+name+'\u2019s account? They\u2019ll be able to submit orders / list products again.'))return;
+    try{await window.LateenAPI.admin.unfreezeUser(userId);admLoadUsers(document.getElementById('user-search').value||'');}catch(e){alert('Failed: '+e.message);}
+  }else{
+    if(!confirm('Freeze '+name+'\u2019s account?\n\nThey\u2019ll stay signed in but won\u2019t be able to submit orders, list products, or verify/fail orders until you unfreeze them.'))return;
+    try{await window.LateenAPI.admin.freezeUser(userId);admLoadUsers(document.getElementById('user-search').value||'');}catch(e){alert('Failed: '+e.message);}
+  }
 }
 
 function admGoToAccount(userId,role,name){
