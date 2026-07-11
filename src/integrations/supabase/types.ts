@@ -514,11 +514,9 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          banned_at: string | null
           business_name: string | null
           country: string | null
           created_at: string
-          frozen_at: string | null
           full_name: string | null
           id: string
           payout_account_holder: string | null
@@ -534,11 +532,9 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          banned_at?: string | null
           business_name?: string | null
           country?: string | null
           created_at?: string
-          frozen_at?: string | null
           full_name?: string | null
           id: string
           payout_account_holder?: string | null
@@ -554,11 +550,9 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          banned_at?: string | null
           business_name?: string | null
           country?: string | null
           created_at?: string
-          frozen_at?: string | null
           full_name?: string | null
           id?: string
           payout_account_holder?: string | null
@@ -813,13 +807,6 @@ export type Database = {
         }
       }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
-      admin_get_user_email: { Args: { _user_id: string }; Returns: string | null }
-      admin_list_user_emails: {
-        Args: { _user_ids: string[] }
-        Returns: { id: string; email: string }[]
-      }
-      admin_set_user_banned: { Args: { _user_id: string; _banned: boolean }; Returns: undefined }
-      admin_set_user_frozen: { Args: { _user_id: string; _frozen: boolean }; Returns: undefined }
       admin_mark_payout_paid: {
         Args: { _payout_id: string }
         Returns: {
