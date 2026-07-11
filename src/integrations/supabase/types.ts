@@ -514,9 +514,11 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned_at: string | null
           business_name: string | null
           country: string | null
           created_at: string
+          frozen_at: string | null
           full_name: string | null
           id: string
           payout_account_holder: string | null
@@ -532,9 +534,11 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          banned_at?: string | null
           business_name?: string | null
           country?: string | null
           created_at?: string
+          frozen_at?: string | null
           full_name?: string | null
           id: string
           payout_account_holder?: string | null
@@ -550,9 +554,11 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          banned_at?: string | null
           business_name?: string | null
           country?: string | null
           created_at?: string
+          frozen_at?: string | null
           full_name?: string | null
           id?: string
           payout_account_holder?: string | null
@@ -807,6 +813,14 @@ export type Database = {
         }
       }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_get_user_email: { Args: { _user_id: string }; Returns: string }
+      admin_list_user_emails: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          email: string
+          id: string
+        }[]
+      }
       admin_mark_payout_paid: {
         Args: { _payout_id: string }
         Returns: {
@@ -971,6 +985,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_set_user_banned: {
+        Args: { _banned: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_set_user_frozen: {
+        Args: { _frozen: boolean; _user_id: string }
+        Returns: undefined
       }
       admin_unban_email: { Args: { _email: string }; Returns: undefined }
       confirm_order: {
