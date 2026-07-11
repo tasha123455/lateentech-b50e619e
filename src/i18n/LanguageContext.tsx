@@ -139,8 +139,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     w.__lateenLang = lang;
   }, [toggle, lang]);
 
-  // Flip dir/lang and translate; smooth the swap with View Transitions when
-  // available, else a brief opacity crossfade.
+  // Flip dir/lang and translate synchronously in a layout effect — before
+  // the browser paints — so there is no visible flicker/jitter on toggle.
+  // Use the View Transitions API when available for a smooth cross-fade;
+  // the opacity-based fallback was the source of the reported jitter.
   useLayoutEffect(() => {
     if (typeof document === "undefined") return;
     const html = document.documentElement;
@@ -158,16 +160,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       docAny.startViewTransition(apply);
       return;
     }
-    const prev = body.style.transition;
-    body.style.transition = "opacity 140ms ease";
-    body.style.opacity = "0.35";
-    requestAnimationFrame(() => {
-      apply();
-      requestAnimationFrame(() => {
-        body.style.opacity = "1";
-        window.setTimeout(() => { body.style.transition = prev; }, 180);
-      });
-    });
+    apply();
   }, [lang, dir]);
 
   // Observe dynamically inserted nodes — ONLY when Arabic is active.

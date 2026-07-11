@@ -800,7 +800,23 @@ recomputeAnalytics=function(){
   }catch(e){console.error('[Lateen] biz wallet',e);}
 };
 (async()=>{try{await loadProducts();await loadOrders();await refreshProfile();}catch(e){console.error('[Lateen] business boot',e);}})();
-window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs.push(window.LateenAPI.subscribe('my-products',()=>{loadProducts();loadOrders();}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('orders',()=>{loadProducts();loadOrders();}));}
+window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
+  /* Coalesce bursts of realtime events into a single refresh so the list
+     doesn't rebuild multiple times back-to-back (which caused visible
+     flicker / momentary blanking on create). */
+  let __rtTimer=null;const __refreshSoon=()=>{if(__rtTimer)return;__rtTimer=setTimeout(()=>{__rtTimer=null;loadProducts();loadOrders();},180);};
+  window.__lateenUnsubs.push(window.LateenAPI.subscribe('my-products',__refreshSoon));
+  window.__lateenUnsubs.push(window.LateenAPI.subscribe('orders',__refreshSoon));
+}
+/* Signature-based render skip: if the exact same list would be rendered
+   again, don't touch innerHTML at all — that removes the "list vanishes and
+   reappears" flash when realtime fires right after a local mutation. */
+(function(){
+  const _rp=window.renderProducts;let __sigP='';
+  if(typeof _rp==='function'){window.renderProducts=function(){try{const s=JSON.stringify((products||[]).map(p=>[p.id,p.status,p.qty,p.name,p.price,(p.photos||[]).length,(p.updated_at||'')]));if(s===__sigP)return;__sigP=s;}catch(e){}return _rp.apply(this,arguments);};}
+  const _ro=window.renderOrders;let __sigO='';
+  if(typeof _ro==='function'){window.renderOrders=function(list){try{const s=JSON.stringify((list||[]).map(o=>[o.id,o.status,o.qty,o.receiptUrl,o.marketerConfirmed]));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
+})();
 /* persist page + scroll across refresh */
 (function(){const K='lateen_bz_page',S='lateen_bz_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
 

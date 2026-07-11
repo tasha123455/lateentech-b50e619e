@@ -622,7 +622,27 @@ __lateenRefreshWalletAndPayout();refreshNotifications();
 setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
 loadBrowse().then(()=>loadOrders());refreshWallet();refreshProfile();
-window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){__unsubBrowse=window.LateenAPI.subscribe('browse-products',()=>loadBrowse());__unsubFavs=window.LateenAPI.subscribe('favorites',()=>loadBrowse());__unsubWallet=window.LateenAPI.subscribe('wallet',()=>__lateenRefreshWalletAndPayout());__unsubOrders=window.LateenAPI.subscribe('orders',()=>{loadOrders();__lateenRefreshWalletAndPayout();});const __unsubPay=window.LateenAPI.subscribe('payouts',()=>__lateenRefreshWalletAndPayout());const __unsubNotif=window.LateenAPI.subscribe('notifications',()=>{refreshNotifications();__lateenRefreshWalletAndPayout();});window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders,__unsubPay,__unsubNotif);}
+window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
+  /* Coalesce realtime bursts so lists don't re-render multiple times in a
+     row (which caused visible flicker when a mutation lands). */
+  let __rtOrd=null,__rtBrw=null;
+  const __ordSoon=()=>{if(__rtOrd)return;__rtOrd=setTimeout(()=>{__rtOrd=null;loadOrders();__lateenRefreshWalletAndPayout();},180);};
+  const __brwSoon=()=>{if(__rtBrw)return;__rtBrw=setTimeout(()=>{__rtBrw=null;loadBrowse();},180);};
+  __unsubBrowse=window.LateenAPI.subscribe('browse-products',__brwSoon);
+  __unsubFavs=window.LateenAPI.subscribe('favorites',__brwSoon);
+  __unsubWallet=window.LateenAPI.subscribe('wallet',()=>__lateenRefreshWalletAndPayout());
+  __unsubOrders=window.LateenAPI.subscribe('orders',__ordSoon);
+  const __unsubPay=window.LateenAPI.subscribe('payouts',()=>__lateenRefreshWalletAndPayout());
+  const __unsubNotif=window.LateenAPI.subscribe('notifications',()=>{refreshNotifications();__lateenRefreshWalletAndPayout();});
+  window.__lateenUnsubs.push(__unsubBrowse,__unsubFavs,__unsubWallet,__unsubOrders,__unsubPay,__unsubNotif);
+}
+/* Signature-based render skip: if the exact same orders/browse list would
+   be rendered again, don't touch innerHTML — removes the "list vanishes
+   then reappears" flash right after a local create/edit. */
+(function(){
+  const _ro=window.renderOrders;let __sigO='';
+  if(typeof _ro==='function'){window.renderOrders=function(){try{const s=JSON.stringify((orders||[]).map(o=>[o.id,o.dbId||'',o._status||'',o.qty,o.hasReceipt?1:0,o.receiptUrl||'',o.adminNotes||'']));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
+})();
 /* persist page + scroll across refresh */
 (function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
 
