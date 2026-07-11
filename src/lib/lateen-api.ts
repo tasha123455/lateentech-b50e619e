@@ -285,7 +285,7 @@ export function createLateenApi(userId: string) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "full_name, business_name, phone, whatsapp, avatar_url, created_at, country, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes",
+          "full_name, business_name, phone, whatsapp, avatar_url, created_at, country, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes, banned_at, frozen_at",
         )
         .eq("id", userId)
         .maybeSingle();
@@ -293,7 +293,15 @@ export function createLateenApi(userId: string) {
       let email: string | null = null;
       try {
         const { data: u } = await supabase.auth.getUser();
-        email = u?.user?.email ?? null;
+        if (u?.user?.id === userId) {
+          email = u?.user?.email ?? null;
+        } else {
+          // Viewing someone else's profile (admin impersonation) — the auth
+          // session still belongs to the admin, so fetch the real target
+          // user's email instead of silently showing the admin's own.
+          const { data: adminEmail } = await supabase.rpc("admin_get_user_email", { _user_id: userId });
+          email = (adminEmail as string | null) ?? null;
+        }
       } catch {
         /* ignore */
       }
@@ -523,7 +531,7 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
       },
       async listAllUsers(search?: string) {
-        let q = supabase.from("profiles").select("id, full_name, phone, business_name, created_at");
+        let q = supabase.from("profiles").select("id, full_name, phone, business_name, created_at, banned_at, frozen_at");
         if (search && search.trim()) {
           const s = `%${search.trim()}%`;
           q = q.or(`full_name.ilike.${s},phone.ilike.${s},business_name.ilike.${s}`);
@@ -536,6 +544,8 @@ export function createLateenApi(userId: string) {
           phone: string | null;
           business_name: string | null;
           created_at: string;
+          banned_at: string | null;
+          frozen_at: string | null;
         }>;
         if (!profiles.length) return [];
         const { data: roles } = await supabase
@@ -546,15 +556,38 @@ export function createLateenApi(userId: string) {
             profiles.map((p) => p.id),
           );
         const rmap = new Map((roles ?? []).map((r: { user_id: string; role: string }) => [r.user_id, r.role]));
-        return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer" }));
+        let emap = new Map<string, string | null>();
+        try {
+          const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
+            _user_ids: profiles.map((p) => p.id),
+          });
+          emap = new Map(
+            ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
+          );
+        } catch {
+          /* ignore — email column just won't be shown */
+        }
+        return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer", email: emap.get(p.id) ?? null }));
       },
       async deleteUser(userId: string) {
         const { adminDeleteUserFn } = await import("./admin-users.functions");
         await adminDeleteUserFn({ data: { userId } });
       },
-      async banUser(userId: string, reason?: string | null) {
-        const { adminBanUserFn } = await import("./admin-users.functions");
-        await adminBanUserFn({ data: { userId, reason: reason ?? null } });
+      async banUser(userId: string) {
+        const { error } = await supabase.rpc("admin_set_user_banned", { _user_id: userId, _banned: true });
+        if (error) throw error;
+      },
+      async unbanUser(userId: string) {
+        const { error } = await supabase.rpc("admin_set_user_banned", { _user_id: userId, _banned: false });
+        if (error) throw error;
+      },
+      async freezeUser(userId: string) {
+        const { error } = await supabase.rpc("admin_set_user_frozen", { _user_id: userId, _frozen: true });
+        if (error) throw error;
+      },
+      async unfreezeUser(userId: string) {
+        const { error } = await supabase.rpc("admin_set_user_frozen", { _user_id: userId, _frozen: false });
+        if (error) throw error;
       },
       async listAllProducts() {
         const { data, error } = await supabase
@@ -693,6 +726,7 @@ export function createLateenApi(userId: string) {
           leadsToday: todayRes.count ?? 0,
           totalUsers: profilesRes.count ?? 0,
           totalProducts: productsRes.count ?? 0,
+          succeededUpfronts: feeRows.length,
         };
       },
     },
