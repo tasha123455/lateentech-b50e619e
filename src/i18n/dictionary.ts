@@ -300,6 +300,10 @@ export const DICT: Record<string, string> = {
   "Street, area, landmark, house number…": "الشارع، المنطقة، علامة مميزة، رقم المنزل…",
   "Delivery fee": "رسوم التوصيل",
   "Total": "الإجمالي",
+  "Total with delivery fee": "الإجمالي بالتوصيل",
+  "Total delivery and shipping": "الإجمالي بالتوصيل و الشحن",
+  "Total with shipping fee": "الإجمالي بالشحن",
+  "Rejected": "مرفوض",
   "Customer details": "بيانات الزبون والتوصيل",
   "Customer & delivery": "بيانات الزبون والتوصيل",
   "WhatsApp (optional)": "واتساب (اختياري)",
@@ -421,6 +425,8 @@ export const DICT: Record<string, string> = {
   "After completing the payment, upload your payment receipt to continue.": "بعد إتمام التحويل، ارفع إيصال الدفع حتى يتم متابعة الطلب.",
   "The fee is deducted from the product price, and is not an additional charge.": "قيمة العربون تُخصم من سعر المنتج، وليست مبلغاً إضافياً على سعر المنتج.",
   "Amount customer pays on Delivery:": "المبلغ الذي يدفعه الزبون عند الإستلام:",
+  "Delivery cost:": "تكلفة التوصيل:",
+  "Shipping cost:": "تكلفة الشحن:",
 
   // ===== Empty States & Search =====
   "No orders found.": "لم يتم العثور على طلبيات.",
