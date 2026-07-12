@@ -190,19 +190,30 @@ export function RegisterForm({ role }: { role: Role }) {
           .select("role")
           .eq("user_id", session.user.id);
         const alreadyHasAccount = Array.isArray(existingRoles) && existingRoles.length > 0;
-        if (alreadyHasAccount) {
+        const rolesList = (existingRoles ?? []).map((r) => r.role as string);
+        const hasThisRole = rolesList.includes(role);
+        const hasOtherRole = rolesList.includes(otherRole);
+        if (hasOtherRole && !hasThisRole) {
           try {
             sessionStorage.removeItem("pending_signup");
             sessionStorage.removeItem("intended_role");
             localStorage.removeItem("active_role");
           } catch { /* ignore */ }
           await supabase.auth.signOut();
-          setError("An account with this email already exists. Please sign in instead.");
+          setError(crossRoleMsg());
+        } else if (alreadyHasAccount) {
+          try {
+            sessionStorage.removeItem("pending_signup");
+            sessionStorage.removeItem("intended_role");
+            localStorage.removeItem("active_role");
+          } catch { /* ignore */ }
+          await supabase.auth.signOut();
+          setError(ar ? "يوجد حساب بالفعل بهذا البريد الإلكتروني. يرجى تسجيل الدخول." : "An account with this email already exists. Please sign in instead.");
         } else {
           await addRoleAndGo();
         }
       }
-      catch (err) { setError(err instanceof Error ? err.message : "Sign up failed"); }
+      catch (err) { setError(err instanceof Error ? err.message : (ar ? "فشل إنشاء الحساب" : "Sign up failed")); }
     }
     setBusy(false);
   };
