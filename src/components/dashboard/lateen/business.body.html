@@ -765,10 +765,13 @@
   </div>
   <div class="ord-chips">
     <div class="fchip active" onclick="setFilter('all',this)">All</div>
-    <div class="fchip" id="fc-new" onclick="setFilter('new',this)">New</div>
+    <div class="fchip" id="fc-new" onclick="setFilter('pending',this)">Pending</div>
+    <div class="fchip" onclick="setFilter('approved',this)">Approved</div>
     <div class="fchip" onclick="setFilter('confirmed',this)">Confirmed</div>
     <div class="fchip" onclick="setFilter('delivered',this)">Delivered</div>
     <div class="fchip" id="fc-failed" onclick="setFilter('failed',this)">Failed</div>
+    <div class="fchip" onclick="setFilter('rejected',this)">Rejected</div>
+    <div class="fchip" onclick="setFilter('draft',this)">Draft</div>
   </div>
   <div class="list" id="orders-list"></div>
 </div>

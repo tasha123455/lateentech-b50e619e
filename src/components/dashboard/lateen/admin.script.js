@@ -87,10 +87,17 @@ async function admLoadVerify(){
     const list=await window.LateenAPI.admin.listPendingReceipts();
     if(!list.length){root.innerHTML='<div class="adm-empty">No receipts awaiting review.</div>';return;}
     root.innerHTML=list.map(o=>{
-      const fee=Number(o.platform_fee||0)*Number(o.qty||0);
+      const qty=Number(o.qty||0);
+      const unitPrice=Number(o.unit_price||0);
+      const marketerFee=Number(o.commission||0)*qty;
+      const platformFee=Number(o.platform_fee||0)*qty;
+      const productTotal=unitPrice*qty;
       const marketer=o.marketer&&o.marketer.full_name||'Unknown marketer';
       const phone=o.marketer&&o.marketer.phone||'';
+      const email=o.marketer&&o.marketer.email||'';
       const product=o.product&&o.product.name||'Order';
+      const prodPhoto=(o.product&&Array.isArray(o.product.photos)&&o.product.photos[0])||'';
+      const prodThumb=prodPhoto?`<img class="adm-prod-thumb" src="${admEsc(prodPhoto)}" alt="" onclick="event.stopPropagation();admLightbox('${admEsc(prodPhoto)}')"/>`:'';
       const thumb=o.receipt_url?`<img class="adm-thumb" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="event.stopPropagation();admLightbox('${admEsc(o.receipt_url)}')" />`:`<div class="adm-thumb-empty">📄</div>`;
       const upAt=o.receipt_uploaded_at?'Uploaded: '+admWhen(o.receipt_uploaded_at):'';
       const created='Created: '+admWhen(o.created_at);
@@ -100,13 +107,24 @@ async function admLoadVerify(){
           <div class="adm-row-mid">
             <div class="adm-row-name">${admEsc(marketer)}</div>
             <div class="adm-row-sub">${admEsc(product)} · ${admEsc(phone)}</div>
+            ${email?`<div class="adm-row-sub">${admEsc(email)}</div>`:''}
             <div class="adm-row-sub" style="opacity:.7">${created}${upAt?' · '+upAt:''}</div>
             <div class="adm-row-sub" style="color:#e0c070">⏳ Pending verification</div>
           </div>
-          <div class="adm-row-amt">${admMoney(fee)}</div>
+          <div class="adm-row-amt">${admMoney(platformFee)}</div>
         </div>
         <div class="adm-expand" id="v-${o.id}">
           ${o.receipt_url?`<img class="adm-receipt-full" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="admLightbox('${admEsc(o.receipt_url)}')"/>`:'<div class="adm-empty">No receipt image</div>'}
+          <div class="adm-order-detail">
+            ${prodThumb}
+            <div class="adm-order-detail-rows">
+              <div class="adm-detail-row"><span>Price</span><span>${admMoney(unitPrice)}</span></div>
+              <div class="adm-detail-row"><span>Qty</span><span>${qty}</span></div>
+              <div class="adm-detail-row"><span>Total</span><span>${admMoney(productTotal)}</span></div>
+              <div class="adm-detail-row"><span>Marketer fee</span><span>${admMoney(marketerFee)}</span></div>
+              <div class="adm-detail-row"><span>Platform fee</span><span>${admMoney(platformFee)}</span></div>
+            </div>
+          </div>
           <div class="adm-actions">
             <button class="adm-btn adm-btn-no" onclick="event.stopPropagation();admReject('${o.id}')">Reject with note</button>
             <button class="adm-btn adm-btn-ok" onclick="event.stopPropagation();admApprove('${o.id}')">Approve &amp; forward</button>

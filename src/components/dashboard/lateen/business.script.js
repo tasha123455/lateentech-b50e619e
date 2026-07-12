@@ -28,6 +28,7 @@ function __bindChartPan(canvas,getChart){if(!canvas||canvas.__panBound)return;ca
 function buildMainChart(){
   if(mainChart){try{mainChart.destroy();}catch(e){}mainChart=null;}
   const canvas=document.getElementById('mainChart');if(!canvas||typeof Chart==='undefined')return;
+  try{const __existing=Chart.getChart(canvas);if(__existing)__existing.destroy();}catch(e){}
   const d=chartData[currentMetric][currentPeriod];
   const labels=d.labels.map(v=>__tlbl(v));
   const subs=d.sub||[];
@@ -218,7 +219,24 @@ let mpActiveFilter='all';
 const mpPhotoIndex={};
 const mpAnalyticsOpen={};
 const mpPeriod={};
-const MP_PERIOD_MULT={day:0.04,month:0.28,year:0.72,all:1};
+function __mpInPeriod(createdAt,period){
+  if(period==='all')return true;
+  if(!createdAt)return false;
+  const c=createdAt instanceof Date?createdAt:new Date(createdAt);
+  if(isNaN(c))return false;
+  const now=new Date();
+  if(period==='day')return c.getFullYear()===now.getFullYear()&&c.getMonth()===now.getMonth()&&c.getDate()===now.getDate();
+  if(period==='month')return c.getFullYear()===now.getFullYear()&&c.getMonth()===now.getMonth();
+  if(period==='year')return c.getFullYear()===now.getFullYear();
+  return true;
+}
+function mpProductOrders(p,period){
+  try{
+    if(typeof orders==='undefined'||!Array.isArray(orders))return[];
+    return orders.filter(o=>o.productId===p.id&&o._status==='delivered'&&__mpInPeriod(o._createdAt,period));
+  }catch(e){return[];}
+}
+function mpOrderNet(o){return(Number(o.price)||0)*(Number(o.qty)||0)-(Number(o.commission)||0)-(Number(o.platformFee)||0);}
 
 function mpEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
@@ -266,17 +284,17 @@ function mpAnalyticsSection(p){
 
 function mpAnalyticsBody(p,period){
   const fmtP=mpFmt(p);
-  const mult=MP_PERIOD_MULT[period]??1;
-  const sold=Math.round((p.sold||0)*mult);
-  const revenue=(p.revenue||0)*mult;
+  const list=mpProductOrders(p,period);
+  const sold=list.reduce((s,o)=>s+(Number(o.qty)||0),0);
+  const revenue=list.reduce((s,o)=>s+mpOrderNet(o),0);
   const stockClass=p.qty===0?'warn':(p.qty<=LOW_STOCK_THRESHOLD?'warn':'accent');
   return `
     <div class="mp-stat-grid">
-      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'المباع':'Sold'}</div><div class="mp-stat-val">${sold.toLocaleString()}</div></div>
-      <div class="mp-stat-tile ${stockClass}"><div class="mp-stat-label">${__ar()?'المخزون':'In stock'}</div><div class="mp-stat-val">${p.qty||0}</div></div>
-      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'الإيرادات':'Revenue'}</div><div class="mp-stat-val">${fmtP(revenue)}</div></div>
+      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'إجمالي المباع':'Total sold'}</div><div class="mp-stat-val">${sold.toLocaleString()}</div></div>
+      <div class="mp-stat-tile ${stockClass}"><div class="mp-stat-label">${__ar()?'إجمالي المخزون':'Total stock'}</div><div class="mp-stat-val">${p.qty||0}</div></div>
+      <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'إجمالي الإيرادات':'Total revenue'}</div><div class="mp-stat-val">${fmtP(revenue)}</div></div>
     </div>
-    ${mpVariantBoxes(p,period)}`;
+    ${mpVariantBoxes(p,period,list)}`;
 }
 
 function mpSetPeriod(pid,period){
@@ -287,8 +305,8 @@ function mpSetPeriod(pid,period){
   if(body)body.innerHTML=mpAnalyticsBody(p,period);
 }
 
-function mpVariantBoxes(p,period){
-  const mult=MP_PERIOD_MULT[period]??1;
+function mpVariantBoxes(p,period,list){
+  list=list||mpProductOrders(p,period);
   const fmtP=mpFmt(p);
   const realGroups=(p.variantGroups||[]).filter(g=>g.items&&g.items.length);
   if(realGroups.length){
@@ -296,17 +314,16 @@ function mpVariantBoxes(p,period){
       const items=g.items;
       const total=items.reduce((s,x)=>s+(Number(x.qty)||0),0);
       const maxQty=Math.max(...items.map(x=>Number(x.qty)||0),1);
-      const qtySum=items.reduce((s,x)=>s+(Number(x.qty)||0),0);
       const rows=items.map(x=>{
         const qty=Number(x.qty)||0;
         const pct=Math.max(6,Math.round(qty/maxQty*100));
         const low=qty===0?'mp-empty':(qty<=LOW_STOCK_THRESHOLD?'mp-low':'');
         const swatch=x.photo?`<img class="mp-vg-swatch" src="${mpEsc(x.photo)}" alt="" onclick="event.stopPropagation();mpOpenLightbox(['${mpEsc(x.photo)}'],0)"/>`:'';
-        // Distribute the product's total sold/revenue across variant values,
-        // weighted by each value's stock share (or evenly if stock is 0 everywhere).
-        const share=qtySum>0?qty/qtySum:1/items.length;
-        const vSold=Math.round((p.sold||0)*mult*share);
-        const vRevenue=(p.revenue||0)*mult*share;
+        // Attribute sold/revenue only to the variant value that was actually
+        // ordered — never split a sale proportionally across sibling values.
+        const vList=list.filter(o=>o.size===x.val||o.color===x.val);
+        const vSold=vList.reduce((s,o)=>s+(Number(o.qty)||0),0);
+        const vRevenue=vList.reduce((s,o)=>s+mpOrderNet(o),0);
         return `<div class="mp-vg-value-row">
           <div class="mp-vg-value-top">
             ${swatch}
@@ -336,7 +353,8 @@ function mpVariantBoxes(p,period){
 function mpActiveMarketerCount(p){
   try{
     if(typeof orders==='undefined'||!Array.isArray(orders))return 0;
-    const ids=new Set(orders.filter(o=>o.productId===p.id&&o.marketerId).map(o=>o.marketerId));
+    const ACTIVE_ST=new Set(['pending','draft','approved','confirmed']);
+    const ids=new Set(orders.filter(o=>o.productId===p.id&&o.marketerId&&ACTIVE_ST.has(o._status)).map(o=>o.marketerId));
     return ids.size;
   }catch(e){return 0;}
 }
@@ -571,7 +589,7 @@ function mpBindLightboxSwipe(){
 }
 
 let __submittingProduct=false;
-async function submitProduct(){if(__submittingProduct)return;if(__frozenBlock())return;const btn=document.querySelector('#form-overlay .submit-btn');const name=document.getElementById('f-name').value.trim();const price=parseFloat(document.getElementById('f-price').value)||0;const costPrice=parseFloat(document.getElementById('f-cost').value)||0;const commPct=parseFloat(document.getElementById('f-comm-pct').value)||0;const commFixed=parseFloat(document.getElementById('f-comm-fixed').value)||0;console.log('[Lateen] submitProduct fired',{name,price,costPrice,commPct,commFixed,selectedCurrency,zones});if(!name||!price||(!commPct&&!commFixed)){alert('Please fill in name, price and commission.');return;}if(!selectedCurrency){alert('Please select a currency.');return;}if(!Object.keys(zones).length){alert('Please add at least one delivery zone.');return;}const validZones={};for(const[code,z]of Object.entries(zones)){const zShip=Number(z.shipping)||0;const vc={};for(const[city,costs]of Object.entries(z.cities||{})){const dlv=Number(costs.delivery)||0;if(dlv>0)vc[city]={shipping:zShip,delivery:dlv};}if(Object.keys(vc).length)validZones[code]={cities:vc,shipping:zShip};}if(!Object.keys(validZones).length){alert('Please add at least one city with a delivery price.');return;}currentCode=ensureUniqueCode(editingId?currentCode:null);__submittingProduct=true;if(btn){btn.disabled=true;btn.style.opacity='0.6';btn.style.pointerEvents='none';btn.dataset.origText=btn.textContent;btn.textContent='Uploading photos…';}try{await __waitForProductPhotoUploads();const{comm,platform,total,commPct:finalPct}=calcFees(price,commPct,commFixed,commMode);const cleanGroups=variantGroups.map(g=>({name:(g.name||'Variant').trim()||'Variant',items:g.items.map(x=>({val:(x.val||'').trim(),qty:Number(x.qty)||0,photo:(typeof x.photo==='string'&&!__isBlobUrl(x.photo))?x.photo:''})).filter(x=>x.val)})).filter(g=>g.items.length);const sizesGroup=cleanGroups.find(g=>/size/i.test(g.name));const colorsGroup=cleanGroups.find(g=>/colou?r/i.test(g.name));const qty=cleanGroups.length?cleanGroups[0].items.reduce((s,x)=>s+(Number(x.qty)||0),0):variantGroups.reduce((s,g)=>s+(g.items||[]).reduce((s2,x)=>s2+(Number(x.qty)||0),0),0);const cleanPhotos=(photos||[]).filter(u=>typeof u==='string'&&!__isBlobUrl(u));const payload={code:currentCode,name,description:document.getElementById('f-desc').value.trim(),category:selectedCategory,price,cost_price:costPrice,qty,currency:selectedCurrency,comm_pct:finalPct,comm_fixed:comm,comm_mode:commMode,platform_fee:platform,total_fee_per_unit:total,variant_groups:cleanGroups,sizes:sizesGroup?sizesGroup.items.map(x=>x.val):[],colors:colorsGroup?colorsGroup.items.map(x=>x.val):[],delivery:validZones,photos:cleanPhotos,biz_name:(typeof BUSINESS!=='undefined'?BUSINESS.name:null)};if(editingId)payload.id=editingId;console.log('[Lateen] payload ready',payload);if(btn)btn.textContent='Saving…';let __codeLen=6,__saveAttempt=0,__saved=false;while(!__saved){try{await window.LateenAPI.upsertProduct(payload);__saved=true;}catch(__err){const __isDupCode=!editingId&&__err&&(__err.code==='23505'||/duplicate key|unique constraint/i.test(__err.message||''));if(__isDupCode&&__saveAttempt<8){__saveAttempt++;if(__saveAttempt>=4)__codeLen=7;currentCode=genCode(__codeLen);payload.code=currentCode;const __cd=document.getElementById('product-code-display');if(__cd)__cd.textContent=currentCode;continue;}throw __err;}}closeForm();await loadProducts();}catch(e){console.error('[Lateen] upsertProduct',e);alert('Could not save product: '+(e.message||e));}finally{__submittingProduct=false;if(btn){btn.disabled=false;btn.style.opacity='';btn.style.pointerEvents='';if(btn.dataset.origText){btn.textContent=btn.dataset.origText;delete btn.dataset.origText;}}}}
+async function submitProduct(){if(__submittingProduct)return;if(__frozenBlock())return;const btn=document.querySelector('#form-overlay .submit-btn');const name=document.getElementById('f-name').value.trim();const price=parseFloat(document.getElementById('f-price').value)||0;const costPrice=parseFloat(document.getElementById('f-cost').value)||0;const commPct=parseFloat(document.getElementById('f-comm-pct').value)||0;const commFixed=parseFloat(document.getElementById('f-comm-fixed').value)||0;console.log('[Lateen] submitProduct fired',{name,price,costPrice,commPct,commFixed,selectedCurrency,zones});if(!name||!price||(!commPct&&!commFixed)){alert('Please fill in name, price and commission.');return;}if(!document.getElementById('f-desc').value.trim()){alert('Please add a product description.');return;}if(!selectedCategory){alert('Please select a category.');return;}if(!photos.length){alert('Please add at least one product photo.');return;}if(!selectedCurrency){alert('Please select a currency.');return;}for(const __vg of variantGroups){const __vgName=(__vg.name||'').trim();const __vgItems=__vg.items||[];const __vgBlank=__vgItems.filter(__it=>!(__it.val||'').toString().trim());const __vgFilled=__vgItems.filter(__it=>(__it.val||'').toString().trim());if(__vgName||__vgItems.length){if(__vgBlank.length){alert('Please fill in a value for every variant you add, or remove the empty one.');return;}if(!__vgFilled.length){alert('Please add at least one value for the "'+(__vgName||'variant')+'" variant, or remove it.');return;}}}if(!Object.keys(zones).length){alert('Please add at least one delivery zone.');return;}const validZones={};for(const[code,z]of Object.entries(zones)){const zShip=Number(z.shipping)||0;const vc={};for(const[city,costs]of Object.entries(z.cities||{})){const dlv=Number(costs.delivery)||0;if(dlv>0)vc[city]={shipping:zShip,delivery:dlv};}if(Object.keys(vc).length)validZones[code]={cities:vc,shipping:zShip};}if(!Object.keys(validZones).length){alert('Please add at least one city with a delivery price.');return;}currentCode=ensureUniqueCode(editingId?currentCode:null);__submittingProduct=true;if(btn){btn.disabled=true;btn.style.opacity='0.6';btn.style.pointerEvents='none';btn.dataset.origText=btn.textContent;btn.textContent='Uploading photos…';}try{await __waitForProductPhotoUploads();const{comm,platform,total,commPct:finalPct}=calcFees(price,commPct,commFixed,commMode);const cleanGroups=variantGroups.map(g=>({name:(g.name||'Variant').trim()||'Variant',items:g.items.map(x=>({val:(x.val||'').trim(),qty:Number(x.qty)||0,photo:(typeof x.photo==='string'&&!__isBlobUrl(x.photo))?x.photo:''})).filter(x=>x.val)})).filter(g=>g.items.length);const sizesGroup=cleanGroups.find(g=>/size/i.test(g.name));const colorsGroup=cleanGroups.find(g=>/colou?r/i.test(g.name));const qty=cleanGroups.length?cleanGroups[0].items.reduce((s,x)=>s+(Number(x.qty)||0),0):variantGroups.reduce((s,g)=>s+(g.items||[]).reduce((s2,x)=>s2+(Number(x.qty)||0),0),0);const cleanPhotos=(photos||[]).filter(u=>typeof u==='string'&&!__isBlobUrl(u));const payload={code:currentCode,name,description:document.getElementById('f-desc').value.trim(),category:selectedCategory,price,cost_price:costPrice,qty,currency:selectedCurrency,comm_pct:finalPct,comm_fixed:comm,comm_mode:commMode,platform_fee:platform,total_fee_per_unit:total,variant_groups:cleanGroups,sizes:sizesGroup?sizesGroup.items.map(x=>x.val):[],colors:colorsGroup?colorsGroup.items.map(x=>x.val):[],delivery:validZones,photos:cleanPhotos,biz_name:(typeof BUSINESS!=='undefined'?BUSINESS.name:null)};if(editingId)payload.id=editingId;console.log('[Lateen] payload ready',payload);if(btn)btn.textContent='Saving…';let __codeLen=6,__saveAttempt=0,__saved=false;while(!__saved){try{await window.LateenAPI.upsertProduct(payload);__saved=true;}catch(__err){const __isDupCode=!editingId&&__err&&(__err.code==='23505'||/duplicate key|unique constraint/i.test(__err.message||''));if(__isDupCode&&__saveAttempt<8){__saveAttempt++;if(__saveAttempt>=4)__codeLen=7;currentCode=genCode(__codeLen);payload.code=currentCode;const __cd=document.getElementById('product-code-display');if(__cd)__cd.textContent=currentCode;continue;}throw __err;}}closeForm();await loadProducts();}catch(e){console.error('[Lateen] upsertProduct',e);alert('Could not save product: '+(e.message||e));}finally{__submittingProduct=false;if(btn){btn.disabled=false;btn.style.opacity='';btn.style.pointerEvents='';if(btn.dataset.origText){btn.textContent=btn.dataset.origText;delete btn.dataset.origText;}}}}
 async function toggleStatus(id){const p=products.find(x=>x.id===id);if(!p)return;const next=p.status==='active'?'paused':'active';try{await window.LateenAPI.setStatus(id,next);await loadProducts();}catch(e){console.error(e);alert('Failed to update status');}}
 async function deleteProduct(id){if(!confirm('Delete this product? Marketers will no longer see it.'))return;try{await window.LateenAPI.deleteProduct(id);await loadProducts();}catch(e){console.error(e);alert('Failed to delete');}}
 function editProduct(id){editingId=id;const p=products.find(x=>x.id===id);if(p)openAddForm(p);}
@@ -599,12 +617,12 @@ function renderProducts(){
 }
 
 /* Orders */
-const ST={new:{label:'New order',step:0,dot:'#E24B4A'},confirmed:{label:'Confirmed',step:1,dot:'#EF9F27'},delivered:{label:'Delivered',step:2,dot:'#34c77b'},failed:{label:'Failed',step:-1,dot:'#e07070'}};
+const ST={pending:{label:'Pending',step:0,dot:'#E24B4A'},approved:{label:'Approved',step:0,dot:'#EF9F27'},confirmed:{label:'Confirmed',step:1,dot:'#EF9F27'},delivered:{label:'Delivered',step:2,dot:'#34c77b'},failed:{label:'Failed',step:-1,dot:'#e07070'},rejected:{label:'Rejected',step:-1,dot:'#e07070'}};
 const STEPS=['New','Confirmed','Delivered'];
 const fmt=(n,sym,code)=>__money(n,sym,code);
 let activeFilter='all',expandedId=null;
 let orders=[];
-function dbStatusToUi(s){return s==='confirmed'?'confirmed':s==='delivered'?'delivered':s==='cancelled'?'failed':'new';}
+function dbStatusToUi(s){if(s==='confirmed')return'confirmed';if(s==='delivered')return'delivered';if(s==='cancelled')return'failed';if(s==='rejected')return'rejected';if(s==='approved')return'approved';return'pending';}
 function dbToOrder(r){const curCode=(r.currency&&r.currency.code)||'USD';const sym=__wrapArSym((r.currency&&r.currency.symbol)||'$',curCode);const prod=products.find(p=>p.id===r.product_id);const ph=prod&&prod.photos&&prod.photos.length?prod.photos:[(prod&&prod.currency&&prod.currency.flag)||'📦'];const dt=new Date(r.created_at);const d=dt.getDate()+' '+dt.toLocaleString('en',{month:'short'})+' '+dt.getFullYear();const q=Number(r.qty)||1;const shipping=Number(r.shipping_fee)||0;const delivery=Number(r.delivery_fee)||0;const total=Number(r.unit_price)*q+shipping+delivery;const mc=r.marketer_confirmed_at?new Date(r.marketer_confirmed_at):null;const mcDate=mc?(mc.getDate()+' '+mc.toLocaleString('en',{month:'short'})+' '+mc.getFullYear()):'';return{id:'#'+r.id.slice(0,8).toUpperCase(),dbId:r.id,marketerId:r.marketer_id||'',productId:r.product_id||'',source:'affiliate',paymentType:'upfront',paymentAmount:Number(r.commission)*q+Number(r.platform_fee)*q,paymentDate:d,photos:ph,productEmoji:'📦',customerName:r.customer_name||'',customerPhone:r.customer_phone||'',customerWhatsapp:r.customer_whatsapp||'',country:r.customer_country||'',city:r.customer_city||'',address:r.customer_address||'',product:prod?prod.name:'(product)',productCode:prod?prod.code:'',sym,curCode,size:r.size||'',color:r.color||'',qty:q,price:Number(r.unit_price)||0,shipping,delivery,total,commission:Number(r.commission)*q,platformFee:Number(r.platform_fee)*q,status:dbStatusToUi(r.status),date:d,notes:r.customer_notes||'',receiptUrl:r.receipt_url||'',marketerConfirmed:!!r.marketer_confirmed_at,marketerConfirmedDate:mcDate,_createdAt:dt,_status:r.status};}
 async function loadOrders(){if(!window.LateenAPI)return;let rows=[];try{rows=await window.LateenAPI.listMyOrders();}catch(e){console.error('[Lateen] loadOrders fetch',e);}try{orders=(rows||[]).filter(r=>r&&r.business_id).map(dbToOrder);}catch(e){console.error('[Lateen] loadOrders map',e);orders=orders||[];}try{updateSummary();}catch(e){console.error('[Lateen] updateSummary',e);}try{applyFilters();}catch(e){console.error('[Lateen] applyFilters',e);try{renderOrders([]);}catch(_){}}try{recomputeAnalytics();}catch(e){console.error('[Lateen] recomputeAnalytics',e);}}
 const __DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -660,14 +678,14 @@ function recomputeAnalytics(){
 }
 function setFilter(f,el){activeFilter=f;document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');applyFilters();}
 function applyFilters(){const q=(document.getElementById('search-input')?document.getElementById('search-input').value||'':'').toLowerCase();const list=orders.filter(o=>{const mf=activeFilter==='all'||o.status===activeFilter;const s=x=>String(x||'').toLowerCase();const mq=!q||s(o.id).includes(q)||s(o.customerName).includes(q)||s(o.city).includes(q)||s(o.product).includes(q)||s(o.customerPhone).includes(q);return mf&&mq;});renderOrders(list);}
-function updateSummary(){const nc=orders.filter(o=>o.status==='new').length;const fc=orders.filter(o=>o.status==='failed').length;const banner=document.getElementById('new-banner');if(banner)banner.style.display=nc>0?'flex':'none';const bt=document.getElementById('new-banner-text');if(bt)bt.textContent=nc+' new';const fcNew=document.getElementById('fc-new');if(fcNew)fcNew.innerHTML=nc>0?`New (${nc}) <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#ef5566;margin-left:3px;vertical-align:middle;animation:blink 1.5s infinite"></span>`:'New';const fcFailed=document.getElementById('fc-failed');if(fcFailed)fcFailed.textContent=fc>0?(__ar()?'فشل ('+fc+')':'Failed ('+fc+')'):(__ar()?'فشل':'Failed');}
+function updateSummary(){const nc=orders.filter(o=>o.status==='pending').length;const fc=orders.filter(o=>o.status==='failed').length;const banner=document.getElementById('new-banner');if(banner)banner.style.display=nc>0?'flex':'none';const bt=document.getElementById('new-banner-text');if(bt)bt.textContent=nc+' new';const fcNew=document.getElementById('fc-new');const pendLbl=__ar()?'قيد الانتظار':'Pending';if(fcNew)fcNew.innerHTML=nc>0?`${pendLbl} (${nc}) <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#ef5566;margin-left:3px;vertical-align:middle;animation:blink 1.5s infinite"></span>`:pendLbl;const fcFailed=document.getElementById('fc-failed');if(fcFailed)fcFailed.textContent=fc>0?(__ar()?'فشل ('+fc+')':'Failed ('+fc+')'):(__ar()?'فشل':'Failed');}
 const __ordCheckIcon=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-function computeOrdFin(o){const subtotal=o.total;const commissionPct=subtotal>0?Math.round((o.commission/subtotal)*100):0;const platformPct=subtotal>0?Math.round((o.platformFee/subtotal)*100):0;const net=subtotal-o.commission-o.platformFee;return{subtotal,commissionPct,platformPct,net};}
-function buildOrdStepper(s){if(s==='failed')return`<div class="progress-failed">Order failed</div>`;const si=ST[s]?.step??0;let h='<div class="progress">';STEPS.forEach((step,i)=>{h+=`<div class="step${i===si?' active':''}"><div class="bubble"></div><div class="lbl">${step}</div></div>`;if(i<STEPS.length-1)h+=`<div class="line"></div>`;});h+='</div>';return h;}
-function buildOrdActions(o){if(o.status==='delivered'||o.status==='failed'){return`<div class="actions"><button class="btn btn-lock" disabled>${o.status==='delivered'?'✓ Delivered':'Failed'}</button></div>`;}const frozen=!!(window.__profileData&&window.__profileData.frozen_at);const dis=frozen?' disabled style="opacity:0.45;pointer-events:none;cursor:not-allowed;"':'';let b='';if(o.status==='new')b+=`<button class="btn btn-confirm"${dis} onclick="event.stopPropagation();advance('${o.id}','confirmed')">Confirm order</button>`;if(o.status==='confirmed')b+=`<button class="btn btn-deliver"${dis} onclick="event.stopPropagation();advance('${o.id}','delivered')">Mark delivered</button>`;if(o.status==='new'||o.status==='confirmed')b+=`<button class="btn btn-fail"${dis} onclick="event.stopPropagation();advance('${o.id}','failed')">Failed</button>`;return`<div class="actions">${b}</div>`;}
+function computeOrdFin(o){const subtotal=o.total;const commissionPct=subtotal>0?Math.round((o.commission/subtotal)*100):0;const platformPct=Math.round(PLATFORM_FEE_RATE*100);const base=o.price*o.qty;const net=base-o.commission-o.platformFee;const hasDelivery=Number(o.delivery)>0;const hasShipping=Number(o.shipping)>0;let extra=null;if(hasDelivery&&hasShipping){extra={label:'Total delivery and shipping',value:base+Number(o.delivery)+Number(o.shipping)-o.commission-o.platformFee};}else if(hasDelivery){extra={label:'Total with delivery fee',value:base+Number(o.delivery)-o.commission-o.platformFee};}else if(hasShipping){extra={label:'Total with shipping fee',value:base+Number(o.shipping)-o.commission-o.platformFee};}return{subtotal,commissionPct,platformPct,net,extra};}
+function buildOrdStepper(s){if(s==='failed')return`<div class="progress-failed">Order failed</div>`;if(s==='rejected')return`<div class="progress-failed">Receipt rejected</div>`;const si=ST[s]?.step??0;let h='<div class="progress">';STEPS.forEach((step,i)=>{h+=`<div class="step${i===si?' active':''}"><div class="bubble"></div><div class="lbl">${step}</div></div>`;if(i<STEPS.length-1)h+=`<div class="line"></div>`;});h+='</div>';return h;}
+function buildOrdActions(o){if(o.status==='delivered'||o.status==='failed'){return`<div class="actions"><button class="btn btn-lock" disabled>${o.status==='delivered'?'✓ Delivered':'Failed'}</button></div>`;}if(o.status==='rejected'){return'<div class="actions"></div>';}const frozen=!!(window.__profileData&&window.__profileData.frozen_at);const dis=frozen?' disabled style="opacity:0.45;pointer-events:none;cursor:not-allowed;"':'';let b='';if(o.status==='approved')b+=`<button class="btn btn-confirm"${dis} onclick="event.stopPropagation();advance('${o.id}','confirmed')">Confirm order</button>`;if(o.status==='confirmed')b+=`<button class="btn btn-deliver"${dis} onclick="event.stopPropagation();advance('${o.id}','delivered')">Mark delivered</button>`;if(o.status==='pending'||o.status==='approved'||o.status==='confirmed')b+=`<button class="btn btn-fail"${dis} onclick="event.stopPropagation();advance('${o.id}','failed')">Failed</button>`;return`<div class="actions">${b}</div>`;}
 function __askFailNote(){return new Promise(resolve=>{const ar=(typeof __ar==='function')?__ar():(document.documentElement.lang==='ar');const title=ar?'وضع الطلب: فشل':'Mark order as failed';const lbl=ar?'ملاحظات للمسوق (اختياري)':'Notes for the marketer (optional)';const ok=ar?'تأكيد':'Confirm';const cancel=ar?'إلغاء':'Cancel';const ph=ar?'وضح سبب فشل الطلب…':'Explain why this order failed…';const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';ov.innerHTML=`<div style="background:#1a2030;border-radius:16px;padding:18px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,0.5)"><div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">${title}</div><div style="font-size:12px;color:#8a96a8;margin-bottom:10px">${lbl}</div><textarea id="__fn_ta" placeholder="${ph}" style="width:100%;min-height:90px;background:#0f1420;border:1px solid #2a3445;border-radius:10px;color:#fff;padding:10px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea><div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end"><button id="__fn_c" style="background:#2a3445;color:#fff;border:0;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer">${cancel}</button><button id="__fn_o" style="background:#e07070;color:#fff;border:0;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">${ok}</button></div></div>`;document.body.appendChild(ov);const cleanup=v=>{try{document.body.removeChild(ov);}catch(_){}resolve(v);};ov.querySelector('#__fn_c').onclick=()=>cleanup(null);ov.querySelector('#__fn_o').onclick=()=>{const v=(ov.querySelector('#__fn_ta').value||'').trim();cleanup(v||'');};ov.addEventListener('click',e=>{if(e.target===ov)cleanup(null);});setTimeout(()=>{const ta=ov.querySelector('#__fn_ta');if(ta)ta.focus();},50);});}
 async function advance(id,ns){if(__frozenBlock())return;const o=orders.find(x=>x.id===id);if(!o)return;let failNote=null;if(ns==='failed'){const entered=await __askFailNote();if(entered===null)return;failNote=entered||null;}try{if(window.LateenAPI&&o.dbId){if(ns==='confirmed')await window.LateenAPI.confirmOrder(o.dbId);else if(ns==='delivered')await window.LateenAPI.markDelivered(o.dbId);else if(ns==='failed')await window.LateenAPI.markFailed(o.dbId,failNote);}}catch(e){console.error('[Lateen] advance',e);alert('Action failed: '+(e.message||e));return;}await loadProducts();await loadOrders();}
-function renderOrders(list){const el=document.getElementById('orders-list');if(!el)return;list=Array.isArray(list)?list:[];if(!list.length){el.innerHTML='<div class="empty-state">No orders found.</div>';return;}el.innerHTML=list.map(o=>{try{const om=n=>fmt(n,o.sym,o.curCode);const isExp=expandedId===o.id;const isImg=s=>typeof s==='string'&&/^(data:|https?:|\/)/.test(s);const photos=(o.photos&&o.photos.length)?o.photos:[o.productEmoji||'📦'];const heroSlides=photos.map(p=>isImg(p)?`<div class="hero-slide"><img src="${p}" alt="" loading="eager" decoding="async"/></div>`:`<div class="hero-slide">${p}</div>`).join('');const heroDots=photos.length>1?`<div class="hero-dots">${photos.map((_,i)=>`<div class="d${i===0?' active':''}"></div>`).join('')}</div>`:'';const stLbl=(ST[o.status]||{}).label||o.status;const statusTag=o.status==='new'?`<div class="status-tag tag-new"><span class="dot"></span>${stLbl}</div>`:`<div class="status-tag tag-plain ${o.status}">${stLbl}</div>`;const __prodForVariant=(typeof products!=='undefined'&&products)?products.find(p=>p.id===o.productId):null;let variantImg='';let variantLabel=o.size?'Size':(o.color?'Colour':'');if(__prodForVariant&&Array.isArray(__prodForVariant.variantGroups)){outer:for(const g of __prodForVariant.variantGroups){for(const it of(g.items||[])){if(it&&(it.val===o.size||it.val===o.color)){if(g.name)variantLabel=g.name;if(it.photo){variantImg=it.photo;break outer;}}}}}const variantThumb=variantImg?`<div class="variant-thumb" onclick="event.stopPropagation();mpOpenLightbox('${String(variantImg).replace(/'/g,"\\'")}')"><img src="${variantImg}" alt="" loading="lazy"/></div>`:'';const fin=computeOrdFin(o);const codBanner=o.paymentType==='upfront'?`<div class="cod-banner"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/></svg></div><div><div class="t1">Cash on delivery</div><div class="t2">Customer pays remaining balance on arrival</div></div></div>`:'';const receiptLink='';return`
+function renderOrders(list){const el=document.getElementById('orders-list');if(!el)return;list=Array.isArray(list)?list:[];if(!list.length){el.innerHTML='<div class="empty-state">No orders found.</div>';return;}el.innerHTML=list.map(o=>{try{const om=n=>fmt(n,o.sym,o.curCode);const isExp=expandedId===o.id;const isImg=s=>typeof s==='string'&&/^(data:|https?:|\/)/.test(s);const photos=(o.photos&&o.photos.length)?o.photos:[o.productEmoji||'📦'];const heroSlides=photos.map(p=>isImg(p)?`<div class="hero-slide"><img src="${p}" alt="" loading="eager" decoding="async"/></div>`:`<div class="hero-slide">${p}</div>`).join('');const heroDots=photos.length>1?`<div class="hero-dots">${photos.map((_,i)=>`<div class="d${i===0?' active':''}"></div>`).join('')}</div>`:'';const stLbl=(ST[o.status]||{}).label||o.status;const statusTag=o.status==='pending'?`<div class="status-tag tag-new"><span class="dot"></span>${stLbl}</div>`:`<div class="status-tag tag-plain ${o.status}">${stLbl}</div>`;const __prodForVariant=(typeof products!=='undefined'&&products)?products.find(p=>p.id===o.productId):null;let variantImg='';let variantLabel=o.size?'Size':(o.color?'Colour':'');if(__prodForVariant&&Array.isArray(__prodForVariant.variantGroups)){outer:for(const g of __prodForVariant.variantGroups){for(const it of(g.items||[])){if(it&&(it.val===o.size||it.val===o.color)){if(g.name)variantLabel=g.name;if(it.photo){variantImg=it.photo;break outer;}}}}}const variantThumb=variantImg?`<div class="variant-thumb" onclick="event.stopPropagation();mpOpenLightbox('${String(variantImg).replace(/'/g,"\\'")}')"><img src="${variantImg}" alt="" loading="lazy"/></div>`:'';const fin=computeOrdFin(o);const codBanner=o.paymentType==='upfront'?`<div class="cod-banner"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/></svg></div><div><div class="t1">Cash on delivery</div><div class="t2">Customer pays remaining balance on arrival</div></div></div>`:'';const receiptLink='';return`
       <div class="order-card ${isExp?'expanded':''}" data-status="${o.status}" data-id="${o.id}">
         <div class="card-top" data-action="toggle">
           <div class="photo-wrap">
@@ -683,9 +701,9 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
               <div class="row-sub">${o.product}</div>
             </div>
             <div class="row-right">
-              ${o.status==='new'?statusTag:''}
+              ${o.status==='pending'?statusTag:''}
               <div class="row-amt">${om(o.total)}</div>
-              ${o.status==='new'?'':statusTag}
+              ${o.status==='pending'?'':statusTag}
             </div>
           </div>
         </div>
@@ -719,6 +737,15 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
             <div class="fin-row"><span class="k">Platform fee <span class="pct">(${fin.platformPct}%)</span></span><span class="v neg">−${om(o.platformFee)}</span></div>
             <div class="fin-total"><span class="k">Total</span><span class="v">${om(fin.net)}</span></div>
           </div>
+          ${fin.extra?`<div class="more-info-box fin-extra-box">
+            <button class="more-info-toggle" type="button" onclick="event.stopPropagation();this.closest('.fin-extra-box').classList.toggle('open')">
+              <span>${fin.extra.label}</span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="more-info-body">
+              <div class="fin-total" style="border-top:none;margin-top:0;padding-top:0"><span class="k">${fin.extra.label}</span><span class="v">${om(fin.extra.value)}</span></div>
+            </div>
+          </div>`:''}
           <div class="more-info-box">
             <button class="more-info-toggle" type="button" onclick="event.stopPropagation();this.closest('.more-info-box').classList.toggle('open')">
               <span>More info</span>
