@@ -29,6 +29,7 @@ function buildMainChart(){
   if(mainChart){try{mainChart.destroy();}catch(e){}mainChart=null;}
   const canvas=document.getElementById('mainChart');if(!canvas||typeof Chart==='undefined')return;
   try{const __existing=Chart.getChart(canvas);if(__existing)__existing.destroy();}catch(e){}
+  try{if(Chart.instances){Object.keys(Chart.instances).forEach(k=>{const inst=Chart.instances[k];if(inst&&inst.canvas===canvas){try{inst.destroy();}catch(e){}}});}}catch(e){}
   const d=chartData[currentMetric][currentPeriod];
   const labels=d.labels.map(v=>__tlbl(v));
   const subs=d.sub||[];
