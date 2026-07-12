@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { useAuth } from "@/auth/AuthContext";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 type Role = "marketer" | "business";
 
@@ -16,6 +17,8 @@ export function SignInForm({ role }: { role: Role }) {
   const s = styles(role);
   const nav = useNavigate();
   const { loadRoleForUser } = useAuth();
+  const { lang } = useLanguage();
+  const ar = lang === "ar";
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,6 +33,16 @@ export function SignInForm({ role }: { role: Role }) {
 
   const otherRole: Role = role === "marketer" ? "business" : "marketer";
 
+  const crossRoleMsg = (other: Role) => {
+    if (ar) {
+      const other_ar = other === "business" ? "التاجر" : "المسوق";
+      const otherPage = other === "business" ? "التاجر" : "المسوق";
+      const thisRole_ar = role === "business" ? "تاجر" : "مسوق";
+      return `هذا الحساب مسجل كحساب ${other_ar}. يرجى استخدام صفحة تسجيل الدخول الخاص بـ${otherPage}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
+    }
+    return `This account is registered as a ${other}. Please use the ${other} sign-in page, or create a separate ${role} account.`;
+  };
+
   const verifyRole = async (userId: string) => {
     const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
     if (error) throw error;
@@ -38,10 +51,10 @@ export function SignInForm({ role }: { role: Role }) {
     if (roles.includes(role)) return role;
     if (roles.includes(otherRole)) {
       await supabase.auth.signOut();
-      throw new Error(`This account is registered as a ${otherRole}. Please use the ${otherRole} sign-in page, or create a separate ${role} account.`);
+      throw new Error(crossRoleMsg(otherRole));
     }
     await supabase.auth.signOut();
-    throw new Error(`No ${role} account found for this user. Please register first.`);
+    throw new Error(ar ? "لا يوجد حساب موجود بهذا البريد الإلكتروني من جوجل. يرجى إنشاء حساب جديد أولاً." : `No ${role} account found for this user. Please register first.`);
   };
 
   const signInGoogle = async () => {

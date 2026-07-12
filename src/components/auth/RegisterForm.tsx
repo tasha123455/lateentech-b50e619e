@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { Field } from "./SignInForm";
 import { useAuth } from "@/auth/AuthContext";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 type Role = "marketer" | "business";
 
@@ -96,6 +97,17 @@ export function RegisterForm({ role }: { role: Role }) {
   const s = styles(role);
   const nav = useNavigate();
   const { refreshRole } = useAuth();
+  const { lang } = useLanguage();
+  const ar = lang === "ar";
+  const otherRole: Role = role === "marketer" ? "business" : "marketer";
+  const crossRoleMsg = () => {
+    if (ar) {
+      const other_ar = otherRole === "business" ? "التاجر" : "المسوق";
+      const thisRole_ar = role === "business" ? "تاجر" : "مسوق";
+      return `هذا الحساب مسجل كحساب ${other_ar}. يرجى استخدام صفحة تسجيل الدخول الخاص بـ${other_ar}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
+    }
+    return `This account is registered as a ${otherRole}. Please use the ${otherRole} sign-in page, or create a separate ${role} account.`;
+  };
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
@@ -178,19 +190,30 @@ export function RegisterForm({ role }: { role: Role }) {
           .select("role")
           .eq("user_id", session.user.id);
         const alreadyHasAccount = Array.isArray(existingRoles) && existingRoles.length > 0;
-        if (alreadyHasAccount) {
+        const rolesList = (existingRoles ?? []).map((r) => r.role as string);
+        const hasThisRole = rolesList.includes(role);
+        const hasOtherRole = rolesList.includes(otherRole);
+        if (hasOtherRole && !hasThisRole) {
           try {
             sessionStorage.removeItem("pending_signup");
             sessionStorage.removeItem("intended_role");
             localStorage.removeItem("active_role");
           } catch { /* ignore */ }
           await supabase.auth.signOut();
-          setError("An account with this email already exists. Please sign in instead.");
+          setError(crossRoleMsg());
+        } else if (alreadyHasAccount) {
+          try {
+            sessionStorage.removeItem("pending_signup");
+            sessionStorage.removeItem("intended_role");
+            localStorage.removeItem("active_role");
+          } catch { /* ignore */ }
+          await supabase.auth.signOut();
+          setError(ar ? "يوجد حساب بالفعل بهذا البريد الإلكتروني. يرجى تسجيل الدخول." : "An account with this email already exists. Please sign in instead.");
         } else {
           await addRoleAndGo();
         }
       }
-      catch (err) { setError(err instanceof Error ? err.message : "Sign up failed"); }
+      catch (err) { setError(err instanceof Error ? err.message : (ar ? "فشل إنشاء الحساب" : "Sign up failed")); }
     }
     setBusy(false);
   };

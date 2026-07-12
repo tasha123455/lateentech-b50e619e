@@ -213,12 +213,21 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
-    async reuploadReceipt(orderId: string, receiptUrl: string) {
+    async reuploadReceipt(orderId: string, receiptUrl: string, oldReceiptUrl?: string | null) {
       const { error } = await supabase.rpc("marketer_reupload_receipt" as never, {
         _order_id: orderId,
         _receipt_url: receiptUrl,
       } as never);
       if (error) throw error;
+      // Best-effort delete of the previous (rejected) receipt file.
+      try {
+        if (typeof oldReceiptUrl === "string" && oldReceiptUrl.startsWith("receipts:")) {
+          const oldPath = oldReceiptUrl.slice("receipts:".length);
+          if (oldPath && oldPath !== receiptUrl.replace(/^receipts:/, "")) {
+            await supabase.storage.from("receipts").remove([oldPath]);
+          }
+        }
+      } catch { /* ignore cleanup errors */ }
     },
 
     async uploadReceipt(file: File): Promise<string> {

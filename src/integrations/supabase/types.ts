@@ -278,6 +278,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           business_id: string
+          business_notes: string | null
           color: string | null
           commission: number
           confirmed_at: string | null
@@ -310,6 +311,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           business_id: string
+          business_notes?: string | null
           color?: string | null
           commission?: number
           confirmed_at?: string | null
@@ -342,6 +344,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           business_id?: string
+          business_notes?: string | null
           color?: string | null
           commission?: number
           confirmed_at?: string | null
@@ -744,6 +747,7 @@ export type Database = {
         Returns: {
           admin_notes: string | null
           business_id: string
+          business_notes: string | null
           color: string | null
           commission: number
           confirmed_at: string | null
@@ -864,6 +868,7 @@ export type Database = {
         Returns: {
           admin_notes: string | null
           business_id: string
+          business_notes: string | null
           color: string | null
           commission: number
           confirmed_at: string | null
@@ -905,6 +910,7 @@ export type Database = {
         Returns: {
           admin_notes: string | null
           business_id: string
+          business_notes: string | null
           color: string | null
           commission: number
           confirmed_at: string | null
@@ -1000,6 +1006,7 @@ export type Database = {
         Returns: {
           admin_notes: string | null
           business_id: string
+          business_notes: string | null
           color: string | null
           commission: number
           confirmed_at: string | null
@@ -1077,6 +1084,7 @@ export type Database = {
         Returns: {
           admin_notes: string | null
           business_id: string
+          business_notes: string | null
           color: string | null
           commission: number
           confirmed_at: string | null
@@ -1119,6 +1127,7 @@ export type Database = {
             Returns: {
               admin_notes: string | null
               business_id: string
+              business_notes: string | null
               color: string | null
               commission: number
               confirmed_at: string | null
@@ -1160,6 +1169,7 @@ export type Database = {
             Returns: {
               admin_notes: string | null
               business_id: string
+              business_notes: string | null
               color: string | null
               commission: number
               confirmed_at: string | null
