@@ -479,7 +479,20 @@ export function createLateenApi(userId: string) {
             ? supabase.from("products").select("id, name, photos").in("id", productIds)
             : Promise.resolve({ data: [] as Array<{ id: string; name: string; photos: string[] }> }),
         ]);
-        const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
+        let emap = new Map<string, string | null>();
+        try {
+          const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
+            _user_ids: marketerIds,
+          });
+          emap = new Map(
+            ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
+          );
+        } catch {
+          /* ignore — email just won't be shown */
+        }
+        const pmap = new Map(
+          (profs ?? []).map((p) => [p.id, { ...p, email: emap.get(p.id) ?? null }]),
+        );
         const prodmap = new Map((prods ?? []).map((p) => [p.id, p]));
         return list.map((o) => ({
           ...o,
