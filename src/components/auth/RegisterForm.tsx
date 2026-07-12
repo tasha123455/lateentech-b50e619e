@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { Field } from "./SignInForm";
 import { useAuth } from "@/auth/AuthContext";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 type Role = "marketer" | "business";
 
