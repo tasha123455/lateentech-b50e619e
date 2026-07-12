@@ -97,6 +97,17 @@ export function RegisterForm({ role }: { role: Role }) {
   const s = styles(role);
   const nav = useNavigate();
   const { refreshRole } = useAuth();
+  const { lang } = useLanguage();
+  const ar = lang === "ar";
+  const otherRole: Role = role === "marketer" ? "business" : "marketer";
+  const crossRoleMsg = () => {
+    if (ar) {
+      const other_ar = otherRole === "business" ? "التاجر" : "المسوق";
+      const thisRole_ar = role === "business" ? "تاجر" : "مسوق";
+      return `هذا الحساب مسجل كحساب ${other_ar}. يرجى استخدام صفحة تسجيل الدخول الخاص بـ${other_ar}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
+    }
+    return `This account is registered as a ${otherRole}. Please use the ${otherRole} sign-in page, or create a separate ${role} account.`;
+  };
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
