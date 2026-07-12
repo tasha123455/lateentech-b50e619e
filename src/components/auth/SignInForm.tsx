@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { useAuth } from "@/auth/AuthContext";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 type Role = "marketer" | "business";
 
