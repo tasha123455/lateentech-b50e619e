@@ -456,7 +456,7 @@ function mpVariantBoxes(p,sel,list){
 function mpActiveMarketerCount(p){
   try{
     if(typeof orders==='undefined'||!Array.isArray(orders))return 0;
-    const ACTIVE_ST=new Set(['pending','draft','approved','confirmed']);
+    const ACTIVE_ST=new Set(['pending','approved','confirmed']);
     const ids=new Set(orders.filter(o=>o.productId===p.id&&o.marketerId&&ACTIVE_ST.has(o._status)).map(o=>o.marketerId));
     return ids.size;
   }catch(e){return 0;}
