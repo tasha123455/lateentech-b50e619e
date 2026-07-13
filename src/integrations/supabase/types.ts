@@ -307,6 +307,7 @@ export type Database = {
           size: string | null
           status: string
           unit_price: number
+          updated_at: string
         }
         Insert: {
           admin_notes?: string | null
@@ -340,6 +341,7 @@ export type Database = {
           size?: string | null
           status?: string
           unit_price?: number
+          updated_at?: string
         }
         Update: {
           admin_notes?: string | null
@@ -373,6 +375,7 @@ export type Database = {
           size?: string | null
           status?: string
           unit_price?: number
+          updated_at?: string
         }
         Relationships: [
           {
@@ -735,6 +738,14 @@ export type Database = {
         Args: { _delta: number; _match: string; _product_id: string }
         Returns: undefined
       }
+      active_marketers_count: { Args: { _product_id: string }; Returns: number }
+      active_marketers_counts: {
+        Args: { _product_ids: string[] }
+        Returns: {
+          active_marketers: number
+          product_id: string
+        }[]
+      }
       add_self_role: {
         Args: {
           _business_name?: string
@@ -776,6 +787,7 @@ export type Database = {
           size: string | null
           status: string
           unit_price: number
+          updated_at: string
         }
         SetofOptions: {
           from: "*"
@@ -897,6 +909,7 @@ export type Database = {
           size: string | null
           status: string
           unit_price: number
+          updated_at: string
         }
         SetofOptions: {
           from: "*"
@@ -939,6 +952,7 @@ export type Database = {
           size: string | null
           status: string
           unit_price: number
+          updated_at: string
         }
         SetofOptions: {
           from: "*"
@@ -1035,6 +1049,7 @@ export type Database = {
           size: string | null
           status: string
           unit_price: number
+          updated_at: string
         }
         SetofOptions: {
           from: "*"
@@ -1113,6 +1128,7 @@ export type Database = {
           size: string | null
           status: string
           unit_price: number
+          updated_at: string
         }
         SetofOptions: {
           from: "*"
@@ -1156,6 +1172,7 @@ export type Database = {
               size: string | null
               status: string
               unit_price: number
+              updated_at: string
             }
             SetofOptions: {
               from: "*"
@@ -1198,6 +1215,7 @@ export type Database = {
               size: string | null
               status: string
               unit_price: number
+              updated_at: string
             }
             SetofOptions: {
               from: "*"
