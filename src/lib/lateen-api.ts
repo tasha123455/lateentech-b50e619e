@@ -251,6 +251,23 @@ export function createLateenApi(userId: string) {
       return data.signedUrl;
     },
 
+    // Live "Active Marketers" count per product: distinct marketers with a
+    // pending/approved (not yet delivered) order for that product. Shared by
+    // the product breakdown view and the analytics section so both always
+    // show the same, always-current number.
+    async activeMarketersCounts(productIds: string[]): Promise<Record<string, number>> {
+      if (!productIds.length) return {};
+      const { data, error } = await supabase.rpc("active_marketers_counts" as never, {
+        _product_ids: productIds,
+      } as never);
+      if (error) throw error;
+      const out: Record<string, number> = {};
+      for (const row of (data as { product_id: string; active_marketers: number }[]) || []) {
+        out[row.product_id] = row.active_marketers;
+      }
+      return out;
+    },
+
     async listMyOrders() {
       const { data, error } = await supabase
         .from("orders")
