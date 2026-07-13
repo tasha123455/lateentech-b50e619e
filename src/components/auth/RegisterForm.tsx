@@ -102,9 +102,10 @@ export function RegisterForm({ role }: { role: Role }) {
   const otherRole: Role = role === "marketer" ? "business" : "marketer";
   const crossRoleMsg = () => {
     if (ar) {
-      const other_ar = otherRole === "business" ? "التاجر" : "المسوق";
-      const thisRole_ar = role === "business" ? "تاجر" : "مسوق";
-      return `هذا الحساب مسجل كحساب ${other_ar}. يرجى استخدام صفحة تسجيل الدخول الخاص بـ${other_ar}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
+      const other_ar_def = otherRole === "business" ? "التاجر" : "المسوّق";
+      const other_ar_indef = otherRole === "business" ? "تاجر" : "مسوّق";
+      const thisRole_ar = role === "business" ? "تاجر" : "مسوّق";
+      return `هذا الحساب مسجل كحساب ${other_ar_indef}. يرجى استخدام صفحة تسجيل الدخول الخاص ب${other_ar_def}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
     }
     return `This account is registered as a ${otherRole}. Please use the ${otherRole} sign-in page, or create a separate ${role} account.`;
   };
