@@ -35,10 +35,10 @@ export function SignInForm({ role }: { role: Role }) {
 
   const crossRoleMsg = (other: Role) => {
     if (ar) {
-      const other_ar = other === "business" ? "التاجر" : "المسوق";
-      const otherPage = other === "business" ? "التاجر" : "المسوق";
-      const thisRole_ar = role === "business" ? "تاجر" : "مسوق";
-      return `هذا الحساب مسجل كحساب ${other_ar}. يرجى استخدام صفحة تسجيل الدخول الخاص بـ${otherPage}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
+      const other_ar_indef = other === "business" ? "تاجر" : "مسوّق";
+      const other_ar_def = other === "business" ? "التاجر" : "المسوّق";
+      const thisRole_ar = role === "business" ? "تاجر" : "مسوّق";
+      return `هذا الحساب مسجل كحساب ${other_ar_indef}. يرجى استخدام صفحة تسجيل الدخول الخاص ب${other_ar_def}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
     }
     return `This account is registered as a ${other}. Please use the ${other} sign-in page, or create a separate ${role} account.`;
   };
