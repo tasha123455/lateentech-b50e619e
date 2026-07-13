@@ -128,6 +128,7 @@ export const DICT: Record<string, string> = {
   "delivery": "التوصيل",
   "Deliv": "التوصيل",
   "Low stock": "المخزون منخفض",
+  "Out of stock": "نفذت الكميه",
 
   // ===== Dashboards: Stats & Wallet =====
   "Business Dashboard": "لوحة تحكم التاجر",
@@ -724,6 +725,8 @@ export const DICT: Record<string, string> = {
   "Select category": "اختر فئة المنتج",
   "Search category...": "ابحث عن الفئه",
   "Variants & inventory": "الخيارات والمخزون",
+  "No variants": "بدون خيارات",
+  "Has variants": "يحتوي على خيارات",
   "Countries and cities available for delivery": "الدول والمدن المتاحة للتوصيل",
   "+ Add a country": "+ إضافة دولة",
   "Marketer profit": "ارباح المسوق",
