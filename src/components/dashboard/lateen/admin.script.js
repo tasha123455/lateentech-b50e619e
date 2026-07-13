@@ -85,6 +85,11 @@ async function admLoadVerify(){
   root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
     const list=await window.LateenAPI.admin.listPendingReceipts();
+    list.sort((a,b)=>{
+      const at=new Date(a.updated_at||a.receipt_uploaded_at||a.created_at||0).getTime();
+      const bt=new Date(b.updated_at||b.receipt_uploaded_at||b.created_at||0).getTime();
+      return bt-at;
+    });
     if(!list.length){root.innerHTML='<div class="adm-empty">No receipts awaiting review.</div>';return;}
     root.innerHTML=list.map(o=>{
       const qty=Number(o.qty||0);
