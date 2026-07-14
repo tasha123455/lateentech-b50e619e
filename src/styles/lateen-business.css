@@ -53,7 +53,7 @@
 .lateen-business #pg-orders .list{ display:flex; flex-direction:column; gap:10px; }
 
 .lateen-business #pg-orders .order-card{ position:relative; display:flex; flex-direction:column; background:#16191d; border:1px solid #262b31; border-radius:14px; overflow:hidden; }
-.lateen-business #pg-orders .order-card[data-status="new"]{ border-left:3px solid #ef5566; }
+.lateen-business #pg-orders .order-card[data-status="pending"], .lateen-business #pg-orders .order-card[data-status="approved"]{ border-left:3px solid #ef5566; }
 
 .lateen-business #pg-orders .card-top{ display:flex; align-items:center; gap:12px; padding:12px; cursor:pointer; transition:gap .45s cubic-bezier(.4,0,.2,1), padding .45s cubic-bezier(.4,0,.2,1); }
 .lateen-business #pg-orders .order-card.expanded .card-top{ gap:0; padding:0; }
