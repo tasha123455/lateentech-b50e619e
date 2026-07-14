@@ -86,19 +86,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             // Existing-account guard: if this Google account already has a
             // role (it registered before), don't silently sign it in with
-            // the new form's name/phone — send it to sign in instead.
+            // the new form's name/phone — send it to sign in instead. If the
+            // existing role is DIFFERENT from the one being registered (e.g.
+            // a marketer account trying to register as a business), show the
+            // specific cross-role message instead of the generic one, and
+            // send them back to the register page rather than a sign-in page
+            // for a role that isn't theirs.
             const { data: existingRolesRow } = await supabase
               .from("user_roles")
               .select("role")
               .eq("user_id", nextSession.user.id);
-            const alreadyHasAccount = Array.isArray(existingRolesRow) && existingRolesRow.length > 0;
+            const existingRoles = (existingRolesRow ?? []).map((r) => r.role as string);
+            const alreadyHasAccount = existingRoles.length > 0;
             if (alreadyHasAccount) {
+              const hasThisRole = existingRoles.includes(p.role) || existingRoles.includes("admin");
+              try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
+              await supabase.auth.signOut();
+              if (!hasThisRole) {
+                const actualRole = existingRoles.includes("business") ? "business" : "marketer";
+                sessionStorage.setItem(
+                  "signin_error",
+                  `This account is registered as a ${actualRole}. Please use the ${actualRole} sign-in page, or create a separate ${p.role} account.`,
+                );
+                if (typeof window !== "undefined") {
+                  window.location.replace(p.role === "business" ? "/business/register" : "/marketer/register");
+                }
+                return;
+              }
               sessionStorage.setItem(
                 "signin_error",
                 "An account with this email already exists. Please sign in instead.",
               );
-              try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
-              await supabase.auth.signOut();
               if (typeof window !== "undefined") {
                 const target = p.role === "business" ? "/business/signin" : "/marketer/signin";
                 window.location.replace(target);
