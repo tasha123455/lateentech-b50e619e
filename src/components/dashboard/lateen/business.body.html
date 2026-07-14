@@ -663,6 +663,15 @@
 .lp-vt-btn { flex:1; background:transparent; border:none; border-radius:11px; padding:10px 8px; font-size:13px; font-weight:700; color:var(--color-text-secondary); cursor:pointer; font-family:var(--font-sans); transition:background .15s,color .15s; }
 .lp-vt-btn.active { background:#34c77b; color:#06150e; }
 #simple-qty-section { margin-bottom:4px; }
+.lp-stepper{display:inline-flex;align-items:center;gap:0;border:0.5px solid var(--color-border-secondary);border-radius:12px;overflow:hidden;background:var(--color-background-primary);}
+.lp-stepper-btn{width:40px;height:40px;border:0;background:transparent;color:var(--color-text-primary);font-size:20px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font-sans);-webkit-tap-highlight-color:transparent;}
+.lp-stepper-btn:active{background:var(--color-background-secondary);}
+.lp-stepper-val{width:64px;height:40px;text-align:center;border:0;background:transparent;color:var(--color-text-primary);font-size:15px;font-weight:600;font-family:var(--font-sans);padding:0;-moz-appearance:textfield;}
+.lp-stepper-val::-webkit-outer-spin-button,.lp-stepper-val::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.vb-stepper{display:inline-flex;align-items:center;border:0.5px solid var(--color-border-secondary);border-radius:10px;overflow:hidden;background:var(--color-background-primary);flex:none;}
+.vb-stepper-btn{width:30px;height:34px;border:0;background:transparent;color:var(--color-text-primary);font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font-sans);-webkit-tap-highlight-color:transparent;padding:0;}
+.vb-stepper-val{width:40px;height:34px;text-align:center;border:0;background:transparent;color:var(--color-text-primary);font-size:13px;font-weight:600;font-family:var(--font-sans);padding:0;-moz-appearance:textfield;}
+.vb-stepper-val::-webkit-outer-spin-button,.vb-stepper-val::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .lp-total-stock-bar { display:flex; align-items:center; justify-content:space-between; background:var(--lp-green-soft); border:0.5px solid rgba(52,199,123,0.35); border-radius:12px; padding:12px 14px; margin-top:12px; }
 .lp-total-stock-label { font-size:13px; font-weight:600; color:var(--lp-green); }
 .lp-total-stock-val { font-size:15px; font-weight:800; color:var(--lp-green); }
@@ -1016,7 +1025,11 @@
       </div>
       <div id="simple-qty-section">
         <label class="lp-field-label">Quantity <span class="lp-req">*</span></label>
-        <input class="lp-input" type="number" min="1" step="1" inputmode="numeric" id="f-simple-qty" placeholder="0" oninput="updateSimpleQty(this.value)"/>
+        <div class="lp-stepper">
+          <button type="button" class="lp-stepper-btn" onclick="__stepSimpleQty(-1)" aria-label="decrease">−</button>
+          <input class="lp-stepper-val" type="number" min="1" step="1" inputmode="numeric" id="f-simple-qty" value="1" oninput="__onSimpleQtyInput(this)"/>
+          <button type="button" class="lp-stepper-btn" onclick="__stepSimpleQty(1)" aria-label="increase">+</button>
+        </div>
       </div>
       <div id="variant-groups-section" style="display:none;">
         <div id="variant-groups-container"></div>
