@@ -1016,7 +1016,11 @@
       </div>
       <div id="simple-qty-section">
         <label class="lp-field-label">Quantity <span class="lp-req">*</span></label>
-        <input class="lp-input" type="number" min="1" step="1" inputmode="numeric" id="f-simple-qty" placeholder="0" oninput="updateSimpleQty(this.value)"/>
+        <div class="lp-stepper">
+          <button type="button" class="lp-stepper-btn" onclick="__stepSimpleQty(-1)" aria-label="decrease">−</button>
+          <input class="lp-stepper-val" type="number" min="1" step="1" inputmode="numeric" id="f-simple-qty" value="1" oninput="__onSimpleQtyInput(this)"/>
+          <button type="button" class="lp-stepper-btn" onclick="__stepSimpleQty(1)" aria-label="increase">+</button>
+        </div>
       </div>
       <div id="variant-groups-section" style="display:none;">
         <div id="variant-groups-container"></div>
