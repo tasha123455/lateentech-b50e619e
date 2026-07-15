@@ -48,7 +48,14 @@ export function SignInForm({ role }: { role: Role }) {
     if (error) throw error;
     const roles = (data ?? []).map((r) => r.role as string);
     if (roles.includes("admin")) return "admin" as const;
-    if (roles.includes(role)) return role;
+    if (roles.includes(role)) {
+      const { data: prof } = await supabase.from("profiles").select("banned_at").eq("id", userId).maybeSingle();
+      if (prof?.banned_at) {
+        await supabase.auth.signOut();
+        throw new Error(ar ? "هذه الحساب محظور." : "This account is banned.");
+      }
+      return role;
+    }
     if (roles.includes(otherRole)) {
       await supabase.auth.signOut();
       throw new Error(crossRoleMsg(otherRole));
