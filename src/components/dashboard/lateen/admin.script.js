@@ -65,6 +65,7 @@ function admGo(pageId){
 }
 
 async function admLoadMetrics(){
+  if(!document.getElementById('m-fees'))return; // old home stat grid was replaced by the v2 design
   try{
     const m=await window.LateenAPI.admin.getMetrics();
     admFeeRows=m.feeRows||[];
@@ -567,3 +568,402 @@ function admOpenEmpHist(id){
   modal.classList.add('open');
 }
 function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.remove('open');}
+
+/* ========== Home Analytics v2 (pasted from dashboard-analytics-v2-1.html, unchanged) ========== */
+  const arMonths = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function buildDays(n){
+    const list = [];
+    const today = new Date();
+    for(let i=0;i<n;i++){
+      const d = new Date(today);
+      d.setDate(d.getDate()-i);
+      const key = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+      const label = d.getDate()+' '+arMonths[d.getMonth()];
+      list.push({key,label});
+    }
+    return list;
+  }
+  function buildMonths(){
+    const list = [];
+    const today = new Date();
+    const year = today.getFullYear();
+    for(let m=today.getMonth(); m>=0; m--){
+      list.push({ key: year+'-'+pad(m+1), label: arMonths[m]+' '+year });
+    }
+    return list;
+  }
+  function buildYears(){
+    const y = new Date().getFullYear();
+    return [y,y-1,y-2].map(v => ({ key:String(v), label:String(v) }));
+  }
+
+  const dayItems = buildDays(14);
+  const monthItems = buildMonths();
+  const yearItems = buildYears();
+  const dayMap = Object.fromEntries(dayItems.map(i=>[i.key,i.label]));
+  const monthMap = Object.fromEntries(monthItems.map(i=>[i.key,i.label]));
+
+  const selected = { day:null, month:null, year:null };
+
+  function seededValue(seedStr, min, max){
+    let hash = 0;
+    for(let i=0;i<seedStr.length;i++){ hash = (hash*31 + seedStr.charCodeAt(i)) >>> 0; }
+    const frac = (hash % 1000) / 1000;
+    return min + frac*(max-min);
+  }
+
+  function getFees(){
+    if(selected.year){
+      if(selected.year === '2026') return 245.00;
+      return Math.round(seededValue('y:'+selected.year, 150, 400) * 100) / 100;
+    }
+    if(selected.month){
+      if(selected.month === '2026-07') return 75.00;
+      return Math.round(seededValue('m:'+selected.month, 25, 220) * 100) / 100;
+    }
+    if(selected.day){
+      return Math.round(seededValue('d:'+selected.day, 5, 60) * 100) / 100;
+    }
+    return 245.00;
+  }
+
+  function renderHero(){
+    const fees = getFees();
+    document.getElementById('heroValue').textContent = 'د.ل' + fees.toFixed(2);
+    let sub = 'إجمالي الأرباح من الطلبيات المؤكدة والمسلّمة';
+    if(selected.year) sub = 'إجمالي أرباح عام ' + selected.year;
+    else if(selected.month) sub = 'إجمالي أرباح شهر ' + monthMap[selected.month];
+    else if(selected.day) sub = 'إجمالي أرباح يوم ' + dayMap[selected.day];
+    document.getElementById('heroSub').textContent = sub;
+  }
+
+  function buildDropdown(listEl, items, filterKey, rangeName){
+    listEl.innerHTML = '';
+    const clearItem = document.createElement('div');
+    clearItem.className = 'dd-item clear';
+    clearItem.textContent = 'إلغاء التحديد';
+    clearItem.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selected[filterKey] = null;
+      updateTabLabel(filterKey);
+      closeDropdown(rangeName);
+      renderHero();
+      renderChart();
+    });
+    listEl.appendChild(clearItem);
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'dd-item';
+      el.textContent = item.label;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selected.day = null; selected.month = null; selected.year = null;
+        selected[filterKey] = item.key;
+        resetOtherTabs(filterKey);
+        updateTabLabel(filterKey);
+        closeDropdown(rangeName);
+        renderHero();
+        renderChart();
+      });
+      listEl.appendChild(el);
+    });
+  }
+
+  const rangeMeta = {
+    daily:   { key:'day',   defaultLabel:'يوم', list: document.getElementById('dailyList') },
+    monthly: { key:'month', defaultLabel:'شهر', list: document.getElementById('monthlyList') },
+    yearly:  { key:'year',  defaultLabel:'سنة', list: document.getElementById('yearlyList') }
+  };
+
+  buildDropdown(rangeMeta.daily.list, dayItems, 'day', 'daily');
+  buildDropdown(rangeMeta.monthly.list, monthItems, 'month', 'monthly');
+  buildDropdown(rangeMeta.yearly.list, yearItems, 'year', 'yearly');
+
+  const rangeTabs = document.querySelectorAll('.range-tab');
+
+  function resetOtherTabs(exceptKey){
+    Object.keys(rangeMeta).forEach(r => {
+      if(rangeMeta[r].key !== exceptKey){
+        const tab = document.querySelector(`.range-tab[data-range="${r}"]`);
+        tab.innerHTML = rangeMeta[r].defaultLabel + ' <span class="chev">▾</span>';
+        tab.classList.remove('active');
+      }
+    });
+  }
+
+  function updateTabLabel(filterKey){
+    const rangeName = Object.keys(rangeMeta).find(r => rangeMeta[r].key === filterKey);
+    const tab = document.querySelector(`.range-tab[data-range="${rangeName}"]`);
+    const val = selected[filterKey];
+    let labelText = rangeMeta[rangeName].defaultLabel;
+    if(val){
+      if(filterKey === 'day') labelText = dayMap[val];
+      else if(filterKey === 'month') labelText = monthMap[val];
+      else labelText = val;
+    }
+    tab.innerHTML = labelText + ' <span class="chev">▾</span>';
+    tab.classList.toggle('active', !!val);
+    updateAllTabState();
+  }
+
+  function updateAllTabState(){
+    const allTab = document.querySelector('.range-tab[data-range="all"]');
+    const anySelected = selected.day || selected.month || selected.year;
+    allTab.classList.toggle('active', !anySelected);
+  }
+
+  function closeDropdown(rangeName){
+    rangeMeta[rangeName].list.classList.remove('open');
+    document.querySelector(`.range-tab[data-range="${rangeName}"]`).classList.remove('open');
+  }
+  function closeAllDropdowns(){ Object.keys(rangeMeta).forEach(closeDropdown); }
+
+  rangeTabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const range = tab.dataset.range;
+
+      if(range === 'all'){
+        closeAllDropdowns();
+        selected.day = null; selected.month = null; selected.year = null;
+        Object.keys(rangeMeta).forEach(r => {
+          const t = document.querySelector(`.range-tab[data-range="${r}"]`);
+          t.innerHTML = rangeMeta[r].defaultLabel + ' <span class="chev">▾</span>';
+          t.classList.remove('active');
+        });
+        tab.classList.add('active');
+        renderHero();
+        renderChart();
+        return;
+      }
+
+      const isOpen = rangeMeta[range].list.classList.contains('open');
+      closeAllDropdowns();
+      if(!isOpen){
+        rangeMeta[range].list.classList.add('open');
+        tab.classList.add('open');
+      }
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('.range-tab') && !e.target.closest('.dropdown-list')){
+      closeAllDropdowns();
+    }
+  });
+
+  renderHero();
+
+  // ---- Analytics chart ----
+  function buildChartDates(n){
+    const arr = [];
+    const today = new Date();
+    for(let i=n-1;i>=0;i--){
+      const d = new Date(today);
+      d.setDate(d.getDate()-i);
+      arr.push(d.getDate()+'/'+(d.getMonth()+1));
+    }
+    return arr;
+  }
+
+  function buildCumulativeSeries(finalValue, len, seedKey){
+    const start = finalValue <= 3 ? 0 : Math.max(0, finalValue - Math.round(finalValue*0.6) - 1);
+    const arr = [];
+    for(let i=0;i<len;i++){
+      const t = i/(len-1);
+      const base = start + t*(finalValue-start);
+      const jitter = seededValue(seedKey+i, -0.4, 0.4);
+      arr.push(Math.max(0, Math.min(finalValue, Math.round(base+jitter))));
+    }
+    for(let i=1;i<len;i++){ if(arr[i] < arr[i-1]) arr[i] = arr[i-1]; }
+    arr[len-1] = finalValue;
+    return arr;
+  }
+
+  function buildFluctuatingSeries(finalValue, len, seedKey, min, max){
+    const arr = [];
+    for(let i=0;i<len;i++){ arr.push(Math.round(seededValue(seedKey+i, min, max))); }
+    arr[len-1] = finalValue;
+    return arr;
+  }
+
+  const CHART_LEN = 14;
+
+  const metricSeedKeys = { activeUsers:'au', totalUsers:'tu', totalProducts:'tp', piecesSold:'ps', succeeded:'su' };
+  const metricDefaults  = { activeUsers:2,  totalUsers:6,  totalProducts:5,  piecesSold:10, succeeded:32 };
+
+  const metrics = [
+    { key:'activeUsers',   label:'المستخدمون النشطون', color:'#7fa8d9', data: [] },
+    { key:'totalUsers',    label:'إجمالي المستخدمين',  color:'#9d8fd9', data: [] },
+    { key:'totalProducts', label:'إجمالي المنتجات',    color:'#d98fa0', data: [] },
+    { key:'piecesSold',    label:'Pieces Sold',        color:'#7fd9a8', data: [] },
+    { key:'succeeded',     label:'Succeeded Upfronts', color:'#caa05a', data: [] }
+  ];
+
+  function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
+
+  // Mirrors the same day/month/year selection used by the hero card (getFees)
+  // so the chart always reflects whichever date rule is currently active.
+  function getChartConfig(){
+    if(selected.year){
+      const year = parseInt(selected.year, 10);
+      const isCurrentYear = year === new Date().getFullYear();
+      const monthCount = isCurrentYear ? (new Date().getMonth()+1) : 12;
+      const labels = arMonths.slice(0, monthCount);
+      return { labels, len: monthCount, seedPrefix: 'y:'+selected.year+':' };
+    }
+    if(selected.month){
+      const [y, m] = selected.month.split('-').map(Number);
+      const today = new Date();
+      const isCurrentMonth = (y === today.getFullYear() && m === today.getMonth()+1);
+      const dayCount = isCurrentMonth ? today.getDate() : daysInMonth(y, m);
+      const labels = [];
+      for(let d=1; d<=dayCount; d++){ labels.push(String(d)); }
+      return { labels, len: dayCount, seedPrefix: 'm:'+selected.month+':' };
+    }
+    if(selected.day){
+      const labels = [];
+      for(let h=0; h<24; h+=2){ labels.push(pad(h)+':00'); }
+      return { labels, len: labels.length, seedPrefix: 'd:'+selected.day+':' };
+    }
+    return { labels: buildChartDates(CHART_LEN), len: CHART_LEN, seedPrefix: '' };
+  }
+
+  function getMetricFinal(key){
+    const base = metricDefaults[key];
+    if(selected.year){
+      if(selected.year === '2026') return base;
+      return Math.max(0, Math.round(seededValue('y:'+key+':'+selected.year, base*0.6, base*1.6)));
+    }
+    if(selected.month){
+      if(selected.month === '2026-07') return Math.max(1, Math.round(base*0.3));
+      return Math.max(0, Math.round(seededValue('m:'+key+':'+selected.month, base*0.1, base*0.6)));
+    }
+    if(selected.day){
+      return Math.max(0, Math.round(seededValue('d:'+key+':'+selected.day, 0, Math.max(2, base*0.25))));
+    }
+    return base;
+  }
+
+  function buildMetricSeries(key, final, len, seedKey){
+    if(len <= 1) return [final];
+    if(key === 'activeUsers'){
+      const max = Math.max(2, final + 2);
+      return buildFluctuatingSeries(final, len, seedKey, 0, max);
+    }
+    return buildCumulativeSeries(final, len, seedKey);
+  }
+
+  function updateChartTitle(){
+    const titleEl = document.querySelector('.chart-title');
+    let text = 'الأداء عبر آخر 14 يوماً';
+    if(selected.year) text = 'الأداء الشهري لعام ' + selected.year;
+    else if(selected.month) text = 'الأداء اليومي لشهر ' + monthMap[selected.month];
+    else if(selected.day) text = 'الأداء بالساعة ليوم ' + dayMap[selected.day];
+    titleEl.textContent = text;
+  }
+
+  const ctx = document.getElementById('analyticsChart').getContext('2d');
+  const analyticsChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: metrics.map(m => ({
+        label: m.label,
+        data: m.data,
+        borderColor: m.color,
+        backgroundColor: m.color,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointBackgroundColor: m.color,
+        borderWidth: 2,
+        tension: 0.35,
+        fill: false
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          rtl: true,
+          backgroundColor: '#1d1d20',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 10,
+          titleFont: { family: 'Cairo', size: 11 },
+          bodyFont: { family: 'Cairo', size: 11 },
+          titleColor: '#9c9c9c',
+          bodyColor: '#f3f3f1'
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+          border: { display: false },
+          ticks: { color: '#6b6b6b', font: { family: 'Cairo', size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+          border: { display: false },
+          ticks: { color: '#6b6b6b', font: { family: 'Cairo', size: 10 }, precision: 0, maxTicksLimit: 5 }
+        }
+      }
+    }
+  });
+
+  function renderChart(){
+    const cfg = getChartConfig();
+    metrics.forEach(m => {
+      const final = getMetricFinal(m.key);
+      m.data = buildMetricSeries(m.key, final, cfg.len, cfg.seedPrefix + metricSeedKeys[m.key]);
+    });
+    analyticsChart.data.labels = cfg.labels;
+    analyticsChart.data.datasets.forEach((ds, i) => { ds.data = metrics[i].data; });
+    updateChartTitle();
+    analyticsChart.update();
+  }
+
+  renderChart();
+
+  function setChartFilter(key){
+    analyticsChart.data.datasets.forEach((ds, i) => {
+      const m = metrics[i];
+      if(key === 'all'){
+        ds.hidden = false;
+        ds.fill = false;
+      } else {
+        ds.hidden = m.key !== key;
+        ds.fill = m.key === key ? 'origin' : false;
+        ds.backgroundColor = m.color + '26';
+      }
+    });
+    analyticsChart.update();
+  }
+
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const key = chip.dataset.metric;
+      chips.forEach(c => {
+        c.classList.remove('active');
+        c.style.background = '';
+        c.style.color = '';
+        c.style.borderColor = '';
+      });
+      chip.classList.add('active');
+      if(key !== 'all'){
+        const m = metrics.find(mm => mm.key === key);
+        chip.style.background = m.color + '22';
+        chip.style.color = m.color;
+        chip.style.borderColor = m.color + '55';
+      }
+      setChartFilter(key);
+    });
+  });

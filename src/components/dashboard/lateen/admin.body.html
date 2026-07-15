@@ -1,4 +1,5 @@
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 .lateen-admin * { box-sizing: border-box; margin: 0; padding: 0; }
 .lateen-admin {
   --bg: #141414; --surface: #1e1e1e; --surface-2: #2a2a2a; --card: #0d0d0d;
@@ -124,6 +125,126 @@
 .adm-pd-zone { border: 0.5px solid var(--border-2); border-radius: 10px; overflow: hidden; margin-top: 6px; }
 .adm-pd-zone-h { padding: 7px 12px; background: var(--surface-2); font-size: 12px; font-weight: 500; }
 .adm-pd-zone-r { display: flex; justify-content: space-between; padding: 7px 12px; border-top: 0.5px solid var(--border-2); font-size: 12px; }
+/* ===== Admin Home v2 (pasted design) ===== */
+.adm-home-v2{
+  --bg: #0b0b0c;
+  --surface: #17171a;
+  --surface-2: #1d1d20;
+  --line: rgba(255,255,255,0.07);
+  --text: #f3f3f1;
+  --text-2: #9c9c9c;
+  --text-3: #6b6b6b;
+  --accent: #caa05a;
+  --accent-soft: rgba(202,160,90,0.14);
+  --danger: #d98177;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  padding-bottom: 8px;
+}
+.adm-home-v2 .section-title{
+  font-size: 24px; font-weight:700; color: var(--text);
+  margin: 4px 0 18px;
+}
+
+/* ---- Date filter: single quiet segmented track ---- */
+.adm-home-v2 .range-tabs{
+  display:flex; gap:4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 4px; border-radius: 16px;
+  margin-bottom: 18px;
+}
+.adm-home-v2 .range-tab{
+  flex:1; text-align:center;
+  padding: 10px 6px; border-radius: 12px;
+  font-size: 13px; font-weight:600; color: var(--text-2);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.adm-home-v2 .range-tab.active{ background: var(--accent-soft); color: var(--accent); }
+.adm-home-v2 .range-tab .chev{ font-size: 9px; transition: transform 0.2s; }
+.adm-home-v2 .range-tab.open .chev{ transform: rotate(180deg); }
+
+.adm-home-v2 .dropdown-list{
+  display:none; flex-direction:column; gap: 2px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 5px;
+  margin: -8px 0 18px;
+}
+.adm-home-v2 .dropdown-list.open{ display:flex; }
+.adm-home-v2 .dd-item{
+  padding: 11px 14px; border-radius: 12px;
+  font-size: 13.5px; color: var(--text-2); cursor:pointer; text-align:right;
+}
+.adm-home-v2 .dd-item:hover{ background: var(--surface-2); color: var(--text); }
+.adm-home-v2 .dd-item.clear{ color: var(--danger); font-weight:600; text-align:center; }
+
+/* ---- Hero card ---- */
+.adm-home-v2 .hero-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 28px 24px;
+  text-align: right;
+}
+.adm-home-v2 .hero-label{ font-size: 14px; font-weight:600; color: var(--text-2); margin-bottom:16px; }
+.adm-home-v2 .hero-value{
+  font-size: 44px; font-weight:800; color: var(--accent);
+  line-height:1; margin-bottom: 14px; font-variant-numeric: tabular-nums;
+}
+.adm-home-v2 .hero-sub{ font-size: 12.5px; color: var(--text-3); }
+
+/* ---- Stats list: one quiet card, rows instead of many boxes ---- */
+.adm-home-v2 .stats-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 4px 20px;
+  margin-top: 14px;
+}
+.adm-home-v2 .stat-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.adm-home-v2 .stat-row:last-child{ border-bottom:none; }
+.adm-home-v2 .stat-left{ display:flex; align-items:center; gap:13px; }
+.adm-home-v2 .stat-icon{
+  width:36px; height:36px; border-radius:11px;
+  background: var(--surface-2);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--text-2); flex-shrink:0;
+}
+.adm-home-v2 .stat-icon svg{ width:17px; height:17px; }
+.adm-home-v2 .stat-label{ font-size: 14px; font-weight:600; color: var(--text); }
+.adm-home-v2 .stat-sub{ font-size: 11.5px; color: var(--text-3); margin-top:2px; }
+.adm-home-v2 .stat-value{ font-size: 21px; font-weight:700; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ---- Analytics chart ---- */
+.adm-home-v2 .chart-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 20px 18px 16px;
+  margin-top: 14px;
+}
+.adm-home-v2 .chart-title{ font-size: 14px; font-weight:600; color: var(--text); margin-bottom:2px; }
+.adm-home-v2 .chart-caption{ font-size: 11.5px; color: var(--text-3); margin-bottom:16px; }
+.adm-home-v2 .chart-filters{
+  display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:14px;
+  scrollbar-width:none;
+}
+.adm-home-v2 .chart-filters::-webkit-scrollbar{ display:none; }
+.adm-home-v2 .chip{
+  flex:0 0 auto;
+  background: var(--surface-2); border:1px solid var(--line); color: var(--text-2);
+  font-family:inherit; font-size:12px; font-weight:600;
+  padding: 8px 14px; border-radius: 14px; white-space:nowrap; cursor:pointer;
+}
+.adm-home-v2 .chip.active{ background: var(--surface-2); color: var(--text); border-color:#3a3a3a; font-weight:700; }
+.adm-home-v2 .chart-wrap{ position:relative; height:220px; }
+
 </style>
 
 <div class="adm-app">
@@ -141,56 +262,113 @@
     </div>
   </div>
 
-  <!-- HOME / METRICS -->
+  <!-- HOME / METRICS (v2 design, pasted from dashboard-analytics-v2-1.html) -->
   <section class="adm-page active" id="adm-home">
-    <div class="adm-h1">Global Analytics</div>
-    <div class="adm-stat-grid">
-      <div class="adm-stat full">
-        <div class="adm-stat-label">Total Platform Fees Collected</div>
-        <div class="adm-stat-value" id="m-fees">د.ل0.00</div>
-        <div class="adm-stat-sub">Lifetime, from confirmed & delivered orders</div>
-      </div>
-      <div class="adm-stat adm-stat-pickable">
-        <div class="adm-stat-label">
-          Fees in
-          <select id="m-month-picker" class="adm-stat-picker" onchange="admUpdateMonthFees()"></select>
+    <div class="adm-home-v2" dir="rtl">
+  <h1 class="section-title">تحليلات شاملة</h1>
+
+  <!-- Date filter -->
+  <div class="range-tabs">
+    <div class="range-tab active" data-range="all">كل الوقت</div>
+    <div class="range-tab" data-range="daily">يوم <span class="chev">▾</span></div>
+    <div class="range-tab" data-range="monthly">شهر <span class="chev">▾</span></div>
+    <div class="range-tab" data-range="yearly">سنة <span class="chev">▾</span></div>
+  </div>
+  <div class="dropdown-list" id="dailyList"></div>
+  <div class="dropdown-list" id="monthlyList"></div>
+  <div class="dropdown-list" id="yearlyList"></div>
+
+  <!-- Hero: total collected platform fees -->
+  <div class="hero-card">
+    <div class="hero-label">إجمالي رسوم المنصة المحصّلة</div>
+    <div class="hero-value" id="heroValue">د.ل245.00</div>
+    <div class="hero-sub" id="heroSub">إجمالي الأرباح من الطلبيات المؤكدة والمسلّمة</div>
+  </div>
+
+  <!-- Stats list -->
+  <div class="stats-card">
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         </div>
-        <div class="adm-stat-value" id="m-fees-month">د.ل0.00</div>
-        <div class="adm-stat-sub">Confirmed &amp; delivered, selected month</div>
-      </div>
-      <div class="adm-stat adm-stat-pickable">
-        <div class="adm-stat-label">
-          Fees in
-          <select id="m-year-picker" class="adm-stat-picker" onchange="admUpdateYearFees()"></select>
+        <div>
+          <div class="stat-label">المستخدمون النشطون</div>
+          <div class="stat-sub">آخر 30 يوماً</div>
         </div>
-        <div class="adm-stat-value" id="m-fees-year">د.ل0.00</div>
-        <div class="adm-stat-sub">Confirmed &amp; delivered, selected year</div>
       </div>
-      <div class="adm-stat">
-        <div class="adm-stat-label">Active Users</div>
-        <div class="adm-stat-value" id="m-active">0</div>
-        <div class="adm-stat-sub">Last 30 days</div>
+      <div class="stat-value">2</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3.1-7 7-7s7 3 7 7"/><path d="M19 8v6M22 11h-6"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">إجمالي المستخدمين</div>
+          <div class="stat-sub">كل الحسابات المسجلة</div>
+        </div>
       </div>
-      <div class="adm-stat">
-        <div class="adm-stat-label">Leads Today</div>
-        <div class="adm-stat-value" id="m-leads">0</div>
-        <div class="adm-stat-sub">New orders today</div>
+      <div class="stat-value">6</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">إجمالي المنتجات</div>
+          <div class="stat-sub">في كل المتاجر</div>
+        </div>
       </div>
-      <div class="adm-stat">
-        <div class="adm-stat-label">Total Users</div>
-        <div class="adm-stat-value" id="m-users">0</div>
-        <div class="adm-stat-sub">All registered accounts</div>
+      <div class="stat-value">5</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Pieces Sold</div>
+          <div class="stat-sub">All confirmed orders, lifetime</div>
+        </div>
       </div>
-      <div class="adm-stat">
-        <div class="adm-stat-label">Live Products</div>
-        <div class="adm-stat-value" id="m-products">0</div>
-        <div class="adm-stat-sub">Across every shop</div>
+      <div class="stat-value">10</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Succeeded Upfronts</div>
+          <div class="stat-sub">Receipts approved, lifetime</div>
+        </div>
       </div>
-      <div class="adm-stat">
-        <div class="adm-stat-label">Succeeded Upfronts</div>
-        <div class="adm-stat-value" id="m-upfronts-ok">0</div>
-        <div class="adm-stat-sub">Receipts approved, lifetime</div>
-      </div>
+      <div class="stat-value">32</div>
+    </div>
+  </div>
+
+  <!-- Analytics chart -->
+  <div class="chart-card">
+    <div class="chart-title">الأداء عبر آخر 14 يوماً</div>
+    <div class="chart-caption">اختر مقياساً لعزله، أو اترك الكل لمقارنتها معاً</div>
+    <div class="chart-filters" id="chartFilters">
+      <button class="chip active" data-metric="all">الكل</button>
+      <button class="chip" data-metric="activeUsers">المستخدمون النشطون</button>
+      <button class="chip" data-metric="totalUsers">إجمالي المستخدمين</button>
+      <button class="chip" data-metric="totalProducts">إجمالي المنتجات</button>
+      <button class="chip" data-metric="piecesSold">Pieces Sold</button>
+      <button class="chip" data-metric="succeeded">Succeeded Upfronts</button>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="analyticsChart"></canvas>
+    </div>
+  </div>
     </div>
   </section>
 
