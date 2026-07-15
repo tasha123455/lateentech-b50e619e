@@ -692,6 +692,8 @@
           <div class="pd-picker-list" id="ppd-method-list" style="display:none;">
             <button type="button" class="pd-picker-item" onclick="pickPd('method','One pay','ppd')">One pay</button>
             <button type="button" class="pd-picker-item" onclick="pickPd('method','Bank of Unity','ppd')">Bank of Unity</button>
+            <button type="button" class="pd-picker-item" onclick="pickPd('method','Libyana Credit','ppd')">Libyana Credit</button>
+            <button type="button" class="pd-picker-item" onclick="pickPd('method','Madar Credit','ppd')">Madar Credit</button>
             <div class="pd-picker-item pd-picker-disabled"><span>More</span><span class="pd-soon-pill">Soon</span></div>
           </div>
         </label>
@@ -718,9 +720,14 @@
             <option>مصرف التضامن</option>
           </select>
         </label>
-        <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Account holder">Account holder</span><input id="ppd-holder" class="pd-inp" placeholder="Full name on account"/></label>
-        <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Account number">Account number</span><input id="ppd-acct" class="pd-inp" placeholder="Account number"/></label>
-        <div class="pd-iban-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <label class="pd-lbl" id="ppd-phone-wrap" style="display:none;">
+          <span class="pd-lbl-head" data-i18n="Phone number">Phone number</span>
+          <input id="ppd-phone" class="pd-inp" placeholder="092XXXXXXX" inputmode="numeric" maxlength="10" dir="ltr" style="text-align:left;"/>
+          <span id="ppd-phone-hint" data-no-i18n style="color:#ff6b7a;font-size:10px;text-transform:none;letter-spacing:normal;margin-top:2px;">Number starts with 092 or 094</span>
+        </label>
+        <label class="pd-lbl" id="ppd-holder-wrap"><span class="pd-lbl-head" data-i18n="Account holder">Account holder</span><input id="ppd-holder" class="pd-inp" placeholder="Full name on account"/></label>
+        <label class="pd-lbl" id="ppd-acct-wrap"><span class="pd-lbl-head" data-i18n="Account number">Account number</span><input id="ppd-acct" class="pd-inp" placeholder="Account number"/></label>
+        <div class="pd-iban-row" id="ppd-iban-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <label class="pd-lbl"><span class="pd-lbl-head">IBAN</span><input id="ppd-iban" class="pd-inp" placeholder="optional"/></label>
           <label class="pd-lbl"><span class="pd-lbl-head">SWIFT/BIC</span><input id="ppd-swift" class="pd-inp" placeholder="optional"/></label>
         </div>
@@ -768,6 +775,8 @@
         <div class="pd-picker-list" id="pd-method-list" style="display:none;">
           <button type="button" class="pd-picker-item" onclick="pickPd('method','One pay')">One pay</button>
           <button type="button" class="pd-picker-item" onclick="pickPd('method','Bank of Unity')">Bank of Unity</button>
+          <button type="button" class="pd-picker-item" onclick="pickPd('method','Libyana Credit')">Libyana Credit</button>
+          <button type="button" class="pd-picker-item" onclick="pickPd('method','Madar Credit')">Madar Credit</button>
           <div class="pd-picker-item pd-picker-disabled"><span>More</span><span class="pd-soon-pill">Soon</span></div>
         </div>
       </label>
@@ -794,9 +803,14 @@
           <option>مصرف التضامن</option>
         </select>
       </label>
-      <label class="pd-lbl"><span class="pd-lbl-head">Account holder <span class="pd-req">*</span></span><input id="pd-holder" class="pd-inp" placeholder="Full name on account" required /></label>
-      <label class="pd-lbl"><span class="pd-lbl-head">Account number <span class="pd-req">*</span></span><input id="pd-acct" class="pd-inp" placeholder="Account number" required /></label>
-      <div class="pd-iban-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <label class="pd-lbl" id="pd-phone-wrap" style="display:none;">
+        <span class="pd-lbl-head" data-i18n="Phone number">Phone number</span>
+        <input id="pd-phone" class="pd-inp" placeholder="092XXXXXXX" inputmode="numeric" maxlength="10" dir="ltr" style="text-align:left;"/>
+        <span id="pd-phone-hint" data-no-i18n style="color:#ff6b7a;font-size:10px;text-transform:none;letter-spacing:normal;margin-top:2px;">Number starts with 092 or 094</span>
+      </label>
+      <label class="pd-lbl" id="pd-holder-wrap"><span class="pd-lbl-head">Account holder <span class="pd-req">*</span></span><input id="pd-holder" class="pd-inp" placeholder="Full name on account" required /></label>
+      <label class="pd-lbl" id="pd-acct-wrap"><span class="pd-lbl-head">Account number <span class="pd-req">*</span></span><input id="pd-acct" class="pd-inp" placeholder="Account number" required /></label>
+      <div class="pd-iban-row" id="pd-iban-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <label class="pd-lbl"><span class="pd-lbl-head">IBAN</span><input id="pd-iban" class="pd-inp" placeholder="optional" /></label>
         <label class="pd-lbl"><span class="pd-lbl-head">SWIFT/BIC</span><input id="pd-swift" class="pd-inp" placeholder="optional" /></label>
       </div>
