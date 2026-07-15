@@ -567,7 +567,13 @@
 
   <!-- ORDERS -->
   <div class="page orders-pg" id="pg-orders">
-    <div class="page-header">Orders</div>
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <span>Orders</span>
+      <button type="button" onclick="goTo('pg-saved')" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:20px;border:1px solid #7f77dd;background:transparent;color:#7f77dd;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#e07070" stroke="#e07070" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        <span>Saved</span>
+      </button>
+    </div>
     <div style="display:flex;justify-content:center;margin:0 0 14px;">
       <button class="add-order-btn" onclick="openForm()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -620,10 +626,6 @@
   <div class="nav-item" id="nav-orders" onclick="goTo('pg-orders')">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
     <span class="nav-label">Orders</span>
-  </div>
-  <div class="nav-item" id="nav-saved" onclick="goTo('pg-saved')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-    <span class="nav-label">Saved</span>
   </div>
   <div class="nav-item" id="nav-menu" onclick="openMenu()">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
