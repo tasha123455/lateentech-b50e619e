@@ -1241,6 +1241,14 @@ export type Database = {
         Args: { _product_id: string; _rating: number; _text: string }
         Returns: undefined
       }
+      pending_active_orders_for_business: {
+        Args: never
+        Returns: {
+          created_at: string
+          marketer_id: string
+          product_id: string
+        }[]
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
