@@ -17,9 +17,6 @@ export function MenuDrawer({ open, onClose, name, subtitle }: Props) {
             <div className="text-xs text-text-2">{subtitle}</div>
           </div>
         </div>
-        <MenuItem label="Account settings" tone="green" />
-        <MenuItem label="Payouts" tone="purple" />
-        <MenuItem label="Help & support" tone="green" />
         <button onClick={signOut} className="mt-auto rounded-xl border border-border py-3 text-sm text-destructive hover:bg-surface-2">
           Sign out
         </button>
