@@ -75,7 +75,7 @@ const __bdSelected={day:null,month:null,year:null};
 // across both dashboards (breakdown boxes, per-product Marketer info tile)
 // always agrees.
 const __ACTIVE_MKT_STATUSES=new Set(['pending','approved','confirmed']);
-function __bdFilterOrders(sel){return (orders||[]).filter(o=>{const c=o._createdAt;if(!c)return false;if(sel.day&&__bdDays[c.getDay()]!==sel.day)return false;if(sel.month&&__bdMonths[c.getMonth()]!==sel.month)return false;if(sel.year&&String(c.getFullYear())!==sel.year)return false;return true;});}
+function __bdFilterOrders(sel){return (orders||[]).concat(__pendingActiveStubs||[]).filter(o=>{const c=o._createdAt;if(!c)return false;if(sel.day&&__bdDays[c.getDay()]!==sel.day)return false;if(sel.month&&__bdMonths[c.getMonth()]!==sel.month)return false;if(sel.year&&String(c.getFullYear())!==sel.year)return false;return true;});}
 function __bdGenerateData(sel){if(!sel.day&&!sel.month&&!sel.year)return __bdAllTime;const list=__bdFilterOrders(sel);let earnings=0,pieces=0,succeeded=0,failed=0;const mset=new Set();list.forEach(o=>{if(o._status==='delivered'){earnings+=(o.price*o.qty)-o.commission-o.platformFee;pieces+=o.qty;succeeded++;}if(o._status==='cancelled')failed++;if(o.marketerId&&__ACTIVE_MKT_STATUSES.has(o._status))mset.add(o.marketerId);});return{earnings,pieces,marketers:mset.size,succeeded,failed};}
 function __ordFrac(n){if(n===1)return'طلبيه واحده';if(n===2)return'طلبيتين';return n+' طلبيات';}
 function bdRenderBreakdown(){const data=__bdGenerateData(__bdSelected);const mEl=document.getElementById('bd-marketers-val');if(mEl)mEl.textContent=data.marketers;const grid=document.getElementById('bd-grid');if(!grid)return;const total=data.succeeded+data.failed;const succPct=total>0?Math.round((data.succeeded/total)*100):0;const failPct=total>0?Math.round((data.failed/total)*100):0;const sym=(typeof window.__bizSelSym==='function')?window.__bizSelSym():'$';const ar=__ar();const succLbl=ar?'الطلبات تم تسليمها':'Succeeded';const failLbl=ar?'الطلبات لم يتم تسليمها':'Failed';const succSub=ar?('من أصل '+__ordFrac(total)):(succPct+'%');const failSub=ar?('من أصل '+__ordFrac(total)):(failPct+'%');const piecesLbl=ar?'قطع تم بيعها':'Pieces sold';const netLbl=ar?'صافي الأرباح منذ إنشاء الحساب':'Net earnings';grid.innerHTML=`
@@ -477,7 +477,8 @@ function mpVariantBoxes(p,sel,list){
 function mpActiveMarketerCount(p){
   try{
     if(typeof orders==='undefined'||!Array.isArray(orders))return 0;
-    const ids=new Set(orders.filter(o=>o.productId===p.id&&o.marketerId&&__ACTIVE_MKT_STATUSES.has(o._status)).map(o=>o.marketerId));
+    const pool=orders.concat(__pendingActiveStubs||[]);
+    const ids=new Set(pool.filter(o=>o.productId===p.id&&o.marketerId&&__ACTIVE_MKT_STATUSES.has(o._status)).map(o=>o.marketerId));
     return ids.size;
   }catch(e){return 0;}
 }
@@ -747,9 +748,25 @@ const STEPS=['New','Confirmed','Delivered'];
 const fmt=(n,sym,code)=>__money(n,sym,code);
 let activeFilter='all',expandedId=null;
 let orders=[];
+// Minimal (marketerId, productId, _status:'pending', _createdAt) stubs for
+// this business's own pending orders. RLS deliberately keeps full pending
+// order rows out of `orders` (unverified receipts stay hidden from the
+// business until admin approves), so without these stubs a marketer whose
+// only order is still pending would never be counted as "active" here —
+// even though the marketer app's live active_marketers_count(s) RPC (which
+// bypasses that same RLS) already counts them. Fetched via a narrow
+// SECURITY DEFINER RPC that returns nothing but these three fields.
+let __pendingActiveStubs=[];
+async function loadPendingActiveStubs(){
+  if(!window.LateenAPI||!window.LateenAPI.pendingActiveOrdersForBusiness)return;
+  try{
+    const rows=await window.LateenAPI.pendingActiveOrdersForBusiness();
+    __pendingActiveStubs=(rows||[]).map(r=>({marketerId:r.marketer_id,productId:r.product_id,_status:'pending',_createdAt:new Date(r.created_at)}));
+  }catch(e){console.error('[Lateen] loadPendingActiveStubs',e);}
+}
 function dbStatusToUi(s){if(s==='confirmed')return'confirmed';if(s==='delivered')return'delivered';if(s==='cancelled')return'failed';if(s==='rejected')return'rejected';if(s==='approved')return'approved';return'pending';}
 function dbToOrder(r){const curCode=(r.currency&&r.currency.code)||'USD';const sym=__wrapArSym((r.currency&&r.currency.symbol)||'$',curCode);const prod=products.find(p=>p.id===r.product_id);const ph=prod&&prod.photos&&prod.photos.length?prod.photos:[(prod&&prod.currency&&prod.currency.flag)||'📦'];const dt=new Date(r.created_at);const d=dt.getDate()+' '+dt.toLocaleString('en',{month:'short'})+' '+dt.getFullYear();const q=Number(r.qty)||1;const shipping=Number(r.shipping_fee)||0;const delivery=Number(r.delivery_fee)||0;const total=Number(r.unit_price)*q+shipping+delivery;const mc=r.marketer_confirmed_at?new Date(r.marketer_confirmed_at):null;const mcDate=mc?(mc.getDate()+' '+mc.toLocaleString('en',{month:'short'})+' '+mc.getFullYear()):'';return{id:'#'+r.id.slice(0,8).toUpperCase(),dbId:r.id,marketerId:r.marketer_id||'',productId:r.product_id||'',source:'affiliate',paymentType:'upfront',paymentAmount:Number(r.commission)*q+Number(r.platform_fee)*q,paymentDate:d,photos:ph,productEmoji:'📦',customerName:r.customer_name||'',customerPhone:r.customer_phone||'',customerWhatsapp:r.customer_whatsapp||'',country:r.customer_country||'',city:r.customer_city||'',address:r.customer_address||'',product:prod?prod.name:'(product)',productCode:prod?prod.code:'',sym,curCode,size:r.size||'',color:r.color||'',qty:q,price:Number(r.unit_price)||0,shipping,delivery,total,commission:Number(r.commission)*q,platformFee:Number(r.platform_fee)*q,status:dbStatusToUi(r.status),date:d,notes:r.customer_notes||'',receiptUrl:r.receipt_url||'',marketerConfirmed:!!r.marketer_confirmed_at,marketerConfirmedDate:mcDate,_createdAt:dt,_status:r.status,_updatedAt:r.updated_at?new Date(r.updated_at):dt};}
-async function loadOrders(){if(!window.LateenAPI)return;let rows=[];try{rows=await window.LateenAPI.listMyOrders();}catch(e){console.error('[Lateen] loadOrders fetch',e);}try{orders=(rows||[]).filter(r=>r&&r.business_id).map(dbToOrder);orders.sort((a,b)=>{const at=(a._updatedAt instanceof Date?a._updatedAt:new Date(a._updatedAt||0)).getTime();const bt=(b._updatedAt instanceof Date?b._updatedAt:new Date(b._updatedAt||0)).getTime();return bt-at;});}catch(e){console.error('[Lateen] loadOrders map',e);orders=orders||[];}try{updateSummary();}catch(e){console.error('[Lateen] updateSummary',e);}try{applyFilters();}catch(e){console.error('[Lateen] applyFilters',e);try{renderOrders([]);}catch(_){}}try{recomputeAnalytics();}catch(e){console.error('[Lateen] recomputeAnalytics',e);}}
+async function loadOrders(){if(!window.LateenAPI)return;let rows=[];try{rows=await window.LateenAPI.listMyOrders();}catch(e){console.error('[Lateen] loadOrders fetch',e);}try{orders=(rows||[]).filter(r=>r&&r.business_id).map(dbToOrder);orders.sort((a,b)=>{const at=(a._updatedAt instanceof Date?a._updatedAt:new Date(a._updatedAt||0)).getTime();const bt=(b._updatedAt instanceof Date?b._updatedAt:new Date(b._updatedAt||0)).getTime();return bt-at;});}catch(e){console.error('[Lateen] loadOrders map',e);orders=orders||[];}await loadPendingActiveStubs();try{updateSummary();}catch(e){console.error('[Lateen] updateSummary',e);}try{applyFilters();}catch(e){console.error('[Lateen] applyFilters',e);try{renderOrders([]);}catch(_){}}try{recomputeAnalytics();}catch(e){console.error('[Lateen] recomputeAnalytics',e);}try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}}
 const __DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const __MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function __buildSeries(){
@@ -775,7 +792,7 @@ function recomputeAnalytics(){
   const pcsD=Array(s.dayCount).fill(0),pcsM=Array(s.monthCount).fill(0),pcsY=Array(s.yearCount).fill(0);
   const ringD={ok:0,fail:0},ringM={ok:0,fail:0},ringY={ok:0,fail:0};
   let totGross=0,totPieces=0,totOk=0,totFail=0,totComm=0,totPlat=0;const marketerSet=new Set();
-  orders.forEach(o=>{
+  orders.concat(__pendingActiveStubs||[]).forEach(o=>{
     const st=o._status;const c=o._createdAt;if(!c)return;
     const net=(o.price*o.qty)-o.commission-o.platformFee;
     const isOk=st==='delivered';const isFail=st==='cancelled';
