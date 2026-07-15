@@ -531,6 +531,7 @@ function __pdMinHintTxt(){const el=document.getElementById('withdraw-min-hint');
 async function refreshPayoutState(){
   const stEl=document.getElementById('payout-status');const btn=document.getElementById('withdraw-btn');
   if(!stEl||!btn||!window.LateenAPI)return;
+  const _fp=window.__profileData;if(_fp&&_fp.frozen_at){const _ar=(typeof __ar==='function'&&__ar());const _t=_ar?'تم تجميد الحساب مؤقتاً':'Account temporarily frozen';window.__lateenCanWithdraw=false;stEl.textContent=_t;stEl.style.color='#eab308';btn.disabled=true;btn.classList.add('disabled');btn.style.opacity='0.45';btn.style.cursor='not-allowed';btn.textContent=(_ar?'سحب':'Withdraw');return;}stEl.style.color='';
   let state=null,prof=null,latest=null,paid=null,wallet=null;
   try{
     [state,prof,latest,paid,wallet]=await Promise.all([
