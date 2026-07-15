@@ -268,6 +268,21 @@ export function createLateenApi(userId: string) {
       return out;
     },
 
+    // Minimal stubs for the caller's own pending orders (marketer_id,
+    // product_id, created_at only). The "Businesses view orders" RLS policy
+    // deliberately hides pending orders from the business (unverified
+    // receipts), so this narrow RPC is how the business dashboard's "Active
+    // marketers" figures can still count marketers who have a pending order,
+    // matching the same live logic the marketer app uses, without exposing
+    // full order/customer detail.
+    async pendingActiveOrdersForBusiness(): Promise<
+      { marketer_id: string; product_id: string; created_at: string }[]
+    > {
+      const { data, error } = await supabase.rpc("pending_active_orders_for_business" as never);
+      if (error) throw error;
+      return (data as { marketer_id: string; product_id: string; created_at: string }[]) || [];
+    },
+
     async listMyOrders() {
       const { data, error } = await supabase
         .from("orders")
