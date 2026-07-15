@@ -201,8 +201,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (prof?.banned_at) {
               setRole(null);
               try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
+              try {
+                const isAr =
+                  typeof document !== "undefined" &&
+                  (document.documentElement.getAttribute("dir") === "rtl" ||
+                    document.documentElement.lang === "ar");
+                sessionStorage.setItem("signin_error", isAr ? "هذه الحساب محظور." : "This account is banned.");
+              } catch { /* ignore */ }
               await supabase.auth.signOut();
-              if (typeof window !== "undefined") window.location.replace("/");
+              if (typeof window !== "undefined") {
+                window.location.replace(picked === "business" ? "/business/signin" : "/marketer/signin");
+              }
               return;
             }
           } catch { /* ignore */ }
