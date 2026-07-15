@@ -231,6 +231,19 @@ function closeForm(){document.getElementById('form-overlay').classList.remove('o
 /* legacy submitProduct removed — see async version below */
 /* MY PRODUCTS v2 — card rendering (real data, mp- prefixed) */
 const LOW_STOCK_THRESHOLD=20;
+// True remaining stock for a product: when it has per-variant quantities
+// tracked, trust their sum over the top-level qty field, which can go out
+// of sync with the real variant counts. Falls back to the raw qty when no
+// variant quantities are tracked (simple/no-variant products).
+function __mpEffectiveQty(p){
+  const groups=(p&&p.variantGroups)||[];
+  let total=0,tracked=false;
+  groups.forEach(g=>(g&&g.items||[]).forEach(it=>{
+    const q=it&&it.qty;
+    if(q!==null&&q!==undefined&&q!==''&&Number.isFinite(Number(q))){tracked=true;total+=Math.max(0,Number(q));}
+  }));
+  return tracked?total:(Number(p&&p.qty)||0);
+}
 let mpActiveFilter='all';
 const mpPhotoIndex={};
 const mpAnalyticsOpen={};
@@ -273,10 +286,11 @@ function mpSetFilter(key,el){mpActiveFilter=key;document.querySelectorAll('.mp-f
 
 function mpStatusBadges(p){
   const b=[];
+  const eq=__mpEffectiveQty(p);
   if(p.status==='active')b.push(`<span class="mp-status-pill mp-status-active"><span class="mp-dot-ind"></span>${__ar()?'نشط':'Active'}</span>`);
   else b.push(`<span class="mp-status-pill mp-status-inactive"><span class="mp-dot-ind"></span>${__ar()?'متوقف':'Paused'}</span>`);
-  if(p.qty===0)b.push(`<span class="mp-status-pill mp-status-outofstock"><span class="mp-dot-ind"></span>${__ar()?'نفدت الكمية':'Out of stock'}</span>`);
-  else if(p.qty>0&&p.qty<=LOW_STOCK_THRESHOLD)b.push(`<span class="mp-status-pill mp-status-lowstock"><span class="mp-dot-ind"></span>${__ar()?'كمية منخفضة':'Low stock'}</span>`);
+  if(eq===0)b.push(`<span class="mp-status-pill mp-status-outofstock"><span class="mp-dot-ind"></span>${__ar()?'نفدت الكمية':'Out of stock'}</span>`);
+  else if(eq>0&&eq<=LOW_STOCK_THRESHOLD)b.push(`<span class="mp-status-pill mp-status-lowstock"><span class="mp-dot-ind"></span>${__ar()?'كمية منخفضة':'Low stock'}</span>`);
   return b.join('');
 }
 
@@ -400,11 +414,12 @@ function mpAnalyticsBody(p,sel){
   const list=mpProductOrders(p,sel);
   const sold=list.reduce((s,o)=>s+(Number(o.qty)||0),0);
   const revenue=list.reduce((s,o)=>s+mpOrderNet(o),0);
-  const stockClass=p.qty===0?'warn':(p.qty<=LOW_STOCK_THRESHOLD?'warn':'accent');
+  const eq=__mpEffectiveQty(p);
+  const stockClass=eq===0?'warn':(eq<=LOW_STOCK_THRESHOLD?'warn':'accent');
   return `
     <div class="mp-stat-grid">
       <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'إجمالي المباع':'Total sold'}</div><div class="mp-stat-val">${sold.toLocaleString()}</div></div>
-      <div class="mp-stat-tile ${stockClass}"><div class="mp-stat-label">${__ar()?'إجمالي المخزون':'Total stock'}</div><div class="mp-stat-val">${p.qty||0}</div></div>
+      <div class="mp-stat-tile ${stockClass}"><div class="mp-stat-label">${__ar()?'إجمالي المخزون':'Total stock'}</div><div class="mp-stat-val">${eq||0}</div></div>
       <div class="mp-stat-tile"><div class="mp-stat-label">${__ar()?'إجمالي الإيرادات':'Total revenue'}</div><div class="mp-stat-val">${fmtP(revenue)}</div></div>
     </div>
     ${mpVariantBoxes(p,sel,list)}`;
@@ -561,6 +576,7 @@ function mpActionsRow(p){
 
 function mpRenderCard(p){
   const fmtP=mpFmt(p);
+  const eq=__mpEffectiveQty(p);
   return `<div class="mp-product-card" data-id="${p.id}">
     <div class="mp-p-head" onclick="mpToggleCard('${p.id}')">
       <div class="mp-p-thumb-wrap" id="mp-thumb-wrap-${p.id}" onclick="event.stopPropagation();mpOpenLightbox('${p.id}')">
@@ -590,7 +606,7 @@ function mpRenderCard(p){
         ${p.desc?`<p class="mp-p-desc-exp">${mpEsc(p.desc)}</p>`:''}
       </div>
     </div>
-    ${p.qty===0?`<div class="mp-oos-banner">${__ar()?'أكتب الكميه لعرض منتجك للمسوّقين':'Enter the quantity to show your product to marketers'}</div>`:''}
+    ${eq===0?`<div class="mp-oos-banner">${__ar()?'أكتب الكميه لعرض منتجك للمسوّقين':'Enter the quantity to show your product to marketers'}</div>`:''}
     <div class="mp-p-details">
       <div class="mp-p-details-inner">
         <div class="mp-divider"></div>
@@ -727,8 +743,8 @@ function renderProducts(){
   let list=products;
   if(mpActiveFilter==='active')list=list.filter(p=>p.status==='active');
   else if(mpActiveFilter==='paused')list=list.filter(p=>p.status!=='active');
-  else if(mpActiveFilter==='lowstock')list=list.filter(p=>p.qty!=null&&p.qty<=LOW_STOCK_THRESHOLD);
-  else if(mpActiveFilter==='outofstock')list=list.filter(p=>p.qty!=null&&p.qty<=0);
+  else if(mpActiveFilter==='lowstock')list=list.filter(p=>{const eq=__mpEffectiveQty(p);return eq>0&&eq<=LOW_STOCK_THRESHOLD;});
+  else if(mpActiveFilter==='outofstock')list=list.filter(p=>__mpEffectiveQty(p)<=0);
   if(q){
     list=list.filter(p=>{
       const cities=Object.keys(p.delivery||{}).flatMap(c=>Object.keys((p.delivery[c]&&p.delivery[c].cities)||{}));
