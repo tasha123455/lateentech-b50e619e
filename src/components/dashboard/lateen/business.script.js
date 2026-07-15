@@ -68,8 +68,15 @@ const __bdDays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const __bdMonths=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let __bdAllTime={earnings:0,pieces:0,marketers:0,succeeded:0,failed:0};
 const __bdSelected={day:null,month:null,year:null};
+// Single source of truth for what counts as an "active" marketer order —
+// pending, approved, or confirmed (i.e. approved-but-not-yet-delivered).
+// This is the exact same status set the marketer app's live
+// active_marketers_count(s) RPC uses, so every "Active marketers" figure
+// across both dashboards (breakdown boxes, per-product Marketer info tile)
+// always agrees.
+const __ACTIVE_MKT_STATUSES=new Set(['pending','approved','confirmed']);
 function __bdFilterOrders(sel){return (orders||[]).filter(o=>{const c=o._createdAt;if(!c)return false;if(sel.day&&__bdDays[c.getDay()]!==sel.day)return false;if(sel.month&&__bdMonths[c.getMonth()]!==sel.month)return false;if(sel.year&&String(c.getFullYear())!==sel.year)return false;return true;});}
-function __bdGenerateData(sel){if(!sel.day&&!sel.month&&!sel.year)return __bdAllTime;const list=__bdFilterOrders(sel);let earnings=0,pieces=0,succeeded=0,failed=0;const mset=new Set();list.forEach(o=>{if(o._status==='delivered'){earnings+=(o.price*o.qty)-o.commission-o.platformFee;pieces+=o.qty;succeeded++;if(o.marketerId)mset.add(o.marketerId);}if(o._status==='cancelled')failed++;});return{earnings,pieces,marketers:mset.size,succeeded,failed};}
+function __bdGenerateData(sel){if(!sel.day&&!sel.month&&!sel.year)return __bdAllTime;const list=__bdFilterOrders(sel);let earnings=0,pieces=0,succeeded=0,failed=0;const mset=new Set();list.forEach(o=>{if(o._status==='delivered'){earnings+=(o.price*o.qty)-o.commission-o.platformFee;pieces+=o.qty;succeeded++;}if(o._status==='cancelled')failed++;if(o.marketerId&&__ACTIVE_MKT_STATUSES.has(o._status))mset.add(o.marketerId);});return{earnings,pieces,marketers:mset.size,succeeded,failed};}
 function __ordFrac(n){if(n===1)return'طلبيه واحده';if(n===2)return'طلبيتين';return n+' طلبيات';}
 function bdRenderBreakdown(){const data=__bdGenerateData(__bdSelected);const mEl=document.getElementById('bd-marketers-val');if(mEl)mEl.textContent=data.marketers;const grid=document.getElementById('bd-grid');if(!grid)return;const total=data.succeeded+data.failed;const succPct=total>0?Math.round((data.succeeded/total)*100):0;const failPct=total>0?Math.round((data.failed/total)*100):0;const sym=(typeof window.__bizSelSym==='function')?window.__bizSelSym():'$';const ar=__ar();const succLbl=ar?'الطلبات تم تسليمها':'Succeeded';const failLbl=ar?'الطلبات لم يتم تسليمها':'Failed';const succSub=ar?('من أصل '+__ordFrac(total)):(succPct+'%');const failSub=ar?('من أصل '+__ordFrac(total)):(failPct+'%');const piecesLbl=ar?'قطع تم بيعها':'Pieces sold';const netLbl=ar?'صافي الأرباح منذ إنشاء الحساب':'Net earnings';grid.innerHTML=`
     <div class="bd-box"><div class="bd-box-label" data-no-i18n>${netLbl}</div><div class="bd-box-value">${__money(data.earnings,sym,window.__bizWalletCur)}</div></div>
@@ -470,8 +477,7 @@ function mpVariantBoxes(p,sel,list){
 function mpActiveMarketerCount(p){
   try{
     if(typeof orders==='undefined'||!Array.isArray(orders))return 0;
-    const ACTIVE_ST=new Set(['pending','approved','confirmed']);
-    const ids=new Set(orders.filter(o=>o.productId===p.id&&o.marketerId&&ACTIVE_ST.has(o._status)).map(o=>o.marketerId));
+    const ids=new Set(orders.filter(o=>o.productId===p.id&&o.marketerId&&__ACTIVE_MKT_STATUSES.has(o._status)).map(o=>o.marketerId));
     return ids.size;
   }catch(e){return 0;}
 }
@@ -773,8 +779,9 @@ function recomputeAnalytics(){
     const st=o._status;const c=o._createdAt;if(!c)return;
     const net=(o.price*o.qty)-o.commission-o.platformFee;
     const isOk=st==='delivered';const isFail=st==='cancelled';
-    if(isOk){totGross+=o.price*o.qty;totPieces+=o.qty;totComm+=o.commission;totPlat+=o.platformFee;totOk++;if(o.marketerId)marketerSet.add(o.marketerId);}
+    if(isOk){totGross+=o.price*o.qty;totPieces+=o.qty;totComm+=o.commission;totPlat+=o.platformFee;totOk++;}
     if(isFail)totFail++;
+    if(o.marketerId&&__ACTIVE_MKT_STATUSES.has(st))marketerSet.add(o.marketerId);
     const di=Math.floor((new Date(c.getFullYear(),c.getMonth(),c.getDate())-s.dayStart)/86400000);
     if(di>=0&&di<s.dayCount){if(isOk){revD[di]+=net;pcsD[di]+=o.qty;ringD.ok++;}if(isFail)ringD.fail++;}
     const mi=(c.getFullYear()-s.startYear)*12+c.getMonth();
