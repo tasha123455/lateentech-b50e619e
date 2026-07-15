@@ -697,6 +697,10 @@ export const DICT: Record<string, string> = {
   "More soon": "المزيد قريباً",
   "One pay": "وان باي",
   "Bank of Unity": "مصرف الوحده",
+  "Libyana Credit": "رصيد ليبيانا",
+  "Madar Credit": "رصيد مدار",
+  "Number starts with 092 or 094": "الرقم يبدا من 092 او 094",
+  "Number starts with 091 or 093": "الرقم يبدا من 091 او 093",
   "Notes (optional)": "ملاحظات (اختياري)",
   "Write any additional notes": "اكتب أي ملاحظات إضافية",
 
