@@ -474,6 +474,7 @@
       <div class="wallet-label">WALLET BALANCE</div>
       <div class="wallet-amount">$0.00</div>
       <div class="wallet-pending" id="wallet-pending">$0.00 pending</div>
+      <div id="wallet-frozen-banner" style="display:none;margin:8px 0 12px;padding:10px 12px;border-radius:10px;background:rgba(234,179,8,0.10);border:0.5px solid rgba(234,179,8,0.35);color:#eab308;font-size:12px;font-weight:600;text-align:center;">Account temporarily frozen</div>
       <div id="wallet-breakdown" style="display:none;margin:-4px 0 14px 0;padding:10px 12px;border-radius:12px;background:#141414;border:0.5px solid #232323;font-size:11px;color:rgba(255,255,255,0.7);line-height:1.6"></div>
       <div class="wallet-row">
         <div class="wallet-meta" id="payout-status">Next payout <span id="days-left">—</span></div>
@@ -575,7 +576,7 @@
       </button>
     </div>
     <div style="display:flex;justify-content:center;margin:0 0 14px;">
-      <button class="add-order-btn" onclick="openForm()">
+      <button class="add-order-btn" id="add-order-btn" onclick="openForm()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         <span data-i18n="Add order">Add order</span>
       </button>
