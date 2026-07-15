@@ -203,13 +203,26 @@ export function RegisterForm({ role }: { role: Role }) {
           await supabase.auth.signOut();
           setError(crossRoleMsg());
         } else if (alreadyHasAccount) {
+          let banned = false;
+          try {
+            const { data: prof } = await supabase
+              .from("profiles")
+              .select("banned_at")
+              .eq("id", session.user.id)
+              .maybeSingle();
+            banned = !!prof?.banned_at;
+          } catch { /* ignore */ }
           try {
             sessionStorage.removeItem("pending_signup");
             sessionStorage.removeItem("intended_role");
             localStorage.removeItem("active_role");
           } catch { /* ignore */ }
           await supabase.auth.signOut();
-          setError(ar ? "يوجد حساب بالفعل بهذا البريد الإلكتروني. يرجى تسجيل الدخول." : "An account with this email already exists. Please sign in instead.");
+          setError(
+            banned
+              ? (ar ? "هذه الحساب محظور." : "This account is banned.")
+              : (ar ? "يوجد حساب بالفعل بهذا البريد الإلكتروني. يرجى تسجيل الدخول." : "An account with this email already exists. Please sign in instead."),
+          );
         } else {
           await addRoleAndGo();
         }
