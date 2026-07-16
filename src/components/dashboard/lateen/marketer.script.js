@@ -684,6 +684,15 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   const _ro=window.renderOrders;let __sigO='';
   if(typeof _ro==='function'){window.renderOrders=function(){try{const s=JSON.stringify((orders||[]).map(o=>[o.id,o.dbId||'',o._status||'',o.qty,o.hasReceipt?1:0,o.receiptUrl||'',o.adminNotes||'',o.businessNotes||'']));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
 })();
+/* Same signature-skip trick, applied to the browse grid: re-opening the
+   Browse tab called go()->rg2(l) every time and rebuilt the whole grid
+   from scratch — every product image included — even when the filtered
+   list hadn't changed at all. That's the "products hit blank for a sec
+   then reload" flash. */
+(function(){
+  const _rg2=window.rg2;let __sigBrw='';
+  if(typeof _rg2==='function'){window.rg2=function(l){try{const s=JSON.stringify((l||[]).map(p=>[p.id,p.sv?1:0,p.pr,p.pct,p.n]));if(s===__sigBrw)return;__sigBrw=s;}catch(e){}return _rg2.apply(this,arguments);};}
+})();
 /* persist page + scroll across refresh */
 (function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
 

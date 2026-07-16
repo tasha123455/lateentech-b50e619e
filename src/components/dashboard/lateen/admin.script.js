@@ -4,6 +4,22 @@ function admMoney(n){const v=Number(n||0);return '\u2066د.ل\u2069'+v.toLocaleS
 function admInitials(name){if(!name)return '?';return name.trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();}
 function admWhen(iso){if(!iso)return '';const d=new Date(iso);const diff=Date.now()-d.getTime();const m=Math.floor(diff/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 
+/* Anti-flicker helpers. Every admin list below used to be reloaded on
+   every nav click, every 10s poll, and every realtime event — and each
+   reload wiped the section to "Loading…" and rebuilt the DOM from scratch
+   even when nothing had changed, causing a visible blank flash each time.
+   Now: "Loading…" only shows the very first time a section is opened, and
+   the rebuild is skipped entirely when the new data matches what's on
+   screen already. */
+const __admSig={};
+function __admFirstLoad(root){return !root||root.dataset.admLoaded!=='1';}
+function __admMarkLoaded(root){if(root)root.dataset.admLoaded='1';}
+function __admUnchanged(key,sig,first){
+  if(!first&&__admSig[key]===sig)return true;
+  __admSig[key]=sig;
+  return false;
+}
+
 let admUsersCache=[];
 let admFeeRows=[];
 const ADM_MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -83,7 +99,8 @@ async function admLoadMetrics(){
 
 async function admLoadVerify(){
   const root=document.getElementById('verify-list');
-  root.innerHTML='<div class="adm-empty">Loading…</div>';
+  const first=__admFirstLoad(root);
+  if(first) root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
     const list=await window.LateenAPI.admin.listPendingReceipts();
     list.sort((a,b)=>{
@@ -91,6 +108,9 @@ async function admLoadVerify(){
       const bt=new Date(b.updated_at||b.receipt_uploaded_at||b.created_at||0).getTime();
       return bt-at;
     });
+    const sig=JSON.stringify(list.map(o=>[o.id,o.updated_at,o.receipt_uploaded_at,o.receipt_url,o.status]));
+    if(__admUnchanged('verify',sig,first))return;
+    __admMarkLoaded(root);
     if(!list.length){root.innerHTML='<div class="adm-empty">No receipts awaiting review.</div>';return;}
     root.innerHTML=list.map(o=>{
       const qty=Number(o.qty||0);
@@ -138,7 +158,7 @@ async function admLoadVerify(){
         </div>
       </div>`;
     }).join('');
-  }catch(e){console.error('[admin] verify',e);root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
+  }catch(e){console.error('[admin] verify',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
 function admToggleRow(id){
@@ -163,9 +183,13 @@ async function admReject(id){
 
 async function admLoadPayouts(){
   const root=document.getElementById('payouts-list');
-  root.innerHTML='<div class="adm-empty">Loading…</div>';
+  const first=__admFirstLoad(root);
+  if(first) root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
     const list=await window.LateenAPI.admin.listPayoutRequests();
+    const sig=JSON.stringify(list.map(p=>[p.id,p.requested_at,p.amount,p.wallet&&p.wallet.balance,(p.user&&p.user.payout_notes)||'']));
+    if(__admUnchanged('payouts',sig,first))return;
+    __admMarkLoaded(root);
     if(!list.length){root.innerHTML='<div class="adm-empty">No payout requests pending.</div>';return;}
     root.innerHTML=list.map(p=>{
       const u=p.user||{};
@@ -203,7 +227,7 @@ async function admLoadPayouts(){
         </div>
       </div>`;
     }).join('');
-  }catch(e){console.error('[admin] payouts',e);root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
+  }catch(e){console.error('[admin] payouts',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
 async function admMarkPaid(id,amt,label){
@@ -222,12 +246,16 @@ async function admSendPayoutNote(id){
 let admUserRoleFilter='';
 async function admLoadUsers(search){
   const root=document.getElementById('users-list');
-  root.innerHTML='<div class="adm-empty">Loading…</div>';
+  const first=__admFirstLoad(root);
+  if(first) root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
     const list=await window.LateenAPI.admin.listAllUsers(search);
     admUsersCache=list;
+    const sig=JSON.stringify(list.map(u=>[u.id,u.role,u.banned_at,u.frozen_at,u.full_name,u.business_name,u.email,u.phone]));
+    if(__admUnchanged('users:'+search,sig,first))return;
+    __admMarkLoaded(root);
     admRenderUsers(admApplyUserFilter(list));
-  }catch(e){console.error('[admin] users',e);root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
+  }catch(e){console.error('[admin] users',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
 function admApplyUserFilter(list){
@@ -318,9 +346,13 @@ function admUserSearch(v){
 
 async function admLoadProducts(){
   const root=document.getElementById('products-grid');
-  root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">Loading…</div>';
+  const first=__admFirstLoad(root);
+  if(first) root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">Loading…</div>';
   try{
     const list=await window.LateenAPI.admin.listAllProducts();
+    const sig=JSON.stringify(list.map(p=>[p.id,p.status,p.price,p.name,(Array.isArray(p.photos)&&p.photos[0])||'']));
+    if(__admUnchanged('products',sig,first))return;
+    __admMarkLoaded(root);
     if(!list.length){root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">No products yet.</div>';return;}
     root.innerHTML=list.map(p=>{
       const photo=Array.isArray(p.photos)&&p.photos[0];
@@ -339,7 +371,7 @@ async function admLoadProducts(){
         </div>
       </div>`;
     }).join('');
-  }catch(e){console.error('[admin] products',e);root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">Failed to load.</div>';}
+  }catch(e){console.error('[admin] products',e);if(first)root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">Failed to load.</div>';}
 }
 
 async function admToggleProduct(id,newStatus){
@@ -416,11 +448,15 @@ function admEmpNextPayday(p){const next=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};r
 
 async function admLoadEmployees(){
   const root=document.getElementById('employees-list');
-  root.innerHTML='<div class="adm-empty">Loading…</div>';
+  const first=__admFirstLoad(root);
+  if(first) root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
     admEmpCache=await window.LateenAPI.admin.listEmployees(admEmpSearchQ);
+    const sig=JSON.stringify(admEmpCache.map(e=>[e.id,e.monthly_salary,e.job_title,e.email,e.notes,JSON.stringify(e.payments||[])]));
+    if(__admUnchanged('employees:'+admEmpSearchQ,sig,first))return;
+    __admMarkLoaded(root);
     admRenderEmployees();
-  }catch(e){console.error('[admin] employees',e);root.innerHTML='<div class="adm-empty">Failed to load: '+admEsc(e.message||'')+'</div>';}
+  }catch(e){console.error('[admin] employees',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load: '+admEsc(e.message||'')+'</div>';}
 }
 
 function admRenderEmployees(){
@@ -967,3 +1003,17 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       setChartFilter(key);
     });
   });
+
+/* persist page across refresh — mirrors the same fix already shipped for
+   the business/marketer dashboards, so returning to a backgrounded admin
+   tab lands back on the same section instead of resetting to Home. */
+(function(){
+  const K='lateen_adm_page';
+  const _g=admGo;
+  admGo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};
+  window.admGo=admGo;
+  try{
+    const sv=sessionStorage.getItem(K);
+    if(sv&&document.getElementById(sv))_g(sv);
+  }catch(e){}
+})();
