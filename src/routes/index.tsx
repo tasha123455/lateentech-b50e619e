@@ -21,6 +21,19 @@ function Landing() {
     if (!loading && user && role) nav({ to: "/dashboard" });
   }, [loading, user, role, nav]);
 
+  // While the auth check is still running, or once we know this is a
+  // signed-in user who's about to be bounced to /dashboard, don't render
+  // the "Who are you?" screen at all — that's what caused every app
+  // re-open to show a flash of the sign-in/role picker before jumping to
+  // the dashboard. Only signed-out visitors ever see the real landing UI.
+  if (loading || (user && role)) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <LateenLogo size={56} />
+      </main>
+    );
+  }
+
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
       <LateenLogo size={68} />
