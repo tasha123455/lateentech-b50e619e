@@ -306,6 +306,7 @@ export type Database = {
           shipping_fee: number
           size: string | null
           status: string
+          stock_reserved: boolean
           unit_price: number
           updated_at: string
         }
@@ -340,6 +341,7 @@ export type Database = {
           shipping_fee?: number
           size?: string | null
           status?: string
+          stock_reserved?: boolean
           unit_price?: number
           updated_at?: string
         }
@@ -374,6 +376,7 @@ export type Database = {
           shipping_fee?: number
           size?: string | null
           status?: string
+          stock_reserved?: boolean
           unit_price?: number
           updated_at?: string
         }
@@ -738,6 +741,10 @@ export type Database = {
         Args: { _delta: number; _match: string; _product_id: string }
         Returns: undefined
       }
+      _reserve_variant_qty_check: {
+        Args: { _match: string; _product_id: string; _qty: number }
+        Returns: undefined
+      }
       active_marketers_count: { Args: { _product_id: string }; Returns: number }
       active_marketers_counts: {
         Args: { _product_ids: string[] }
@@ -786,6 +793,7 @@ export type Database = {
           shipping_fee: number
           size: string | null
           status: string
+          stock_reserved: boolean
           unit_price: number
           updated_at: string
         }
@@ -908,6 +916,7 @@ export type Database = {
           shipping_fee: number
           size: string | null
           status: string
+          stock_reserved: boolean
           unit_price: number
           updated_at: string
         }
@@ -951,6 +960,7 @@ export type Database = {
           shipping_fee: number
           size: string | null
           status: string
+          stock_reserved: boolean
           unit_price: number
           updated_at: string
         }
@@ -1048,6 +1058,7 @@ export type Database = {
           shipping_fee: number
           size: string | null
           status: string
+          stock_reserved: boolean
           unit_price: number
           updated_at: string
         }
@@ -1127,6 +1138,7 @@ export type Database = {
           shipping_fee: number
           size: string | null
           status: string
+          stock_reserved: boolean
           unit_price: number
           updated_at: string
         }
@@ -1171,6 +1183,7 @@ export type Database = {
               shipping_fee: number
               size: string | null
               status: string
+              stock_reserved: boolean
               unit_price: number
               updated_at: string
             }
@@ -1214,6 +1227,7 @@ export type Database = {
               shipping_fee: number
               size: string | null
               status: string
+              stock_reserved: boolean
               unit_price: number
               updated_at: string
             }
