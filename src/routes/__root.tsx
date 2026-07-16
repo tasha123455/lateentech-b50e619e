@@ -113,6 +113,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body suppressHydrationWarning>
+        {/* Runs synchronously before any other body content parses/paints.
+            Sets dir/lang from the saved preference immediately, so a
+            returning Arabic user's page never visibly flips from LTR to
+            RTL after load — it's already correct in the first frame. The
+            actual text translation still happens in React (see
+            LanguageContext) once it hydrates, just after this. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{if(localStorage.getItem('lateen_lang')==='ar'){var h=document.documentElement;h.setAttribute('lang','ar');h.setAttribute('dir','rtl');}}catch(e){}})();",
+          }}
+        />
         <LanguageProvider>
           <AuthProvider>{children}</AuthProvider>
           <FloatingLanguageToggle />
