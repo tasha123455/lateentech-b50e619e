@@ -116,7 +116,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // a useEffect — after hydration — to avoid React throwing away the tree.
   const [lang, setLangState] = useState<Lang>("en");
 
-  useEffect(() => {
+  // Read the stored preference in a LAYOUT effect, not a passive useEffect.
+  // useEffect callbacks run *after* the browser has already painted, so an
+  // Arabic-preferring user briefly saw the English tree on every load or
+  // refresh before this flipped it. useLayoutEffect runs before paint, so
+  // the flip (and the translation layout effect below) lands in the same
+  // frame as hydration — no visible English flash first.
+  useLayoutEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored === "ar") setLangState("ar");
