@@ -3,6 +3,27 @@
 // real backend operations instead of mutating in-memory arrays.
 import { supabase } from "@/integrations/supabase/client";
 
+function mapStockError(err: unknown): unknown {
+  const msg = (err && typeof err === "object" && "message" in err) ? String((err as { message?: unknown }).message ?? "") : "";
+  if (/OUT_OF_STOCK/i.test(msg)) {
+    const variantMatch = msg.match(/variant "([^"]+)" has only (\d+) left/i);
+    const isAr = typeof document !== "undefined" && document.documentElement.getAttribute("dir") === "rtl";
+    if (variantMatch) {
+      const name = variantMatch[1];
+      const left = variantMatch[2];
+      const friendly = isAr
+        ? `عذراً، لم يعد المتغير "${name}" متوفراً بالكمية المطلوبة (المتاح: ${left}). يرجى تحديث الطلب.`
+        : `Sorry, variant "${name}" no longer has enough stock (${left} left). Please update the order.`;
+      return new Error(friendly);
+    }
+    const friendly = isAr
+      ? "عذراً، لم يعد هذا المنتج متوفراً بالكمية المطلوبة. لقد قام مسوق آخر بحجز آخر قطعة."
+      : "Sorry, this product no longer has enough stock — another marketer may have just reserved the last unit.";
+    return new Error(friendly);
+  }
+  return err;
+}
+
 export type LateenProduct = {
   id: string;
   business_id: string;
