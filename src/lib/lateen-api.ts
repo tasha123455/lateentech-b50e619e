@@ -197,7 +197,7 @@ export function createLateenApi(userId: string) {
         .insert(payload as never)
         .select()
         .single();
-      if (error) throw error;
+      if (error) throw mapStockError(error);
       return data;
     },
 
@@ -210,7 +210,7 @@ export function createLateenApi(userId: string) {
         .from("orders")
         .update(next as never)
         .eq("id", id);
-      if (error) throw error;
+      if (error) throw mapStockError(error);
     },
 
     async reuploadReceipt(orderId: string, receiptUrl: string, oldReceiptUrl?: string | null) {
@@ -218,7 +218,7 @@ export function createLateenApi(userId: string) {
         _order_id: orderId,
         _receipt_url: receiptUrl,
       } as never);
-      if (error) throw error;
+      if (error) throw mapStockError(error);
       // Best-effort delete of the previous (rejected) receipt file.
       try {
         if (typeof oldReceiptUrl === "string" && oldReceiptUrl.startsWith("receipts:")) {
