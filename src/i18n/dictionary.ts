@@ -712,7 +712,7 @@ export const DICT: Record<string, string> = {
   "Enter": "أدخل",
   "Failed:": "فشل:",
   "Receipt rejected": "تم رفض الإيصال",
-  "Alex Morgan": "أحمد محمد",
+  "Kim Kardashian": "هيفاء وهبي",
   "Sunrise Kicks Ltd.": "شركة شروق الأحذية المحدودة",
   "Phone:": "الهاتف:",
   "Hired:": "تاريخ التوظيف:",
