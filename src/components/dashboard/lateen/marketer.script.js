@@ -70,12 +70,16 @@ let __favOrder=[];
 // trust their sum over the top-level qty column, which can go out of sync
 // with the real variant counts (e.g. after order/stock updates).
 function __vgStockTotal(vg,rawQty){
-  let total=0,tracked=false;
-  (vg||[]).forEach(g=>(g&&g.items||[]).forEach(it=>{
-    const q=it&&it.qty;
-    if(q!==null&&q!==undefined&&Number.isFinite(Number(q))){tracked=true;total+=Math.max(0,Number(q));}
-  }));
-  return tracked?total:(Number(rawQty)||0);
+  const groupTotals=[];
+  (vg||[]).forEach(g=>{
+    let gTotal=0,gTracked=false;
+    (g&&g.items||[]).forEach(it=>{
+      const q=it&&it.qty;
+      if(q!==null&&q!==undefined&&Number.isFinite(Number(q))){gTracked=true;gTotal+=Math.max(0,Number(q));}
+    });
+    if(gTracked)groupTotals.push(gTotal);
+  });
+  return groupTotals.length?Math.min(...groupTotals):(Number(rawQty)||0);
 }
 function dbToBrowse(r){const cur=r.currency||{symbol:'$',code:'USD'};cur.symbol=__wrapArSym(cur.symbol,cur.code);const photo=(r.photos&&r.photos[0])||null;const e=photo?`<img src="${__escH(photo)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>`:(cur.flag||'📦');const d={};Object.entries(r.delivery||{}).forEach(([code,z])=>{d[code]={cities:[],c:{},shipping:0,delivery:0};Object.entries(z.cities||{}).forEach(([city,v])=>{d[code].c[city]={s:Number(v.shipping)||0,d:Number(v.delivery)||0};d[code].cities.push(city);d[code].shipping=Number(v.shipping)||0;d[code].delivery=Number(v.delivery)||0;});});const __hasQty=v=>v&&typeof v==='object'&&v.qty!==undefined&&v.qty!==null&&v.qty!==''&&Number.isFinite(Number(v.qty));const __ni=v=>typeof v==='string'?{val:v,photo:'',qty:null}:{val:(v&&v.val)||'',photo:(v&&v.photo)||'',qty:__hasQty(v)?Math.max(0,Number(v.qty)):null};const vg=(r.variant_groups&&r.variant_groups.length)?r.variant_groups.map(g=>({name:g.name||'',items:(g.items||[]).map(__ni).filter(x=>x.val)})).filter(g=>g.items.length):[...(r.sizes&&r.sizes.length?[{name:'Size',items:r.sizes.map(__ni)}]:[]),...(r.colors&&r.colors.length?[{name:'Colour',items:r.colors.map(__ni)}]:[])];return{id:r.id,bid:r.business_id,biz:r.biz_name||'',e,ph:r.photos||[],n:r.name,cat:r.category||'',code:r.code||'',desc:r.description||'',pr:Number(r.price)||0,cur:{s:cur.symbol||'$',code:cur.code||'USD'},pct:Number(r.comm_pct)||0,platformFee:Number(r.platform_fee)||0,q:__vgStockTotal(vg,r.qty),sv:__favIds.has(r.id),sz:r.sizes||[],cl:r.colors||[],vg,d};}
 async function loadBrowse(){if(!window.LateenAPI)return;try{const api=window.LateenAPI;if(api.listFavoriteIdsOrdered){__favOrder=await api.listFavoriteIdsOrdered();__favIds=new Set(__favOrder);}else{__favIds=await api.listFavoriteIds();__favOrder=[...__favIds];}const rows=await api.listBrowse();P=rows.map(dbToBrowse);rebuildProductsMap();if(typeof go==='function')go();if(typeof renderSaved==='function')renderSaved();}catch(e){console.error('[Lateen] loadBrowse',e);}}
