@@ -86,20 +86,20 @@ export const DICT: Record<string, string> = {
   "Name": "الاسم الكامل",
   "Phone": "رقم الهاتف",
   "Phone number": "رقم الهاتف",
-  "Business name": "اسم التاجر / النشاط التجاري",
+  "Business name": "اسم تاجر / النشاط التجاري",
   "Go to dashboard →": "الانتقال إلى لوحة التحكم ←",
   "Marketer": "مسوّق",
-  "Business": "التاجر",
+  "Business": "تاجر",
   "business owner": "صاحب العمل",
   "Business owner": "صاحب العمل",
 
   // ===== Business Profile & Settings =====
-  "Business Profile": "ملف التاجر",
-  "Business Info": "معلومات التاجر",
-  "Company Name": "اسم التاجر",
+  "Business Profile": "ملف تاجر",
+  "Business Info": "معلومات تاجر",
+  "Company Name": "اسم تاجر",
   "Industry": "مجال العمل",
   "Fashion & Apparel": "أزياء وملابس",
-  "Company website (optional)": "موقع التاجر (اختياري)",
+  "Company website (optional)": "موقع تاجر (اختياري)",
   "Contact Info": "معلومات التواصل",
   "Support email": "إيميل الدعم الفني",
   "Support phone": "رقم هاتف الدعم",
@@ -131,7 +131,7 @@ export const DICT: Record<string, string> = {
   "Out of stock": "نفذت الكميه",
 
   // ===== Dashboards: Stats & Wallet =====
-  "Business Dashboard": "لوحة تحكم التاجر",
+  "Business Dashboard": "لوحة تحكم تاجر",
   "Marketer Dashboard": "لوحة تحكم المسوّق",
   "WALLET BALANCE": "رصيد المحفظه",
   "Wallet Balance": "رصيد المحفظه",
@@ -373,7 +373,7 @@ export const DICT: Record<string, string> = {
   "No, not yet": "لا، مزال",
   "Customer pays remaining balance on arrival": "الزبون يدفع باقي المبلغ عند الاستلام",
   "Cash on delivery": "الدفع عند الاستلام",
-  "This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.": "هذا العربون غير قابل للترجيع لو الزبون لغى الطلبية، عشان يحميك ويحمي التاجر من الطلبات الوهمية.",
+  "This fee is non-refundable if the customer cancels. It protects you and the business from fake orders.": "هذا العربون غير قابل للترجيع لو الزبون لغى الطلبية، عشان يحميك ويحمي تاجر من الطلبات الوهمية.",
   "How to collect the fee": "كيف تحصل العربون",
   "How to collect fee": "كيف تحصل الرسوم",
   "Request a deposit from the customer": "اطلب عربون من الزبون",
@@ -447,7 +447,7 @@ export const DICT: Record<string, string> = {
   "Search countries…": "ابحث عن الدول...",
   "Search by name, ID, city, product…": "ابحث بالاسم، رقم الطلبية، المدينة، المنتج...",
   "Search by name, number, role, email…": "ابحث بالاسم أو الرقم أو الدور أو البريد…",
-  "Search by name, phone, business…": "ابحث بالاسم أو الهاتف أو التاجر…",
+  "Search by name, phone, business…": "ابحث بالاسم أو الهاتف أو تاجر…",
   "Search products & marketers…": "ابحث عن المنتجات والمسوّقين…",
   "Search orders (customer, product, city, ID)": "ابحث في الطلبات (العميل، المنتج، المدينة، رقم الطلب)",
   "Search orders…": "ابحث عن الطلبات",
@@ -515,7 +515,7 @@ export const DICT: Record<string, string> = {
   "W": "أ",
   "M": "شهر",
   "Y": "سنة",
-  "Business workspace": "مساحة عمل التاجر",
+  "Business workspace": "مساحة عمل تاجر",
   "Marketer workspace": "مساحة عمل المسوّق",
   "Mon": "الإثنين", "Tue": "الثلاثاء", "Wed": "الأربعاء",
   "Thu": "الخميس", "Thur": "الخميس", "Fri": "الجمعة", "Sat": "السبت", "Sun": "الأحد",
@@ -587,7 +587,7 @@ export const DICT: Record<string, string> = {
   "Any": "الكل",
   "Approve & forward": "اعتماد وتحويل",
   "Approved forwarded to business": "تمت الموافقة وتم التحويل للتاجر",
-  "Awaiting business": "بانتظار التاجر",
+  "Awaiting business": "بانتظار تاجر",
   "Bank / Provider": "البنك / المزود",
   "Camera Gallery Files": "الكاميرا · المعرض · الملفات",
   "Cash / Other": "نقداً / أخرى",
@@ -760,7 +760,7 @@ type Pattern = { re: RegExp; build: (m: RegExpMatchArray) => string };
 const PATTERNS: Pattern[] = [
   // "This account is registered as a business/marketer. Please use the ... sign-in page, or create a separate ... account."
   { re: /^This account is registered as a (business|marketer)\. Please use the \1 sign-in page, or create a separate (business|marketer) account\.?$/i, build: (m) => {
-    const def: Record<string, string> = { business: "التاجر", marketer: "المسوق" };
+    const def: Record<string, string> = { business: "تاجر", marketer: "المسوق" };
     const indef: Record<string, string> = { business: "تاجر", marketer: "مسوق" };
     const actual = m[1].toLowerCase();
     const intent = m[2].toLowerCase();
@@ -878,9 +878,9 @@ const PATTERNS: Pattern[] = [
     } },
   // "For Benghazi, LY · set by business owner"
   { re: /^For\s+(.+?)\s*[·\-]\s*set\s+by\s+business\s+owner\b\.?$/i,
-    build: (m) => `لـ ${m[1]} · يحدده صاحب التاجر` },
+    build: (m) => `لـ ${m[1]} · يحدده صاحب تاجر` },
   { re: /^set\s+by\s+business\s+owner\b\.?$/i,
-    build: () => `يحدده صاحب التاجر` },
+    build: () => `يحدده صاحب تاجر` },
   // "commission %28.6" / "commission 28.6%"
   { re: /^commission\s+%?([\d.]+)%?$/i, build: (m) => `العمولة ${m[1]}%` },
   // "%28.6 commission" / "28.6% commission"
