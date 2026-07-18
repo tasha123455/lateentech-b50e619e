@@ -1001,12 +1001,14 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
         </div>
       </div>
 
-      <!-- Product code -->
-      <label class="lp-field-label lp-field-label-row">
-        Product code
-        <span class="lp-badge">Auto-generated</span>
-      </label>
-      <input class="lp-input" type="text" id="product-code-display" value="—" disabled style="font-family:var(--font-mono);letter-spacing:0.05em;"/>
+      <!-- Product code: auto-generated, not shown to the business owner -->
+      <div style="display:none">
+        <label class="lp-field-label lp-field-label-row">
+          Product code
+          <span class="lp-badge">Auto-generated</span>
+        </label>
+        <input class="lp-input" type="text" id="product-code-display" value="—" disabled style="font-family:var(--font-mono);letter-spacing:0.05em;"/>
+      </div>
     </div>
 
     <!-- STEP 2: Variants & Inventory -->
