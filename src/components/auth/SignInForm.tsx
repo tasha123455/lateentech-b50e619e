@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -70,20 +69,11 @@ export function SignInForm({ role }: { role: Role }) {
     try { sessionStorage.setItem("intended_role", role); } catch { /* ignore */ }
     try { sessionStorage.setItem("signin_intent", role); } catch { /* ignore */ }
     try { sessionStorage.removeItem("pending_signup"); } catch { /* ignore */ }
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.redirected) return;
-    if (result.error) { setError(result.error.message); return; }
-    const session = (await supabase.auth.getSession()).data.session;
-    if (session?.user) {
-      try {
-        const picked = await verifyRole(session.user.id);
-        try { localStorage.setItem("active_role", picked === "admin" ? role : picked); } catch { /* ignore */ }
-        await loadRoleForUser(session.user.id);
-        nav({ to: "/dashboard" });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Sign in failed");
-      }
-    }
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+    if (oauthError) setError(oauthError.message);
   };
 
   const subtitle = role === "marketer" ? "Sign in to your marketer account" : "Sign in to your business account";

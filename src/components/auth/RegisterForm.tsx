@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState, useEffect, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { GoogleButton } from "./GoogleButton";
 import { Field } from "./SignInForm";
 import { useAuth } from "@/auth/AuthContext";
@@ -177,58 +176,12 @@ export function RegisterForm({ role }: { role: Role }) {
       localStorage.setItem("active_role", role);
     } catch { /* ignore */ }
 
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.redirected) return;
-    if (result.error) { setError(result.error.message); setBusy(false); return; }
-    const session = (await supabase.auth.getSession()).data.session;
-    if (session?.user) {
-      try {
-        // Existing-account guard: if this Google account already has a
-        // role (it registered before), don't silently sign it in with the
-        // new form's name/phone — send it to sign in instead.
-        const { data: existingRoles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
-        const alreadyHasAccount = Array.isArray(existingRoles) && existingRoles.length > 0;
-        const rolesList = (existingRoles ?? []).map((r) => r.role as string);
-        const hasThisRole = rolesList.includes(role);
-        const hasOtherRole = rolesList.includes(otherRole);
-        if (hasOtherRole && !hasThisRole) {
-          try {
-            sessionStorage.removeItem("pending_signup");
-            sessionStorage.removeItem("intended_role");
-            localStorage.removeItem("active_role");
-          } catch { /* ignore */ }
-          await supabase.auth.signOut();
-          setError(crossRoleMsg());
-        } else if (alreadyHasAccount) {
-          let banned = false;
-          try {
-            const { data: prof } = await supabase
-              .from("profiles")
-              .select("banned_at")
-              .eq("id", session.user.id)
-              .maybeSingle();
-            banned = !!prof?.banned_at;
-          } catch { /* ignore */ }
-          try {
-            sessionStorage.removeItem("pending_signup");
-            sessionStorage.removeItem("intended_role");
-            localStorage.removeItem("active_role");
-          } catch { /* ignore */ }
-          await supabase.auth.signOut();
-          setError(
-            banned
-              ? (ar ? "هذه الحساب محظور." : "This account is banned.")
-              : (ar ? "يوجد حساب بالفعل بهذا البريد الإلكتروني. يرجى تسجيل الدخول." : "An account with this email already exists. Please sign in instead."),
-          );
-        } else {
-          await addRoleAndGo();
-        }
-      }
-      catch (err) { setError(err instanceof Error ? err.message : (ar ? "فشل إنشاء الحساب" : "Sign up failed")); }
-    }
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+    if (!oauthError) return;
+    setError(oauthError.message);
     setBusy(false);
   };
 
