@@ -35,7 +35,7 @@ export function SignInForm({ role }: { role: Role }) {
   const crossRoleMsg = (other: Role) => {
     if (ar) {
       const other_ar_indef = other === "business" ? "تاجر" : "مسوّق";
-      const other_ar_def = other === "business" ? "التاجر" : "المسوّق";
+      const other_ar_def = other === "business" ? "تاجر" : "المسوّق";
       const thisRole_ar = role === "business" ? "تاجر" : "مسوّق";
       return `هذا الحساب مسجل كحساب ${other_ar_indef}. يرجى استخدام صفحة تسجيل الدخول الخاص ب${other_ar_def}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
     }

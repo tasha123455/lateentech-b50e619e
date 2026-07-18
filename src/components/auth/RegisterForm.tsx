@@ -101,7 +101,7 @@ export function RegisterForm({ role }: { role: Role }) {
   const otherRole: Role = role === "marketer" ? "business" : "marketer";
   const crossRoleMsg = () => {
     if (ar) {
-      const other_ar_def = otherRole === "business" ? "التاجر" : "المسوّق";
+      const other_ar_def = otherRole === "business" ? "تاجر" : "المسوّق";
       const other_ar_indef = otherRole === "business" ? "تاجر" : "مسوّق";
       const thisRole_ar = role === "business" ? "تاجر" : "مسوّق";
       return `هذا الحساب مسجل كحساب ${other_ar_indef}. يرجى استخدام صفحة تسجيل الدخول الخاص ب${other_ar_def}، أو إنشاء حساب ${thisRole_ar} منفصل.`;
