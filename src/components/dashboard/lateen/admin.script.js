@@ -382,6 +382,20 @@ async function admToggleProduct(id,newStatus){
 
 function admClosePDetail(){document.getElementById('adm-pdetail').classList.remove('open');}
 
+function __admEffectiveQty(p){
+  const groups=(p&&p.variant_groups)||[];
+  if(!groups.length)return Number(p&&p.qty)||0;
+  const groupTotals=[];
+  groups.forEach(g=>{
+    let gTotal=0,gTracked=false;
+    (g&&g.items||[]).forEach(it=>{
+      const q=it&&it.qty;
+      if(q!==null&&q!==undefined&&q!==''&&Number.isFinite(Number(q))){gTracked=true;gTotal+=Math.max(0,Number(q));}
+    });
+    if(gTracked)groupTotals.push(gTotal);
+  });
+  return groupTotals.length?Math.min(...groupTotals):(Number(p&&p.qty)||0);
+}
 async function admOpenProduct(id){
   const modal=document.getElementById('adm-pdetail');
   const body=document.getElementById('adm-pdetail-body');
@@ -412,7 +426,7 @@ async function admOpenProduct(id){
       <div class="adm-pd-shop">Code: ${admEsc(p.code||'—')} · ${admEsc(p.category||'Uncategorised')}</div>
       <div class="adm-pd-grid">
         <div class="adm-pd-cell"><div class="adm-pd-cell-l">Price</div><div class="adm-pd-cell-v">${curH}${Number(p.price||0).toFixed(2)}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">In stock</div><div class="adm-pd-cell-v">${Number(p.qty||0)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">In stock</div><div class="adm-pd-cell-v">${__admEffectiveQty(p)}</div></div>
         <div class="adm-pd-cell"><div class="adm-pd-cell-l">Commission</div><div class="adm-pd-cell-v">${p.comm_mode==='fixed'?curH+Number(p.comm_fixed||0).toFixed(2):Number(p.comm_pct||0)+'%'}</div></div>
         <div class="adm-pd-cell"><div class="adm-pd-cell-l">Platform fee</div><div class="adm-pd-cell-v">${curH}${Number(p.platform_fee||0).toFixed(2)}</div></div>
         <div class="adm-pd-cell"><div class="adm-pd-cell-l">Sold</div><div class="adm-pd-cell-v">${Number(p.sold||0)}</div></div>
