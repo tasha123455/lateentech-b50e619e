@@ -459,9 +459,27 @@ let admEmpFilter=''; // '', 'pending', 'paid'
 let admEmpSearchQ='';
 
 function admEmpPeriod(){const d=new Date();return {y:d.getFullYear(),m:d.getMonth()+1};}
-function admEmpIsPaid(emp,p){return (emp.payments||[]).some(x=>x.period_year===p.y&&x.period_month===p.m);}
 function admEmpFmtDate(d){if(!d)return '—';const dt=new Date(d);return dt.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});}
-function admEmpNextPayday(p){const next=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};return ADM_MONTH_NAMES[next.m-1]+' '+next.y;}
+// Payday runs on a rolling 30-day cycle: from the hire date until the first
+// payment, then from whichever payment was most recent after that. Pressing
+// "Mark as Paid" restarts the 30-day countdown from that moment.
+function admEmpLastCycleStart(emp){
+  const pays=emp.payments||[];
+  if(!pays.length) return emp.hired_at;
+  return pays.reduce((latest,p)=>(!latest||new Date(p.paid_at)>new Date(latest))?p.paid_at:latest, null);
+}
+function admEmpPaydayDate(emp){
+  const d=new Date(admEmpLastCycleStart(emp));
+  d.setDate(d.getDate()+30);
+  return d;
+}
+function admEmpIsDue(emp){
+  const today=new Date();
+  const payday=admEmpPaydayDate(emp);
+  const t0=new Date(today.getFullYear(),today.getMonth(),today.getDate()).getTime();
+  const p0=new Date(payday.getFullYear(),payday.getMonth(),payday.getDate()).getTime();
+  return t0>=p0;
+}
 
 async function admLoadEmployees(){
   const root=document.getElementById('employees-list');
@@ -478,13 +496,13 @@ async function admLoadEmployees(){
 
 function admRenderEmployees(){
   const root=document.getElementById('employees-list');
-  const p=admEmpPeriod();
-  const periodLabel=ADM_MONTH_NAMES[p.m-1]+' '+p.y;
   let totalSalary=0,paidAmt=0,pendingAmt=0,paidCount=0;
   admEmpCache.forEach(e=>{
     const sal=Number(e.monthly_salary||0);
     totalSalary+=sal;
-    if(admEmpIsPaid(e,p)){paidAmt+=sal;paidCount++;}else{pendingAmt+=sal;}
+    // Only count a salary as "pending" once its 30-day cycle has reached or
+    // passed its payday; otherwise it's not counted yet.
+    if(admEmpIsDue(e)){pendingAmt+=sal;}else{paidAmt+=sal;paidCount++;}
   });
   document.getElementById('emp-total-salary').innerHTML=admMoneyH(totalSalary);
   document.getElementById('emp-paid-amt').innerHTML=admMoneyH(paidAmt);
@@ -493,33 +511,33 @@ function admRenderEmployees(){
   document.getElementById('emp-paid-count').textContent=paidCount;
 
   const filtered=admEmpCache.filter(e=>{
-    const paid=admEmpIsPaid(e,p);
-    if(admEmpFilter==='paid'&&!paid)return false;
-    if(admEmpFilter==='pending'&&paid)return false;
+    const due=admEmpIsDue(e);
+    if(admEmpFilter==='paid'&&due)return false;
+    if(admEmpFilter==='pending'&&!due)return false;
     return true;
   });
   if(!filtered.length){root.innerHTML='<div class="adm-empty">No employees match.</div>';return;}
   root.innerHTML=filtered.map(e=>{
-    const paid=admEmpIsPaid(e,p);
-    const status=paid?'<span style="color:#2dbd8f">Paid · '+periodLabel+'</span>':'<span style="color:#e07070">Pending · '+periodLabel+'</span>';
-    const payday=paid?admEmpNextPayday(p):periodLabel;
+    const due=admEmpIsDue(e);
+    const paydayStr=admEmpFmtDate(admEmpPaydayDate(e));
+    const status=due?'<span style="color:#e07070">Pending</span>':'<span style="color:#2dbd8f">Paid</span>';
     return `<div class="adm-emp-row">
       <div class="adm-emp-top">
         <div class="adm-emp-av">${admEsc(admInitials(e.full_name))}</div>
         <div style="flex:1;min-width:0;">
           <div class="adm-emp-name">${admEsc(e.full_name)} <span style="color:#9e9b97;font-weight:400;">· ${admEsc(e.employee_number)}</span></div>
-          <div class="adm-emp-sub">${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}</div>
+          <div class="adm-emp-sub">${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}${e.phone?` · ${admEsc(e.phone)}`:''}</div>
         </div>
         <div style="text-align:right;font-size:13px;font-weight:500;color:#f5b441;">${admMoneyH(e.monthly_salary)}</div>
       </div>
       <div class="adm-emp-meta">
         <div>Hired <b>${admEmpFmtDate(e.hired_at)}</b></div>
-        <div>Payday <b>${admEsc(payday)}</b></div>
+        <div>Payday <b>${admEsc(paydayStr)}</b></div>
         <div style="grid-column:1/-1;">Status: ${status}</div>
         ${e.notes?`<div style="grid-column:1/-1;color:#9e9b97;font-style:italic;">${admEsc(e.notes)}</div>`:''}
       </div>
       <div class="adm-emp-actions">
-        <button class="adm-emp-pay-btn ${paid?'paid':''}" ${paid?'disabled':''} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${paid?'Paid ✓':'Mark as Paid'}</button>
+        <button class="adm-emp-pay-btn ${due?'':'paid'}" ${due?'':'disabled'} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${due?'Mark as Paid':'Paid ✓'}</button>
         <button class="adm-emp-link-btn" onclick="admOpenEmpHist('${e.id}')">History</button>
         <button class="adm-emp-link-btn" onclick="admOpenEmpForm('${e.id}')">Edit</button>
       </div>
@@ -544,7 +562,8 @@ async function admPayEmp(id,amount){
   const p=admEmpPeriod();
   const e=admEmpCache.find(x=>x.id===id);
   if(!e)return;
-  if(!confirm('Mark '+e.full_name+' as paid for '+ADM_MONTH_NAMES[p.m-1]+' '+p.y+' ('+admMoney(amount)+')?'))return;
+  if(!admEmpIsDue(e)){alert('Not due yet — payday is '+admEmpFmtDate(admEmpPaydayDate(e))+'.');return;}
+  if(!confirm('Mark '+e.full_name+' as paid ('+admMoney(amount)+')? The next payday will be set to 30 days from today.'))return;
   try{
     await window.LateenAPI.admin.payEmployee({employee_id:id,period_year:p.y,period_month:p.m,amount:Number(amount)});
     await admLoadEmployees();
@@ -561,6 +580,7 @@ function admOpenEmpForm(id){
   document.getElementById('emp-num').value=e?(e.employee_number||''):'';
   document.getElementById('emp-job').value=e?(e.job_title||''):'';
   document.getElementById('emp-email').value=e?(e.email||''):'';
+  document.getElementById('emp-phone').value=e?(e.phone||''):'';
   document.getElementById('emp-salary').value=e?(e.monthly_salary||0):'';
   document.getElementById('emp-hired').value=e?(e.hired_at||'').slice(0,10):new Date().toISOString().slice(0,10);
   document.getElementById('emp-notes').value=e?(e.notes||''):'';
@@ -577,6 +597,7 @@ async function admSaveEmp(){
     employee_number:v('emp-num'),
     job_title:v('emp-job')||null,
     email:v('emp-email')||null,
+    phone:v('emp-phone')||null,
     monthly_salary:Number(v('emp-salary'))||0,
     hired_at:v('emp-hired')||new Date().toISOString().slice(0,10),
     notes:v('emp-notes')||null,
