@@ -3,6 +3,16 @@
 // real backend operations instead of mutating in-memory arrays.
 import { supabase } from "@/integrations/supabase/client";
 
+// Same charset as product codes (no ambiguous 0/O or 1/I), but with no
+// prefix -- product codes are shown as "LT-XXXXXX" while order numbers are
+// shown as "#XXXXXXXX", so the two can never be confused for one another.
+const ORDER_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function genOrderCode(len: number): string {
+  let s = "";
+  for (let i = 0; i < len; i++) s += ORDER_CODE_CHARS[Math.floor(Math.random() * ORDER_CODE_CHARS.length)];
+  return s;
+}
+
 function mapStockError(err: unknown): unknown {
   const msg = (err && typeof err === "object" && "message" in err) ? String((err as { message?: unknown }).message ?? "") : "";
   if (/OUT_OF_STOCK/i.test(msg)) {
@@ -213,13 +223,23 @@ export function createLateenApi(userId: string) {
     }) {
       const payload: Record<string, unknown> = { ...input, marketer_id: userId };
       if (input.receipt_url) payload.receipt_uploaded_at = new Date().toISOString();
-      const { data, error } = await supabase
-        .from("orders")
-        .insert(payload as never)
-        .select()
-        .single();
-      if (error) throw mapStockError(error);
-      return data;
+      let codeLen = 8;
+      for (let attempt = 0; ; attempt++) {
+        payload.order_number = genOrderCode(codeLen);
+        const { data, error } = await supabase
+          .from("orders")
+          .insert(payload as never)
+          .select()
+          .single();
+        if (!error) return data;
+        const isDupOrderNumber =
+          error.code === "23505" && /order_number/i.test(error.message || "");
+        if (isDupOrderNumber && attempt < 8) {
+          if (attempt >= 3) codeLen = 10;
+          continue;
+        }
+        throw mapStockError(error);
+      }
     },
 
     async updateOrder(id: string, patch: Record<string, unknown>) {
