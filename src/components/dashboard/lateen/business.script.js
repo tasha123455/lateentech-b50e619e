@@ -237,12 +237,16 @@ const LOW_STOCK_THRESHOLD=20;
 // variant quantities are tracked (simple/no-variant products).
 function __mpEffectiveQty(p){
   const groups=(p&&p.variantGroups)||[];
-  let total=0,tracked=false;
-  groups.forEach(g=>(g&&g.items||[]).forEach(it=>{
-    const q=it&&it.qty;
-    if(q!==null&&q!==undefined&&q!==''&&Number.isFinite(Number(q))){tracked=true;total+=Math.max(0,Number(q));}
-  }));
-  return tracked?total:(Number(p&&p.qty)||0);
+  const groupTotals=[];
+  groups.forEach(g=>{
+    let gTotal=0,gTracked=false;
+    (g&&g.items||[]).forEach(it=>{
+      const q=it&&it.qty;
+      if(q!==null&&q!==undefined&&q!==''&&Number.isFinite(Number(q))){gTracked=true;gTotal+=Math.max(0,Number(q));}
+    });
+    if(gTracked)groupTotals.push(gTotal);
+  });
+  return groupTotals.length?Math.min(...groupTotals):(Number(p&&p.qty)||0);
 }
 let mpActiveFilter='all';
 const mpPhotoIndex={};
