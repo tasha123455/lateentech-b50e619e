@@ -1,6 +1,7 @@
 /* Admin dashboard logic — all data calls go through window.LateenAPI.admin */
 function admEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function admMoney(n){const v=Number(n||0);return '\u2066د.ل\u2069'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function admMoneyH(n){const v=Number(n||0);return '<span class="cur-sym">\u2066د.ل\u2069</span>'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 function admInitials(name){if(!name)return '?';return name.trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();}
 function admWhen(iso){if(!iso)return '';const d=new Date(iso);const diff=Date.now()-d.getTime();const m=Math.floor(diff/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 
@@ -58,13 +59,13 @@ function admUpdateMonthFees(){
   if(!sel||!sel.value)return;
   sel.dataset.value=sel.value;
   const [y,m]=sel.value.split('-').map(Number);
-  document.getElementById('m-fees-month').textContent=admMoney(admSumFeesIn(y,m));
+  document.getElementById('m-fees-month').innerHTML=admMoneyH(admSumFeesIn(y,m));
 }
 function admUpdateYearFees(){
   const sel=document.getElementById('m-year-picker');
   if(!sel||!sel.value)return;
   sel.dataset.year=sel.value;
-  document.getElementById('m-fees-year').textContent=admMoney(admSumFeesIn(Number(sel.value),null));
+  document.getElementById('m-fees-year').innerHTML=admMoneyH(admSumFeesIn(Number(sel.value),null));
 }
 
 function admGo(pageId){
@@ -85,7 +86,7 @@ async function admLoadMetrics(){
   try{
     const m=await window.LateenAPI.admin.getMetrics();
     admFeeRows=m.feeRows||[];
-    document.getElementById('m-fees').textContent=admMoney(m.totalFees);
+    document.getElementById('m-fees').innerHTML=admMoneyH(m.totalFees);
     admPopulateFeePickers();
     admUpdateMonthFees();
     admUpdateYearFees();
@@ -137,18 +138,18 @@ async function admLoadVerify(){
             <div class="adm-row-sub" style="opacity:.7">${created}${upAt?' · '+upAt:''}</div>
             <div class="adm-row-sub" style="color:#e0c070">⏳ Pending verification</div>
           </div>
-          <div class="adm-row-amt">${admMoney(platformFee)}</div>
+          <div class="adm-row-amt">${admMoneyH(platformFee)}</div>
         </div>
         <div class="adm-expand" id="v-${o.id}">
           ${o.receipt_url?`<img class="adm-receipt-full" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="admLightbox('${admEsc(o.receipt_url)}')"/>`:'<div class="adm-empty">No receipt image</div>'}
           <div class="adm-order-detail">
             ${prodThumb}
             <div class="adm-order-detail-rows">
-              <div class="adm-detail-row"><span>Price</span><span>${admMoney(unitPrice)}</span></div>
+              <div class="adm-detail-row"><span>Price</span><span>${admMoneyH(unitPrice)}</span></div>
               <div class="adm-detail-row"><span>Qty</span><span>${qty}</span></div>
-              <div class="adm-detail-row"><span>Total</span><span>${admMoney(productTotal)}</span></div>
-              <div class="adm-detail-row"><span>Marketer fee</span><span>${admMoney(marketerFee)}</span></div>
-              <div class="adm-detail-row"><span>Platform fee</span><span>${admMoney(platformFee)}</span></div>
+              <div class="adm-detail-row"><span>Total</span><span>${admMoneyH(productTotal)}</span></div>
+              <div class="adm-detail-row"><span>Marketer fee</span><span>${admMoneyH(marketerFee)}</span></div>
+              <div class="adm-detail-row"><span>Platform fee</span><span>${admMoneyH(platformFee)}</span></div>
             </div>
           </div>
           <div class="adm-actions">
@@ -198,6 +199,7 @@ async function admLoadPayouts(){
       const cur=p.wallet&&p.wallet.currency&&p.wallet.currency.symbol?p.wallet.currency.symbol:'$';
       const curCode=p.wallet&&p.wallet.currency&&p.wallet.currency.code?p.wallet.currency.code:'';
       const fmtAmt=(n)=>typeof window.__money==='function'?window.__money(n,cur,curCode):admMoney(n);
+      const fmtAmtH=(n)=>typeof window.__moneyH==='function'?window.__moneyH(n,cur,curCode):admMoneyH(n);
       const detail=(label,val)=>val?`<div class="adm-pay-detail-row"><span class="adm-pay-detail-k">${admEsc(label)}</span><span class="adm-pay-detail-v">${admEsc(val)}</span></div>`:'';
       const hasAny=u.payout_method||u.payout_bank_name||u.payout_account_holder||u.payout_account_number||u.payout_iban||u.payout_swift||u.payout_notes;
       const detailsHtml=hasAny?`<div class="adm-pay-details">
@@ -217,7 +219,7 @@ async function admLoadPayouts(){
             <div class="adm-pay-name">${admEsc(name)}</div>
             <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
           </div>
-          <div class="adm-pay-amt"><div>${fmtAmt(liveBal)}</div></div>
+          <div class="adm-pay-amt"><div>${fmtAmtH(liveBal)}</div></div>
           <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal},'${encodeURIComponent(fmtAmt(liveBal))}')">Paid</button>
         </div>
         ${detailsHtml}
@@ -365,7 +367,7 @@ async function admLoadProducts(){
           <div class="adm-prod-name">${admEsc(p.name)}</div>
           <div class="adm-prod-shop">${admEsc(p.biz_name||'Shop')}</div>
           <div class="adm-prod-row">
-            <span class="adm-prod-price">${admMoney(p.price)}</span>
+            <span class="adm-prod-price">${admMoneyH(p.price)}</span>
             <button class="adm-prod-toggle ${isHidden?'hidden-state':'active'}" onclick="event.stopPropagation();admToggleProduct('${p.id}','${isHidden?'active':'hidden'}')">${isHidden?'Unhide':'Hide'}</button>
           </div>
         </div>
@@ -390,6 +392,7 @@ async function admOpenProduct(id){
     if(!res||!res.product){body.innerHTML='<div class="adm-empty">Product not found.</div>';return;}
     const p=res.product, owner=res.owner||{};
     const cur=(p.currency&&p.currency.symbol)||'$';
+    const curH='<span class="cur-sym">'+cur+'</span>';
     const photos=Array.isArray(p.photos)?p.photos:[];
     const mainImg=photos[0]?`<img class="adm-pd-img" src="${admEsc(photos[0])}" alt="${admEsc(p.name)}" onclick="admLightbox('${admEsc(photos[0])}')"/>`:`<div class="adm-pd-img" style="display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--txt-3);">📦</div>`;
     const thumbs=photos.length>1?`<div class="adm-pd-imgrow">${photos.map(u=>`<img src="${admEsc(u)}" alt="" onclick="admLightbox('${admEsc(u)}')"/>`).join('')}</div>`:'';
@@ -399,7 +402,7 @@ async function admOpenProduct(id){
     const delivery=p.delivery&&typeof p.delivery==='object'?Object.entries(p.delivery):[];
     const deliveryHtml=delivery.length?`<div class="adm-pd-section">Delivery</div>`+delivery.map(([code,z])=>{
       const cities=z&&z.cities?Object.entries(z.cities):[];
-      return `<div class="adm-pd-zone"><div class="adm-pd-zone-h">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="adm-pd-zone-r"><span>${admEsc(city)}</span><span style="color:var(--txt-2);">Ship ${cur}${Number(c.shipping||0).toFixed(2)} · Deliv ${cur}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
+      return `<div class="adm-pd-zone"><div class="adm-pd-zone-h">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="adm-pd-zone-r"><span>${admEsc(city)}</span><span style="color:var(--txt-2);">Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliv ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
     }).join(''):'';
     const ownerName=owner.business_name||owner.full_name||p.biz_name||'Unknown';
     const ownerOther=owner.business_name&&owner.full_name&&owner.business_name!==owner.full_name?`<div class="adm-pd-owner-row">Contact name: <span>${admEsc(owner.full_name)}</span></div>`:'';
@@ -408,12 +411,12 @@ async function admOpenProduct(id){
       <div class="adm-pd-name">${admEsc(p.name)}</div>
       <div class="adm-pd-shop">Code: ${admEsc(p.code||'—')} · ${admEsc(p.category||'Uncategorised')}</div>
       <div class="adm-pd-grid">
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Price</div><div class="adm-pd-cell-v">${cur}${Number(p.price||0).toFixed(2)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Price</div><div class="adm-pd-cell-v">${curH}${Number(p.price||0).toFixed(2)}</div></div>
         <div class="adm-pd-cell"><div class="adm-pd-cell-l">In stock</div><div class="adm-pd-cell-v">${Number(p.qty||0)}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Commission</div><div class="adm-pd-cell-v">${p.comm_mode==='fixed'?cur+Number(p.comm_fixed||0).toFixed(2):Number(p.comm_pct||0)+'%'}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Platform fee</div><div class="adm-pd-cell-v">${cur}${Number(p.platform_fee||0).toFixed(2)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Commission</div><div class="adm-pd-cell-v">${p.comm_mode==='fixed'?curH+Number(p.comm_fixed||0).toFixed(2):Number(p.comm_pct||0)+'%'}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Platform fee</div><div class="adm-pd-cell-v">${curH}${Number(p.platform_fee||0).toFixed(2)}</div></div>
         <div class="adm-pd-cell"><div class="adm-pd-cell-l">Sold</div><div class="adm-pd-cell-v">${Number(p.sold||0)}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Revenue</div><div class="adm-pd-cell-v">${cur}${Number(p.revenue||0).toFixed(2)}</div></div>
+        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Revenue</div><div class="adm-pd-cell-v">${curH}${Number(p.revenue||0).toFixed(2)}</div></div>
       </div>
       ${p.description?`<div class="adm-pd-section">Description</div><div class="adm-pd-desc">${admEsc(p.description)}</div>`:''}
       ${sizes}${colors}${deliveryHtml}
@@ -469,9 +472,9 @@ function admRenderEmployees(){
     totalSalary+=sal;
     if(admEmpIsPaid(e,p)){paidAmt+=sal;paidCount++;}else{pendingAmt+=sal;}
   });
-  document.getElementById('emp-total-salary').textContent=admMoney(totalSalary);
-  document.getElementById('emp-paid-amt').textContent=admMoney(paidAmt);
-  document.getElementById('emp-pending-amt').textContent=admMoney(pendingAmt);
+  document.getElementById('emp-total-salary').innerHTML=admMoneyH(totalSalary);
+  document.getElementById('emp-paid-amt').innerHTML=admMoneyH(paidAmt);
+  document.getElementById('emp-pending-amt').innerHTML=admMoneyH(pendingAmt);
   document.getElementById('emp-count').textContent=admEmpCache.length;
   document.getElementById('emp-paid-count').textContent=paidCount;
 
@@ -493,7 +496,7 @@ function admRenderEmployees(){
           <div class="adm-emp-name">${admEsc(e.full_name)} <span style="color:#9e9b97;font-weight:400;">· ${admEsc(e.employee_number)}</span></div>
           <div class="adm-emp-sub">${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}</div>
         </div>
-        <div style="text-align:right;font-size:13px;font-weight:500;color:#f5b441;">${admMoney(e.monthly_salary)}</div>
+        <div style="text-align:right;font-size:13px;font-weight:500;color:#f5b441;">${admMoneyH(e.monthly_salary)}</div>
       </div>
       <div class="adm-emp-meta">
         <div>Hired <b>${admEmpFmtDate(e.hired_at)}</b></div>
@@ -596,10 +599,10 @@ function admOpenEmpHist(id){
     <div style="padding:18px 18px 8px;">
       <div style="font-size:16px;font-weight:600;">${admEsc(e.full_name)}</div>
       <div style="font-size:12px;color:#9e9b97;margin-top:2px;">${admEsc(e.employee_number)} · ${admEsc(e.job_title||'—')}</div>
-      <div style="margin-top:10px;font-size:13px;">Total paid: <b style="color:#2dbd8f;">${admMoney(total)}</b> across ${pays.length} payment${pays.length===1?'':'s'}</div>
+      <div style="margin-top:10px;font-size:13px;">Total paid: <b style="color:#2dbd8f;">${admMoneyH(total)}</b> across ${pays.length} payment${pays.length===1?'':'s'}</div>
     </div>
     <div class="adm-section" style="margin:0 18px 18px;">
-      ${pays.length?pays.map(p=>`<div class="adm-emp-hist-row"><span>${ADM_MONTH_NAMES[p.period_month-1]} ${p.period_year}</span><span style="color:#9e9b97;">${admEmpFmtDate(p.paid_at)}</span><b>${admMoney(p.amount)}</b></div>`).join(''):'<div class="adm-empty">No payments recorded yet.</div>'}
+      ${pays.length?pays.map(p=>`<div class="adm-emp-hist-row"><span>${ADM_MONTH_NAMES[p.period_month-1]} ${p.period_year}</span><span style="color:#9e9b97;">${admEmpFmtDate(p.paid_at)}</span><b>${admMoneyH(p.amount)}</b></div>`).join(''):'<div class="adm-empty">No payments recorded yet.</div>'}
     </div>`;
   modal.classList.add('open');
 }
@@ -667,7 +670,7 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
 
   function renderHero(){
     const fees = getFees();
-    document.getElementById('heroValue').textContent = 'د.ل' + fees.toFixed(2);
+    document.getElementById('heroValue').innerHTML = '<span class="cur-sym">د.ل</span>' + fees.toFixed(2);
     let sub = 'إجمالي الأرباح من الطلبيات المؤكدة والمسلّمة';
     if(selected.year) sub = 'إجمالي أرباح عام ' + selected.year;
     else if(selected.month) sub = 'إجمالي أرباح شهر ' + monthMap[selected.month];
