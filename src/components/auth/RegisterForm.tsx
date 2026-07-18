@@ -196,7 +196,7 @@ export function RegisterForm({ role }: { role: Role }) {
           required
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          placeholder="Alex Morgan"
+          placeholder="Kim Kardashian"
           className="auth-input"
         />
       </Field>
