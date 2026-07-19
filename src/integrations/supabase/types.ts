@@ -297,6 +297,7 @@ export type Database = {
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
+          order_number: string | null
           platform_fee: number
           product_id: string
           qty: number
@@ -332,6 +333,7 @@ export type Database = {
           id?: string
           marketer_confirmed_at?: string | null
           marketer_id: string
+          order_number?: string | null
           platform_fee?: number
           product_id: string
           qty?: number
@@ -367,6 +369,7 @@ export type Database = {
           id?: string
           marketer_confirmed_at?: string | null
           marketer_id?: string
+          order_number?: string | null
           platform_fee?: number
           product_id?: string
           qty?: number
@@ -784,6 +787,7 @@ export type Database = {
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
+          order_number: string | null
           platform_fee: number
           product_id: string
           qty: number
@@ -907,6 +911,7 @@ export type Database = {
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
+          order_number: string | null
           platform_fee: number
           product_id: string
           qty: number
@@ -951,6 +956,7 @@ export type Database = {
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
+          order_number: string | null
           platform_fee: number
           product_id: string
           qty: number
@@ -1049,6 +1055,7 @@ export type Database = {
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
+          order_number: string | null
           platform_fee: number
           product_id: string
           qty: number
@@ -1129,6 +1136,7 @@ export type Database = {
           id: string
           marketer_confirmed_at: string | null
           marketer_id: string
+          order_number: string | null
           platform_fee: number
           product_id: string
           qty: number
@@ -1174,6 +1182,7 @@ export type Database = {
               id: string
               marketer_confirmed_at: string | null
               marketer_id: string
+              order_number: string | null
               platform_fee: number
               product_id: string
               qty: number
@@ -1218,6 +1227,7 @@ export type Database = {
               id: string
               marketer_confirmed_at: string | null
               marketer_id: string
+              order_number: string | null
               platform_fee: number
               product_id: string
               qty: number
