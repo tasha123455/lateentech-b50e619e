@@ -708,8 +708,10 @@ export const DICT: Record<string, string> = {
   "Support": "مساعدة",
   "Have a problem?": "عندك مشكله؟",
   "Contact admin": "راسل الأدمن",
-  "This system protects the rights and responsibilities of both marketers and business owners. Upfront fees are non-refundable under all circumstances. Deposits cannot be reversed once made, except if the customer does not receive the product. In that case, contact the admin: +218 91 575 6638. After verification, the upfront fee will be refunded and the business owner will be permanently banned. If the product has been delivered, any dispute is the business owner's responsibility. The admin may only hide or ban the business owner.":
-    "النظام هذا يحفظ حقوق والتزامات المسوق وصاحب النشاط. العربون غير قابل للاسترجاع في أي حال من الأحوال، والإيداع ما ينلغي إلا إذا الزبون ما استلمش المنتج. في هالحالة تواصل مع الإدارة: +218 91 575 6638. بعد التحقق يتم ترجيع العربون وحظر صاحب النشاط نهائياً. أما إذا الزبون استلم المنتج، فالمسؤولية على صاحب النشاط، وإجراء الإدارة يقتصر على إخفاء أو حظر الحساب.",
+  "This system protects the rights and responsibilities of both marketers and business owners. Upfront fees are non-refundable under all circumstances. Deposits cannot be reversed once made, except if the customer does not receive the product. In that case, contact the admin:":
+    "النظام هذا يحفظ حقوق والتزامات المسوق وصاحب النشاط. العربون غير قابل للاسترجاع في أي حال من الأحوال، والإيداع ما ينلغي إلا إذا الزبون ما استلمش المنتج. في هالحالة تواصل مع الإدارة:",
+  "After verification, the upfront fee will be refunded and the business owner will be permanently banned. If the product has been delivered, any dispute is the business owner's responsibility. The admin may only hide or ban the business owner.":
+    "بعد التحقق يتم ترجيع العربون وحظر صاحب النشاط نهائياً. أما إذا الزبون استلم المنتج، فالمسؤولية على صاحب النشاط، وإجراء الإدارة يقتصر على إخفاء أو حظر الحساب.",
   "Number starts with 092 or 094": "الرقم يبدا من 092 او 094",
   "Number starts with 091 or 093": "الرقم يبدا من 091 او 093",
   "Notes (optional)": "ملاحظات (اختياري)",
