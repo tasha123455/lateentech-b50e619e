@@ -346,21 +346,30 @@ function admUserSearch(v){
   admUserSearchTimer=setTimeout(()=>admLoadUsers(v),250);
 }
 
+let admProductSearchQ='';
+let admProductSearchTimer=null;
+function admProductSearch(v){
+  admProductSearchQ=v||'';
+  clearTimeout(admProductSearchTimer);
+  admProductSearchTimer=setTimeout(admLoadProducts,250);
+}
+
 async function admLoadProducts(){
   const root=document.getElementById('products-grid');
   const first=__admFirstLoad(root);
   if(first) root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">Loading…</div>';
   try{
-    const list=await window.LateenAPI.admin.listAllProducts();
+    const list=await window.LateenAPI.admin.listAllProducts(admProductSearchQ);
     const sig=JSON.stringify(list.map(p=>[p.id,p.status,p.price,p.name,(Array.isArray(p.photos)&&p.photos[0])||'']));
-    if(__admUnchanged('products',sig,first))return;
+    if(__admUnchanged('products:'+admProductSearchQ,sig,first))return;
     __admMarkLoaded(root);
-    if(!list.length){root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">No products yet.</div>';return;}
+    if(!list.length){root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">'+(admProductSearchQ?'No products match your search.':'No products yet.')+'</div>';return;}
     root.innerHTML=list.map(p=>{
       const photo=Array.isArray(p.photos)&&p.photos[0];
       const img=photo?`<img class="adm-prod-img" src="${admEsc(photo)}" alt="${admEsc(p.name)}"/>`:`<div class="adm-prod-img-empty">📦</div>`;
       const isHidden=p.status==='hidden';
       const pill=isHidden?'<span class="adm-status-pill" style="background:rgba(224,112,112,0.85);color:#fff;">Hidden</span>':'';
+      const nameAttr=admEsc(p.name).replace(/'/g,"&#39;");
       return `<div class="adm-prod" onclick="admOpenProduct('${p.id}')">
         <div class="adm-prod-img-wrap">${img}${pill}</div>
         <div class="adm-prod-body">
@@ -368,7 +377,10 @@ async function admLoadProducts(){
           <div class="adm-prod-shop">${admEsc(p.biz_name||'Shop')}</div>
           <div class="adm-prod-row">
             <span class="adm-prod-price">${admMoneyH(p.price)}</span>
-            <button class="adm-prod-toggle ${isHidden?'hidden-state':'active'}" onclick="event.stopPropagation();admToggleProduct('${p.id}','${isHidden?'active':'hidden'}')">${isHidden?'Unhide':'Hide'}</button>
+            <div class="adm-prod-actions">
+              <button class="adm-prod-toggle ${isHidden?'hidden-state':'active'}" onclick="event.stopPropagation();admToggleProduct('${p.id}','${isHidden?'active':'hidden'}')">${isHidden?'Unhide':'Hide'}</button>
+              <button class="adm-prod-del" onclick="event.stopPropagation();admDeleteProduct('${p.id}','${nameAttr}')">Delete</button>
+            </div>
           </div>
         </div>
       </div>`;
@@ -378,6 +390,15 @@ async function admLoadProducts(){
 
 async function admToggleProduct(id,newStatus){
   try{await window.LateenAPI.admin.setProductStatus(id,newStatus);admLoadProducts();}catch(e){alert('Failed: '+e.message);}
+}
+
+async function admDeleteProduct(id,name){
+  if(!confirm('Permanently delete "'+name+'"?\n\nIt will disappear from marketer browsing and saved products right away. This cannot be undone.'))return;
+  try{
+    await window.LateenAPI.admin.deleteProduct(id);
+    admClosePDetail();
+    admLoadProducts();
+  }catch(e){alert('Failed: '+e.message);}
 }
 
 function admClosePDetail(){document.getElementById('adm-pdetail').classList.remove('open');}
