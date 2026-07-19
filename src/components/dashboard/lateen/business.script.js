@@ -149,7 +149,7 @@ function toggleCategoryPanel(){if(categoryPanelOpen)closeCategoryPanel();else op
 function selectCategory(name){selectedCategory=name;const v=document.getElementById('category-picker-value');v.textContent=__ar()?(CATEGORY_ITEM_AR[name]||name):name;v.setAttribute('data-no-i18n','');v.classList.remove('placeholder');closeCategoryPanel();}
 document.addEventListener('click',(e)=>{const picker=document.getElementById('category-picker');if(picker&&categoryPanelOpen&&!picker.contains(e.target))closeCategoryPanel();});
  const BUSINESS={name:'Sunrise Kicks Ltd.',phone:'+44 20 1234 5678'};
- let photos=[],variantGroups=[],zones={},editingId=null,commMode='pct',currentCode='',variantIdCounter=0,groupIdCounter=0,selectedCurrency=null,currDropdownOpen=false,countryDropdownOpen=false,selectedCountry=null,__photoUploadJobs=[],__variantPhotoUploadJobs=[],variantMode='none',simpleQty='';
+ let photos=[],variantGroups=[],zones={},editingId=null,commMode='pct',currentCode='',variantIdCounter=0,groupIdCounter=0,selectedCurrency=null,currDropdownOpen=false,countryDropdownOpen=false,selectedCountry=null,__photoUploadJobs=[],__variantPhotoUploadJobs=[],variantMode='none',simpleQty='',cityPanelOpenFor=null;
 const genCode=(len)=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const n=len||6;let s='LT-';for(let i=0;i<n;i++)s+=c[Math.floor(Math.random()*c.length)];return s;};
 const genId=()=>'p'+Math.random().toString(36).substr(2,5);
 const pctOf=(price,pct)=>parseFloat((price*(pct/100)).toFixed(2));
