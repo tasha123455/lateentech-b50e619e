@@ -741,7 +741,6 @@ export function createLateenApi(userId: string) {
         full_name: string;
         job_title?: string | null;
         email?: string | null;
-        phone?: string | null;
         monthly_salary: number;
         hired_at: string;
         notes?: string | null;
@@ -774,55 +773,70 @@ export function createLateenApi(userId: string) {
         return data;
       },
       async getMetrics() {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-
-        const monthStart = new Date();
-        monthStart.setDate(1);
-        monthStart.setHours(0, 0, 0, 0);
-        const yearStart = new Date(monthStart.getFullYear(), 0, 1);
-
-        const [feesRes, todayRes, activeRes, profilesRes, productsRes] = await Promise.all([
+        const [ordersRes, profilesRes, productsRes] = await Promise.all([
           supabase
             .from("orders")
-            .select("platform_fee, qty, status, created_at")
-            .in("status", ["approved", "confirmed", "delivered", "cancelled"]),
-          supabase
-            .from("orders")
-            .select("id", { count: "exact", head: true })
-            .gte("created_at", todayStart.toISOString()),
-          supabase.from("orders").select("marketer_id, business_id, created_at").gte("created_at", monthAgo),
-          supabase.from("profiles").select("id", { count: "exact", head: true }),
-          supabase.from("products").select("id", { count: "exact", head: true }).is("deleted_at", null),
+            .select("qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at"),
+          supabase.from("profiles").select("id, created_at"),
+          supabase.from("products").select("id, created_at").is("deleted_at", null),
         ]);
 
-        const feeRows = (feesRes.data ?? []) as Array<{ platform_fee: number; qty: number; created_at: string }>;
-        const calc = (rows: typeof feeRows) =>
-          rows.reduce((sum, r) => sum + Number(r.platform_fee || 0) * Number(r.qty || 0), 0);
-        const fees = calc(feeRows);
-        const monthMs = monthStart.getTime();
-        const yearMs = yearStart.getTime();
-        const feesThisMonth = calc(feeRows.filter((r) => new Date(r.created_at).getTime() >= monthMs));
-        const feesThisYear = calc(feeRows.filter((r) => new Date(r.created_at).getTime() >= yearMs));
+        const feeEligibleStatuses = new Set(["approved", "confirmed", "delivered", "cancelled"]);
+        const orders = (ordersRes.data ?? []) as Array<{
+          qty: number;
+          platform_fee: number;
+          status: string;
+          marketer_id: string;
+          business_id: string;
+          created_at: string;
+          confirmed_at: string | null;
+          reviewed_at: string | null;
+        }>;
+        const profiles = (profilesRes.data ?? []) as Array<{ id: string; created_at: string }>;
+        const products = (productsRes.data ?? []) as Array<{ id: string; created_at: string }>;
+
+        const totalFees = orders.reduce(
+          (sum, o) =>
+            feeEligibleStatuses.has(o.status) ? sum + Number(o.platform_fee || 0) * Number(o.qty || 0) : sum,
+          0,
+        );
+        // "Pieces Sold" = units on orders that actually reached the confirmed stage (or later).
+        const piecesSold = orders.reduce((sum, o) => (o.confirmed_at ? sum + Number(o.qty || 0) : sum), 0);
+        // "Succeeded Upfronts" = orders whose payment receipt was approved by an admin
+        // (reviewed_at is only ever set by admin_approve_order), regardless of what
+        // happened to the order afterward.
+        const succeededUpfronts = orders.filter((o) => !!o.reviewed_at).length;
+
+        const monthAgo = Date.now() - 30 * 86400000;
         const activeUsers = new Set<string>();
-        for (const r of (activeRes.data ?? []) as Array<{ marketer_id: string; business_id: string }>) {
-          activeUsers.add(r.marketer_id);
-          activeUsers.add(r.business_id);
+        for (const o of orders) {
+          if (new Date(o.created_at).getTime() >= monthAgo) {
+            activeUsers.add(o.marketer_id);
+            activeUsers.add(o.business_id);
+          }
         }
+
         return {
-          totalFees: fees,
-          feesThisMonth,
-          feesThisYear,
-          feeRows: feeRows.map((r) => ({
-            ts: new Date(r.created_at).getTime(),
-            amount: Number(r.platform_fee || 0) * Number(r.qty || 0),
-          })),
+          totalFees,
           activeUsers: activeUsers.size,
-          leadsToday: todayRes.count ?? 0,
-          totalUsers: profilesRes.count ?? 0,
-          totalProducts: productsRes.count ?? 0,
-          succeededUpfronts: feeRows.length,
+          totalUsers: profiles.length,
+          totalProducts: products.length,
+          piecesSold,
+          succeededUpfronts,
+          // Raw, lightweight rows so the Home dashboard can compute accurate
+          // historical breakdowns for every date filter (day / month / year /
+          // all-time) client-side, without extra round-trips per filter click.
+          orders: orders.map((o) => ({
+            qty: Number(o.qty || 0),
+            fee: feeEligibleStatuses.has(o.status) ? Number(o.platform_fee || 0) * Number(o.qty || 0) : 0,
+            marketer_id: o.marketer_id,
+            business_id: o.business_id,
+            created_at: o.created_at,
+            confirmed_at: o.confirmed_at,
+            reviewed_at: o.reviewed_at,
+          })),
+          profiles: profiles.map((p) => ({ created_at: p.created_at })),
+          products: products.map((p) => ({ created_at: p.created_at })),
         };
       },
     },
