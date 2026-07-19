@@ -55,6 +55,8 @@ export type LateenProduct = {
   colors: string[];
   delivery: Record<string, { cities: Record<string, { shipping: number; delivery: number }> }>;
   photos: string[];
+  cover_focus_x: number;
+  cover_focus_y: number;
   status: "active" | "paused";
   sold: number;
   revenue: number;
@@ -101,6 +103,8 @@ export function createLateenApi(userId: string) {
         colors: p.colors ?? [],
         delivery: p.delivery ?? {},
         photos: p.photos ?? [],
+        cover_focus_x: p.cover_focus_x ?? 50,
+        cover_focus_y: p.cover_focus_y ?? 50,
         status: p.status ?? "active",
         biz_name: p.biz_name ?? null,
       };
