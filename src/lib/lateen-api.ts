@@ -684,17 +684,30 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.rpc("admin_set_user_frozen", { _user_id: userId, _frozen: false });
         if (error) throw error;
       },
-      async listAllProducts() {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .is("deleted_at", null)
-          .order("created_at", { ascending: false });
+      async listAllProducts(search?: string) {
+        let q = supabase.from("products").select("*").is("deleted_at", null);
+        if (search && search.trim()) {
+          const s = `%${search.trim()}%`;
+          q = q.or(`name.ilike.${s},code.ilike.${s},biz_name.ilike.${s}`);
+        }
+        const { data, error } = await q.order("created_at", { ascending: false });
         if (error) throw error;
         return data ?? [];
       },
       async setProductStatus(id: string, status: "active" | "hidden") {
         const { error } = await supabase.rpc("admin_set_product_status", { _product_id: id, _status: status });
+        if (error) throw error;
+      },
+      async deleteProduct(id: string) {
+        // Soft delete, same as a business owner deleting their own product —
+        // keeps historical orders/favorites intact, just removes it from
+        // every listing (admin's Product Review list already filters on
+        // deleted_at IS NULL). Relies on the "Admins update all products"
+        // RLS policy.
+        const { error } = await supabase
+          .from("products")
+          .update({ deleted_at: new Date().toISOString(), status: "paused" })
+          .eq("id", id);
         if (error) throw error;
       },
       async getProductDetail(id: string) {
