@@ -23,6 +23,7 @@ function __admUnchanged(key,sig,first){
 
 let admUsersCache=[];
 let admFeeRows=[];
+let admHomeRaw=null; // real {orders,profiles,products} rows behind the Home Analytics v2 page
 const ADM_MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function admSumFeesIn(year,month){
@@ -82,19 +83,18 @@ function admGo(pageId){
 }
 
 async function admLoadMetrics(){
-  if(!document.getElementById('m-fees'))return; // old home stat grid was replaced by the v2 design
+  if(!document.getElementById('heroValue'))return; // v2 home analytics markup not present on this page
   try{
     const m=await window.LateenAPI.admin.getMetrics();
-    admFeeRows=m.feeRows||[];
-    document.getElementById('m-fees').innerHTML=admMoneyH(m.totalFees);
-    admPopulateFeePickers();
-    admUpdateMonthFees();
-    admUpdateYearFees();
-    document.getElementById('m-active').textContent=m.activeUsers.toLocaleString();
-    document.getElementById('m-leads').textContent=m.leadsToday.toLocaleString();
-    document.getElementById('m-users').textContent=m.totalUsers.toLocaleString();
-    document.getElementById('m-products').textContent=m.totalProducts.toLocaleString();
-    document.getElementById('m-upfronts-ok').textContent=(m.succeededUpfronts||0).toLocaleString();
+    admHomeRaw={orders:m.orders||[],profiles:m.profiles||[],products:m.products||[]};
+    const setStat=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=Number(val||0).toLocaleString();};
+    setStat('statActiveUsers',m.activeUsers);
+    setStat('statTotalUsers',m.totalUsers);
+    setStat('statTotalProducts',m.totalProducts);
+    setStat('statPiecesSold',m.piecesSold);
+    setStat('statSucceeded',m.succeededUpfronts);
+    renderHero();
+    renderChart();
   }catch(e){console.error('[admin] metrics',e);}
 }
 
@@ -459,27 +459,9 @@ let admEmpFilter=''; // '', 'pending', 'paid'
 let admEmpSearchQ='';
 
 function admEmpPeriod(){const d=new Date();return {y:d.getFullYear(),m:d.getMonth()+1};}
+function admEmpIsPaid(emp,p){return (emp.payments||[]).some(x=>x.period_year===p.y&&x.period_month===p.m);}
 function admEmpFmtDate(d){if(!d)return '—';const dt=new Date(d);return dt.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});}
-// Payday runs on a rolling 30-day cycle: from the hire date until the first
-// payment, then from whichever payment was most recent after that. Pressing
-// "Mark as Paid" restarts the 30-day countdown from that moment.
-function admEmpLastCycleStart(emp){
-  const pays=emp.payments||[];
-  if(!pays.length) return emp.hired_at;
-  return pays.reduce((latest,p)=>(!latest||new Date(p.paid_at)>new Date(latest))?p.paid_at:latest, null);
-}
-function admEmpPaydayDate(emp){
-  const d=new Date(admEmpLastCycleStart(emp));
-  d.setDate(d.getDate()+30);
-  return d;
-}
-function admEmpIsDue(emp){
-  const today=new Date();
-  const payday=admEmpPaydayDate(emp);
-  const t0=new Date(today.getFullYear(),today.getMonth(),today.getDate()).getTime();
-  const p0=new Date(payday.getFullYear(),payday.getMonth(),payday.getDate()).getTime();
-  return t0>=p0;
-}
+function admEmpNextPayday(p){const next=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};return ADM_MONTH_NAMES[next.m-1]+' '+next.y;}
 
 async function admLoadEmployees(){
   const root=document.getElementById('employees-list');
@@ -496,13 +478,13 @@ async function admLoadEmployees(){
 
 function admRenderEmployees(){
   const root=document.getElementById('employees-list');
+  const p=admEmpPeriod();
+  const periodLabel=ADM_MONTH_NAMES[p.m-1]+' '+p.y;
   let totalSalary=0,paidAmt=0,pendingAmt=0,paidCount=0;
   admEmpCache.forEach(e=>{
     const sal=Number(e.monthly_salary||0);
     totalSalary+=sal;
-    // Only count a salary as "pending" once its 30-day cycle has reached or
-    // passed its payday; otherwise it's not counted yet.
-    if(admEmpIsDue(e)){pendingAmt+=sal;}else{paidAmt+=sal;paidCount++;}
+    if(admEmpIsPaid(e,p)){paidAmt+=sal;paidCount++;}else{pendingAmt+=sal;}
   });
   document.getElementById('emp-total-salary').innerHTML=admMoneyH(totalSalary);
   document.getElementById('emp-paid-amt').innerHTML=admMoneyH(paidAmt);
@@ -511,33 +493,33 @@ function admRenderEmployees(){
   document.getElementById('emp-paid-count').textContent=paidCount;
 
   const filtered=admEmpCache.filter(e=>{
-    const due=admEmpIsDue(e);
-    if(admEmpFilter==='paid'&&due)return false;
-    if(admEmpFilter==='pending'&&!due)return false;
+    const paid=admEmpIsPaid(e,p);
+    if(admEmpFilter==='paid'&&!paid)return false;
+    if(admEmpFilter==='pending'&&paid)return false;
     return true;
   });
   if(!filtered.length){root.innerHTML='<div class="adm-empty">No employees match.</div>';return;}
   root.innerHTML=filtered.map(e=>{
-    const due=admEmpIsDue(e);
-    const paydayStr=admEmpFmtDate(admEmpPaydayDate(e));
-    const status=due?'<span style="color:#e07070">Pending</span>':'<span style="color:#2dbd8f">Paid</span>';
+    const paid=admEmpIsPaid(e,p);
+    const status=paid?'<span style="color:#2dbd8f">Paid · '+periodLabel+'</span>':'<span style="color:#e07070">Pending · '+periodLabel+'</span>';
+    const payday=paid?admEmpNextPayday(p):periodLabel;
     return `<div class="adm-emp-row">
       <div class="adm-emp-top">
         <div class="adm-emp-av">${admEsc(admInitials(e.full_name))}</div>
         <div style="flex:1;min-width:0;">
           <div class="adm-emp-name">${admEsc(e.full_name)} <span style="color:#9e9b97;font-weight:400;">· ${admEsc(e.employee_number)}</span></div>
-          <div class="adm-emp-sub">${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}${e.phone?` · ${admEsc(e.phone)}`:''}</div>
+          <div class="adm-emp-sub">${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}</div>
         </div>
         <div style="text-align:right;font-size:13px;font-weight:500;color:#f5b441;">${admMoneyH(e.monthly_salary)}</div>
       </div>
       <div class="adm-emp-meta">
         <div>Hired <b>${admEmpFmtDate(e.hired_at)}</b></div>
-        <div>Payday <b>${admEsc(paydayStr)}</b></div>
+        <div>Payday <b>${admEsc(payday)}</b></div>
         <div style="grid-column:1/-1;">Status: ${status}</div>
         ${e.notes?`<div style="grid-column:1/-1;color:#9e9b97;font-style:italic;">${admEsc(e.notes)}</div>`:''}
       </div>
       <div class="adm-emp-actions">
-        <button class="adm-emp-pay-btn ${due?'':'paid'}" ${due?'':'disabled'} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${due?'Mark as Paid':'Paid ✓'}</button>
+        <button class="adm-emp-pay-btn ${paid?'paid':''}" ${paid?'disabled':''} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${paid?'Paid ✓':'Mark as Paid'}</button>
         <button class="adm-emp-link-btn" onclick="admOpenEmpHist('${e.id}')">History</button>
         <button class="adm-emp-link-btn" onclick="admOpenEmpForm('${e.id}')">Edit</button>
       </div>
@@ -562,8 +544,7 @@ async function admPayEmp(id,amount){
   const p=admEmpPeriod();
   const e=admEmpCache.find(x=>x.id===id);
   if(!e)return;
-  if(!admEmpIsDue(e)){alert('Not due yet — payday is '+admEmpFmtDate(admEmpPaydayDate(e))+'.');return;}
-  if(!confirm('Mark '+e.full_name+' as paid ('+admMoney(amount)+')? The next payday will be set to 30 days from today.'))return;
+  if(!confirm('Mark '+e.full_name+' as paid for '+ADM_MONTH_NAMES[p.m-1]+' '+p.y+' ('+admMoney(amount)+')?'))return;
   try{
     await window.LateenAPI.admin.payEmployee({employee_id:id,period_year:p.y,period_month:p.m,amount:Number(amount)});
     await admLoadEmployees();
@@ -580,7 +561,6 @@ function admOpenEmpForm(id){
   document.getElementById('emp-num').value=e?(e.employee_number||''):'';
   document.getElementById('emp-job').value=e?(e.job_title||''):'';
   document.getElementById('emp-email').value=e?(e.email||''):'';
-  document.getElementById('emp-phone').value=e?(e.phone||''):'';
   document.getElementById('emp-salary').value=e?(e.monthly_salary||0):'';
   document.getElementById('emp-hired').value=e?(e.hired_at||'').slice(0,10):new Date().toISOString().slice(0,10);
   document.getElementById('emp-notes').value=e?(e.notes||''):'';
@@ -597,7 +577,6 @@ async function admSaveEmp(){
     employee_number:v('emp-num'),
     job_title:v('emp-job')||null,
     email:v('emp-email')||null,
-    phone:v('emp-phone')||null,
     monthly_salary:Number(v('emp-salary'))||0,
     hired_at:v('emp-hired')||new Date().toISOString().slice(0,10),
     notes:v('emp-notes')||null,
@@ -681,26 +660,63 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
 
   const selected = { day:null, month:null, year:null };
 
-  function seededValue(seedStr, min, max){
-    let hash = 0;
-    for(let i=0;i<seedStr.length;i++){ hash = (hash*31 + seedStr.charCodeAt(i)) >>> 0; }
-    const frac = (hash % 1000) / 1000;
-    return min + frac*(max-min);
+  // Real platform-fee sum for whichever day/month/year is selected (or all-time
+  // if none is). Reads from admHomeRaw.orders, populated by admLoadMetrics().
+  function getFees(){
+    const raw = admHomeRaw;
+    if(!raw) return 0;
+    let rows = raw.orders;
+    if(selected.year){
+      const y = Number(selected.year);
+      rows = rows.filter(o => new Date(o.created_at).getFullYear() === y);
+    } else if(selected.month){
+      const [y,m] = selected.month.split('-').map(Number);
+      rows = rows.filter(o => {
+        const d = new Date(o.created_at);
+        return d.getFullYear()===y && (d.getMonth()+1)===m;
+      });
+    } else if(selected.day){
+      rows = rows.filter(o => {
+        const d = new Date(o.created_at);
+        return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === selected.day;
+      });
+    }
+    const sum = rows.reduce((s,o) => s + Number(o.fee||0), 0);
+    return Math.round(sum*100)/100;
   }
 
-  function getFees(){
-    if(selected.year){
-      if(selected.year === '2026') return 245.00;
-      return Math.round(seededValue('y:'+selected.year, 150, 400) * 100) / 100;
+  // Real point-in-time snapshot of a metric "as of" a given timestamp — e.g.
+  // total users who had signed up by then, or the rolling-30-day active-user
+  // count ending then. Used for both the stat-card totals and every point on
+  // the chart, so the chart and the "final" value are always consistent.
+  function metricValueAsOf(key, ts){
+    const raw = admHomeRaw;
+    if(!raw) return 0;
+    if(key === 'totalUsers'){
+      return raw.profiles.filter(p => new Date(p.created_at).getTime() <= ts).length;
     }
-    if(selected.month){
-      if(selected.month === '2026-07') return 75.00;
-      return Math.round(seededValue('m:'+selected.month, 25, 220) * 100) / 100;
+    if(key === 'totalProducts'){
+      return raw.products.filter(p => new Date(p.created_at).getTime() <= ts).length;
     }
-    if(selected.day){
-      return Math.round(seededValue('d:'+selected.day, 5, 60) * 100) / 100;
+    if(key === 'piecesSold'){
+      return raw.orders.reduce((s,o) => {
+        if(!o.confirmed_at) return s;
+        return new Date(o.confirmed_at).getTime() <= ts ? s + Number(o.qty||0) : s;
+      }, 0);
     }
-    return 245.00;
+    if(key === 'succeeded'){
+      return raw.orders.filter(o => o.reviewed_at && new Date(o.reviewed_at).getTime() <= ts).length;
+    }
+    if(key === 'activeUsers'){
+      const windowStart = ts - 30*86400000;
+      const set = new Set();
+      raw.orders.forEach(o => {
+        const t = new Date(o.created_at).getTime();
+        if(t > windowStart && t <= ts){ set.add(o.marketer_id); set.add(o.business_id); }
+      });
+      return set.size;
+    }
+    return 0;
   }
 
   function renderHero(){
@@ -829,8 +845,6 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
     }
   });
 
-  renderHero();
-
   // ---- Analytics chart ----
   function buildChartDates(n){
     const arr = [];
@@ -843,31 +857,7 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
     return arr;
   }
 
-  function buildCumulativeSeries(finalValue, len, seedKey){
-    const start = finalValue <= 3 ? 0 : Math.max(0, finalValue - Math.round(finalValue*0.6) - 1);
-    const arr = [];
-    for(let i=0;i<len;i++){
-      const t = i/(len-1);
-      const base = start + t*(finalValue-start);
-      const jitter = seededValue(seedKey+i, -0.4, 0.4);
-      arr.push(Math.max(0, Math.min(finalValue, Math.round(base+jitter))));
-    }
-    for(let i=1;i<len;i++){ if(arr[i] < arr[i-1]) arr[i] = arr[i-1]; }
-    arr[len-1] = finalValue;
-    return arr;
-  }
-
-  function buildFluctuatingSeries(finalValue, len, seedKey, min, max){
-    const arr = [];
-    for(let i=0;i<len;i++){ arr.push(Math.round(seededValue(seedKey+i, min, max))); }
-    arr[len-1] = finalValue;
-    return arr;
-  }
-
   const CHART_LEN = 14;
-
-  const metricSeedKeys = { activeUsers:'au', totalUsers:'tu', totalProducts:'tp', piecesSold:'ps', succeeded:'su' };
-  const metricDefaults  = { activeUsers:2,  totalUsers:6,  totalProducts:5,  piecesSold:10, succeeded:32 };
 
   const metrics = [
     { key:'activeUsers',   label:'المستخدمون النشطون', color:'#7fa8d9', data: [] },
@@ -879,15 +869,18 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
 
   function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
 
-  // Mirrors the same day/month/year selection used by the hero card (getFees)
-  // so the chart always reflects whichever date rule is currently active.
+  // Mirrors the same day/month/year selection used by the hero card (getFees),
+  // and returns the real end-of-bucket timestamp for each chart point so
+  // metricValueAsOf() can compute a true snapshot at each one.
   function getChartConfig(){
     if(selected.year){
       const year = parseInt(selected.year, 10);
       const isCurrentYear = year === new Date().getFullYear();
       const monthCount = isCurrentYear ? (new Date().getMonth()+1) : 12;
       const labels = arMonths.slice(0, monthCount);
-      return { labels, len: monthCount, seedPrefix: 'y:'+selected.year+':' };
+      const ends = [];
+      for(let m=1; m<=monthCount; m++){ ends.push(new Date(year, m, 0, 23,59,59,999).getTime()); }
+      return { labels, len: monthCount, ends };
     }
     if(selected.month){
       const [y, m] = selected.month.split('-').map(Number);
@@ -895,40 +888,38 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       const isCurrentMonth = (y === today.getFullYear() && m === today.getMonth()+1);
       const dayCount = isCurrentMonth ? today.getDate() : daysInMonth(y, m);
       const labels = [];
-      for(let d=1; d<=dayCount; d++){ labels.push(String(d)); }
-      return { labels, len: dayCount, seedPrefix: 'm:'+selected.month+':' };
+      const ends = [];
+      for(let d=1; d<=dayCount; d++){
+        labels.push(String(d));
+        ends.push(new Date(y, m-1, d, 23,59,59,999).getTime());
+      }
+      return { labels, len: dayCount, ends };
     }
     if(selected.day){
+      const [y,m,d] = selected.day.split('-').map(Number);
       const labels = [];
-      for(let h=0; h<24; h+=2){ labels.push(pad(h)+':00'); }
-      return { labels, len: labels.length, seedPrefix: 'd:'+selected.day+':' };
+      const ends = [];
+      for(let h=0; h<24; h+=2){
+        labels.push(pad(h)+':00');
+        ends.push(new Date(y, m-1, d, h+2, 0, 0, 0).getTime()-1);
+      }
+      return { labels, len: labels.length, ends };
     }
-    return { labels: buildChartDates(CHART_LEN), len: CHART_LEN, seedPrefix: '' };
+    // Default: last 14 days, one point per day. "Today" uses the current
+    // instant rather than end-of-day so the last point is truly live.
+    const today = new Date();
+    const ends = [];
+    for(let i=CHART_LEN-1; i>=0; i--){
+      if(i===0){ ends.push(Date.now()); continue; }
+      const d = new Date(today);
+      d.setDate(d.getDate()-i);
+      ends.push(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999).getTime());
+    }
+    return { labels: buildChartDates(CHART_LEN), len: CHART_LEN, ends };
   }
 
-  function getMetricFinal(key){
-    const base = metricDefaults[key];
-    if(selected.year){
-      if(selected.year === '2026') return base;
-      return Math.max(0, Math.round(seededValue('y:'+key+':'+selected.year, base*0.6, base*1.6)));
-    }
-    if(selected.month){
-      if(selected.month === '2026-07') return Math.max(1, Math.round(base*0.3));
-      return Math.max(0, Math.round(seededValue('m:'+key+':'+selected.month, base*0.1, base*0.6)));
-    }
-    if(selected.day){
-      return Math.max(0, Math.round(seededValue('d:'+key+':'+selected.day, 0, Math.max(2, base*0.25))));
-    }
-    return base;
-  }
-
-  function buildMetricSeries(key, final, len, seedKey){
-    if(len <= 1) return [final];
-    if(key === 'activeUsers'){
-      const max = Math.max(2, final + 2);
-      return buildFluctuatingSeries(final, len, seedKey, 0, max);
-    }
-    return buildCumulativeSeries(final, len, seedKey);
+  function buildMetricSeries(key, ends){
+    return ends.map(ts => metricValueAsOf(key, ts));
   }
 
   function updateChartTitle(){
@@ -994,17 +985,12 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
 
   function renderChart(){
     const cfg = getChartConfig();
-    metrics.forEach(m => {
-      const final = getMetricFinal(m.key);
-      m.data = buildMetricSeries(m.key, final, cfg.len, cfg.seedPrefix + metricSeedKeys[m.key]);
-    });
+    metrics.forEach(m => { m.data = buildMetricSeries(m.key, cfg.ends); });
     analyticsChart.data.labels = cfg.labels;
     analyticsChart.data.datasets.forEach((ds, i) => { ds.data = metrics[i].data; });
     updateChartTitle();
     analyticsChart.update();
   }
-
-  renderChart();
 
   function setChartFilter(key){
     analyticsChart.data.datasets.forEach((ds, i) => {
@@ -1041,6 +1027,8 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       setChartFilter(key);
     });
   });
+
+  admLoadMetrics(); // first real load of the Home Analytics v2 page
 
 /* persist page across refresh — mirrors the same fix already shipped for
    the business/marketer dashboards, so returning to a backgrounded admin
