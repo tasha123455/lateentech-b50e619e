@@ -368,6 +368,7 @@ export const DICT: Record<string, string> = {
   "Platform Security Fee:": "رسوم المنصة:",
   "Platform Security Fee": "رسوم المنصة",
   "Total:": "الإجمالي:",
+  "Total fee required": "إجمالي العربون المطلوب",
   "of the product price.": "من سعر المنتج.",
   "Explain that a small commitment fee is required before their order is placed. This reserves the product and confirms they are serious.": "اشرح للزبون إن فيه عربون بسيط مطلوب قبل تأكيد الطلب لضمان الجدية.",
   "Did the customer pay the commitment fee?": "هل دفع الزبون عربون الحجز؟",
