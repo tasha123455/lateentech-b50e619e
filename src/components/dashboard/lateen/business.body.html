@@ -36,7 +36,7 @@
 .sub-header .sub-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
 .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
-.avatar { width: 38px; height: 38px; border-radius: 50%; background: #1a3d2f; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #34c77b; flex-shrink: 0; background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: #0A3C2A; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #34c77b; flex-shrink: 0; background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; }
 .greet { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
 .greet-sub { font-size: 12px; color: var(--color-text-secondary); }
 .notif-btn { width: 36px; height: 36px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
@@ -709,7 +709,7 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 <div class="page active" id="pg-home">
   <div class="topbar">
     <div class="topbar-left">
-      <div class="avatar" id="user-avatar" onclick="openProfile()" style="cursor:pointer" role="button" tabindex="0">··</div>
+      <div class="avatar" id="user-avatar" onclick="openProfile()" style="cursor:pointer" role="button" tabindex="0"></div>
       <div><div class="greet" id="user-greet">Hey there</div><div class="greet-sub" id="user-sub">Business</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
@@ -837,7 +837,7 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
   <div class="menu-backdrop" onclick="closeMenu()"></div>
   <div class="menu-drawer">
     <button class="menu-close" onclick="closeMenu()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <div class="menu-user" onclick="openProfile()" style="cursor:pointer;" role="button" tabindex="0"><div class="avatar" id="menu-avatar">··</div><div style="flex:1;min-width:0"><div class="menu-name" id="menu-name">Welcome</div><div class="menu-sub" id="menu-sub">Business</div></div></div>
+    <div class="menu-user" onclick="openProfile()" style="cursor:pointer;" role="button" tabindex="0"><div class="avatar" id="menu-avatar"></div><div style="flex:1;min-width:0"><div class="menu-name" id="menu-name">Welcome</div><div class="menu-sub" id="menu-sub">Business</div></div></div>
     <div class="menu-item" onclick="window.__lateenToggleLang&&window.__lateenToggleLang()" role="button" tabindex="0" data-no-i18n><div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89ee8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><div style="flex:1;min-width:0"><div class="menu-item-label">اللغة</div><div class="menu-item-sub">Language</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg></div>
     <div class="menu-item" data-action="sign-out" style="margin-top:auto;border-top:0.5px solid var(--color-border-tertiary);padding-top:14px;"><div class="menu-icon-wrap mi-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><div class="menu-item-label" style="color:#e07070">Sign out</div></div>
   </div>
@@ -868,7 +868,7 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:1.25rem;">
       <div style="position:relative;">
-        <div id="prof-avatar" style="width:88px;height:88px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:28px;color:#34c77b;font-weight:500;background-size:cover;background-position:center;overflow:hidden;">··</div>
+        <div id="prof-avatar" style="width:88px;height:88px;border-radius:50%;background:#0A3C2A;display:flex;align-items:center;justify-content:center;font-size:28px;color:#34c77b;font-weight:500;background-size:cover;background-position:center;overflow:hidden;"></div>
         <label for="prof-avatar-file" style="position:absolute;bottom:-2px;right:-2px;width:30px;height:30px;border-radius:50%;background:#34c77b;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #1e1e1e;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </label>
