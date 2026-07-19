@@ -713,7 +713,7 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
       <div><div class="greet" id="user-greet">Hey there</div><div class="greet-sub" id="user-sub">Business</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button type="button" data-no-i18n aria-label="Toggle language" onclick="window.__lateenToggleLang&&window.__lateenToggleLang()" style="height:32px;padding:0 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:rgba(20,20,20,0.92);color:#f0eeeb;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);"><span aria-hidden style="font-size:14px">🌐</span><span class="lang-label-en">العربية</span><span class="lang-label-ar">English</span></button>
+      <button type="button" onclick="openSupport()" aria-label="Support" style="height:36px;padding:0 14px;border-radius:10px;border:0.5px solid rgba(224,112,112,0.35);background:rgba(58,26,26,0.9);color:#f0eeeb;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);"><span data-i18n="Support">Support</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></button>
       <div class="notif-btn" onclick="goTo('pg-notif')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
         <div class="notif-dot" id="notif-dot" style="display:none"></div>
@@ -838,7 +838,22 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
   <div class="menu-drawer">
     <button class="menu-close" onclick="closeMenu()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="menu-user" onclick="openProfile()" style="cursor:pointer;" role="button" tabindex="0"><div class="avatar" id="menu-avatar">··</div><div style="flex:1;min-width:0"><div class="menu-name" id="menu-name">Welcome</div><div class="menu-sub" id="menu-sub">Business</div></div></div>
+    <div class="menu-item" onclick="window.__lateenToggleLang&&window.__lateenToggleLang()" role="button" tabindex="0" data-no-i18n><div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89ee8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><div style="flex:1;min-width:0"><div class="menu-item-label">اللغة</div><div class="menu-item-sub">Language</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg></div>
     <div class="menu-item" data-action="sign-out" style="margin-top:auto;border-top:0.5px solid var(--color-border-tertiary);padding-top:14px;"><div class="menu-icon-wrap mi-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><div class="menu-item-label" style="color:#e07070">Sign out</div></div>
+  </div>
+</div>
+
+<!-- SUPPORT OVERLAY -->
+<div class="overlay" id="support-overlay" style="z-index:150;align-items:center;">
+  <div class="overlay-bg" onclick="closeSupport()"></div>
+  <div style="position:relative;z-index:1;width:min(86%,340px);background:#A82C34;border-radius:20px;padding:30px 24px 28px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.5);">
+    <button type="button" aria-label="Close" onclick="closeSupport()" style="position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;line-height:1;padding:0;">×</button>
+    <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;" data-i18n="Have a problem?">Have a problem?</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.85);margin-bottom:20px;" data-i18n="Contact admin">Contact admin</div>
+    <a href="https://wa.me/218915756638" target="_blank" rel="noopener" aria-label="WhatsApp" style="display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;background:#25D366;margin-bottom:16px;text-decoration:none;">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2 22l5.42-1.35a9.9 9.9 0 004.62 1.14h.01c5.46 0 9.9-4.45 9.9-9.9C21.95 6.44 17.5 2 12.04 2zm5.7 14.2c-.24.68-1.39 1.3-1.92 1.37-.49.07-1.1.1-1.78-.11a16.3 16.3 0 01-1.63-.6c-2.87-1.24-4.74-4.13-4.88-4.32-.14-.19-1.17-1.56-1.17-2.98s.72-2.11 1-2.4c.28-.29.6-.36.8-.36h.58c.19 0 .43-.07.67.51.24.58.83 2.01.9 2.16.07.15.12.32.02.51-.1.19-.15.31-.3.48-.14.17-.3.38-.44.51-.14.14-.29.29-.13.58.17.29.75 1.24 1.61 2.01 1.11 1 2.04 1.31 2.33 1.46.29.14.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.38-.24.63-.14.26.1 1.63.77 1.92.91.29.14.48.21.55.33.07.12.07.68-.17 1.36z"/></svg>
+    </a>
+    <div style="font-size:21px;font-weight:700;color:#fff;letter-spacing:0.3px;" dir="ltr" data-no-i18n>+218 91 575 6638</div>
   </div>
 </div>
 
