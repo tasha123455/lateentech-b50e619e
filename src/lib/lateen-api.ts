@@ -615,6 +615,67 @@ export function createLateenApi(userId: string) {
         });
         if (error) throw error;
       },
+      // Marks an already-approved order as refunded. Does not touch status,
+      // wallets, or stock — it only stamps refunded_at, which getMetrics()
+      // uses to stop counting that order's platform fee from that point on.
+      async refundOrder(id: string) {
+        const { error } = await supabase.rpc("admin_refund_order", { _order_id: id });
+        if (error) throw error;
+      },
+      // Receipts the admin has already reviewed (approved or rejected).
+      // Mirrors listPendingReceipts's enrichment (signed URLs + marketer/product
+      // join) but filtered to reviewed orders and sorted by review time.
+      async listReceiptHistory() {
+        const { data: orders, error } = await supabase
+          .from("orders")
+          .select("*")
+          .in("status", ["approved", "rejected"])
+          .not("receipt_url", "is", null)
+          .order("reviewed_at", { ascending: false });
+        if (error) throw error;
+        const list = (orders ?? []) as Array<
+          Record<string, unknown> & { marketer_id: string; product_id: string; receipt_url?: string | null }
+        >;
+        await Promise.all(
+          list.map(async (o) => {
+            if (typeof o.receipt_url === "string" && o.receipt_url.startsWith("receipts:")) {
+              const path = o.receipt_url.slice("receipts:".length);
+              const { data: s } = await supabase.storage.from("receipts").createSignedUrl(path, 60 * 60);
+              o.receipt_url = s?.signedUrl ?? "";
+            }
+          }),
+        );
+        const marketerIds = [...new Set(list.map((o) => o.marketer_id))];
+        const productIds = [...new Set(list.map((o) => o.product_id))];
+        const [{ data: profs }, { data: prods }] = await Promise.all([
+          marketerIds.length
+            ? supabase.from("profiles").select("id, full_name, phone").in("id", marketerIds)
+            : Promise.resolve({ data: [] as Array<{ id: string; full_name: string | null; phone: string | null }> }),
+          productIds.length
+            ? supabase.from("products").select("id, name, photos").in("id", productIds)
+            : Promise.resolve({ data: [] as Array<{ id: string; name: string; photos: string[] }> }),
+        ]);
+        let emap = new Map<string, string | null>();
+        try {
+          const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
+            _user_ids: marketerIds,
+          });
+          emap = new Map(
+            ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
+          );
+        } catch {
+          /* ignore — email just won't be shown */
+        }
+        const pmap = new Map(
+          (profs ?? []).map((p) => [p.id, { ...p, email: emap.get(p.id) ?? null }]),
+        );
+        const prodmap = new Map((prods ?? []).map((p) => [p.id, p]));
+        return list.map((o) => ({
+          ...o,
+          marketer: pmap.get(o.marketer_id) ?? null,
+          product: prodmap.get(o.product_id) ?? null,
+        }));
+      },
       async listPayoutRequests() {
         const { data, error } = await supabase
           .from("payouts")
@@ -823,7 +884,9 @@ export function createLateenApi(userId: string) {
         const [ordersRes, profilesRes, productsRes] = await Promise.all([
           supabase
             .from("orders")
-            .select("qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at"),
+            .select(
+              "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at, refunded_at",
+            ),
           supabase.from("profiles").select("id, created_at"),
           supabase.from("products").select("id, created_at").is("deleted_at", null),
         ]);
@@ -838,13 +901,19 @@ export function createLateenApi(userId: string) {
           created_at: string;
           confirmed_at: string | null;
           reviewed_at: string | null;
+          refunded_at: string | null;
         }>;
         const profiles = (profilesRes.data ?? []) as Array<{ id: string; created_at: string }>;
         const products = (productsRes.data ?? []) as Array<{ id: string; created_at: string }>;
 
+        // A refunded order's platform fee is no longer counted as revenue,
+        // even though the order itself keeps whatever status it already had
+        // (approved orders stay "approved" everywhere else in the app).
+        const feeEligible = (o: { status: string; refunded_at: string | null }) =>
+          feeEligibleStatuses.has(o.status) && !o.refunded_at;
+
         const totalFees = orders.reduce(
-          (sum, o) =>
-            feeEligibleStatuses.has(o.status) ? sum + Number(o.platform_fee || 0) * Number(o.qty || 0) : sum,
+          (sum, o) => (feeEligible(o) ? sum + Number(o.platform_fee || 0) * Number(o.qty || 0) : sum),
           0,
         );
         // "Pieces Sold" = units on orders that actually reached the confirmed stage (or later).
@@ -875,7 +944,7 @@ export function createLateenApi(userId: string) {
           // all-time) client-side, without extra round-trips per filter click.
           orders: orders.map((o) => ({
             qty: Number(o.qty || 0),
-            fee: feeEligibleStatuses.has(o.status) ? Number(o.platform_fee || 0) * Number(o.qty || 0) : 0,
+            fee: feeEligible(o) ? Number(o.platform_fee || 0) * Number(o.qty || 0) : 0,
             marketer_id: o.marketer_id,
             business_id: o.business_id,
             created_at: o.created_at,
