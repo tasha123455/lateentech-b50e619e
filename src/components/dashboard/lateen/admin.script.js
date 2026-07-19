@@ -4,6 +4,7 @@ function admMoney(n){const v=Number(n||0);return '\u2066د.ل\u2069'+v.toLocaleS
 function admMoneyH(n){const v=Number(n||0);return '<span class="cur-sym">\u2066د.ل\u2069</span>'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 function admInitials(name){if(!name)return '?';return name.trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();}
 function admWhen(iso){if(!iso)return '';const d=new Date(iso);const diff=Date.now()-d.getTime();const m=Math.floor(diff/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
+function admWhenFull(iso){if(!iso)return '';const d=new Date(iso);const day=d.getDate();const month=d.toLocaleString('en-US',{month:'short'});const year=d.getFullYear();let h=d.getHours();const mins=String(d.getMinutes()).padStart(2,'0');const ampm=h>=12?'PM':'AM';h=h%12;if(h===0)h=12;return `${day} ${month} ${year}, ${h}:${mins} ${ampm}`;}
 
 /* Anti-flicker helpers. Every admin list below used to be reloaded on
    every nav click, every 10s poll, and every realtime event — and each
@@ -98,73 +99,238 @@ async function admLoadMetrics(){
   }catch(e){console.error('[admin] metrics',e);}
 }
 
+let __admVerifyMarketers=[];
+let __admVerifySearchQ='';
+let __admMktDetailId=null;
+let __admMktDetailTab='new';
+let __admMktDetailSearch='';
+
 async function admLoadVerify(){
   const root=document.getElementById('verify-list');
   const first=__admFirstLoad(root);
   if(first) root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
-    const list=await window.LateenAPI.admin.listPendingReceipts();
-    list.sort((a,b)=>{
-      const at=new Date(a.updated_at||a.receipt_uploaded_at||a.created_at||0).getTime();
-      const bt=new Date(b.updated_at||b.receipt_uploaded_at||b.created_at||0).getTime();
-      return bt-at;
-    });
-    const sig=JSON.stringify(list.map(o=>[o.id,o.updated_at,o.receipt_uploaded_at,o.receipt_url,o.status]));
+    const [pending,history]=await Promise.all([
+      window.LateenAPI.admin.listPendingReceipts(),
+      window.LateenAPI.admin.listReceiptHistory(),
+    ]);
+    const sig=JSON.stringify([
+      pending.map(o=>[o.id,o.updated_at,o.receipt_uploaded_at,o.receipt_url,o.status]),
+      history.map(o=>[o.id,o.reviewed_at,o.status,o.admin_notes,o.refunded_at]),
+    ]);
     if(__admUnchanged('verify',sig,first))return;
     __admMarkLoaded(root);
-    if(!list.length){root.innerHTML='<div class="adm-empty">No receipts awaiting review.</div>';return;}
-    root.innerHTML=list.map(o=>{
-      const qty=Number(o.qty||0);
-      const unitPrice=Number(o.unit_price||0);
-      const marketerFee=Number(o.commission||0)*qty;
-      const platformFee=Number(o.platform_fee||0)*qty;
-      const productTotal=unitPrice*qty;
-      const marketer=o.marketer&&o.marketer.full_name||'Unknown marketer';
-      const phone=o.marketer&&o.marketer.phone||'';
-      const email=o.marketer&&o.marketer.email||'';
-      const product=o.product&&o.product.name||'Order';
-      const prodPhoto=(o.product&&Array.isArray(o.product.photos)&&o.product.photos[0])||'';
-      const prodThumb=prodPhoto?`<img class="adm-prod-thumb" src="${admEsc(prodPhoto)}" alt="" onclick="event.stopPropagation();admLightbox('${admEsc(prodPhoto)}')"/>`:'';
-      const thumb=o.receipt_url?`<img class="adm-thumb" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="event.stopPropagation();admLightbox('${admEsc(o.receipt_url)}')" />`:`<div class="adm-thumb-empty">📄</div>`;
-      const upAt=o.receipt_uploaded_at?'Uploaded: '+admWhen(o.receipt_uploaded_at):'';
-      const created='Created: '+admWhen(o.created_at);
-      return `<div class="adm-row" onclick="admToggleRow('v-${o.id}')">
-        <div class="adm-row-top">
-          ${thumb}
-          <div class="adm-row-mid">
-            <div class="adm-row-name">${admEsc(marketer)}</div>
-            <div class="adm-row-sub">${admEsc(product)} · ${admEsc(phone)}</div>
-            ${email?`<div class="adm-row-sub">${admEsc(email)}</div>`:''}
-            <div class="adm-row-sub" style="opacity:.7">${created}${upAt?' · '+upAt:''}</div>
-            <div class="adm-row-sub" style="color:#e0c070">⏳ Pending verification</div>
-          </div>
-          <div class="adm-row-amt">${admMoneyH(platformFee)}</div>
-        </div>
-        <div class="adm-expand" id="v-${o.id}">
-          ${o.receipt_url?`<img class="adm-receipt-full" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="admLightbox('${admEsc(o.receipt_url)}')"/>`:'<div class="adm-empty">No receipt image</div>'}
-          <div class="adm-order-detail">
-            ${prodThumb}
-            <div class="adm-order-detail-rows">
-              <div class="adm-detail-row"><span>Price</span><span>${admMoneyH(unitPrice)}</span></div>
-              <div class="adm-detail-row"><span>Qty</span><span>${qty}</span></div>
-              <div class="adm-detail-row"><span>Total</span><span>${admMoneyH(productTotal)}</span></div>
-              <div class="adm-detail-row"><span>Marketer fee</span><span>${admMoneyH(marketerFee)}</span></div>
-              <div class="adm-detail-row"><span>Platform fee</span><span>${admMoneyH(platformFee)}</span></div>
-            </div>
-          </div>
-          <div class="adm-actions">
-            <button class="adm-btn adm-btn-no" onclick="event.stopPropagation();admReject('${o.id}')">Reject with note</button>
-            <button class="adm-btn adm-btn-ok" onclick="event.stopPropagation();admApprove('${o.id}')">Approve &amp; forward</button>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
+
+    const byMkt=new Map();
+    const addTo=(o,bucket)=>{
+      const mid=o.marketer_id;
+      if(!byMkt.has(mid)){
+        byMkt.set(mid,{
+          id:mid,
+          name:(o.marketer&&o.marketer.full_name)||'Unknown marketer',
+          phone:(o.marketer&&o.marketer.phone)||'',
+          email:(o.marketer&&o.marketer.email)||'',
+          pending:[],
+          history:[],
+        });
+      }
+      byMkt.get(mid)[bucket].push(o);
+    };
+    pending.forEach(o=>addTo(o,'pending'));
+    history.forEach(o=>addTo(o,'history'));
+
+    __admVerifyMarketers=[...byMkt.values()].sort((a,b)=>b.pending.length-a.pending.length);
+    admRenderVerifyList();
+    admRenderMktDetail();
   }catch(e){console.error('[admin] verify',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
-function admToggleRow(id){
-  document.querySelectorAll('.adm-expand').forEach(x=>{if(x.id!==id)x.classList.remove('open');});
-  const el=document.getElementById(id); if(el) el.classList.toggle('open');
+function admVerifySearch(q){
+  __admVerifySearchQ=(q||'').trim().toLowerCase();
+  admRenderVerifyList();
+}
+
+function admRenderVerifyList(){
+  const root=document.getElementById('verify-list');
+  const q=__admVerifySearchQ;
+  const list=__admVerifyMarketers.filter(m=>!q||m.name.toLowerCase().includes(q)||m.phone.toLowerCase().includes(q)||m.email.toLowerCase().includes(q));
+  if(!list.length){
+    root.innerHTML=`<div class="adm-empty">${__admVerifyMarketers.length?'No marketers match your search.':'No receipts awaiting review.'}</div>`;
+    return;
+  }
+  root.innerHTML=list.map(m=>{
+    const badge=m.pending.length
+      ? `<span class="adm-mkt-badge">${m.pending.length} pending</span>`
+      : `<span class="adm-mkt-badge clear">All clear</span>`;
+    const contact=admEsc([m.phone,m.email].filter(Boolean).join(' · '));
+    return `<div class="adm-mkt-row" onclick="admOpenMktDetail('${m.id}')">
+      <div class="adm-mkt-av">${admEsc(admInitials(m.name))}</div>
+      <div class="adm-mkt-main">
+        <div class="adm-mkt-name-row"><span class="adm-mkt-name">${admEsc(m.name)}</span>${badge}</div>
+        <div class="adm-mkt-contact">${contact}</div>
+      </div>
+      <div class="adm-mkt-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div>
+    </div>`;
+  }).join('');
+}
+
+function admOpenMktDetail(id){
+  __admMktDetailId=id;
+  __admMktDetailTab='new';
+  __admMktDetailSearch='';
+  admRenderMktDetailShell();
+  document.getElementById('adm-mkt-detail').classList.add('open');
+}
+function admCloseMktDetail(){
+  document.getElementById('adm-mkt-detail').classList.remove('open');
+  __admMktDetailId=null;
+}
+function admMktDetailTab(tab){
+  __admMktDetailTab=tab;
+  const nb=document.getElementById('adm-mkt-tab-new');
+  const hb=document.getElementById('adm-mkt-tab-history');
+  if(nb)nb.classList.toggle('on',tab==='new');
+  if(hb)hb.classList.toggle('on',tab==='history');
+  admRenderMktDetailList();
+}
+function admMktDetailSearch(q){
+  __admMktDetailSearch=(q||'').trim().toLowerCase();
+  admRenderMktDetailList();
+}
+
+// Called after a background data refresh (e.g. post approve/reject/refund).
+// Updates counts + the card list in place; never rebuilds the header/search
+// input, so a marketer that's mid-typed-search doesn't lose focus or text.
+function admRenderMktDetail(){
+  if(!__admMktDetailId)return;
+  if(!document.getElementById('adm-mkt-detail-body'))return;
+  if(!document.getElementById('adm-mkt-search')){admRenderMktDetailShell();return;}
+  const m=__admVerifyMarketers.find(x=>x.id===__admMktDetailId);
+  if(!m)return;
+  const nb=document.getElementById('adm-mkt-tab-new');
+  const hb=document.getElementById('adm-mkt-tab-history');
+  if(nb)nb.textContent=`New (${m.pending.length})`;
+  if(hb)hb.textContent=`History (${m.history.length})`;
+  admRenderMktDetailList();
+}
+
+function admRenderMktDetailShell(){
+  const body=document.getElementById('adm-mkt-detail-body');
+  if(!body)return;
+  const m=__admVerifyMarketers.find(x=>x.id===__admMktDetailId);
+  if(!m){body.innerHTML='<div class="adm-empty">This marketer has no receipts to show.</div>';return;}
+  const contact=admEsc([m.phone,m.email].filter(Boolean).join(' · '));
+  body.innerHTML=`
+    <div class="adm-mkt-detail-head">
+      <div class="adm-mkt-av">${admEsc(admInitials(m.name))}</div>
+      <div>
+        <div class="adm-mkt-detail-name">${admEsc(m.name)}</div>
+        <div class="adm-mkt-detail-contact">${contact}</div>
+      </div>
+    </div>
+    <div class="adm-filter-row">
+      <button class="adm-filter-chip ${__admMktDetailTab==='new'?'on':''}" id="adm-mkt-tab-new" onclick="admMktDetailTab('new')">New (${m.pending.length})</button>
+      <button class="adm-filter-chip ${__admMktDetailTab==='history'?'on':''}" id="adm-mkt-tab-history" onclick="admMktDetailTab('history')">History (${m.history.length})</button>
+    </div>
+    <input class="adm-search" id="adm-mkt-search" placeholder="Search this marketer's receipts by product" value="${admEsc(__admMktDetailSearch)}" oninput="admMktDetailSearch(this.value)" />
+    <div id="adm-mkt-detail-list"></div>
+  `;
+  admRenderMktDetailList();
+}
+
+function admRenderMktDetailList(){
+  const listRoot=document.getElementById('adm-mkt-detail-list');
+  if(!listRoot)return;
+  const m=__admVerifyMarketers.find(x=>x.id===__admMktDetailId);
+  if(!m)return;
+  const q=__admMktDetailSearch;
+  const baseList=__admMktDetailTab==='new'?m.pending:m.history;
+  const list=q?baseList.filter(o=>((o.product&&o.product.name)||'').toLowerCase().includes(q)):baseList;
+  if(!list.length){
+    listRoot.innerHTML=q
+      ? '<div class="adm-empty">No receipts match your search.</div>'
+      : (__admMktDetailTab==='new'
+          ? '<div class="adm-empty">No pending receipts. This marketer is all caught up.</div>'
+          : '<div class="adm-empty">No reviewed receipts yet.</div>');
+    return;
+  }
+  listRoot.innerHTML=list.map(o=>admMktDetailCard(o)).join('');
+}
+
+function admMktDetailCard(o){
+  const qty=Number(o.qty||0);
+  const unitPrice=Number(o.unit_price||0);
+  const marketerFee=Number(o.commission||0)*qty;
+  const platformFee=Number(o.platform_fee||0)*qty;
+  const productTotal=unitPrice*qty;
+  const product=(o.product&&o.product.name)||'Order';
+  const prodPhoto=(o.product&&Array.isArray(o.product.photos)&&o.product.photos[0])||'';
+  const prodThumb=prodPhoto
+    ?`<img class="adm-prod-thumb" src="${admEsc(prodPhoto)}" alt="" onclick="admLightbox('${admEsc(prodPhoto)}')"/>`
+    :`<div class="adm-thumb-empty" style="width:44px;height:44px;">📦</div>`;
+  const receiptThumb=o.receipt_url
+    ?`<img class="adm-thumb" src="${admEsc(o.receipt_url)}" alt="receipt" onclick="admLightbox('${admEsc(o.receipt_url)}')"/>`
+    :`<div class="adm-thumb-empty">📄</div>`;
+
+  const isRefunded=!!o.refunded_at;
+  const statusPill=isRefunded
+    ?'<span class="adm-status-pill adm-status-refunded">↺ Refunded</span>'
+    :o.status==='pending'
+    ?'<span class="adm-status-pill adm-status-pending">⏳ Pending verification</span>'
+    :o.status==='approved'
+    ?'<span class="adm-status-pill adm-status-approved">✓ Approved</span>'
+    :'<span class="adm-status-pill adm-status-rejected">✕ Rejected</span>';
+
+  const created='Created: '+admWhenFull(o.created_at);
+  const uploaded=o.receipt_uploaded_at?'Uploaded: '+admWhenFull(o.receipt_uploaded_at):'';
+
+  const noteBlock=(o.status==='rejected')
+    ?`<div class="adm-note-block"><div class="adm-note-block-label">Admin note</div><div class="adm-note-block-text">${o.admin_notes&&String(o.admin_notes).trim()?admEsc(o.admin_notes):'No note was provided.'}</div></div>`
+    :'';
+
+  const reviewedLine=(o.status!=='pending'&&o.reviewed_at)
+    ?`<div class="adm-row-sub" style="opacity:.7;margin-top:6px;">Reviewed: ${admWhenFull(o.reviewed_at)}${isRefunded?' · Refunded: '+admWhenFull(o.refunded_at):''}</div>`
+    :'';
+
+  const actions=o.status==='pending'
+    ?`<div class="adm-actions" style="margin-top:10px;">
+        <button class="adm-btn adm-btn-no" onclick="admReject('${o.id}')">Reject with note</button>
+        <button class="adm-btn adm-btn-ok" onclick="admApprove('${o.id}')">Approve &amp; forward</button>
+      </div>`
+    :'';
+
+  // Refunding only ever makes sense for a receipt the admin already approved
+  // (that's the only point real platform-fee revenue was counted), and only
+  // once — the button disappears the moment refunded_at is set.
+  const refundBtn=(o.status==='approved'&&!isRefunded)
+    ?`<button class="adm-btn-refund" onclick="admRefundOrder('${o.id}')">Refund customer</button>`
+    :'';
+
+  return `<div class="adm-recpt-card">
+    <div class="adm-row-top" style="align-items:flex-start;">
+      <div class="adm-thumbs-row">
+        <div class="adm-thumb-block">${prodThumb}<span class="adm-thumb-block-label">Product</span></div>
+        <div class="adm-thumb-block">${receiptThumb}<span class="adm-thumb-block-label">Receipt</span></div>
+      </div>
+      <div class="adm-row-mid">
+        <div class="adm-row-name">${admEsc(product)}</div>
+        <div style="margin-top:5px;">${statusPill}</div>
+      </div>
+      <div class="adm-row-amt">${admMoneyH(platformFee)}</div>
+    </div>
+    <div class="adm-row-sub" style="margin-top:8px;">${created}${uploaded?' · '+uploaded:''}</div>
+    ${noteBlock}
+    <div class="adm-order-detail-rows" style="margin-top:8px;">
+      <div class="adm-detail-row"><span>Price</span><span>${admMoneyH(unitPrice)}</span></div>
+      <div class="adm-detail-row"><span>Qty</span><span>${qty}</span></div>
+      <div class="adm-detail-row"><span>Total</span><span>${admMoneyH(productTotal)}</span></div>
+      <div class="adm-detail-row"><span>Marketer fee</span><span>${admMoneyH(marketerFee)}</span></div>
+      <div class="adm-detail-row"><span>Platform fee</span><span>${admMoneyH(platformFee)}</span></div>
+    </div>
+    ${reviewedLine}
+    ${actions}
+    ${refundBtn}
+  </div>`;
 }
 
 function admLightbox(url){
@@ -173,13 +339,21 @@ function admLightbox(url){
 }
 
 async function admApprove(id){
-  if(!confirm('Approve this receipt? The order will be forwarded to the business owner and stock will be decremented.'))return;
+  if(!confirm('Approve this receipt? The order will be forwarded to the business owner.'))return;
   try{await window.LateenAPI.admin.approveOrder(id);admLoadVerify();}catch(e){alert('Approve failed: '+e.message);}
 }
 async function admReject(id){
   const notes=prompt('Reason for rejecting this receipt? (visible to the marketer)');
   if(notes===null)return;
   try{await window.LateenAPI.admin.rejectOrder(id,notes||'Receipt rejected');admLoadVerify();}catch(e){alert('Reject failed: '+e.message);}
+}
+async function admRefundOrder(id){
+  if(!confirm("Refund this order?\n\nThis removes its platform fee from your total platform fee metrics on the Home page. It does not touch the marketer's wallet balance or change the order's status elsewhere in the app. This can't be undone."))return;
+  try{
+    await window.LateenAPI.admin.refundOrder(id);
+    admLoadVerify();
+    admLoadMetrics();
+  }catch(e){alert('Refund failed: '+e.message);}
 }
 
 async function admLoadPayouts(){

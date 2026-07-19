@@ -126,6 +126,44 @@
 .adm-pd-zone { border: 0.5px solid var(--border-2); border-radius: 10px; overflow: hidden; margin-top: 6px; }
 .adm-pd-zone-h { padding: 7px 12px; background: var(--surface-2); font-size: 12px; font-weight: 500; }
 .adm-pd-zone-r { display: flex; justify-content: space-between; padding: 7px 12px; border-top: 0.5px solid var(--border-2); font-size: 12px; }
+
+/* ===== Order Verification Hub v2 (grouped by marketer) ===== */
+.adm-mkt-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); cursor: pointer; }
+.adm-mkt-row:last-child { border-bottom: none; }
+.adm-mkt-av { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-tint); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.adm-mkt-main { flex: 1; min-width: 0; }
+.adm-mkt-name-row { display: flex; align-items: center; gap: 8px; }
+.adm-mkt-name { font-size: 13px; font-weight: 500; }
+.adm-mkt-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); flex-shrink: 0; white-space: nowrap; }
+.adm-mkt-badge.clear { background: var(--surface-2); color: var(--txt-3); }
+.adm-mkt-contact { font-size: 11px; color: var(--txt-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-mkt-chev { color: var(--txt-3); flex-shrink: 0; }
+
+.adm-mkt-detail-head { display: flex; align-items: center; gap: 10px; margin: 6px 34px 14px 0; }
+.adm-mkt-detail-name { font-size: 15px; font-weight: 600; }
+.adm-mkt-detail-contact { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+
+.adm-status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; }
+.adm-status-pending { background: var(--accent-tint); color: var(--accent); }
+.adm-status-approved { background: var(--ok-tint); color: var(--ok); }
+.adm-status-rejected { background: var(--danger-tint); color: var(--danger); }
+.adm-status-refunded { background: #1c2740; color: #7c9cf0; }
+
+.adm-thumbs-row { display: flex; gap: 6px; flex-shrink: 0; }
+.adm-thumb-block { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.adm-thumb-block-label { font-size: 8px; color: var(--txt-3); text-transform: uppercase; letter-spacing: 0.05em; }
+
+.adm-recpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+.adm-recpt-card:last-child { margin-bottom: 0; }
+
+.adm-note-block { background: var(--surface); border-left: 3px solid var(--danger); border-radius: 8px; padding: 8px 10px; margin: 8px 0 0; }
+.adm-note-block-label { font-size: 9px; font-weight: 600; color: var(--danger); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+.adm-note-block-text { font-size: 12px; color: var(--txt-2); line-height: 1.45; }
+
+/* Refund only ever applies to approved receipts — see admMktDetailCard(). */
+.adm-btn-refund { width: 100%; margin-top: 8px; height: 34px; border-radius: 17px; background: transparent; border: 0.5px solid #7c9cf0; color: #7c9cf0; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font); }
+.adm-btn-refund:hover { background: rgba(124,156,240,0.12); }
+.adm-btn-refund:disabled { opacity: 0.5; cursor: not-allowed; }
 /* ===== Admin Home v2 (pasted design) ===== */
 .adm-home-v2{
   --bg: #0b0b0c;
@@ -376,6 +414,7 @@
   <!-- ORDER VERIFICATION -->
   <section class="adm-page" id="adm-verify">
     <div class="adm-h1">Order Verification Hub</div>
+    <input class="adm-search" id="verify-search" placeholder="Search by marketer name, phone, or email" oninput="admVerifySearch(this.value)" />
     <div class="adm-section" id="verify-list">
       <div class="adm-empty">Loading…</div>
     </div>
@@ -479,6 +518,14 @@
     <div class="adm-pdetail-card">
       <button class="adm-pdetail-close" onclick="admCloseEmpHist()">×</button>
       <div id="adm-emp-hist-body"><div class="adm-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- MARKETER RECEIPT DETAIL MODAL -->
+  <div class="adm-pdetail" id="adm-mkt-detail" onclick="if(event.target===this)admCloseMktDetail()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admCloseMktDetail()">×</button>
+      <div id="adm-mkt-detail-body"><div class="adm-empty">Loading…</div></div>
     </div>
   </div>
 
