@@ -681,7 +681,31 @@
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-name">Full name</span><input id="prof-name" class="pd-inp" placeholder="Your name"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-phone">Phone number</span><input id="prof-phone" class="pd-inp" readonly dir="ltr" style="opacity:.6;cursor:not-allowed;text-align:left;"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-email">Email</span><input id="prof-email" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
-      <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span><input id="prof-whatsapp" class="pd-inp" placeholder="+218..."/></label>
+      <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Country">Country</span>
+        <button type="button" class="pd-inp pd-picker-btn" id="prof-country-btn" onclick="toggleProfPicker('country')" style="display:flex;align-items:center;justify-content:space-between;" dir="ltr">
+          <span id="prof-country-txt" data-no-i18n>🇱🇾 Libya</span>
+          <span style="opacity:.5;font-size:11px;">▾</span>
+        </button>
+        <div class="pd-picker-list" id="prof-country-list" style="display:none;">
+          <button type="button" class="pd-picker-item" onclick="pickProfCountry()"><span>🇱🇾 <span data-i18n="Libya">Libya</span></span></button>
+          <div class="pd-picker-item pd-picker-disabled"><span data-i18n="More countries">More countries</span><span class="pd-soon-pill" data-i18n="Soon">Soon</span></div>
+        </div>
+      </label>
+      <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span>
+        <div style="display:flex;gap:6px;">
+          <div style="position:relative;flex-shrink:0;">
+            <button type="button" class="pd-inp pd-picker-btn" id="prof-wacc-btn" onclick="toggleProfPicker('wacc')" style="display:flex;align-items:center;gap:4px;width:82px;" dir="ltr">
+              <span id="prof-wacc-txt">+218</span>
+              <span style="opacity:.5;font-size:11px;">▾</span>
+            </button>
+            <div class="pd-picker-list" id="prof-wacc-list" style="display:none;position:absolute;z-index:5;width:190px;top:calc(100% + 4px);">
+              <button type="button" class="pd-picker-item" onclick="pickProfWaCc()" dir="ltr"><span>+218 — <span data-i18n="Libya">Libya</span></span></button>
+              <div class="pd-picker-item pd-picker-disabled"><span data-i18n="More">More</span><span class="pd-soon-pill" data-i18n="Soon">Soon</span></div>
+            </div>
+          </div>
+          <input id="prof-whatsapp" class="pd-inp" placeholder="092xxxxxxx" inputmode="numeric" dir="ltr" style="text-align:left;flex:1;"/>
+        </div>
+      </label>
 
       <div id="prof-bank-section" style="margin-top:14px;padding-top:14px;border-top:0.5px solid #2a2a2a;display:grid;gap:10px;">
         <div style="font-size:12px;font-weight:600;color:var(--color-text-primary);text-transform:uppercase;letter-spacing:0.5px;" data-i18n="Payout / Bank details">Payout / Bank details</div>
@@ -1177,7 +1201,6 @@ body.lang-ar .pd-iban-row{display:none !important;}
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" data-i18n="How to collect fee">How to collect fee</div>
-    <div class="sheet-sub" id="instr-sub"></div>
     <div class="instr-card light">
       <div class="instr-step"><div class="step-num">1</div><div style="flex:1;min-width:0;">
         <div class="step-title" data-i18n="Request a deposit from the customer">Request a deposit from the customer</div>

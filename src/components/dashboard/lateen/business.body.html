@@ -716,6 +716,19 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 .mp-lightbox-dots{position:absolute;bottom:22px;left:0;right:0;display:flex;gap:6px;align-items:center;justify-content:center;z-index:2;}
 .mp-lightbox-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.32);cursor:pointer;transition:background .15s,width .15s;}
 .mp-lightbox-dot.active{width:16px;border-radius:3px;background:rgba(255,255,255,0.9);}
+.pd-lbl{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;width:100%;}
+.pd-lbl-head{display:flex;align-items:center;gap:2px;flex-direction:row;white-space:nowrap;}
+.pd-inp{background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:8px;padding:10px 12px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);outline:none;text-transform:none;letter-spacing:normal;width:100%;}
+.pd-inp:focus{border-color:#666;}
+.pd-inp:disabled{opacity:0.4;cursor:not-allowed;}
+.pd-soon-pill{display:inline-block;background:#ff3b4a;color:#fff;font-size:9px;font-weight:600;letter-spacing:0.4px;padding:2px 6px;border-radius:6px;text-transform:uppercase;}
+.pd-picker-list{background:#1a1a1a;border:0.5px solid #3a3a3a;border-radius:8px;margin-top:4px;overflow:hidden;}
+.pd-picker-item{width:100%;padding:10px 12px;background:transparent;border:none;border-bottom:0.5px solid #2a2a2a;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);text-align:start;cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
+.pd-picker-item:last-child{border-bottom:none;}
+.pd-picker-item:active{background:#2a2a2a;}
+.pd-picker-disabled{opacity:0.5;cursor:default;pointer-events:none;}
+.pd-picker-disabled:active{background:transparent;}
+.lateen-business .pd-picker-item.pd-picker-disabled{display:flex;align-items:center;justify-content:flex-start;gap:6px;}
 </style>
 
 <div style="position:relative;max-width:420px;margin:0 auto;min-height:860px;overflow:hidden;background:#141414;">
@@ -908,7 +921,31 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-biz">Business name</span><input id="prof-biz" class="pd-inp" placeholder="Business name"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-phone">Phone number</span><input id="prof-phone" class="pd-inp" readonly dir="ltr" style="opacity:.6;cursor:not-allowed;text-align:left;"/></label>
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-email">Email</span><input id="prof-email" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
-      <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span><input id="prof-whatsapp" class="pd-inp" placeholder="+218..."/></label>
+      <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Country">Country</span>
+        <button type="button" class="pd-inp pd-picker-btn" id="prof-country-btn" onclick="toggleProfPicker('country')" style="display:flex;align-items:center;justify-content:space-between;" dir="ltr">
+          <span id="prof-country-txt" data-no-i18n>🇱🇾 Libya</span>
+          <span style="opacity:.5;font-size:11px;">▾</span>
+        </button>
+        <div class="pd-picker-list" id="prof-country-list" style="display:none;">
+          <button type="button" class="pd-picker-item" onclick="pickProfCountry()"><span>🇱🇾 <span data-i18n="Libya">Libya</span></span></button>
+          <div class="pd-picker-item pd-picker-disabled"><span data-i18n="More countries">More countries</span><span class="pd-soon-pill" data-i18n="Soon">Soon</span></div>
+        </div>
+      </label>
+      <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span>
+        <div style="display:flex;gap:6px;">
+          <div style="position:relative;flex-shrink:0;">
+            <button type="button" class="pd-inp pd-picker-btn" id="prof-wacc-btn" onclick="toggleProfPicker('wacc')" style="display:flex;align-items:center;gap:4px;width:82px;" dir="ltr">
+              <span id="prof-wacc-txt">+218</span>
+              <span style="opacity:.5;font-size:11px;">▾</span>
+            </button>
+            <div class="pd-picker-list" id="prof-wacc-list" style="display:none;position:absolute;z-index:5;width:190px;top:calc(100% + 4px);">
+              <button type="button" class="pd-picker-item" onclick="pickProfWaCc()" dir="ltr"><span>+218 — <span data-i18n="Libya">Libya</span></span></button>
+              <div class="pd-picker-item pd-picker-disabled"><span data-i18n="More">More</span><span class="pd-soon-pill" data-i18n="Soon">Soon</span></div>
+            </div>
+          </div>
+          <input id="prof-whatsapp" class="pd-inp" placeholder="092xxxxxxx" inputmode="numeric" dir="ltr" style="text-align:left;flex:1;"/>
+        </div>
+      </label>
     </div>
     <button onclick="saveProfile()" id="prof-save" style="width:100%;margin-top:1.25rem;background:#34c77b;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
