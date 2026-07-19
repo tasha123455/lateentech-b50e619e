@@ -364,7 +364,9 @@ export const DICT: Record<string, string> = {
   "An upfront payment is required before this order can be processed.": "لازم تدفع العربون قبل ما يتم إرسال الطلب.",
   
   "Your Marketer Fee:": "عمولتك كمسوّق:",
+  "Your Marketer Fee": "عمولتك كمسوّق",
   "Platform Security Fee:": "رسوم المنصة:",
+  "Platform Security Fee": "رسوم المنصة",
   "Total:": "الإجمالي:",
   "of the product price.": "من سعر المنتج.",
   "Explain that a small commitment fee is required before their order is placed. This reserves the product and confirms they are serious.": "اشرح للزبون إن فيه عربون بسيط مطلوب قبل تأكيد الطلب لضمان الجدية.",
