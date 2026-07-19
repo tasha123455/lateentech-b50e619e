@@ -5,6 +5,7 @@ import { GoogleButton } from "./GoogleButton";
 import { Field } from "./SignInForm";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type Role = "marketer" | "business";
 
@@ -98,6 +99,15 @@ export function RegisterForm({ role }: { role: Role }) {
   const { refreshRole } = useAuth();
   const { lang } = useLanguage();
   const ar = lang === "ar";
+  const importantNotesAr =
+    role === "marketer"
+      ? "تأكد إن جميع البيانات اللي تدخلها صحيحة قبل إنشاء الحساب. بياناتك الشخصية مرتبطة بمحفظتك و فلوسك وما تقدرش تعدلها بعد التسجيل. احتفظ ببيانات تسجيل الدخول في مكان آمن، لأنك حتحتاجها للدخول إلى حسابك."
+      : "تأكد إن جميع البيانات اللي تدخلها صحيحة قبل إنشاء الحساب. بياناتك الشخصية مرتبطة بحسابك وما تقدرش تعدلها بعد التسجيل. احتفظ ببيانات تسجيل الدخول في مكان آمن، لأنك حتحتاجها للدخول إلى حسابك.";
+  const importantNotesEn =
+    role === "marketer"
+      ? "Please make sure all the information you enter is accurate before creating your account. Your personal details are linked to your wallet and money and cannot be changed after registration. Keep your login information in a safe place, as you will need it to access your account."
+      : "Please make sure all the information you enter is accurate before creating your account. Your personal details are linked to your account and cannot be changed after registration. Keep your login information in a safe place, as you will need it to access your account.";
+
   const otherRole: Role = role === "marketer" ? "business" : "marketer";
   const crossRoleMsg = () => {
     if (ar) {
@@ -235,6 +245,19 @@ export function RegisterForm({ role }: { role: Role }) {
       <Field label="Country" required>
         <CountryPicker />
       </Field>
+
+      <Collapsible className="rounded-xl border border-border bg-surface-2">
+        <CollapsibleTrigger
+          type="button"
+          className="flex w-full items-center justify-between px-3 py-2.5 text-start text-xs font-medium text-text-2"
+        >
+          <span>{ar ? "ملاحظات مهمة" : "Important notes"}</span>
+          <span className="text-text-3">▾</span>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-3 pb-3 text-xs leading-relaxed text-text-3">
+          {ar ? importantNotesAr : importantNotesEn}
+        </CollapsibleContent>
+      </Collapsible>
 
       {error && <p className="text-xs text-destructive">{error}</p>}
 
