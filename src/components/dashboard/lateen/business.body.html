@@ -630,9 +630,13 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 .lp-input:disabled { color:var(--color-text-secondary); cursor:not-allowed; }
 .lp-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
 .lp-row-2 .lp-field-label { margin:0 0 8px; }
-.lp-upload-box { border:1.5px dashed var(--color-border-secondary); border-radius:14px; padding:26px 16px; text-align:center; color:var(--color-text-secondary); font-size:14px; background:var(--color-background-secondary); cursor:pointer; }
-.lp-upload-box svg { display:block; margin:0 auto 10px; color:#34c77b; }
-.lp-upload-box .lp-sub { font-size:12px; color:var(--color-text-tertiary); margin-top:4px; }
+.lp-cover-frame { position:relative; width:100%; height:110px; border-radius:14px; overflow:hidden; background:var(--color-background-secondary); border:0.5px solid var(--color-border-tertiary); touch-action:none; }
+.lp-cover-placeholder { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--color-text-secondary); font-size:13px; cursor:pointer; padding:8px; }
+.lp-cover-placeholder svg { display:block; margin:0 auto 6px; color:#34c77b; }
+.lp-cover-placeholder .lp-sub { font-size:11px; color:var(--color-text-tertiary); margin-top:3px; }
+.lp-cover-img { width:100%; height:100%; object-fit:cover; display:block; cursor:grab; user-select:none; -webkit-user-select:none; }
+.lp-cover-remove { position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
+.lp-cover-caption { font-size:11px; color:var(--color-text-tertiary); margin-top:6px; text-align:center; }
 .lp-photo-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:10px; }
 .lp-photo-slot { aspect-ratio:1; border-radius:10px; background:var(--color-background-secondary); border:0.5px solid var(--color-border-tertiary); overflow:hidden; position:relative; }
 .lp-photo-slot img { width:100%; height:100%; object-fit:contain; display:block; background:#0d0d0d; }
@@ -956,11 +960,16 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 
       <!-- Photos -->
       <label class="lp-field-label">Product photos <span class="lp-req">*</span></label>
-      <div class="lp-upload-box" onclick="document.getElementById('photo-input').click()">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Tap to upload photos
-        <div class="lp-sub">First photo becomes the cover image</div>
+      <div class="lp-cover-frame" id="lp-cover-frame">
+        <div class="lp-cover-placeholder" id="lp-cover-placeholder" onclick="document.getElementById('photo-input').click()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Tap to upload photos
+          <div class="lp-sub">First photo becomes the cover image</div>
+        </div>
+        <img class="lp-cover-img" id="lp-cover-img" alt="" style="display:none" draggable="false"/>
+        <button type="button" class="lp-cover-remove" id="lp-cover-remove" style="display:none" onclick="event.stopPropagation();removePhoto(0)">×</button>
       </div>
+      <div class="lp-cover-caption" id="lp-cover-caption" style="display:none">This is what the marketer sees before tapping on the product to see the full photo</div>
       <div class="lp-photo-grid" id="photo-grid">
         <div class="lp-photo-slot add-tile" onclick="document.getElementById('photo-input').click()">
           <div class="lp-add-icon">+</div>
