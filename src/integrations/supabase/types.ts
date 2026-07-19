@@ -455,6 +455,7 @@ export type Database = {
           platform_fee: number
           price: number
           qty: number
+          require_additional_phone: boolean
           revenue: number
           sizes: Json
           sold: number
@@ -484,6 +485,7 @@ export type Database = {
           platform_fee?: number
           price?: number
           qty?: number
+          require_additional_phone?: boolean
           revenue?: number
           sizes?: Json
           sold?: number
@@ -513,6 +515,7 @@ export type Database = {
           platform_fee?: number
           price?: number
           qty?: number
+          require_additional_phone?: boolean
           revenue?: number
           sizes?: Json
           sold?: number
@@ -541,6 +544,7 @@ export type Database = {
           payout_notes: string | null
           payout_swift: string | null
           phone: string | null
+          require_additional_phone: boolean
           updated_at: string
           whatsapp: string | null
         }
@@ -561,6 +565,7 @@ export type Database = {
           payout_notes?: string | null
           payout_swift?: string | null
           phone?: string | null
+          require_additional_phone?: boolean
           updated_at?: string
           whatsapp?: string | null
         }
@@ -581,6 +586,7 @@ export type Database = {
           payout_notes?: string | null
           payout_swift?: string | null
           phone?: string | null
+          require_additional_phone?: boolean
           updated_at?: string
           whatsapp?: string | null
         }
@@ -681,6 +687,7 @@ export type Database = {
           platform_fee: number | null
           price: number | null
           qty: number | null
+          require_additional_phone: boolean | null
           sizes: Json | null
           status: string | null
           updated_at: string | null
@@ -706,6 +713,7 @@ export type Database = {
           platform_fee?: number | null
           price?: number | null
           qty?: number | null
+          require_additional_phone?: boolean | null
           sizes?: Json | null
           status?: string | null
           updated_at?: string | null
@@ -731,6 +739,7 @@ export type Database = {
           platform_fee?: number | null
           price?: number | null
           qty?: number | null
+          require_additional_phone?: boolean | null
           sizes?: Json | null
           status?: string | null
           updated_at?: string | null
