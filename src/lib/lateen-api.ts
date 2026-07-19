@@ -685,10 +685,22 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
       },
       async listAllProducts(search?: string) {
+        const term = search && search.trim();
         let q = supabase.from("products").select("*").is("deleted_at", null);
-        if (search && search.trim()) {
-          const s = `%${search.trim()}%`;
-          q = q.or(`name.ilike.${s},code.ilike.${s},biz_name.ilike.${s}`);
+        if (term) {
+          const s = `%${term}%`;
+          const filters = [`name.ilike.${s}`, `code.ilike.${s}`, `biz_name.ilike.${s}`];
+          // products.biz_name is only a snapshot taken when the product was
+          // saved — it can be missing or out of date if the shop renamed
+          // itself since. Also match against the owner's *current* profile
+          // name so searching by today's shop name always works.
+          const { data: owners } = await supabase
+            .from("profiles")
+            .select("id")
+            .or(`business_name.ilike.${s},full_name.ilike.${s}`);
+          const ownerIds = (owners ?? []).map((o) => o.id).filter(Boolean);
+          if (ownerIds.length) filters.push(`business_id.in.(${ownerIds.join(",")})`);
+          q = q.or(filters.join(","));
         }
         const { data, error } = await q.order("created_at", { ascending: false });
         if (error) throw error;
