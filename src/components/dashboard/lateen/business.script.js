@@ -17,7 +17,7 @@ if(typeof window!=='undefined'){window.__money=__money;window.__moneyH=__moneyH;
 const __AR_LBL={Sun:'الأحد',Mon:'الإثنين',Tue:'الثلاثاء',Wed:'الأربعاء',Thu:'الخميس',Fri:'الجمعة',Sat:'السبت',Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر'};
 const __ar=()=>document.documentElement.lang==='ar';
 const __tlbl=v=>(__ar()&&__AR_LBL[v])?__AR_LBL[v]:v;
-window.addEventListener('lateen-lang',()=>{try{if(typeof loadProducts==='function')loadProducts();if(typeof loadOrders==='function')loadOrders();if(typeof buildMainChart==='function')buildMainChart();if(typeof renderVariantGroups==='function')renderVariantGroups();if(typeof refreshProfile==='function')refreshProfile();}catch(e){}});
+window.addEventListener('lateen-lang',()=>{try{if(typeof loadProducts==='function')loadProducts();if(typeof loadOrders==='function')loadOrders();if(typeof buildMainChart==='function')buildMainChart();if(typeof renderVariantGroups==='function')renderVariantGroups();if(typeof refreshProfile==='function')refreshProfile();if(typeof __syncLangRow==='function')__syncLangRow();}catch(e){}});
 const chartData={revenue:{D:{labels:[],sub:[],values:[]},M:{labels:[],sub:[],values:[]},Y:{labels:[],sub:[],values:[]}},pieces:{D:{labels:[],sub:[],values:[]},M:{labels:[],sub:[],values:[]},Y:{labels:[],sub:[],values:[]}}};
 const analyticsData={D:{ok:0,fail:0},M:{ok:0,fail:0},Y:{ok:0,fail:0}};
 let currentMetric='revenue',currentPeriod='D',mainChart,ringChart;
@@ -59,8 +59,9 @@ function switchPeriod(p,el){currentPeriod=p;document.querySelectorAll('.ptab').f
 
 /* Nav */
 function goTo(pageId){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(pageId).classList.add('active');const navMap={'pg-home':'nav-home','pg-products':'nav-products','pg-orders':'nav-orders'};document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');n.querySelectorAll('svg').forEach(s=>s.setAttribute('stroke','var(--color-text-secondary)'));n.querySelector('.nav-label').style.color='';});if(navMap[pageId]){const nav=document.getElementById(navMap[pageId]);nav.classList.add('active');nav.querySelectorAll('svg').forEach(s=>s.setAttribute('stroke','#34c77b'));nav.querySelector('.nav-label').style.color='#34c77b';}if(pageId==='pg-products'){renderProducts();renderPhotoGrid();}if(pageId==='pg-orders'){updateSummary();applyFilters();}if(pageId==='pg-notif')document.getElementById('notif-dot').style.display='none';}
-function openMenu(){document.getElementById('menu-overlay').classList.add('open');document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';}
+function openMenu(){__syncLangRow();document.getElementById('menu-overlay').classList.add('open');document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';}
 function closeMenu(){document.getElementById('menu-overlay').classList.remove('open');document.body.style.overflow='';document.documentElement.style.overflow='';}
+function __syncLangRow(){const p=document.getElementById('lang-row-primary');const s=document.getElementById('lang-row-secondary');if(!p||!s)return;const ar=(typeof __ar==='function'&&__ar());if(ar){p.textContent='اللغة';s.textContent='Language';}else{p.textContent='Language';s.textContent='اللغة';}}
 function openSupport(){const ov=document.getElementById('support-overlay');if(ov)ov.classList.add('open');}
 function closeSupport(){const ov=document.getElementById('support-overlay');if(ov)ov.classList.remove('open');}
 function openPayout(){document.getElementById('payout-overlay').classList.add('open');if(typeof bdRenderBreakdown==='function')bdRenderBreakdown();}
