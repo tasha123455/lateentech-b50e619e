@@ -1,0 +1,515 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+.lateen-admin * { box-sizing: border-box; margin: 0; padding: 0; }
+.lateen-admin {
+  --bg: #141414; --surface: #1e1e1e; --surface-2: #2a2a2a; --card: #0d0d0d;
+  --txt-1: #f0eeeb; --txt-2: #9e9b97; --txt-3: #5e5c58;
+  --border: #333330; --border-2: #272725;
+  --accent: #f5b441; --accent-tint: #3a2a10;
+  --danger: #e07070; --danger-tint: #3a1a1a;
+  --ok: #2dbd8f; --ok-tint: #1a3d2f;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.adm-app { background: var(--bg); min-height: 100vh; padding: 0.75rem 1.25rem 5rem; max-width: 480px; margin: 0 auto; font-family: var(--font); color: var(--txt-1); position: relative; }
+.adm-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.adm-tl { display: flex; align-items: center; gap: 10px; }
+.adm-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent-tint); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--accent); }
+.adm-greet { font-size: 15px; font-weight: 500; }
+.adm-greet-sub { font-size: 11px; color: var(--txt-2); }
+.adm-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); text-transform: uppercase; }
+.adm-signout { background: none; border: 0.5px solid var(--border); color: var(--txt-2); font-size: 11px; padding: 6px 11px; border-radius: 14px; cursor: pointer; font-family: var(--font); }
+.adm-page { display: none; }
+.adm-page.active { display: block; }
+.adm-h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; }
+.adm-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.adm-stat { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 14px; padding: 14px; }
+.adm-stat-label { font-size: 11px; color: var(--txt-2); margin-bottom: 6px; }
+.adm-stat-value { font-size: 22px; font-weight: 500; }
+.cur-sym { font-size: 0.62em; opacity: 0.82; font-weight: 500; margin-inline-end: 0.18em; letter-spacing: 0.01em; display: inline-block; vertical-align: baseline; }
+.adm-stat-sub { font-size: 10px; color: var(--txt-3); margin-top: 4px; }
+.adm-stat.full { grid-column: 1 / -1; background: var(--card); border-color: var(--accent-tint); }
+.adm-stat.full .adm-stat-value { color: var(--accent); font-size: 28px; }
+.adm-section { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+.adm-row { padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); cursor: pointer; }
+.adm-row:last-child { border-bottom: none; }
+.adm-row-top { display: flex; align-items: center; gap: 12px; }
+.adm-thumb { width: 48px; height: 48px; border-radius: 8px; background: var(--surface-2); object-fit: cover; flex-shrink: 0; cursor: zoom-in; }
+.adm-thumb-empty { width: 48px; height: 48px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--txt-3); flex-shrink: 0; }
+.adm-row-mid { flex: 1; min-width: 0; }
+.adm-row-name { font-size: 13px; font-weight: 500; }
+.adm-row-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+.adm-row-amt { font-size: 14px; font-weight: 500; color: var(--accent); }
+.adm-expand { display: none; padding: 12px 14px 14px; border-top: 0.5px solid var(--border-2); }
+.adm-expand.open { display: block; }
+.adm-receipt-full { width: 100%; max-height: 360px; object-fit: contain; background: #000; border-radius: 10px; margin-bottom: 10px; }
+.adm-prod-thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--surface-2); object-fit: cover; flex-shrink: 0; cursor: zoom-in; }
+.adm-order-detail { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.adm-order-detail-rows { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.adm-detail-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--txt-2); }
+.adm-detail-row span:last-child { color: var(--txt-1); font-weight: 500; }
+.adm-actions { display: flex; gap: 8px; }
+.adm-btn { flex: 1; height: 36px; border-radius: 18px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font); }
+.adm-btn-ok { background: var(--ok); color: #fff; }
+.adm-btn-no { background: var(--danger); color: #fff; }
+.adm-btn-ghost { background: transparent; color: var(--txt-2); border: 0.5px solid var(--border); }
+.adm-btn-acc { background: var(--accent); color: #1a1a1a; }
+.adm-empty { padding: 32px 16px; text-align: center; color: var(--txt-3); font-size: 12px; }
+.adm-search { width: 100%; height: 38px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 0 14px; color: var(--txt-1); font-family: var(--font); font-size: 13px; margin-bottom: 12px; }
+.adm-search:focus { outline: none; border-color: var(--accent); }
+.adm-user-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); }
+.adm-user-row:last-child { border-bottom: none; }
+.adm-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .adm-user-actions { flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
+.adm-role-pill { font-size: 9px; padding: 2px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.adm-role-marketer { background: #2d2b4e; color: #a09efc; }
+.adm-role-business { background: var(--ok-tint); color: var(--ok); }
+.adm-role-admin { background: var(--accent-tint); color: var(--accent); }
+.adm-payout-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); gap: 10px; }
+.adm-payout-row:last-child { border-bottom: none; }
+.adm-pay-info { flex: 1; min-width: 0; }
+.adm-pay-name { font-size: 13px; font-weight: 500; }
+.adm-pay-sub { font-size: 10px; color: var(--txt-3); margin-top: 2px; }
+.adm-pay-amt { font-size: 14px; font-weight: 500; color: var(--accent); margin-right: 8px; }
+.adm-prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.c { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 14px; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+.c:hover { border-color: var(--border); }
+.ci2 { width: 100%; height: 110px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; }
+.cb2 { padding: 10px 12px 12px; }
+.cn { font-size: 13px; font-weight: 500; color: var(--txt-1); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr { display: flex; align-items: center; justify-content: space-between; }
+.cpr { font-size: 13px; font-weight: 500; color: var(--txt-1); }
+.cco { font-size: 12px; font-weight: 500; color: #8b83e8; }
+.adm-status-pill { position: absolute; top: 8px; left: 8px; font-size: 9px; padding: 3px 7px; border-radius: 8px; background: rgba(0,0,0,0.7); color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; z-index: 2; }
+.adm-prod-del-ov { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: var(--danger); border: 1.5px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; z-index: 2; cursor: pointer; }
+.adm-prod-del-ov:hover { filter: brightness(1.1); }
+.adm-prod-hide-ov { position: absolute; bottom: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 8px 7px; cursor: pointer; z-index: 2; }
+.adm-prod-hide-circle { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1.5px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.adm-prod-hide-circle.on { background: var(--accent); border-color: var(--accent); }
+.adm-prod-hide-ov span { font-size: 9px; color: rgba(255,255,255,.8); font-weight: 500; font-family: var(--font); }
+
+.adm-bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #1a1a1a; border-top: 0.5px solid var(--border-2); padding: 10px 0 16px; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 20; }
+.adm-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 0.6rem; flex: 1; }
+.adm-nav-label { font-size: 10px; color: var(--txt-2); }
+.adm-nav-item.active .adm-nav-label { color: var(--accent); font-weight: 500; }
+.adm-nav-item.active svg { stroke: var(--accent); }
+.adm-nav-item svg { width: 20px; height: 20px; stroke: var(--txt-2); }
+
+.adm-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+.adm-lightbox.open { display: flex; }
+.adm-lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.adm-filter-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.adm-filter-chip { font-size: 11px; padding: 6px 12px; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); color: var(--txt-2); cursor: pointer; font-family: var(--font); font-weight: 500; }
+.adm-filter-chip.on { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+
+.adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; align-items: flex-end; justify-content: center; }
+.adm-pdetail.open { display: flex; }
+.adm-pdetail-card { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; position: relative; padding: 18px 16px 32px; border-top: 0.5px solid var(--border); }
+.adm-pdetail-close { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.4); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 2; }
+.adm-pd-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 14px; background: var(--surface-2); margin-bottom: 12px; }
+.adm-pd-imgrow { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; }
+.adm-pd-imgrow img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
+.adm-pd-name { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+.adm-pd-shop { font-size: 12px; color: var(--txt-2); margin-bottom: 14px; }
+.adm-pd-section { font-size: 11px; font-weight: 600; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 6px; }
+.adm-pd-desc { font-size: 13px; color: var(--txt-1); line-height: 1.5; white-space: pre-wrap; }
+.adm-pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.adm-pd-cell { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; }
+.adm-pd-cell-l { font-size: 10px; color: var(--txt-3); }
+.adm-pd-cell-v { font-size: 14px; font-weight: 500; color: var(--txt-1); }
+.adm-pd-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.adm-pd-chip { font-size: 11px; padding: 4px 9px; border-radius: 8px; background: var(--surface-2); color: var(--txt-2); }
+.adm-pd-owner { background: var(--card); border: 0.5px solid var(--accent-tint); border-radius: 12px; padding: 12px; margin-top: 6px; }
+.adm-pd-owner-name { font-size: 14px; font-weight: 500; color: var(--accent); margin-bottom: 4px; }
+.adm-pd-owner-row { font-size: 12px; color: var(--txt-2); margin-top: 3px; }
+.adm-pd-owner-row span { color: var(--txt-1); font-weight: 500; }
+.adm-pd-zone { border: 0.5px solid var(--border-2); border-radius: 10px; overflow: hidden; margin-top: 6px; }
+.adm-pd-zone-h { padding: 7px 12px; background: var(--surface-2); font-size: 12px; font-weight: 500; }
+.adm-pd-zone-r { display: flex; justify-content: space-between; padding: 7px 12px; border-top: 0.5px solid var(--border-2); font-size: 12px; }
+/* ===== Admin Home v2 (pasted design) ===== */
+.adm-home-v2{
+  --bg: #0b0b0c;
+  --surface: #17171a;
+  --surface-2: #1d1d20;
+  --line: rgba(255,255,255,0.07);
+  --text: #f3f3f1;
+  --text-2: #9c9c9c;
+  --text-3: #6b6b6b;
+  --accent: #caa05a;
+  --accent-soft: rgba(202,160,90,0.14);
+  --danger: #d98177;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  padding-bottom: 8px;
+}
+.adm-home-v2 .section-title{
+  font-size: 24px; font-weight:700; color: var(--text);
+  margin: 4px 0 18px;
+}
+
+/* ---- Date filter: single quiet segmented track ---- */
+.adm-home-v2 .range-tabs{
+  display:flex; gap:4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 4px; border-radius: 16px;
+  margin-bottom: 18px;
+}
+.adm-home-v2 .range-tab{
+  flex:1; text-align:center;
+  padding: 10px 6px; border-radius: 12px;
+  font-size: 13px; font-weight:600; color: var(--text-2);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.adm-home-v2 .range-tab.active{ background: var(--accent-soft); color: var(--accent); }
+.adm-home-v2 .range-tab .chev{ font-size: 9px; transition: transform 0.2s; }
+.adm-home-v2 .range-tab.open .chev{ transform: rotate(180deg); }
+
+.adm-home-v2 .dropdown-list{
+  display:none; flex-direction:column; gap: 2px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 5px;
+  margin: -8px 0 18px;
+}
+.adm-home-v2 .dropdown-list.open{ display:flex; }
+.adm-home-v2 .dd-item{
+  padding: 11px 14px; border-radius: 12px;
+  font-size: 13.5px; color: var(--text-2); cursor:pointer; text-align:right;
+}
+.adm-home-v2 .dd-item:hover{ background: var(--surface-2); color: var(--text); }
+.adm-home-v2 .dd-item.clear{ color: var(--danger); font-weight:600; text-align:center; }
+
+/* ---- Hero card ---- */
+.adm-home-v2 .hero-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 28px 24px;
+  text-align: right;
+}
+.adm-home-v2 .hero-label{ font-size: 14px; font-weight:600; color: var(--text-2); margin-bottom:16px; }
+.adm-home-v2 .hero-value{
+  font-size: 44px; font-weight:800; color: var(--accent);
+  line-height:1; margin-bottom: 14px; font-variant-numeric: tabular-nums;
+}
+.adm-home-v2 .hero-sub{ font-size: 12.5px; color: var(--text-3); }
+
+/* ---- Stats list: one quiet card, rows instead of many boxes ---- */
+.adm-home-v2 .stats-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 4px 20px;
+  margin-top: 14px;
+}
+.adm-home-v2 .stat-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.adm-home-v2 .stat-row:last-child{ border-bottom:none; }
+.adm-home-v2 .stat-left{ display:flex; align-items:center; gap:13px; }
+.adm-home-v2 .stat-icon{
+  width:36px; height:36px; border-radius:11px;
+  background: var(--surface-2);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--text-2); flex-shrink:0;
+}
+.adm-home-v2 .stat-icon svg{ width:17px; height:17px; }
+.adm-home-v2 .stat-label{ font-size: 14px; font-weight:600; color: var(--text); }
+.adm-home-v2 .stat-sub{ font-size: 11.5px; color: var(--text-3); margin-top:2px; }
+.adm-home-v2 .stat-value{ font-size: 21px; font-weight:700; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ---- Analytics chart ---- */
+.adm-home-v2 .chart-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 20px 18px 16px;
+  margin-top: 14px;
+}
+.adm-home-v2 .chart-title{ font-size: 14px; font-weight:600; color: var(--text); margin-bottom:2px; }
+.adm-home-v2 .chart-caption{ font-size: 11.5px; color: var(--text-3); margin-bottom:16px; }
+.adm-home-v2 .chart-filters{
+  display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:14px;
+  scrollbar-width:none;
+}
+.adm-home-v2 .chart-filters::-webkit-scrollbar{ display:none; }
+.adm-home-v2 .chip{
+  flex:0 0 auto;
+  background: var(--surface-2); border:1px solid var(--line); color: var(--text-2);
+  font-family:inherit; font-size:12px; font-weight:600;
+  padding: 8px 14px; border-radius: 14px; white-space:nowrap; cursor:pointer;
+}
+.adm-home-v2 .chip.active{ background: var(--surface-2); color: var(--text); border-color:#3a3a3a; font-weight:700; }
+.adm-home-v2 .chart-wrap{ position:relative; height:220px; }
+
+</style>
+
+<div class="adm-app">
+  <div class="adm-topbar">
+    <div class="adm-tl">
+      <div class="adm-avatar">A</div>
+      <div>
+        <div class="adm-greet">Admin Console</div>
+        <div class="adm-greet-sub">Lateen platform control</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="adm-badge">Admin</span>
+      <button class="adm-signout" data-action="sign-out">Sign out</button>
+    </div>
+  </div>
+
+  <!-- HOME / METRICS (v2 design, pasted from dashboard-analytics-v2-1.html) -->
+  <section class="adm-page active" id="adm-home">
+    <div class="adm-home-v2" dir="rtl">
+  <h1 class="section-title">تحليلات شاملة</h1>
+
+  <!-- Date filter -->
+  <div class="range-tabs">
+    <div class="range-tab active" data-range="all">كل الوقت</div>
+    <div class="range-tab" data-range="daily">يوم <span class="chev">▾</span></div>
+    <div class="range-tab" data-range="monthly">شهر <span class="chev">▾</span></div>
+    <div class="range-tab" data-range="yearly">سنة <span class="chev">▾</span></div>
+  </div>
+  <div class="dropdown-list" id="dailyList"></div>
+  <div class="dropdown-list" id="monthlyList"></div>
+  <div class="dropdown-list" id="yearlyList"></div>
+
+  <!-- Hero: total collected platform fees -->
+  <div class="hero-card">
+    <div class="hero-label">إجمالي رسوم المنصة المحصّلة</div>
+    <div class="hero-value" id="heroValue"><span class="cur-sym">د.ل</span>…</div>
+    <div class="hero-sub" id="heroSub">إجمالي الأرباح من الطلبيات المؤكدة والمسلّمة</div>
+  </div>
+
+  <!-- Stats list -->
+  <div class="stats-card">
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">المستخدمون النشطون</div>
+          <div class="stat-sub">آخر 30 يوماً</div>
+        </div>
+      </div>
+      <div class="stat-value" id="statActiveUsers">…</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3.1-7 7-7s7 3 7 7"/><path d="M19 8v6M22 11h-6"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">إجمالي المستخدمين</div>
+          <div class="stat-sub">كل الحسابات المسجلة</div>
+        </div>
+      </div>
+      <div class="stat-value" id="statTotalUsers">…</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">إجمالي المنتجات</div>
+          <div class="stat-sub">في كل المتاجر</div>
+        </div>
+      </div>
+      <div class="stat-value" id="statTotalProducts">…</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Pieces Sold</div>
+          <div class="stat-sub">All confirmed orders, lifetime</div>
+        </div>
+      </div>
+      <div class="stat-value" id="statPiecesSold">…</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Succeeded Upfronts</div>
+          <div class="stat-sub">Receipts approved, lifetime</div>
+        </div>
+      </div>
+      <div class="stat-value" id="statSucceeded">…</div>
+    </div>
+  </div>
+
+  <!-- Analytics chart -->
+  <div class="chart-card">
+    <div class="chart-title">الأداء عبر آخر 14 يوماً</div>
+    <div class="chart-caption">اختر مقياساً لعزله، أو اترك الكل لمقارنتها معاً</div>
+    <div class="chart-filters" id="chartFilters">
+      <button class="chip active" data-metric="all">الكل</button>
+      <button class="chip" data-metric="activeUsers">المستخدمون النشطون</button>
+      <button class="chip" data-metric="totalUsers">إجمالي المستخدمين</button>
+      <button class="chip" data-metric="totalProducts">إجمالي المنتجات</button>
+      <button class="chip" data-metric="piecesSold">Pieces Sold</button>
+      <button class="chip" data-metric="succeeded">Succeeded Upfronts</button>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="analyticsChart"></canvas>
+    </div>
+  </div>
+    </div>
+  </section>
+
+  <!-- ORDER VERIFICATION -->
+  <section class="adm-page" id="adm-verify">
+    <div class="adm-h1">Order Verification Hub</div>
+    <div class="adm-section" id="verify-list">
+      <div class="adm-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- PAYOUTS -->
+  <section class="adm-page" id="adm-payouts">
+    <div class="adm-h1">Payout Manager</div>
+    <div class="adm-section" id="payouts-list">
+      <div class="adm-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- USERS -->
+  <section class="adm-page" id="adm-users">
+    <div class="adm-h1">User Directory</div>
+    <div class="adm-filter-row" id="user-filter-row">
+      <button class="adm-filter-chip on" data-role="" onclick="admSetUserFilter('',this)">All</button>
+      <button class="adm-filter-chip" data-role="marketer" onclick="admSetUserFilter('marketer',this)">Marketers</button>
+      <button class="adm-filter-chip" data-role="business" onclick="admSetUserFilter('business',this)">Businesses</button>
+      <button class="adm-filter-chip" data-role="admin" onclick="admSetUserFilter('admin',this)">Admins</button>
+    </div>
+    <input class="adm-search" id="user-search" placeholder="Search by name, phone, business…" oninput="admUserSearch(this.value)" />
+    <div class="adm-section" id="users-list">
+      <div class="adm-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="adm-page" id="adm-products">
+    <div class="adm-h1">Product Review</div>
+    <input class="adm-search" id="product-search" placeholder="Search by name, code, shop…" oninput="admProductSearch(this.value)" />
+    <div class="adm-prod-grid" id="products-grid">
+      <div class="adm-empty" style="grid-column:1/-1;">Loading…</div>
+    </div>
+  </section>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="adm-pdetail" id="adm-pdetail" onclick="if(event.target===this)admClosePDetail()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admClosePDetail()">×</button>
+      <div id="adm-pdetail-body"><div class="adm-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- EMPLOYEES -->
+  <section class="adm-page" id="adm-employees">
+    <div class="adm-h1">Employees & Payroll</div>
+    <div class="adm-stat-grid">
+      <div class="adm-stat full">
+        <div class="adm-stat-label">Total Monthly Salaries</div>
+        <div class="adm-stat-value" id="emp-total-salary"><span class="cur-sym">د.ل</span>0.00</div>
+        <div class="adm-stat-sub"><span id="emp-count">0</span> employees · <span id="emp-paid-count">0</span> paid this month</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Paid This Month</div>
+        <div class="adm-stat-value" id="emp-paid-amt"><span class="cur-sym">د.ل</span>0.00</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-label">Pending This Month</div>
+        <div class="adm-stat-value" id="emp-pending-amt" style="color:var(--danger)"><span class="cur-sym">د.ل</span>0.00</div>
+      </div>
+    </div>
+    <div class="adm-filter-row">
+      <button class="adm-filter-chip on" data-emp-filter="" onclick="admSetEmpFilter('',this)">All</button>
+      <button class="adm-filter-chip" data-emp-filter="pending" onclick="admSetEmpFilter('pending',this)">Pending</button>
+      <button class="adm-filter-chip" data-emp-filter="paid" onclick="admSetEmpFilter('paid',this)">Paid</button>
+      <button class="adm-filter-chip" style="margin-left:auto;background:var(--accent);color:#1a1a1a;border-color:var(--accent);" onclick="admOpenEmpForm()">+ New</button>
+    </div>
+    <input class="adm-search" id="emp-search" placeholder="Search by name, number, role, email…" oninput="admEmpSearch(this.value)" />
+    <div class="adm-section" id="employees-list"><div class="adm-empty">Loading…</div></div>
+  </section>
+
+  <!-- EMPLOYEE FORM MODAL -->
+  <div class="adm-pdetail" id="adm-emp-form" onclick="if(event.target===this)admCloseEmpForm()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admCloseEmpForm()">×</button>
+      <div style="padding:18px 18px 8px;font-size:16px;font-weight:600;" id="adm-emp-form-title">New Employee</div>
+      <div class="adm-emp-form-body">
+        <input type="hidden" id="emp-id" />
+        <label class="adm-emp-lbl">Full name<input id="emp-name" class="adm-emp-inp" /></label>
+        <label class="adm-emp-lbl">Employee number<input id="emp-num" class="adm-emp-inp" placeholder="EMP-001" /></label>
+        <label class="adm-emp-lbl">Job title<input id="emp-job" class="adm-emp-inp" /></label>
+        <label class="adm-emp-lbl">Email<input id="emp-email" type="email" class="adm-emp-inp" /></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <label class="adm-emp-lbl">Monthly salary ($)<input id="emp-salary" type="number" min="0" step="0.01" class="adm-emp-inp" /></label>
+          <label class="adm-emp-lbl">Date of hire<input id="emp-hired" type="date" class="adm-emp-inp" /></label>
+        </div>
+        <label class="adm-emp-lbl">Notes<textarea id="emp-notes" rows="3" class="adm-emp-inp"></textarea></label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="adm-btn adm-btn-ghost" onclick="admCloseEmpForm()">Cancel</button>
+          <button class="adm-btn adm-btn-acc" onclick="admSaveEmp()">Save</button>
+        </div>
+        <button class="adm-btn adm-btn-no" id="emp-delete-btn" style="margin-top:8px;display:none;" onclick="admDeleteEmp()">Delete employee</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPLOYEE HISTORY MODAL -->
+  <div class="adm-pdetail" id="adm-emp-hist" onclick="if(event.target===this)admCloseEmpHist()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admCloseEmpHist()">×</button>
+      <div id="adm-emp-hist-body"><div class="adm-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <nav class="adm-bottom-nav">
+    <div class="adm-nav-item active" id="nav-adm-home" onclick="admGo('adm-home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+      <span class="adm-nav-label">Home</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-verify" onclick="admGo('adm-verify')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M9 12l2 2 4-4M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span class="adm-nav-label">Verify</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-payouts" onclick="admGo('adm-payouts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 7h18v10H3zM3 11h18M7 15h2"/></svg>
+      <span class="adm-nav-label">Payouts</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-users" onclick="admGo('adm-users')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 11h5M18.5 8.5v5"/></svg>
+      <span class="adm-nav-label">Users</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-products" onclick="admGo('adm-products')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg>
+      <span class="adm-nav-label">Products</span>
+    </div>
+    <div class="adm-nav-item" id="nav-adm-employees" onclick="admGo('adm-employees')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c1-4 4-6 7-6s6 2 7 6"/></svg>
+      <span class="adm-nav-label">Employees</span>
+    </div>
+  </nav>
+
+  <div class="adm-lightbox" id="adm-lightbox" onclick="this.classList.remove('open')">
+    <img id="adm-lightbox-img" alt="Receipt" />
+  </div>
+</div>
