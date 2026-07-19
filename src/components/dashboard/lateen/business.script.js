@@ -228,6 +228,8 @@ const LIBYA_CITIES=[{en:'Suluq',ar:'سلوق'},{en:'Ghemines',ar:'قمينس'},{
 function __cityLbl(en){try{if(typeof __ar==='function'&&__ar()){const m=LIBYA_CITIES.find(c=>c.en===en);if(m)return m.ar;}}catch(e){}return en;}
 function __countryLbl(code){if(code==='LY')return __ar()?'ليبيا':'Libya';if(typeof COUNTRY_NAMES!=='undefined'&&COUNTRY_NAMES[code])return COUNTRY_NAMES[code];return code;}
 function addCity(code,cityVal){let city=cityVal;if(!city){const id='new-city-'+code;const el=document.getElementById(id);city=el?el.value.trim():'';if(el)el.value='';}if(!city||!zones[code]||zones[code].cities[city])return;zones[code].cities[city]={delivery:''};renderZoneBuilderList();}
+function toggleCityPanel(code){cityPanelOpenFor=(cityPanelOpenFor===code)?null:code;renderZoneBuilderList();}
+function toggleCityCheck(code,cityEn){if(!zones[code])return;const scroller=document.getElementById('city-panel-'+code);const savedScroll=scroller?scroller.scrollTop:0;if(zones[code].cities[cityEn]){delete zones[code].cities[cityEn];}else{zones[code].cities[cityEn]={delivery:''};}renderZoneBuilderList();const restored=document.getElementById('city-panel-'+code);if(restored)restored.scrollTop=savedScroll;}
 function removeCity(code,city){delete zones[code].cities[city];renderZoneBuilderList();}
 function updateCityCost(code,city,field,val){if(zones[code]&&zones[code].cities[city])zones[code].cities[city][field]=parseFloat(val)||0;}
 function updateZoneShipping(code,val){if(zones[code])zones[code].shipping=val===''?'':(parseFloat(val)||0);}
