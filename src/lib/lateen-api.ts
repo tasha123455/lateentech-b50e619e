@@ -814,7 +814,18 @@ export function createLateenApi(userId: string) {
           .select("id, full_name, business_name, phone, created_at")
           .eq("id", (product as { business_id: string }).business_id)
           .maybeSingle();
-        return { product, owner };
+        let ownerEmail: string | null = null;
+        if (owner) {
+          try {
+            const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
+              _user_ids: [(owner as { id: string }).id],
+            });
+            ownerEmail = ((emailRows ?? []) as Array<{ id: string; email: string | null }>)[0]?.email ?? null;
+          } catch {
+            /* ignore — email just won't be shown */
+          }
+        }
+        return { product, owner: owner ? { ...owner, email: ownerEmail } : owner };
       },
       async listEmployees(search?: string) {
         let q = supabase.from("employees").select("*");
