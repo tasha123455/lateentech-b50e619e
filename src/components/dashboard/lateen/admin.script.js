@@ -612,37 +612,59 @@ async function admOpenProduct(id){
     const cur=(p.currency&&p.currency.symbol)||'$';
     const curH='<span class="cur-sym">'+cur+'</span>';
     const photos=Array.isArray(p.photos)?p.photos:[];
-    const mainImg=photos[0]?`<img class="adm-pd-img" src="${admEsc(photos[0])}" alt="${admEsc(p.name)}" onclick="admLightbox('${admEsc(photos[0])}')"/>`:`<div class="adm-pd-img" style="display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--txt-3);">📦</div>`;
-    const thumbs=photos.length>1?`<div class="adm-pd-imgrow">${photos.map(u=>`<img src="${admEsc(u)}" alt="" onclick="admLightbox('${admEsc(u)}')"/>`).join('')}</div>`:'';
-    const sizes=Array.isArray(p.sizes)&&p.sizes.length?`<div class="adm-pd-section">Sizes</div><div class="adm-pd-chips">${p.sizes.map(s=>`<span class="adm-pd-chip">${admEsc(s)}</span>`).join('')}</div>`:'';
-    const colors=Array.isArray(p.colors)&&p.colors.length?`<div class="adm-pd-section">Colours</div><div class="adm-pd-chips">${p.colors.map(s=>`<span class="adm-pd-chip">${admEsc(s)}</span>`).join('')}</div>`:'';
+    const gallery=photos.length
+      ?`<div class="pd-gallery"><div class="pd-gallery-track">${photos.map(u=>`<div class="pd-gallery-slide" onclick="admLightbox('${admEsc(u)}')"><img src="${admEsc(u)}" alt=""/></div>`).join('')}</div>${photos.length>1?`<div class="pd-gallery-dots">${photos.map((_,i)=>`<span class="pd-gd-dot${i===0?' on':''}"></span>`).join('')}</div>`:''}</div>`
+      :`<div class="pd-gallery pd-gallery-empty"><div class="pd-gallery-slide" style="font-size:64px;">📦</div></div>`;
+    const descBlock=p.description?`<div class="pd-sec-ttl">Description</div><div class="pd-desc">${admEsc(p.description)}</div>`:'';
+    const commVal=p.comm_mode==='fixed'?curH+Number(p.comm_fixed||0).toFixed(2):Number(p.comm_pct||0)+'%';
+    const marketerEarn=p.comm_mode==='fixed'?Number(p.comm_fixed||0):Number(p.price||0)*Number(p.comm_pct||0)/100;
+    const icSize='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>';
+    const icColor='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 7 5 10.5 5 14a7 7 0 0014 0c0-3.5-3-7-7-12z"/></svg>';
+    const icPrice='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>';
+    const icStock='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>';
+    const icSold='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+    const icRevenue='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>';
+    const sizes=Array.isArray(p.sizes)&&p.sizes.length?`<div class="pd-row"><div class="pd-row-ic">${icSize}</div><div class="pd-row-lbl">Sizes</div><div class="pd-row-val">${p.sizes.map(admEsc).join(', ')}</div></div>`:'';
+    const colors=Array.isArray(p.colors)&&p.colors.length?`<div class="pd-row"><div class="pd-row-ic">${icColor}</div><div class="pd-row-lbl">Colours</div><div class="pd-row-val">${p.colors.map(admEsc).join(', ')}</div></div>`:'';
     const CN={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa',MA:'Morocco'};
     const delivery=p.delivery&&typeof p.delivery==='object'?Object.entries(p.delivery):[];
-    const deliveryHtml=delivery.length?`<div class="adm-pd-section">Delivery</div>`+delivery.map(([code,z])=>{
+    const deliveryHtml=delivery.length?`<div class="pd-sec-ttl">Delivery</div>`+delivery.map(([code,z])=>{
       const cities=z&&z.cities?Object.entries(z.cities):[];
-      return `<div class="adm-pd-zone"><div class="adm-pd-zone-h">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="adm-pd-zone-r"><span>${admEsc(city)}</span><span style="color:var(--txt-2);">Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliv ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
+      return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span>${admEsc(city)}</span><span>Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliver ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
     }).join(''):'';
     const ownerName=owner.business_name||owner.full_name||p.biz_name||'Unknown';
-    const ownerOther=owner.business_name&&owner.full_name&&owner.business_name!==owner.full_name?`<div class="adm-pd-owner-row">Contact name: <span>${admEsc(owner.full_name)}</span></div>`:'';
+    const ownerOther=owner.business_name&&owner.full_name&&owner.business_name!==owner.full_name?`<div class="adm-pd-owner-row">Business owner name: <span>${admEsc(owner.full_name)}</span></div>`:'';
+    const ownerEmail=owner.email?`<div class="adm-pd-owner-row">Email: <span>${admEsc(owner.email)}</span></div>`:'';
     body.innerHTML=`
-      ${mainImg}${thumbs}
-      <div class="adm-pd-name">${admEsc(p.name)}</div>
-      <div class="adm-pd-shop">Code: ${admEsc(p.code||'—')} · ${admEsc(p.category||'Uncategorised')}</div>
-      <div class="adm-pd-grid">
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Price</div><div class="adm-pd-cell-v">${curH}${Number(p.price||0).toFixed(2)}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">In stock</div><div class="adm-pd-cell-v">${__admEffectiveQty(p)}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Commission</div><div class="adm-pd-cell-v">${p.comm_mode==='fixed'?curH+Number(p.comm_fixed||0).toFixed(2):Number(p.comm_pct||0)+'%'}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Platform fee</div><div class="adm-pd-cell-v">${curH}${Number(p.platform_fee||0).toFixed(2)}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Sold</div><div class="adm-pd-cell-v">${Number(p.sold||0)}</div></div>
-        <div class="adm-pd-cell"><div class="adm-pd-cell-l">Revenue</div><div class="adm-pd-cell-v">${curH}${Number(p.revenue||0).toFixed(2)}</div></div>
+      <div class="pd-card">
+        <div class="pd-hd-row">
+          <div class="pd-hd-name">${admEsc(p.name)}</div>
+          <div class="pd-hd-code"><span class="pd-hd-code-lbl">Code:</span>${admEsc(p.code||'—')}${p.category?' · '+admEsc(p.category):''}</div>
+        </div>
       </div>
-      ${p.description?`<div class="adm-pd-section">Description</div><div class="adm-pd-desc">${admEsc(p.description)}</div>`:''}
-      ${sizes}${colors}${deliveryHtml}
-      <div class="adm-pd-section">Business owner</div>
+      ${gallery}
+      ${descBlock}
+      <div class="pd-earn">
+        <div class="pd-earn-lbl">Marketer earns per sale</div>
+        <div class="pd-earn-val">${curH}${marketerEarn.toFixed(2)}</div>
+        <div class="pd-earn-divider"></div>
+        <div class="pd-earn-rows">
+          <div class="pd-earn-row"><span class="pd-earn-row-lbl">Commission</span><span class="pd-earn-row-val pu">${commVal}</span></div>
+          <div class="pd-earn-row"><span class="pd-earn-row-lbl">Platform fee</span><span class="pd-earn-row-val">${curH}${Number(p.platform_fee||0).toFixed(2)}</span></div>
+        </div>
+      </div>
+      <div class="pd-row"><div class="pd-row-ic">${icPrice}</div><div class="pd-row-lbl">Price</div><div class="pd-row-val">${curH}${Number(p.price||0).toFixed(2)}</div></div>
+      <div class="pd-row"><div class="pd-row-ic">${icStock}</div><div class="pd-row-lbl">In stock</div><div class="pd-row-val">${__admEffectiveQty(p)}</div></div>
+      <div class="pd-row"><div class="pd-row-ic">${icSold}</div><div class="pd-row-lbl">Sold</div><div class="pd-row-val">${Number(p.sold||0)}</div></div>
+      <div class="pd-row"><div class="pd-row-ic">${icRevenue}</div><div class="pd-row-lbl">Revenue</div><div class="pd-row-val">${curH}${Number(p.revenue||0).toFixed(2)}</div></div>
+      ${sizes}${colors}
+      ${deliveryHtml}
+      <div class="pd-sec-ttl">Business owner</div>
       <div class="adm-pd-owner">
         <div class="adm-pd-owner-name">${admEsc(ownerName)}</div>
         ${ownerOther}
         <div class="adm-pd-owner-row">Phone: <span>${admEsc(owner.phone||'—')}</span></div>
+        ${ownerEmail}
         <div class="adm-pd-owner-row">Joined: <span>${owner.created_at?admWhen(owner.created_at):'—'}</span></div>
         <div class="adm-pd-owner-row" style="margin-top:8px;">
           <button class="adm-go-btn" onclick="admGoToAccount('${p.business_id}','business','${admEsc(ownerName).replace(/'/g,'&#39;')}')">Go to Account</button>
