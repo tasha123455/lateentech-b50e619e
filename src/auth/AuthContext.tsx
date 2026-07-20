@@ -79,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               role: "marketer" | "business";
               full_name?: string;
               phone?: string;
+              whatsapp?: string;
               country?: string;
               business_name?: string;
             };
@@ -128,9 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               _role: p.role,
               _business_name: p.role === "business" ? p.business_name : undefined,
             });
-            const patch: { full_name?: string; phone?: string; country?: string; business_name?: string } = {};
+            const patch: { full_name?: string; phone?: string; whatsapp?: string; country?: string; business_name?: string } = {};
             if (p.full_name) patch.full_name = p.full_name;
             if (p.phone) patch.phone = p.phone;
+            if (p.whatsapp) patch.whatsapp = p.whatsapp;
             if (p.country) patch.country = p.country;
             if (p.role === "business" && p.business_name) patch.business_name = p.business_name;
             if (Object.keys(patch).length) {
