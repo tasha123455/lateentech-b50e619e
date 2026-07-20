@@ -121,6 +121,7 @@ export function RegisterForm({ role }: { role: Role }) {
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
+  const [altPhone, setAltPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -135,12 +136,14 @@ export function RegisterForm({ role }: { role: Role }) {
   }, []);
 
   const phoneValid = PHONE_RE.test(phone);
+  const altPhoneDuplicate = altPhone.length > 0 && altPhone === phone;
   const canSubmit = useMemo(() => {
     if (!fullName.trim()) return false;
     if (role === "business" && !businessName.trim()) return false;
     if (!phoneValid) return false;
+    if (altPhoneDuplicate) return false;
     return true;
-  }, [fullName, businessName, phone, role, phoneValid]);
+  }, [fullName, businessName, phone, role, phoneValid, altPhoneDuplicate]);
 
   const addRoleAndGo = async () => {
     const { error: rpcErr } = await supabase.rpc("add_self_role", {
@@ -179,6 +182,7 @@ export function RegisterForm({ role }: { role: Role }) {
           role,
           full_name: fullName.trim(),
           phone: "+218" + phone,
+          whatsapp: altPhone ? "+218" + altPhone : undefined,
           country: "LY",
           business_name: role === "business" ? businessName.trim() : undefined,
         }),
@@ -238,6 +242,27 @@ export function RegisterForm({ role }: { role: Role }) {
         {phone.length === 10 && !phoneValid && (
           <span className="mt-1 block text-[11px] text-destructive">
             Phone must be 10 digits and start with 091, 092, 093, or 094.
+          </span>
+        )}
+      </Field>
+
+      <Field label={ar ? "رقم هاتف إضافي" : "Additional phone number"}>
+        <div className="flex gap-2">
+          <CountryCodePicker />
+          <input
+            type="tel"
+            inputMode="numeric"
+            value={altPhone}
+            onChange={(e) => setAltPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+            placeholder="091xxxxxxx"
+            className="auth-input flex-1"
+          />
+        </div>
+        {altPhoneDuplicate && (
+          <span className="mt-1 block text-[11px] text-destructive">
+            {ar
+              ? "لا يمكن أن يكون رقم الهاتف الإضافي نفس رقم الهاتف الأساسي."
+              : "Additional phone number can't be the same as your phone number."}
           </span>
         )}
       </Field>
