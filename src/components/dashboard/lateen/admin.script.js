@@ -94,9 +94,24 @@ async function admLoadMetrics(){
     setStat('statTotalProducts',m.totalProducts);
     setStat('statPiecesSold',m.piecesSold);
     setStat('statSucceeded',m.succeededUpfronts);
+    const heroErr=document.getElementById('heroError'); if(heroErr) heroErr.remove();
     renderHero();
     renderChart();
-  }catch(e){console.error('[admin] metrics',e);}
+  }catch(e){
+    console.error('[admin] metrics',e);
+    const hero=document.getElementById('heroValue');
+    if(hero){
+      hero.innerHTML='<span class="cur-sym">د.ل</span>—';
+      let err=document.getElementById('heroError');
+      if(!err){
+        err=document.createElement('div');
+        err.id='heroError';
+        err.style.cssText='margin-top:8px;font-size:11.5px;color:var(--danger);';
+        hero.parentElement.appendChild(err);
+      }
+      err.textContent='Failed to load: '+(e&&e.message?e.message:'unknown error');
+    }
+  }
 }
 
 let __admVerifyMarketers=[];
@@ -232,7 +247,7 @@ function admRenderMktDetailShell(){
       <button class="adm-filter-chip ${__admMktDetailTab==='new'?'on':''}" id="adm-mkt-tab-new" onclick="admMktDetailTab('new')">New (${m.pending.length})</button>
       <button class="adm-filter-chip ${__admMktDetailTab==='history'?'on':''}" id="adm-mkt-tab-history" onclick="admMktDetailTab('history')">History (${m.history.length})</button>
     </div>
-    <input class="adm-search" id="adm-mkt-search" placeholder="Search this marketer's receipts by product" value="${admEsc(__admMktDetailSearch)}" oninput="admMktDetailSearch(this.value)" />
+    <input class="adm-search" id="adm-mkt-search" placeholder="Search by product, customer name, or phone" value="${admEsc(__admMktDetailSearch)}" oninput="admMktDetailSearch(this.value)" />
     <div id="adm-mkt-detail-list"></div>
   `;
   admRenderMktDetailList();
@@ -245,7 +260,13 @@ function admRenderMktDetailList(){
   if(!m)return;
   const q=__admMktDetailSearch;
   const baseList=__admMktDetailTab==='new'?m.pending:m.history;
-  const list=q?baseList.filter(o=>((o.product&&o.product.name)||'').toLowerCase().includes(q)):baseList;
+  const matches=o=>{
+    const product=((o.product&&o.product.name)||'').toLowerCase();
+    const custName=(o.customer_name||'').toLowerCase();
+    const custPhone=(o.customer_phone||'').toLowerCase();
+    return product.includes(q)||custName.includes(q)||custPhone.includes(q);
+  };
+  const list=q?baseList.filter(matches):baseList;
   if(!list.length){
     listRoot.innerHTML=q
       ? '<div class="adm-empty">No receipts match your search.</div>'
@@ -264,6 +285,8 @@ function admMktDetailCard(o){
   const platformFee=Number(o.platform_fee||0)*qty;
   const productTotal=unitPrice*qty;
   const product=(o.product&&o.product.name)||'Order';
+  const customerName=o.customer_name||'';
+  const customerPhone=o.customer_phone||'';
   const prodPhoto=(o.product&&Array.isArray(o.product.photos)&&o.product.photos[0])||'';
   const prodThumb=prodPhoto
     ?`<img class="adm-prod-thumb" src="${admEsc(prodPhoto)}" alt="" onclick="admLightbox('${admEsc(prodPhoto)}')"/>`
@@ -274,15 +297,18 @@ function admMktDetailCard(o){
 
   const isRefunded=!!o.refunded_at;
   const statusPill=isRefunded
-    ?'<span class="adm-status-pill adm-status-refunded">↺ Refunded</span>'
+    ?'<span class="adm-recpt-status adm-status-refunded">↺ Refunded</span>'
     :o.status==='pending'
-    ?'<span class="adm-status-pill adm-status-pending">⏳ Pending verification</span>'
+    ?'<span class="adm-recpt-status adm-status-pending">⏳ Pending verification</span>'
     :o.status==='approved'
-    ?'<span class="adm-status-pill adm-status-approved">✓ Approved</span>'
-    :'<span class="adm-status-pill adm-status-rejected">✕ Rejected</span>';
+    ?'<span class="adm-recpt-status adm-status-approved">✓ Approved</span>'
+    :'<span class="adm-recpt-status adm-status-rejected">✕ Rejected</span>';
 
   const created='Created: '+admWhenFull(o.created_at);
   const uploaded=o.receipt_uploaded_at?'Uploaded: '+admWhenFull(o.receipt_uploaded_at):'';
+  const customerLine=(customerName||customerPhone)
+    ?`<div class="adm-row-sub" style="margin-top:2px;">Customer: ${admEsc([customerName,customerPhone].filter(Boolean).join(' · '))}</div>`
+    :'';
 
   const noteBlock=(o.status==='rejected')
     ?`<div class="adm-note-block"><div class="adm-note-block-label">Admin note</div><div class="adm-note-block-text">${o.admin_notes&&String(o.admin_notes).trim()?admEsc(o.admin_notes):'No note was provided.'}</div></div>`
@@ -319,6 +345,7 @@ function admMktDetailCard(o){
       <div class="adm-row-amt">${admMoneyH(platformFee)}</div>
     </div>
     <div class="adm-row-sub" style="margin-top:8px;">${created}${uploaded?' · '+uploaded:''}</div>
+    ${customerLine}
     ${noteBlock}
     <div class="adm-order-detail-rows" style="margin-top:8px;">
       <div class="adm-detail-row"><span>Price</span><span>${admMoneyH(unitPrice)}</span></div>
@@ -348,7 +375,7 @@ async function admReject(id){
   try{await window.LateenAPI.admin.rejectOrder(id,notes||'Receipt rejected');admLoadVerify();}catch(e){alert('Reject failed: '+e.message);}
 }
 async function admRefundOrder(id){
-  if(!confirm("Refund this order?\n\nThis removes its platform fee from your total platform fee metrics on the Home page. It does not touch the marketer's wallet balance or change the order's status elsewhere in the app. This can't be undone."))return;
+  if(!confirm("Refund this order?\n\nThis removes its platform fee from your total platform fee metrics on the Home page, and deducts the marketer's fee for this order from their wallet balance. It does not change the order's status elsewhere in the app. This can't be undone."))return;
   try{
     await window.LateenAPI.admin.refundOrder(id);
     admLoadVerify();
