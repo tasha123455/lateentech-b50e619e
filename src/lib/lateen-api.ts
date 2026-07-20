@@ -373,7 +373,7 @@ export function createLateenApi(userId: string) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "full_name, business_name, phone, whatsapp, avatar_url, created_at, country, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes, banned_at, frozen_at, require_additional_phone",
+          "full_name, business_name, phone, whatsapp, avatar_url, created_at, country, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes, banned_at, frozen_at",
         )
         .eq("id", userId)
         .maybeSingle();
@@ -412,22 +412,6 @@ export function createLateenApi(userId: string) {
         .update(patch as never)
         .eq("id", userId);
       if (error) throw error;
-    },
-
-    async setRequireAdditionalPhone(value: boolean) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ require_additional_phone: value } as never)
-        .eq("id", userId);
-      if (profileError) throw profileError;
-      // Denormalized copy on every product owned by this business, so
-      // products_marketer_view (security_invoker) can expose it to
-      // marketers without needing to read this business's profiles row.
-      const { error: productsError } = await supabase
-        .from("products")
-        .update({ require_additional_phone: value } as never)
-        .eq("business_id", userId);
-      if (productsError) throw productsError;
     },
 
     async uploadAvatar(file: File): Promise<string> {
