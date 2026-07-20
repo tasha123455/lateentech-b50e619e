@@ -798,12 +798,12 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
     <input id="products-search" type="text" oninput="filterProducts()" placeholder="Search products…" data-i18n-ph="Search products…"/>
   </div>
 
-  <div class="mp-filter-row">
-    <div class="mp-filter-chip active" onclick="mpSetFilter('all',this)">All</div>
-    <div class="mp-filter-chip" onclick="mpSetFilter('active',this)">Active</div>
-    <div class="mp-filter-chip" onclick="mpSetFilter('paused',this)">Paused</div>
-    <div class="mp-filter-chip" onclick="mpSetFilter('lowstock',this)">Low stock</div>
-    <div class="mp-filter-chip" onclick="mpSetFilter('outofstock',this)">Out of stock</div>
+  <div class="mp-filter-row" data-no-i18n>
+    <div class="mp-filter-chip active" data-f="all" onclick="mpSetFilter('all',this)">All</div>
+    <div class="mp-filter-chip" data-f="active" onclick="mpSetFilter('active',this)">Active</div>
+    <div class="mp-filter-chip" data-f="paused" onclick="mpSetFilter('paused',this)">Paused</div>
+    <div class="mp-filter-chip" data-f="lowstock" onclick="mpSetFilter('lowstock',this)">Low stock</div>
+    <div class="mp-filter-chip" data-f="outofstock" onclick="mpSetFilter('outofstock',this)">Out of stock</div>
   </div>
 
   <div id="product-list"></div>
@@ -819,12 +819,12 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke-width="2" stroke-linecap="round"/></svg>
     <input type="text" id="search-input" placeholder="Search orders…" oninput="applyFilters()"/>
   </div>
-  <div class="ord-chips">
-    <div class="fchip active" onclick="setFilter('all',this)">All</div>
-    <div class="fchip" id="fc-new" onclick="setFilter('new',this)">New</div>
-    <div class="fchip" onclick="setFilter('confirmed',this)">Confirmed</div>
-    <div class="fchip" onclick="setFilter('delivered',this)">Delivered</div>
-    <div class="fchip" id="fc-failed" onclick="setFilter('failed',this)">Failed</div>
+  <div class="ord-chips" data-no-i18n>
+    <div class="fchip active" data-f="all" onclick="setFilter('all',this)">All</div>
+    <div class="fchip" id="fc-new" data-f="new" onclick="setFilter('new',this)">New</div>
+    <div class="fchip" data-f="confirmed" onclick="setFilter('confirmed',this)">Confirmed</div>
+    <div class="fchip" data-f="delivered" onclick="setFilter('delivered',this)">Delivered</div>
+    <div class="fchip" id="fc-failed" data-f="failed" onclick="setFilter('failed',this)">Failed</div>
   </div>
   <div class="list" id="orders-list"></div>
 </div>
