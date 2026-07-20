@@ -163,15 +163,12 @@
   --mp-text:#f2f3f1;--mp-text-dim:#9aa39d;--mp-text-faint:#6b746e;
   --mp-danger:#f0645a;--mp-danger-soft:rgba(240,100,90,0.12);
 }
-.mp-settings-card{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--mp-card);border:1px solid var(--mp-border);border-radius:14px;padding:12px 14px;margin-bottom:14px;}
-.mp-settings-label-wrap{display:flex;align-items:center;gap:6px;min-width:0;}
-.mp-settings-label{font-size:12.5px;font-weight:700;color:var(--mp-text);line-height:1.35;}
-.mp-info-btn{flex-shrink:0;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--mp-text-faint);background:transparent;color:var(--mp-text-faint);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-size:11px;font-weight:800;font-family:var(--font-sans);line-height:1;}
-.mp-info-btn:hover{border-color:var(--mp-text-dim);color:var(--mp-text-dim);}
-.mp-switch{flex-shrink:0;position:relative;width:44px;height:26px;border-radius:99px;border:1px solid var(--mp-border);background:var(--mp-field);padding:0;cursor:pointer;transition:background .2s,border-color .2s;}
-.mp-switch .mp-switch-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--mp-text-dim);transition:transform .2s,background .2s;}
-.mp-switch.on{background:var(--mp-green-soft);border-color:rgba(52,199,123,0.45);}
-.mp-switch.on .mp-switch-knob{transform:translateX(18px);background:var(--mp-green);}
+.mp-info-btn{flex-shrink:0;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--color-text-tertiary);background:transparent;color:var(--color-text-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-size:11px;font-weight:800;font-family:var(--font-sans);line-height:1;}
+.mp-info-btn:hover{border-color:var(--color-text-secondary);color:var(--color-text-secondary);}
+.mp-switch{flex-shrink:0;position:relative;width:44px;height:26px;border-radius:99px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);padding:0;cursor:pointer;transition:background .2s,border-color .2s;}
+.mp-switch .mp-switch-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--color-text-secondary);transition:transform .2s,background .2s;}
+.mp-switch.on{background:rgba(52,199,123,0.14);border-color:rgba(52,199,123,0.45);}
+.mp-switch.on .mp-switch-knob{transform:translateX(18px);background:#34c77b;}
 [dir="rtl"] .mp-switch .mp-switch-knob{left:auto;right:2px;}
 [dir="rtl"] .mp-switch.on .mp-switch-knob{transform:translateX(-18px);}
 .mp-switch:disabled{opacity:.6;cursor:not-allowed;}
@@ -673,6 +670,9 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 .lp-comm-unit { font-weight:700; color:#34c77b; font-size:14px; white-space:nowrap; }
 .lp-conversion-note { margin-top:12px; font-size:13px; color:var(--color-text-secondary); background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); border-radius:10px; padding:10px 12px; }
 .lp-conversion-note b { color:#34c77b; }
+.lp-reqphone-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(52,199,123,0.2);}
+.lp-reqphone-label-wrap{display:flex;align-items:center;gap:6px;min-width:0;}
+.lp-reqphone-label{font-size:12.5px;font-weight:700;color:var(--color-text-primary);line-height:1.35;}
 .lp-summary-row { display:flex; justify-content:space-between; font-size:14px; color:var(--color-text-secondary); padding:8px 0; }
 .lp-summary-row.total { color:var(--color-text-primary); font-weight:800; font-size:16px; padding-top:12px; border-top:0.5px solid var(--color-border-tertiary); margin-top:4px; }
 .lp-summary-row.total .lp-val { color:#34c77b; }
@@ -790,16 +790,6 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
     <button class="add-btn" id="add-product-btn" onclick="openAddForm()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Add product
-    </button>
-  </div>
-
-  <div class="mp-settings-card">
-    <div class="mp-settings-label-wrap">
-      <span class="mp-settings-label" data-i18n="Require Additional Phone Number from customer">Require Additional Phone Number from customer</span>
-      <button type="button" class="mp-info-btn" id="require-wa-info-btn" aria-label="Info" onclick="openRequireAdditionalPhoneInfo(event)">!</button>
-    </div>
-    <button type="button" class="mp-switch" id="require-wa-toggle" role="switch" aria-checked="false" onclick="onToggleRequireAdditionalPhone()">
-      <span class="mp-switch-knob"></span>
     </button>
   </div>
 
@@ -1182,6 +1172,16 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
         </div>
 
         <div class="lp-conversion-note" id="conversion-note" data-no-i18n></div>
+
+        <div class="lp-reqphone-row">
+          <div class="lp-reqphone-label-wrap">
+            <span class="lp-reqphone-label" data-i18n="Require Additional Phone Number from customer">Require Additional Phone Number from customer</span>
+            <button type="button" class="mp-info-btn" id="require-wa-info-btn" aria-label="Info" onclick="openRequireAdditionalPhoneInfo(event)">!</button>
+          </div>
+          <button type="button" class="mp-switch" id="require-wa-toggle" role="switch" aria-checked="false" onclick="onToggleProductReqPhone()">
+            <span class="mp-switch-knob"></span>
+          </button>
+        </div>
       </div>
     </div>
 
