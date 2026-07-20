@@ -613,52 +613,98 @@ async function admOpenProduct(id){
     const curH='<span class="cur-sym">'+cur+'</span>';
     const photos=Array.isArray(p.photos)?p.photos:[];
     const gallery=photos.length
-      ?`<div class="pd-gallery"><div class="pd-gallery-track">${photos.map(u=>`<div class="pd-gallery-slide" onclick="admLightbox('${admEsc(u)}')"><img src="${admEsc(u)}" alt=""/></div>`).join('')}</div>${photos.length>1?`<div class="pd-gallery-dots">${photos.map((_,i)=>`<span class="pd-gd-dot${i===0?' on':''}"></span>`).join('')}</div>`:''}</div>`
+      ?`<div class="pd-gallery"><div class="pd-gallery-track" id="admPdGalleryTrack">${photos.map(u=>`<div class="pd-gallery-slide" onclick="admLightbox('${admEsc(u)}')"><img src="${admEsc(u)}" alt=""/></div>`).join('')}</div>${photos.length>1?`<div class="pd-gallery-dots" id="admPdGalleryDots">${photos.map((_,i)=>`<span class="pd-gd-dot${i===0?' on':''}"></span>`).join('')}</div>`:''}</div>`
       :`<div class="pd-gallery pd-gallery-empty"><div class="pd-gallery-slide" style="font-size:64px;">📦</div></div>`;
     const descBlock=p.description?`<div class="pd-sec-ttl">Description</div><div class="pd-desc">${admEsc(p.description)}</div>`:'';
+
+    // Earn box — same 3-row breakdown as the marketer's sheet (commission,
+    // platform fee, deposit = the two combined), reworded from "your" to
+    // "marketer's" since it's the admin looking at someone else's earning.
     const commVal=p.comm_mode==='fixed'?curH+Number(p.comm_fixed||0).toFixed(2):Number(p.comm_pct||0)+'%';
-    const marketerEarn=p.comm_mode==='fixed'?Number(p.comm_fixed||0):Number(p.price||0)*Number(p.comm_pct||0)/100;
-    const icSize='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>';
-    const icColor='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 7 5 10.5 5 14a7 7 0 0014 0c0-3.5-3-7-7-12z"/></svg>';
+    const earnAmt=p.comm_mode==='fixed'?Number(p.comm_fixed||0):Number(p.price||0)*Number(p.comm_pct||0)/100;
+    const platFee=Number(p.platform_fee||0);
+    const deposit=earnAmt+platFee;
+
     const icPrice='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>';
     const icStock='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>';
     const icSold='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
     const icRevenue='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>';
-    const sizes=Array.isArray(p.sizes)&&p.sizes.length?`<div class="pd-row"><div class="pd-row-ic">${icSize}</div><div class="pd-row-lbl">Sizes</div><div class="pd-row-val">${p.sizes.map(admEsc).join(', ')}</div></div>`:'';
-    const colors=Array.isArray(p.colors)&&p.colors.length?`<div class="pd-row"><div class="pd-row-ic">${icColor}</div><div class="pd-row-lbl">Colours</div><div class="pd-row-val">${p.colors.map(admEsc).join(', ')}</div></div>`:'';
+    const icPin='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const icPeople='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+    const chev='<svg class="pd-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+    // Variant groups — same derivation the marketer's browse card uses:
+    // real variant_groups if the business set them up, else Size/Colour
+    // built from the plain sizes/colors arrays.
+    const __hasQty=v=>v&&typeof v==='object'&&v.qty!==undefined&&v.qty!==null&&v.qty!==''&&Number.isFinite(Number(v.qty));
+    const __ni=v=>typeof v==='string'?{val:v,photo:'',qty:null}:{val:(v&&v.val)||'',photo:(v&&v.photo)||'',qty:__hasQty(v)?Math.max(0,Number(v.qty)):null};
+    const vg=(p.variant_groups&&p.variant_groups.length)
+      ?p.variant_groups.map(g=>({name:g.name||'',items:(g.items||[]).map(__ni).filter(x=>x.val)})).filter(g=>g.items.length)
+      :[...(p.sizes&&p.sizes.length?[{name:'Size',items:p.sizes.map(__ni)}]:[]),...(p.colors&&p.colors.length?[{name:'Colour',items:p.colors.map(__ni)}]:[])];
+    const variantChev='<svg class="pd-variant-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    const variantBlock=vg.map((g,gi)=>`<div class="pd-variant"><div class="pd-variant-lbl">${admEsc(g.name)}</div><div class="pd-variant-sel-wrap"><select class="pd-variant-sel" id="admPdVsel${gi}">${g.items.map(x=>{
+      const q=x.qty;
+      const oos=q===0;
+      const suffix=q===null?'':(q>0?` · ${q} left`:' · out of stock');
+      return `<option value="${admEsc(x.val)}"${oos?' disabled':''}>${admEsc(x.val)}${suffix}</option>`;
+    }).join('')}</select>${variantChev}</div></div>`).join('');
+
+    // Ships to — collapsible, same as the marketer sheet.
     const CN={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa',MA:'Morocco'};
-    const delivery=p.delivery&&typeof p.delivery==='object'?Object.entries(p.delivery):[];
-    const deliveryHtml=delivery.length?`<div class="pd-sec-ttl">Delivery</div>`+delivery.map(([code,z])=>{
+    const deliveryEntries=p.delivery&&typeof p.delivery==='object'?Object.entries(p.delivery):[];
+    const cityCount=deliveryEntries.reduce((n,[,z])=>n+Object.keys((z&&z.cities)||{}).length,0);
+    const cityText=cityCount?(cityCount===1?'1 city':cityCount+' cities'):'—';
+    const zonesInner=deliveryEntries.map(([code,z])=>{
       const cities=z&&z.cities?Object.entries(z.cities):[];
       return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span>${admEsc(city)}</span><span>Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliver ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
-    }).join(''):'';
+    }).join('');
+    const shipsToRow=deliveryEntries.length?`<div class="pd-row pd-row-tap" onclick="admPdToggle('admPdZones')">
+        <div class="pd-row-ic">${icPin}</div>
+        <div class="pd-row-lbl">Delivery to</div>
+        <div class="pd-row-val">${cityText}${chev.replace('class="pd-chev"','class="pd-chev" id="admPdZonesChev"')}</div>
+      </div>
+      <div id="admPdZones" class="pd-zones" style="display:none;">${zonesInner}</div>`:'';
+
+    // Stock — collapsible per-variant breakdown when variants are tracked.
+    const qty=__admEffectiveQty(p);
+    const low=qty>0&&qty<=20;
+    const stockRow=`<div class="pd-row${vg.length?' pd-row-tap':''}"${vg.length?` onclick="admPdToggle('admPdStock')"`:''}>
+        <div class="pd-row-ic">${icStock}</div>
+        <div class="pd-row-lbl">In stock</div>
+        <div class="pd-row-val${low?' am':''}">${qty} pcs${vg.length?chev.replace('class="pd-chev"','class="pd-chev" id="admPdStockChev"'):''}</div>
+      </div>
+      ${vg.length?`<div id="admPdStock" class="pd-zones" style="display:none;">${vg.map(g=>`<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(g.name)}</div>${g.items.map(it=>`<div class="pd-zone-city"><span>${admEsc(it.val)}</span><span>${it.qty===null?'—':it.qty+' pcs'}</span></div>`).join('')}</div>`).join('')}</div>`:''}`;
+
     const ownerName=owner.business_name||owner.full_name||p.biz_name||'Unknown';
     const ownerOther=owner.business_name&&owner.full_name&&owner.business_name!==owner.full_name?`<div class="adm-pd-owner-row">Business owner name: <span>${admEsc(owner.full_name)}</span></div>`:'';
     const ownerEmail=owner.email?`<div class="adm-pd-owner-row">Email: <span>${admEsc(owner.email)}</span></div>`:'';
+
     body.innerHTML=`
       <div class="pd-card">
         <div class="pd-hd-row">
           <div class="pd-hd-name">${admEsc(p.name)}</div>
-          <div class="pd-hd-code"><span class="pd-hd-code-lbl">Code:</span>${admEsc(p.code||'—')}${p.category?' · '+admEsc(p.category):''}</div>
+          <div class="pd-hd-code"><span class="pd-hd-code-lbl">Product code:</span> ${admEsc(p.code||'—')}</div>
         </div>
       </div>
       ${gallery}
       ${descBlock}
       <div class="pd-earn">
-        <div class="pd-earn-lbl">Marketer earns per sale</div>
-        <div class="pd-earn-val">${curH}${marketerEarn.toFixed(2)}</div>
+        <div class="pd-earn-lbl">Marketer's earning per sale</div>
+        <div class="pd-earn-val">${curH}${earnAmt.toFixed(2)}</div>
         <div class="pd-earn-divider"></div>
         <div class="pd-earn-rows">
           <div class="pd-earn-row"><span class="pd-earn-row-lbl">Commission</span><span class="pd-earn-row-val pu">${commVal}</span></div>
-          <div class="pd-earn-row"><span class="pd-earn-row-lbl">Platform fee</span><span class="pd-earn-row-val">${curH}${Number(p.platform_fee||0).toFixed(2)}</span></div>
+          <div class="pd-earn-row"><span class="pd-earn-row-lbl">Platform fee</span><span class="pd-earn-row-val">${curH}${platFee.toFixed(2)}</span></div>
+          <div class="pd-earn-row"><span class="pd-earn-row-lbl">Deposit (with platform fee)</span><span class="pd-earn-row-val">${curH}${deposit.toFixed(2)}</span></div>
         </div>
       </div>
-      <div class="pd-row"><div class="pd-row-ic">${icPrice}</div><div class="pd-row-lbl">Price</div><div class="pd-row-val">${curH}${Number(p.price||0).toFixed(2)}</div></div>
-      <div class="pd-row"><div class="pd-row-ic">${icStock}</div><div class="pd-row-lbl">In stock</div><div class="pd-row-val">${__admEffectiveQty(p)}</div></div>
+      <div class="pd-row"><div class="pd-row-ic">${icPrice}</div><div class="pd-row-lbl">Product price</div><div class="pd-row-val">${curH}${Number(p.price||0).toFixed(2)}</div></div>
+      ${variantBlock}
+      ${shipsToRow}
+      ${stockRow}
+      <div class="pd-row"><div class="pd-row-ic">${icPeople}</div><div class="pd-row-lbl">Active marketers</div><div class="pd-row-val" id="admPdActMkt">…</div></div>
       <div class="pd-row"><div class="pd-row-ic">${icSold}</div><div class="pd-row-lbl">Sold</div><div class="pd-row-val">${Number(p.sold||0)}</div></div>
       <div class="pd-row"><div class="pd-row-ic">${icRevenue}</div><div class="pd-row-lbl">Revenue</div><div class="pd-row-val">${curH}${Number(p.revenue||0).toFixed(2)}</div></div>
-      ${sizes}${colors}
-      ${deliveryHtml}
       <div class="pd-sec-ttl">Business owner</div>
       <div class="adm-pd-owner">
         <div class="adm-pd-owner-name">${admEsc(ownerName)}</div>
@@ -671,7 +717,34 @@ async function admOpenProduct(id){
         </div>
       </div>
     `;
+
+    // Gallery dot sync on scroll (matches the marketer sheet's behaviour).
+    const track=document.getElementById('admPdGalleryTrack');
+    const dots=document.getElementById('admPdGalleryDots');
+    if(track&&dots){
+      track.addEventListener('scroll',()=>{
+        const w=track.clientWidth||1;
+        const i=Math.round(Math.abs(track.scrollLeft)/w);
+        [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i));
+      });
+    }
+    // Live active-marketers count (same shared RPC the marketer sheet uses).
+    try{
+      window.LateenAPI.activeMarketersCounts([p.id]).then(m=>{
+        const el=document.getElementById('admPdActMkt');
+        if(el)el.textContent=String(m[p.id]||0);
+      }).catch(()=>{const el=document.getElementById('admPdActMkt');if(el)el.textContent='0';});
+    }catch(e){}
   }catch(e){console.error('[admin] product detail',e);body.innerHTML='<div class="adm-empty">Failed to load: '+admEsc(e.message||'')+'</div>';}
+}
+
+function admPdToggle(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const isOpen=el.style.display!=='none';
+  el.style.display=isOpen?'none':'flex';
+  const chev=document.getElementById(id+'Chev');
+  if(chev)chev.classList.toggle('open',!isOpen);
 }
 
 /* boot */

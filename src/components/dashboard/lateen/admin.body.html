@@ -144,6 +144,17 @@
 .pd-zone-city { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; color: #f0eeeb; border-bottom: 0.5px solid #1c1c1c; }
 .pd-zone-city:last-child { border-bottom: none; }
 .pd-zone-city span:last-child { color: #c9c6c1; font-size: 12px; text-align: end; }
+.pd-row-val.am { color: #c9923a; }
+.pd-row-tap { cursor: pointer; user-select: none; }
+.pd-row-tap:active { background: #1f1f1f; }
+.pd-chev { transition: transform .2s ease; vertical-align: middle; opacity: .7; margin-inline-start: 4px; }
+.pd-chev.open { transform: rotate(180deg); }
+.pd-zones { margin: 0 0 8px; display: flex; flex-direction: column; gap: 6px; }
+.pd-variant { display: flex; align-items: center; flex-wrap: wrap; background: #191919; border: 0.5px solid #232323; border-radius: 14px; padding: 10px 16px; margin: 0 0 8px; gap: 12px; }
+.pd-variant-lbl { font-size: 14px; color: #f0eeeb; flex: 1; min-width: 0; font-weight: 500; }
+.pd-variant-sel-wrap { position: relative; display: flex; align-items: center; min-width: 44%; }
+.pd-variant-sel { appearance: none; -webkit-appearance: none; -moz-appearance: none; background: #0d0d0d; border: 0.5px solid #2a2a2a; border-radius: 10px; color: #f0eeeb; font-size: 13px; font-family: var(--font); padding: 9px 30px 9px 12px; width: 100%; cursor: pointer; outline: none; }
+.pd-variant-chev { position: absolute; right: 10px; color: #a89ee8; pointer-events: none; }
 
 /* ===== Order Verification Hub v2 (grouped by marketer) ===== */
 .adm-mkt-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); cursor: pointer; }
