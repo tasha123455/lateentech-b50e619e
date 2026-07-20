@@ -518,7 +518,8 @@ export function createLateenApi(userId: string) {
         | "payouts"
         | "notifications"
         | "admin-wallets"
-        | "admin-payouts",
+        | "admin-payouts"
+        | "admin-reports",
       onChange: () => void,
     ) {
       const ch = supabase.channel(`lateen-${key}-${userId}-${crypto.randomUUID()}`);
@@ -532,6 +533,7 @@ export function createLateenApi(userId: string) {
       if (key === "notifications") filters.push({ table: "notifications", filter: `user_id=eq.${userId}` });
       if (key === "admin-wallets") filters.push({ table: "wallets" });
       if (key === "admin-payouts") filters.push({ table: "payouts" });
+      if (key === "admin-reports") filters.push({ table: "reports" });
       for (const f of filters) {
         (
           ch as unknown as {
@@ -824,6 +826,60 @@ export function createLateenApi(userId: string) {
           }
         }
         return { product, owner: owner ? { ...owner, email: ownerEmail } : owner };
+      },
+      async listReports() {
+        const { data, error } = await supabase
+          .from("reports")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        const reports = (data ?? []) as Array<{
+          id: string;
+          reporter_id: string;
+          report_type: string;
+          product_id: string | null;
+          business_id: string | null;
+          message: string;
+          status: string;
+          admin_comment: string | null;
+          resolved_at: string | null;
+          created_at: string;
+        }>;
+        if (!reports.length) return [];
+        const peopleIds = [
+          ...new Set(
+            reports.flatMap((r) => [r.reporter_id, r.business_id].filter(Boolean) as string[]),
+          ),
+        ];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, business_name, phone")
+          .in("id", peopleIds);
+        const pmap = new Map((profiles ?? []).map((p: { id: string }) => [p.id, p]));
+        const productIds = [...new Set(reports.map((r) => r.product_id).filter(Boolean) as string[])];
+        let products: Array<{ id: string; name: string; price: number; code: string; photos: string[] }> = [];
+        if (productIds.length) {
+          const { data: prods } = await supabase
+            .from("products")
+            .select("id, name, price, code, photos")
+            .in("id", productIds);
+          products = (prods ?? []) as typeof products;
+        }
+        const prodMap = new Map(products.map((p) => [p.id, p]));
+        return reports.map((r) => ({
+          ...r,
+          reporter: pmap.get(r.reporter_id) ?? null,
+          business: r.business_id ? (pmap.get(r.business_id) ?? null) : null,
+          product: r.product_id ? (prodMap.get(r.product_id) ?? null) : null,
+        }));
+      },
+      async resolveReport(id: string, comment: string) {
+        const { data, error } = await supabase.rpc("admin_resolve_report", {
+          _report_id: id,
+          _comment: comment,
+        });
+        if (error) throw error;
+        return data;
       },
       async listEmployees(search?: string) {
         let q = supabase.from("employees").select("*");
