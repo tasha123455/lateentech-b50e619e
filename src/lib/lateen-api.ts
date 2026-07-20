@@ -187,15 +187,28 @@ export function createLateenApi(userId: string) {
       if (error && error.code !== "23505") throw error;
     },
 
-    async notifyProductReview(productId: string, rating: number, text: string) {
+    async notifyProductReview(productId: string, rating: number, text: string, photo?: string, avatar?: string) {
       const { error } = await supabase.rpc(
         "notify_product_review" as never,
         {
           _product_id: productId,
           _rating: rating,
           _text: text,
+          _photo: photo || null,
+          _avatar: avatar || null,
         } as never,
       );
+      if (error) throw error;
+    },
+
+    async submitReport(payload: { type: string; productId?: string; businessId?: string; message: string }) {
+      const { error } = await supabase.from("reports").insert({
+        reporter_id: userId,
+        report_type: payload.type,
+        product_id: payload.productId || null,
+        business_id: payload.businessId || null,
+        message: payload.message,
+      });
       if (error) throw error;
     },
 
