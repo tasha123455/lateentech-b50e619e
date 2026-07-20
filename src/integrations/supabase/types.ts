@@ -177,6 +177,7 @@ export type Database = {
           job_title: string | null
           monthly_salary: number
           notes: string | null
+          phone: string | null
           updated_at: string
         }
         Insert: {
@@ -189,6 +190,7 @@ export type Database = {
           job_title?: string | null
           monthly_salary?: number
           notes?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Update: {
@@ -201,6 +203,7 @@ export type Database = {
           job_title?: string | null
           monthly_salary?: number
           notes?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -300,6 +303,7 @@ export type Database = {
           order_number: string | null
           platform_fee: number
           product_id: string
+          product_snapshot: Json | null
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
@@ -337,6 +341,7 @@ export type Database = {
           order_number?: string | null
           platform_fee?: number
           product_id: string
+          product_snapshot?: Json | null
           qty?: number
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
@@ -374,6 +379,7 @@ export type Database = {
           order_number?: string | null
           platform_fee?: number
           product_id?: string
+          product_snapshot?: Json | null
           qty?: number
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
@@ -447,6 +453,8 @@ export type Database = {
           comm_mode: string
           comm_pct: number
           cost_price: number
+          cover_focus_x: number
+          cover_focus_y: number
           created_at: string
           currency: Json | null
           deleted_at: string | null
@@ -459,6 +467,7 @@ export type Database = {
           price: number
           qty: number
           require_additional_phone: boolean
+          reserved_qty: number
           revenue: number
           sizes: Json
           sold: number
@@ -477,6 +486,8 @@ export type Database = {
           comm_mode?: string
           comm_pct?: number
           cost_price?: number
+          cover_focus_x?: number
+          cover_focus_y?: number
           created_at?: string
           currency?: Json | null
           deleted_at?: string | null
@@ -489,6 +500,7 @@ export type Database = {
           price?: number
           qty?: number
           require_additional_phone?: boolean
+          reserved_qty?: number
           revenue?: number
           sizes?: Json
           sold?: number
@@ -507,6 +519,8 @@ export type Database = {
           comm_mode?: string
           comm_pct?: number
           cost_price?: number
+          cover_focus_x?: number
+          cover_focus_y?: number
           created_at?: string
           currency?: Json | null
           deleted_at?: string | null
@@ -519,6 +533,7 @@ export type Database = {
           price?: number
           qty?: number
           require_additional_phone?: boolean
+          reserved_qty?: number
           revenue?: number
           sizes?: Json
           sold?: number
@@ -727,6 +742,8 @@ export type Database = {
           comm_fixed: number | null
           comm_mode: string | null
           comm_pct: number | null
+          cover_focus_x: number | null
+          cover_focus_y: number | null
           created_at: string | null
           currency: Json | null
           deleted_at: string | null
@@ -753,6 +770,8 @@ export type Database = {
           comm_fixed?: number | null
           comm_mode?: string | null
           comm_pct?: number | null
+          cover_focus_x?: number | null
+          cover_focus_y?: number | null
           created_at?: string | null
           currency?: Json | null
           deleted_at?: string | null
@@ -763,7 +782,7 @@ export type Database = {
           photos?: string[] | null
           platform_fee?: number | null
           price?: number | null
-          qty?: number | null
+          qty?: never
           require_additional_phone?: boolean | null
           sizes?: Json | null
           status?: string | null
@@ -779,6 +798,8 @@ export type Database = {
           comm_fixed?: number | null
           comm_mode?: string | null
           comm_pct?: number | null
+          cover_focus_x?: number | null
+          cover_focus_y?: number | null
           created_at?: string | null
           currency?: Json | null
           deleted_at?: string | null
@@ -789,7 +810,7 @@ export type Database = {
           photos?: string[] | null
           platform_fee?: number | null
           price?: number | null
-          qty?: number | null
+          qty?: never
           require_additional_phone?: boolean | null
           sizes?: Json | null
           status?: string | null
@@ -850,6 +871,7 @@ export type Database = {
           order_number: string | null
           platform_fee: number
           product_id: string
+          product_snapshot: Json | null
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
@@ -975,6 +997,7 @@ export type Database = {
           order_number: string | null
           platform_fee: number
           product_id: string
+          product_snapshot: Json | null
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
@@ -1021,6 +1044,7 @@ export type Database = {
           order_number: string | null
           platform_fee: number
           product_id: string
+          product_snapshot: Json | null
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
@@ -1067,6 +1091,7 @@ export type Database = {
           order_number: string | null
           platform_fee: number
           product_id: string
+          product_snapshot: Json | null
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
@@ -1105,6 +1130,8 @@ export type Database = {
           comm_mode: string
           comm_pct: number
           cost_price: number
+          cover_focus_x: number
+          cover_focus_y: number
           created_at: string
           currency: Json | null
           deleted_at: string | null
@@ -1116,6 +1143,8 @@ export type Database = {
           platform_fee: number
           price: number
           qty: number
+          require_additional_phone: boolean
+          reserved_qty: number
           revenue: number
           sizes: Json
           sold: number
@@ -1167,9 +1196,11 @@ export type Database = {
           order_number: string | null
           platform_fee: number
           product_id: string
+          product_snapshot: Json | null
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refunded_at: string | null
           reviewed_at: string | null
           shipping_fee: number
           size: string | null
@@ -1248,9 +1279,11 @@ export type Database = {
           order_number: string | null
           platform_fee: number
           product_id: string
+          product_snapshot: Json | null
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refunded_at: string | null
           reviewed_at: string | null
           shipping_fee: number
           size: string | null
@@ -1294,9 +1327,11 @@ export type Database = {
               order_number: string | null
               platform_fee: number
               product_id: string
+              product_snapshot: Json | null
               qty: number
               receipt_uploaded_at: string | null
               receipt_url: string | null
+              refunded_at: string | null
               reviewed_at: string | null
               shipping_fee: number
               size: string | null
@@ -1339,9 +1374,11 @@ export type Database = {
               order_number: string | null
               platform_fee: number
               product_id: string
+              product_snapshot: Json | null
               qty: number
               receipt_uploaded_at: string | null
               receipt_url: string | null
+              refunded_at: string | null
               reviewed_at: string | null
               shipping_fee: number
               size: string | null
@@ -1371,7 +1408,13 @@ export type Database = {
         Returns: number
       }
       notify_product_review: {
-        Args: { _avatar?: string; _photo?: string; _product_id: string; _rating: number; _text: string }
+        Args: {
+          _avatar?: string
+          _photo?: string
+          _product_id: string
+          _rating: number
+          _text: string
+        }
         Returns: undefined
       }
       pending_active_orders_for_business: {
