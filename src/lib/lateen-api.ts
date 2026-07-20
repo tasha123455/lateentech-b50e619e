@@ -237,6 +237,7 @@ export function createLateenApi(userId: string) {
       delivery_fee?: number;
       size?: string;
       color?: string;
+      selected_variants?: { name: string; value: string }[];
       receipt_url?: string;
       marketer_confirmed_at?: string;
     }) {
