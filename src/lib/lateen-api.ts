@@ -889,15 +889,25 @@ export function createLateenApi(userId: string) {
         return data;
       },
       async getMetrics() {
-        const [ordersRes, profilesRes, productsRes] = await Promise.all([
-          supabase
-            .from("orders")
-            .select(
-              "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at, refunded_at",
-            ),
+        const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at";
+        const [ordersAttempt, profilesRes, productsRes] = await Promise.all([
+          supabase.from("orders").select(`${orderColumns}, refunded_at`),
           supabase.from("profiles").select("id, created_at"),
           supabase.from("products").select("id, created_at").is("deleted_at", null),
         ]);
+        if (profilesRes.error) throw profilesRes.error;
+        if (productsRes.error) throw productsRes.error;
+
+        let ordersRes = ordersAttempt;
+        if (ordersRes.error) {
+          // Most likely cause: the refund migration (which adds
+          // orders.refunded_at) hasn't been deployed to this database yet.
+          // Degrade gracefully instead of failing the whole Home page —
+          // refunded orders just won't be excluded from fee totals until
+          // that migration lands, but every other stat still works.
+          ordersRes = await supabase.from("orders").select(orderColumns);
+          if (ordersRes.error) throw ordersRes.error;
+        }
 
         const feeEligibleStatuses = new Set(["approved", "confirmed", "delivered", "cancelled"]);
         const orders = (ordersRes.data ?? []) as Array<{
@@ -909,7 +919,7 @@ export function createLateenApi(userId: string) {
           created_at: string;
           confirmed_at: string | null;
           reviewed_at: string | null;
-          refunded_at: string | null;
+          refunded_at?: string | null;
         }>;
         const profiles = (profilesRes.data ?? []) as Array<{ id: string; created_at: string }>;
         const products = (productsRes.data ?? []) as Array<{ id: string; created_at: string }>;
@@ -917,7 +927,7 @@ export function createLateenApi(userId: string) {
         // A refunded order's platform fee is no longer counted as revenue,
         // even though the order itself keeps whatever status it already had
         // (approved orders stay "approved" everywhere else in the app).
-        const feeEligible = (o: { status: string; refunded_at: string | null }) =>
+        const feeEligible = (o: { status: string; refunded_at?: string | null }) =>
           feeEligibleStatuses.has(o.status) && !o.refunded_at;
 
         const totalFees = orders.reduce(
