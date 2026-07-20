@@ -259,6 +259,8 @@ function applyProductEditLock(){
     if(uploadBox){uploadBox.style.pointerEvents=locked?'none':'';uploadBox.style.opacity=locked?'0.55':'';}
     const coverFrame=sheet.querySelector('#lp-cover-frame');
     if(coverFrame){coverFrame.style.pointerEvents=locked?'none':'';coverFrame.style.opacity=locked?'0.55':'';}
+    const zoneList=sheet.querySelector('#zone-builder-list');
+    if(zoneList){zoneList.style.pointerEvents=locked?'none':'';zoneList.style.opacity=locked?'0.55':'';}
     sheet.querySelectorAll('.photo-remove,.add-photo-btn,.vg-remove-btn,.vb-remove,.vb-add-btn,.vb-thumb-x,.vb-thumb-add,#lp-cover-remove').forEach(el=>{el.style.pointerEvents=locked?'none':'';el.style.opacity=locked?'0.35':'';});
     const submitBtn=sheet.querySelector('.lp-btn-primary');
     if(submitBtn){submitBtn.style.opacity=locked?'0.5':'';submitBtn.style.cursor=locked?'not-allowed':'';}
