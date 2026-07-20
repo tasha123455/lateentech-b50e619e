@@ -303,7 +303,6 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
-          refunded_at: string | null
           reviewed_at: string | null
           shipping_fee: number
           size: string | null
@@ -340,7 +339,6 @@ export type Database = {
           qty?: number
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
-          refunded_at?: string | null
           reviewed_at?: string | null
           shipping_fee?: number
           size?: string | null
@@ -377,7 +375,6 @@ export type Database = {
           qty?: number
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
-          refunded_at?: string | null
           reviewed_at?: string | null
           shipping_fee?: number
           size?: string | null
@@ -458,7 +455,6 @@ export type Database = {
           platform_fee: number
           price: number
           qty: number
-          require_additional_phone: boolean
           revenue: number
           sizes: Json
           sold: number
@@ -488,7 +484,6 @@ export type Database = {
           platform_fee?: number
           price?: number
           qty?: number
-          require_additional_phone?: boolean
           revenue?: number
           sizes?: Json
           sold?: number
@@ -518,7 +513,6 @@ export type Database = {
           platform_fee?: number
           price?: number
           qty?: number
-          require_additional_phone?: boolean
           revenue?: number
           sizes?: Json
           sold?: number
@@ -547,7 +541,6 @@ export type Database = {
           payout_notes: string | null
           payout_swift: string | null
           phone: string | null
-          require_additional_phone: boolean
           updated_at: string
           whatsapp: string | null
         }
@@ -568,7 +561,6 @@ export type Database = {
           payout_notes?: string | null
           payout_swift?: string | null
           phone?: string | null
-          require_additional_phone?: boolean
           updated_at?: string
           whatsapp?: string | null
         }
@@ -589,59 +581,10 @@ export type Database = {
           payout_notes?: string | null
           payout_swift?: string | null
           phone?: string | null
-          require_additional_phone?: boolean
           updated_at?: string
           whatsapp?: string | null
         }
         Relationships: []
-      }
-      reports: {
-        Row: {
-          business_id: string | null
-          created_at: string
-          id: string
-          message: string
-          product_id: string | null
-          report_type: string
-          reporter_id: string
-          status: string
-        }
-        Insert: {
-          business_id?: string | null
-          created_at?: string
-          id?: string
-          message: string
-          product_id?: string | null
-          report_type: string
-          reporter_id: string
-          status?: string
-        }
-        Update: {
-          business_id?: string | null
-          created_at?: string
-          id?: string
-          message?: string
-          product_id?: string | null
-          report_type?: string
-          reporter_id?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reports_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reports_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products_marketer_view"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       suppressed_emails: {
         Row: {
@@ -738,7 +681,6 @@ export type Database = {
           platform_fee: number | null
           price: number | null
           qty: number | null
-          require_additional_phone: boolean | null
           sizes: Json | null
           status: string | null
           updated_at: string | null
@@ -764,7 +706,6 @@ export type Database = {
           platform_fee?: number | null
           price?: number | null
           qty?: number | null
-          require_additional_phone?: boolean | null
           sizes?: Json | null
           status?: string | null
           updated_at?: string | null
@@ -790,7 +731,6 @@ export type Database = {
           platform_fee?: number | null
           price?: number | null
           qty?: number | null
-          require_additional_phone?: boolean | null
           sizes?: Json | null
           status?: string | null
           updated_at?: string | null
@@ -853,7 +793,6 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
-          refunded_at: string | null
           reviewed_at: string | null
           shipping_fee: number
           size: string | null
@@ -948,52 +887,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      admin_refund_order: {
-        Args: { _order_id: string }
-        Returns: {
-          admin_notes: string | null
-          business_id: string
-          business_notes: string | null
-          color: string | null
-          commission: number
-          confirmed_at: string | null
-          created_at: string
-          currency: Json | null
-          customer_address: string | null
-          customer_city: string | null
-          customer_country: string | null
-          customer_country_code: string | null
-          customer_name: string | null
-          customer_notes: string | null
-          customer_phone: string | null
-          customer_whatsapp: string | null
-          delivered_at: string | null
-          delivery_fee: number
-          id: string
-          marketer_confirmed_at: string | null
-          marketer_id: string
-          order_number: string | null
-          platform_fee: number
-          product_id: string
-          qty: number
-          receipt_uploaded_at: string | null
-          receipt_url: string | null
-          refunded_at: string | null
-          reviewed_at: string | null
-          shipping_fee: number
-          size: string | null
-          status: string
-          stock_reserved: boolean
-          unit_price: number
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "orders"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       admin_reject_order: {
         Args: { _order_id: string }
         Returns: {
@@ -1024,7 +917,6 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
-          refunded_at: string | null
           reviewed_at: string | null
           shipping_fee: number
           size: string | null
@@ -1070,7 +962,6 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
-          refunded_at: string | null
           reviewed_at: string | null
           shipping_fee: number
           size: string | null
@@ -1371,7 +1262,7 @@ export type Database = {
         Returns: number
       }
       notify_product_review: {
-        Args: { _avatar?: string; _photo?: string; _product_id: string; _rating: number; _text: string }
+        Args: { _product_id: string; _rating: number; _text: string }
         Returns: undefined
       }
       pending_active_orders_for_business: {
