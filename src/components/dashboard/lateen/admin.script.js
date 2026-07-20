@@ -79,7 +79,7 @@ function admGo(pageId){
   if(pageId==='adm-verify') admLoadVerify();
   if(pageId==='adm-payouts') admLoadPayouts();
   if(pageId==='adm-users') admLoadUsers('');
-  if(pageId==='adm-products') admLoadProducts();
+  if(pageId==='adm-products'){admLoadProducts();admLoadReports();}
   if(pageId==='adm-employees') admLoadEmployees();
 }
 
@@ -774,10 +774,113 @@ function admPdToggle(id){
   if(chev)chev.classList.toggle('open',!isOpen);
 }
 
+/* ========== Reports ========== */
+let admReportsCache=[];
+let admReportFilter='';
+function admReportTypeLabel(t){return t==='product'?'Product':(t==='merchant'?'Merchant':'Other');}
+async function admLoadReports(){
+  try{
+    admReportsCache=await window.LateenAPI.admin.listReports();
+  }catch(e){console.error('[admin] listReports',e);return;}
+  const openCount=admReportsCache.filter(r=>r.status==='open').length;
+  const badge=document.getElementById('adm-reports-count');
+  if(badge){badge.style.display=openCount>0?'inline-block':'none';badge.textContent=String(openCount);}
+  if(document.getElementById('adm-reports-ov')?.classList.contains('open'))admRenderReports();
+}
+function admSetReportFilter(f,el){
+  admReportFilter=f;
+  document.querySelectorAll('#reports-filter-row .adm-filter-chip').forEach(c=>c.classList.remove('on'));
+  if(el)el.classList.add('on');
+  admRenderReports();
+}
+function admOpenReports(){
+  const ov=document.getElementById('adm-reports-ov');
+  if(!ov)return;
+  ov.classList.add('open');
+  if(!admReportsCache.length){
+    const root=document.getElementById('reports-list');
+    if(root)root.innerHTML='<div class="adm-empty">Loading…</div>';
+  }else{
+    admRenderReports();
+  }
+  admLoadReports();
+}
+function admCloseReports(){
+  const ov=document.getElementById('adm-reports-ov');
+  if(ov)ov.classList.remove('open');
+}
+function admRenderReports(){
+  const root=document.getElementById('reports-list');
+  if(!root)return;
+  const list=admReportFilter?admReportsCache.filter(r=>r.status===admReportFilter):admReportsCache;
+  if(!list.length){root.innerHTML='<div class="adm-empty">No reports'+(admReportFilter?' in this filter':'')+'.</div>';return;}
+  root.innerHTML=list.map(r=>{
+    const reporter=r.reporter||{};
+    const business=r.business||{};
+    const product=r.product||{};
+    const reporterName=reporter.full_name||'Unknown marketer';
+    const businessName=business.business_name||business.full_name||'Unknown business';
+    const reporterNameSafe=admEsc(reporterName).replace(/'/g,'&#39;');
+    const businessNameSafe=admEsc(businessName).replace(/'/g,'&#39;');
+    const isOpen=r.status==='open';
+    const photo=Array.isArray(product.photos)?product.photos[0]:null;
+    const thumb=photo?`<img class="rpt-mini-thumb" src="${admEsc(photo)}" alt=""/>`:`<div class="rpt-mini-thumb-empty">📦</div>`;
+    const prodBlock=r.product_id?`<div class="rpt-mini-prod" onclick="admOpenProduct('${r.product_id}')">
+        ${thumb}
+        <div class="rpt-mini-info">
+          <div class="rpt-name">${admEsc(product.name||'Product no longer available')}</div>
+          <div class="rpt-sub">${product.price!=null?admMoney(product.price):''}${product.code?' · '+admEsc(product.code):''}</div>
+        </div>
+      </div>`:'';
+    const bizRow=r.business_id?`<div class="rpt-biz-row">
+        <div style="min-width:0;">
+          <div class="rpt-name">${admEsc(businessName)}</div>
+          <div class="rpt-sub">${admEsc(business.phone||'no phone')}</div>
+        </div>
+        <button class="adm-go-btn" onclick="admGoToAccount('${r.business_id}','business','${businessNameSafe}')">Go to business account</button>
+      </div>`:'';
+    const commentBlock=isOpen
+      ?`<div class="rpt-comment-box">
+          <textarea class="rpt-comment-ta" id="rpt-comment-${r.id}" placeholder="Write your review of this report — the marketer will see it as 'Report reviewed'"></textarea>
+          <button class="adm-btn adm-btn-acc" style="width:100%;" onclick="admResolveReport('${r.id}')">Send review to marketer</button>
+        </div>`
+      :`<div class="rpt-resolved-note"><b>Admin comment:</b> ${admEsc(r.admin_comment||'')}<div style="margin-top:4px;opacity:0.8;font-size:11px;">Reviewed ${admWhen(r.resolved_at)}</div></div>`;
+    return `<div class="rpt-card">
+      <div class="rpt-top">
+        <span class="rpt-type-pill">${admReportTypeLabel(r.report_type)}</span>
+        <span class="rpt-status-pill ${isOpen?'rpt-status-open':'rpt-status-resolved'}">${isOpen?'Open':'Resolved'}</span>
+      </div>
+      <div class="rpt-reporter-row">
+        <div class="adm-user-av">${admEsc(admInitials(reporterName))}</div>
+        <div style="flex:1;min-width:120px;">
+          <div class="rpt-name">${admEsc(reporterName)}</div>
+          <div class="rpt-sub">${admEsc(reporter.phone||'no phone')} · ${admWhen(r.created_at)}</div>
+        </div>
+        <button class="adm-go-btn" onclick="admGoToAccount('${r.reporter_id}','marketer','${reporterNameSafe}')">Go to marketer account</button>
+      </div>
+      <div class="rpt-msg">${admEsc(r.message)}</div>
+      ${prodBlock}
+      ${bizRow}
+      ${commentBlock}
+    </div>`;
+  }).join('');
+}
+async function admResolveReport(id){
+  const ta=document.getElementById('rpt-comment-'+id);
+  const comment=(ta&&ta.value||'').trim();
+  if(!comment){alert('Write a comment before sending your review.');return;}
+  if(!confirm('Send this review to the marketer? They will be notified as "Report reviewed".'))return;
+  try{
+    await window.LateenAPI.admin.resolveReport(id,comment);
+    await admLoadReports();
+  }catch(e){alert('Failed: '+e.message);}
+}
+
 /* boot */
 admLoadMetrics();
+admLoadReports();
 setInterval(()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}},10000);
-if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-wallets',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-payouts',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));}
+if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-wallets',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-payouts',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-reports',()=>{admLoadReports();}));}
 
 /* ========== Employees & Payroll ========== */
 let admEmpCache=[];

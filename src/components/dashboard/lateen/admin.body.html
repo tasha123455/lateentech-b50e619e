@@ -313,6 +313,31 @@
 .adm-home-v2 .chip.active{ background: var(--surface-2); color: var(--text); border-color:#3a3a3a; font-weight:700; }
 .adm-home-v2 .chart-wrap{ position:relative; height:220px; }
 
+/* ---- Reports ---- */
+.adm-h1-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 1rem; }
+.adm-reports-btn { display: flex; align-items: center; gap: 6px; background: var(--danger-tint); color: var(--danger); border: 0.5px solid var(--danger); border-radius: 14px; font-size: 12px; font-weight: 600; padding: 7px 12px; cursor: pointer; font-family: var(--font); }
+.adm-reports-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 700; padding: 1px 6px; min-width: 16px; text-align: center; line-height: 1.4; }
+.rpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.rpt-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.rpt-type-pill { font-size: 9px; padding: 3px 8px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; background: var(--accent-tint); color: var(--accent); }
+.rpt-status-pill { font-size: 9px; padding: 3px 8px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.rpt-status-open { background: var(--danger-tint); color: var(--danger); }
+.rpt-status-resolved { background: var(--ok-tint); color: var(--ok); }
+.rpt-reporter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.rpt-name { font-size: 12.5px; font-weight: 500; color: var(--txt-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rpt-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+.rpt-msg { font-size: 13px; color: var(--txt-1); line-height: 1.5; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; white-space: pre-wrap; word-break: break-word; }
+.rpt-mini-prod { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 12px; padding: 8px 10px; margin-bottom: 10px; cursor: pointer; }
+.rpt-mini-thumb { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
+.rpt-mini-thumb-empty { width: 42px; height: 42px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.rpt-mini-info { flex: 1; min-width: 0; }
+.rpt-biz-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.rpt-comment-ta { width: 100%; min-height: 64px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; color: var(--txt-1); padding: 9px 10px; font-size: 12.5px; font-family: var(--font); resize: vertical; box-sizing: border-box; margin-bottom: 8px; }
+.rpt-resolved-note { background: var(--ok-tint); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--ok); line-height: 1.5; }
+.rpt-resolved-note b { color: var(--ok); }
+#adm-reports-ov { z-index: 109; }
+#adm-pdetail { z-index: 110; }
+
 </style>
 
 <div class="adm-app">
@@ -474,7 +499,14 @@
 
   <!-- PRODUCTS -->
   <section class="adm-page" id="adm-products">
-    <div class="adm-h1">Product Review</div>
+    <div class="adm-h1-row">
+      <div class="adm-h1" style="margin-bottom:0;">Product Review</div>
+      <button class="adm-reports-btn" id="adm-reports-btn" onclick="admOpenReports()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Reports
+        <span class="adm-reports-count" id="adm-reports-count" style="display:none;">0</span>
+      </button>
+    </div>
     <input class="adm-search" id="product-search" placeholder="Search by name, code, shop…" oninput="admProductSearch(this.value)" />
     <div class="adm-prod-grid" id="products-grid">
       <div class="adm-empty" style="grid-column:1/-1;">Loading…</div>
@@ -486,6 +518,20 @@
     <div class="adm-pdetail-card">
       <button class="adm-pdetail-close" onclick="admClosePDetail()">×</button>
       <div id="adm-pdetail-body"><div class="adm-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- REPORTS OVERLAY -->
+  <div class="adm-pdetail" id="adm-reports-ov" onclick="if(event.target===this)admCloseReports()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admCloseReports()">×</button>
+      <div class="adm-h1" style="margin-bottom:12px;">Reports</div>
+      <div class="adm-filter-row" id="reports-filter-row" style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="adm-filter-chip on" data-rf="" onclick="admSetReportFilter('',this)">All</button>
+        <button class="adm-filter-chip" data-rf="open" onclick="admSetReportFilter('open',this)">Open</button>
+        <button class="adm-filter-chip" data-rf="resolved" onclick="admSetReportFilter('resolved',this)">Resolved</button>
+      </div>
+      <div id="reports-list"><div class="adm-empty">Loading…</div></div>
     </div>
   </div>
 
