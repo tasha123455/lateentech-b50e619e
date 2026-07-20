@@ -136,14 +136,15 @@ export function RegisterForm({ role }: { role: Role }) {
   }, []);
 
   const phoneValid = PHONE_RE.test(phone);
+  const altPhoneValid = altPhone.length === 0 || PHONE_RE.test(altPhone);
   const altPhoneDuplicate = altPhone.length > 0 && altPhone === phone;
   const canSubmit = useMemo(() => {
     if (!fullName.trim()) return false;
     if (role === "business" && !businessName.trim()) return false;
     if (!phoneValid) return false;
-    if (altPhoneDuplicate) return false;
+    if (altPhone.length > 0 && (!altPhoneValid || altPhoneDuplicate)) return false;
     return true;
-  }, [fullName, businessName, phone, role, phoneValid, altPhoneDuplicate]);
+  }, [fullName, businessName, phone, role, phoneValid, altPhone, altPhoneValid, altPhoneDuplicate]);
 
   const addRoleAndGo = async () => {
     const { error: rpcErr } = await supabase.rpc("add_self_role", {
@@ -246,7 +247,7 @@ export function RegisterForm({ role }: { role: Role }) {
         )}
       </Field>
 
-      <Field label={ar ? "رقم هاتف إضافي" : "Additional phone number"}>
+      <Field label={ar ? "واتساب او رقم هاتف إضافي (اختياري)" : "WhatsApp or additional phone number (optional)"}>
         <div className="flex gap-2">
           <CountryCodePicker />
           <input
@@ -258,7 +259,14 @@ export function RegisterForm({ role }: { role: Role }) {
             className="auth-input flex-1"
           />
         </div>
-        {altPhoneDuplicate && (
+        {altPhone.length === 10 && !altPhoneValid && (
+          <span className="mt-1 block text-[11px] text-destructive">
+            {ar
+              ? "رقم الهاتف يجب أن يكون 10 أرقام ويبدأ بـ 091 أو 092 أو 093 أو 094."
+              : "Phone must be 10 digits and start with 091, 092, 093, or 094."}
+          </span>
+        )}
+        {altPhoneValid && altPhoneDuplicate && (
           <span className="mt-1 block text-[11px] text-destructive">
             {ar
               ? "لا يمكن أن يكون رقم الهاتف الإضافي نفس رقم الهاتف الأساسي."
