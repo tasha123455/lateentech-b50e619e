@@ -595,6 +595,54 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          id: string
+          message: string
+          product_id: string | null
+          report_type: string
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          product_id?: string | null
+          report_type: string
+          reporter_id: string
+          status?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          product_id?: string | null
+          report_type?: string
+          reporter_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_marketer_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -1323,7 +1371,7 @@ export type Database = {
         Returns: number
       }
       notify_product_review: {
-        Args: { _product_id: string; _rating: number; _text: string }
+        Args: { _avatar?: string; _photo?: string; _product_id: string; _rating: number; _text: string }
         Returns: undefined
       }
       pending_active_orders_for_business: {
