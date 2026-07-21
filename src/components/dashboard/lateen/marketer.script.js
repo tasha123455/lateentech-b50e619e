@@ -1,4 +1,3 @@
-
 function __splitCC(p){var s=String(p||'').trim();if(!s)return{cc:'',num:''};var m=s.match(/^(\+\d{1,3})[\s-]*(.*)$/);if(m)return{cc:'\u200E'+m[1]+'\u200E',num:'\u200E'+m[2].replace(/\s+/g,'')+'\u200E'};return{cc:'',num:'\u200E'+s+'\u200E'};}
 function __dispPhone(p){var s=__splitCC(p);return s.cc?(s.cc+' | '+s.num):s.num;}
 function __fmtDT(v){var d=new Date(v);if(isNaN(d.getTime()))return'';var ar=__ar();var datePart=(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();var h=d.getHours();var mins=String(d.getMinutes()).padStart(2,'0');var isPM=h>=12;h=h%12;if(h===0)h=12;var ampm=ar?(isPM?'مساءً':'صباحاً'):(isPM?'PM':'AM');return'\u200E'+datePart+', '+h+':'+mins+' '+ampm+'\u200E';}
@@ -711,8 +710,8 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
    be rendered again, don't touch innerHTML — removes the "list vanishes
    then reappears" flash right after a local create/edit. */
 (function(){
-  const _ro=window.renderOrders;let __sigO='';
-  if(typeof _ro==='function'){window.renderOrders=function(){try{const s=JSON.stringify((orders||[]).map(o=>[o.id,o.dbId||'',o._status||'',o.qty,o.hasReceipt?1:0,o.receiptUrl||'',o.adminNotes||'',o.businessNotes||'']));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
+  const _ro=renderOrders;let __sigO='';
+  if(typeof _ro==='function'){renderOrders=function(){try{const s=JSON.stringify((orders||[]).map(o=>[o.id,o.dbId||'',o._status||'',o.qty,o.hasReceipt?1:0,o.receiptUrl||'',o.adminNotes||'',o.businessNotes||'']));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
 })();
 /* Same signature-skip trick, applied to the browse grid: re-opening the
    Browse tab called go()->rg2(l) every time and rebuilt the whole grid
@@ -720,8 +719,8 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
    list hadn't changed at all. That's the "products hit blank for a sec
    then reload" flash. */
 (function(){
-  const _rg2=window.rg2;let __sigBrw='';
-  if(typeof _rg2==='function'){window.rg2=function(l){try{const s=JSON.stringify((l||[]).map(p=>[p.id,p.sv?1:0,p.pr,p.pct,p.n]));if(s===__sigBrw)return;__sigBrw=s;}catch(e){}return _rg2.apply(this,arguments);};}
+  const _rg2=rg2;let __sigBrw='';
+  if(typeof _rg2==='function'){rg2=function(l){try{const s=JSON.stringify((l||[]).map(p=>[p.id,p.sv?1:0,p.pr,p.pct,p.n]));if(s===__sigBrw)return;__sigBrw=s;}catch(e){}return _rg2.apply(this,arguments);};}
 })();
 /* persist page + scroll across refresh */
 (function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
@@ -738,16 +737,16 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   window.__uploadingReceipt = false;
   let __deferredLoad = false;
 
-  const _renderOrders = window.renderOrders;
+  const _renderOrders = renderOrders;
   if (typeof _renderOrders === 'function') {
-    window.renderOrders = function(){
+    renderOrders = function(){
       if (window.__uploadingReceipt) { __deferredLoad = true; return; }
       return _renderOrders.apply(this, arguments);
     };
   }
-  const _loadOrders = window.loadOrders;
+  const _loadOrders = loadOrders;
   if (typeof _loadOrders === 'function') {
-    window.loadOrders = function(){
+    loadOrders = function(){
       if (window.__uploadingReceipt) { __deferredLoad = true; return Promise.resolve(); }
       return _loadOrders.apply(this, arguments);
     };
@@ -762,18 +761,18 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
     }
   }
 
-  const _onOrderReceiptFile = window.onOrderReceiptFile;
+  const _onOrderReceiptFile = onOrderReceiptFile;
   if (typeof _onOrderReceiptFile === 'function') {
-    window.onOrderReceiptFile = async function(input){
+    onOrderReceiptFile = async function(input){
       if (!input || !input.files || !input.files.length) return;
       beginUpload();
       try { return await _onOrderReceiptFile.call(this, input); }
       finally { endUpload(); }
     };
   }
-  const _onFileUpload = window.onFileUpload;
+  const _onFileUpload = onFileUpload;
   if (typeof _onFileUpload === 'function') {
-    window.onFileUpload = async function(input){
+    onFileUpload = async function(input){
       if (!input || !input.files || !input.files.length) return;
       beginUpload();
       try { return await _onFileUpload.call(this, input); }
