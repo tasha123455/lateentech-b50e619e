@@ -309,6 +309,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           reviewed_at: string | null
+          selected_variants: Json
           shipping_fee: number
           size: string | null
           status: string
@@ -347,6 +348,7 @@ export type Database = {
           receipt_url?: string | null
           refunded_at?: string | null
           reviewed_at?: string | null
+          selected_variants?: Json
           shipping_fee?: number
           size?: string | null
           status?: string
@@ -385,6 +387,7 @@ export type Database = {
           receipt_url?: string | null
           refunded_at?: string | null
           reviewed_at?: string | null
+          selected_variants?: Json
           shipping_fee?: number
           size?: string | null
           status?: string
@@ -612,6 +615,7 @@ export type Database = {
       }
       reports: {
         Row: {
+          admin_comment: string | null
           business_id: string | null
           created_at: string
           id: string
@@ -619,9 +623,12 @@ export type Database = {
           product_id: string | null
           report_type: string
           reporter_id: string
+          resolved_at: string | null
+          reviewed_by: string | null
           status: string
         }
         Insert: {
+          admin_comment?: string | null
           business_id?: string | null
           created_at?: string
           id?: string
@@ -629,9 +636,12 @@ export type Database = {
           product_id?: string | null
           report_type: string
           reporter_id: string
+          resolved_at?: string | null
+          reviewed_by?: string | null
           status?: string
         }
         Update: {
+          admin_comment?: string | null
           business_id?: string | null
           created_at?: string
           id?: string
@@ -639,6 +649,8 @@ export type Database = {
           product_id?: string | null
           report_type?: string
           reporter_id?: string
+          resolved_at?: string | null
+          reviewed_by?: string | null
           status?: string
         }
         Relationships: [
@@ -877,6 +889,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           reviewed_at: string | null
+          selected_variants: Json
           shipping_fee: number
           size: string | null
           status: string
@@ -1003,6 +1016,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           reviewed_at: string | null
+          selected_variants: Json
           shipping_fee: number
           size: string | null
           status: string
@@ -1050,6 +1064,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           reviewed_at: string | null
+          selected_variants: Json
           shipping_fee: number
           size: string | null
           status: string
@@ -1097,6 +1112,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           reviewed_at: string | null
+          selected_variants: Json
           shipping_fee: number
           size: string | null
           status: string
@@ -1117,6 +1133,28 @@ export type Database = {
           _user_id: string
         }
         Returns: undefined
+      }
+      admin_resolve_report: {
+        Args: { _comment: string; _report_id: string }
+        Returns: {
+          admin_comment: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          message: string
+          product_id: string | null
+          report_type: string
+          reporter_id: string
+          resolved_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reports"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_set_product_status: {
         Args: { _product_id: string; _status: string }
@@ -1202,6 +1240,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           reviewed_at: string | null
+          selected_variants: Json
           shipping_fee: number
           size: string | null
           status: string
@@ -1285,6 +1324,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           reviewed_at: string | null
+          selected_variants: Json
           shipping_fee: number
           size: string | null
           status: string
@@ -1333,6 +1373,7 @@ export type Database = {
               receipt_url: string | null
               refunded_at: string | null
               reviewed_at: string | null
+              selected_variants: Json
               shipping_fee: number
               size: string | null
               status: string
@@ -1380,6 +1421,7 @@ export type Database = {
               receipt_url: string | null
               refunded_at: string | null
               reviewed_at: string | null
+              selected_variants: Json
               shipping_fee: number
               size: string | null
               status: string
