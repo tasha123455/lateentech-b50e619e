@@ -728,3 +728,56 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
 
 /* auto-hide bottom nav on scroll down, show on scroll up */
 (function(){const nav=document.querySelector('.lateen-marketer .bottom-nav');if(!nav)return;let lastY=window.scrollY||0,ticking=false;const TH=6;function upd(){const y=window.scrollY||0,d=y-lastY;if(Math.abs(d)>TH){if(d>0&&y>60)nav.classList.add('nav-hidden');else nav.classList.remove('nav-hidden');lastY=y;}ticking=false;}window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(upd);ticking=true;}},{passive:true});})();
+
+/* Receipt-upload jitter fix.
+   While a receipt upload is in flight, pause list re-renders and defer
+   realtime-triggered loadOrders/renderOrders so the "Uploading…" button
+   isn't ripped out of the DOM mid-upload and the post-upload state
+   settles in a single render pass. */
+(function(){
+  window.__uploadingReceipt = false;
+  let __deferredLoad = false;
+
+  const _renderOrders = window.renderOrders;
+  if (typeof _renderOrders === 'function') {
+    window.renderOrders = function(){
+      if (window.__uploadingReceipt) { __deferredLoad = true; return; }
+      return _renderOrders.apply(this, arguments);
+    };
+  }
+  const _loadOrders = window.loadOrders;
+  if (typeof _loadOrders === 'function') {
+    window.loadOrders = function(){
+      if (window.__uploadingReceipt) { __deferredLoad = true; return Promise.resolve(); }
+      return _loadOrders.apply(this, arguments);
+    };
+  }
+
+  function beginUpload(){ window.__uploadingReceipt = true; __deferredLoad = false; }
+  function endUpload(){
+    window.__uploadingReceipt = false;
+    if (__deferredLoad) {
+      __deferredLoad = false;
+      try { window.loadOrders && window.loadOrders(); } catch(e){}
+    }
+  }
+
+  const _onOrderReceiptFile = window.onOrderReceiptFile;
+  if (typeof _onOrderReceiptFile === 'function') {
+    window.onOrderReceiptFile = async function(input){
+      if (!input || !input.files || !input.files.length) return;
+      beginUpload();
+      try { return await _onOrderReceiptFile.call(this, input); }
+      finally { endUpload(); }
+    };
+  }
+  const _onFileUpload = window.onFileUpload;
+  if (typeof _onFileUpload === 'function') {
+    window.onFileUpload = async function(input){
+      if (!input || !input.files || !input.files.length) return;
+      beginUpload();
+      try { return await _onFileUpload.call(this, input); }
+      finally { endUpload(); }
+    };
+  }
+})();
