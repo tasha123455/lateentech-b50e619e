@@ -129,7 +129,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
-          employee_id: string
+          employee_id: string | null
           id: string
           notes: string | null
           paid_at: string
