@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
 import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
 import { Route as BusinessSigninRouteImport } from './routes/business.signin'
@@ -18,6 +19,7 @@ import { Route as BusinessRegisterRouteImport } from './routes/business.register
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicNotificationsPushRouteImport } from './routes/api/public/notifications/push'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -27,6 +29,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PIdRoute = PIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketerSigninRoute = MarketerSigninRouteImport.update({
@@ -65,6 +72,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNotificationsPushRoute =
+  ApiPublicNotificationsPushRouteImport.update({
+    id: '/api/public/notifications/push',
+    path: '/api/public/notifications/push',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,6 +86,8 @@ export interface FileRoutesByFullPath {
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
+  '/p/$id': typeof PIdRoute
+  '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -84,6 +99,8 @@ export interface FileRoutesByTo {
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
+  '/p/$id': typeof PIdRoute
+  '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -96,6 +113,8 @@ export interface FileRoutesById {
   '/business/signin': typeof BusinessSigninRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
+  '/p/$id': typeof PIdRoute
+  '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -109,6 +128,8 @@ export interface FileRouteTypes {
     | '/business/signin'
     | '/marketer/register'
     | '/marketer/signin'
+    | '/p/$id'
+    | '/api/public/notifications/push'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -120,6 +141,8 @@ export interface FileRouteTypes {
     | '/business/signin'
     | '/marketer/register'
     | '/marketer/signin'
+    | '/p/$id'
+    | '/api/public/notifications/push'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -131,6 +154,8 @@ export interface FileRouteTypes {
     | '/business/signin'
     | '/marketer/register'
     | '/marketer/signin'
+    | '/p/$id'
+    | '/api/public/notifications/push'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -143,6 +168,8 @@ export interface RootRouteChildren {
   BusinessSigninRoute: typeof BusinessSigninRoute
   MarketerRegisterRoute: typeof MarketerRegisterRoute
   MarketerSigninRoute: typeof MarketerSigninRoute
+  PIdRoute: typeof PIdRoute
+  ApiPublicNotificationsPushRoute: typeof ApiPublicNotificationsPushRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -162,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$id': {
+      id: '/p/$id'
+      path: '/p/$id'
+      fullPath: '/p/$id'
+      preLoaderRoute: typeof PIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketer/signin': {
@@ -213,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/notifications/push': {
+      id: '/api/public/notifications/push'
+      path: '/api/public/notifications/push'
+      fullPath: '/api/public/notifications/push'
+      preLoaderRoute: typeof ApiPublicNotificationsPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -223,6 +264,8 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessSigninRoute: BusinessSigninRoute,
   MarketerRegisterRoute: MarketerRegisterRoute,
   MarketerSigninRoute: MarketerSigninRoute,
+  PIdRoute: PIdRoute,
+  ApiPublicNotificationsPushRoute: ApiPublicNotificationsPushRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
