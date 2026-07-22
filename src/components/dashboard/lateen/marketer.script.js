@@ -417,13 +417,13 @@ function renderOrders(){
 }
 function editOrder(id){if(__mktFrozenBlock())return;const o=orders.find(x=>x.id===id);if(!o)return;if(o._status==='pending'||o._status==='approved'||o._status==='confirmed'||o._status==='delivered'||o._status==='cancelled')return;openForm(o);}
 function deleteOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;if(o._status==='pending'||o._status==='approved'||o._status==='confirmed'||o._status==='delivered'||o._status==='cancelled')return;if(o&&!o.dbId)removeDraft(id);orders=orders.filter(x=>x.id!==id);renderOrders();}
-function dbToOrder(r){const p=PRODUCTS[r.product_id]||{};const cur=r.currency||p.currency||{symbol:'$',code:'USD'};const curCode=cur.code||'USD';const sym=__wrapArSym(cur.symbol||'$',curCode);const __snap=r.product_snapshot||null;const name=(__snap&&__snap.name)?__snap.name:(p.name||'Product');const price=Number(r.unit_price)||0;const pct=p.pct||(price>0?Number(r.commission)/price:0);const q=Number(r.qty)||1;const commPerUnit=Number(r.commission)||0;const platformPerUnit=Number(r.platform_fee)||0;const feePerUnit=parseFloat((commPerUnit+platformPerUnit).toFixed(2));const totalFee=parseFloat((feePerUnit*q).toFixed(2));const di=p.delivery&&p.delivery[r.customer_country_code||r.customer_country]?p.delivery[r.customer_country_code||r.customer_country]:null;const per=Number(r.shipping_fee)||Number(r.delivery_fee)?{shipping:Number(r.shipping_fee)||0,delivery:Number(r.delivery_fee)||0}:(di&&di._per&&di._per[r.customer_city]?{shipping:di._per[r.customer_city].s,delivery:di._per[r.customer_city].d}:{shipping:di?di.shipping:0,delivery:di?di.delivery:0});const created=r.created_at?new Date(r.created_at):new Date();const reserveDate=created.getDate()+'/'+(created.getMonth()+1)+'/'+created.getFullYear();const confirmed=!!r.marketer_confirmed_at;const mc=r.marketer_confirmed_at?new Date(r.marketer_confirmed_at):null;return{id:'ORD-'+String(r.id).slice(0,6).toUpperCase(),dbId:r.id,reserveDate,customerName:r.customer_name||'',phone:r.customer_phone||'',whatsapp:r.customer_whatsapp||'',countryCode:r.customer_country_code||'',country:r.customer_country||'',city:r.customer_city||'',address:r.customer_address||'',productKey:r.product_id,productName:name,price,pct,earn:commPerUnit,shipping:per.shipping,delivery:per.delivery,size:r.size||'',color:r.color||'',selectedVariants:Array.isArray(r.selected_variants)?r.selected_variants:[],qty:q,total:parseFloat((price*q+per.shipping+per.delivery).toFixed(2)),feePerUnit,totalFee,commPerUnit,platformPerUnit,notes:r.customer_notes||'',bizName:p.biz||'',bizPhone:p.bizPhone||'',hasReceipt:!!r.receipt_url,receiptUrl:r.receipt_url||'',depositConfirmed:confirmed?true:null,payDate:mc?(mc.getDate()+'/'+(mc.getMonth()+1)+'/'+mc.getFullYear()):null,_status:r.status,_sym:sym,_curCode:curCode,_createdAt:created,adminNotes:r.admin_notes||'',businessNotes:r.business_notes||'',receiptUploadedAt:r.receipt_uploaded_at||null,reviewedAt:r.reviewed_at||null,_updatedAt:r.updated_at?new Date(r.updated_at):created};}
+function dbToOrder(r){const p=PRODUCTS[r.product_id]||{};const cur=r.currency||p.currency||{symbol:'$',code:'USD'};const curCode=cur.code||'USD';const sym=__wrapArSym(cur.symbol||'$',curCode);const __snap=r.product_snapshot||null;const name=(__snap&&__snap.name)?__snap.name:(p.name||'Product');const price=Number(r.unit_price)||0;const pct=p.pct||(price>0?Number(r.commission)/price:0);const q=Number(r.qty)||1;const commPerUnit=Number(r.commission)||0;const platformPerUnit=Number(r.platform_fee)||0;const feePerUnit=parseFloat((commPerUnit+platformPerUnit).toFixed(2));const totalFee=parseFloat((feePerUnit*q).toFixed(2));const di=p.delivery&&p.delivery[r.customer_country_code||r.customer_country]?p.delivery[r.customer_country_code||r.customer_country]:null;const per=Number(r.shipping_fee)||Number(r.delivery_fee)?{shipping:Number(r.shipping_fee)||0,delivery:Number(r.delivery_fee)||0}:(di&&di._per&&di._per[r.customer_city]?{shipping:di._per[r.customer_city].s,delivery:di._per[r.customer_city].d}:{shipping:di?di.shipping:0,delivery:di?di.delivery:0});const created=r.created_at?new Date(r.created_at):new Date();const reserveDate=created.getDate()+'/'+(created.getMonth()+1)+'/'+created.getFullYear();const confirmed=!!r.marketer_confirmed_at;const mc=r.marketer_confirmed_at?new Date(r.marketer_confirmed_at):null;return{id:'ORD-'+String(r.id).slice(0,6).toUpperCase(),dbId:r.id,reserveDate,customerName:r.customer_name||'',phone:r.customer_phone||'',whatsapp:r.customer_whatsapp||'',countryCode:r.customer_country_code||'',country:r.customer_country||'',city:r.customer_city||'',address:r.customer_address||'',productKey:r.product_id,productName:name,price,pct,earn:commPerUnit,shipping:per.shipping,delivery:per.delivery,size:r.size||'',color:r.color||'',selectedVariants:Array.isArray(r.selected_variants)?r.selected_variants:[],qty:q,total:parseFloat((price*q+per.shipping+per.delivery).toFixed(2)),feePerUnit,totalFee,commPerUnit,platformPerUnit,notes:r.customer_notes||'',bizName:p.biz||'',bizPhone:p.bizPhone||'',hasReceipt:!!r.receipt_url,receiptUrl:r.receipt_url||'',depositConfirmed:confirmed?true:null,payDate:mc?(mc.getDate()+'/'+(mc.getMonth()+1)+'/'+mc.getFullYear()):null,_status:r.status,_sym:sym,_curCode:curCode,_createdAt:created,adminNotes:r.admin_notes||'',businessNotes:r.business_notes||'',receiptUploadedAt:r.receipt_uploaded_at||null,reviewedAt:r.reviewed_at||null,_updatedAt:r.updated_at?new Date(r.updated_at):created,_refundedAt:r.refunded_at?new Date(r.refunded_at):null,refundNote:r.refund_note||''};}
 async function loadOrders(){const drafts=loadDrafts();if(!window.LateenAPI||!window.LateenAPI.listMyOrders){orders=drafts;renderOrders();refreshWallet();return;}try{const rows=await window.LateenAPI.listMyOrders();const mine=rows.filter(r=>r.marketer_id===window.LateenAPI.userId);const sentDbIds=new Set(mine.map(r=>r.id));orders=[...drafts.filter(d=>!d.dbId||!sentDbIds.has(d.dbId)),...mine.map(dbToOrder)];orders.sort((a,b)=>{const at=(a._updatedAt instanceof Date?a._updatedAt:new Date(a._updatedAt||0)).getTime();const bt=(b._updatedAt instanceof Date?b._updatedAt:new Date(b._updatedAt||0)).getTime();return bt-at;});renderOrders();recomputeAnalytics();refreshWallet();}catch(e){console.error('[Lateen] loadOrders',e);if(!orders.length)orders=drafts;renderOrders();refreshWallet();}}
 const __DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const __MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function __buildSeries(){
   const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  let earliest=null;orders.forEach(o=>{const c=o._createdAt;if(c&&(!earliest||c<earliest))earliest=c;});
+  let earliest=null;orders.forEach(o=>{const c=o._createdAt;if(c&&(!earliest||c<earliest))earliest=c;const rf=o._refundedAt;if(rf&&(!earliest||rf<earliest))earliest=rf;});
   const minDayStart=new Date(today);minDayStart.setDate(today.getDate()-29);
   let dayStart=earliest?new Date(earliest.getFullYear(),earliest.getMonth(),earliest.getDate()):new Date(today);
   if(dayStart>minDayStart)dayStart=minDayStart;
@@ -457,6 +457,16 @@ function recomputeAnalytics(){
     if(mi>=0&&mi<s.monthCount){if(isEarn)earnM[mi]+=earn;if(isOk){pcsM[mi]+=o.qty;ringM.ok++;}if(isFail)ringM.fail++;}
     const yi=c.getFullYear()-s.startYear;
     if(yi>=0&&yi<s.yearCount){if(isEarn)earnY[yi]+=earn;if(isOk){pcsY[yi]+=o.qty;ringY.ok++;}if(isFail)ringY.fail++;}
+    if(o._refundedAt){
+      const rc=o._refundedAt;
+      totEarn-=earn;const rcc=o._curCode||'USD';if(earnByCur[rcc])earnByCur[rcc].amount-=earn;
+      const rdi=Math.floor((new Date(rc.getFullYear(),rc.getMonth(),rc.getDate())-s.dayStart)/86400000);
+      if(rdi>=0&&rdi<s.dayCount)earnD[rdi]-=earn;
+      const rmi=(rc.getFullYear()-s.startYear)*12+rc.getMonth();
+      if(rmi>=0&&rmi<s.monthCount)earnM[rmi]-=earn;
+      const ryi=rc.getFullYear()-s.startYear;
+      if(ryi>=0&&ryi<s.yearCount)earnY[ryi]-=earn;
+    }
   });
   chartData.earnings.D={labels:s.dayLabels,sub:s.daySub,values:earnD.map(v=>+v.toFixed(2))};
   chartData.earnings.M={labels:s.monLabels,sub:s.monSub,values:earnM.map(v=>+v.toFixed(2))};
@@ -474,8 +484,9 @@ function recomputeAnalytics(){
 const __mkbdDays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const __mkbdMonths=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const __mkbdSelected={day:null,month:null,year:null};
-function __mkbdFilterOrders(sel){return (orders||[]).filter(o=>{const c=o._createdAt;if(!c)return false;if(sel.day&&__mkbdDays[c.getDay()]!==sel.day)return false;if(sel.month&&__mkbdMonths[c.getMonth()]!==sel.month)return false;if(sel.year&&String(c.getFullYear())!==sel.year)return false;return true;});}
-function __mkbdGenerateData(sel){const cur=window.__lateenWalletCur;const list=(!sel.day&&!sel.month&&!sel.year)?(orders||[]):__mkbdFilterOrders(sel);let earnings=0,pieces=0,succeeded=0,failed=0;list.forEach(o=>{const status=o._status||'pending';const isEarn=status==='approved'||status==='confirmed'||status==='delivered'||status==='cancelled';if(isEarn){if(!cur||(o._curCode||'USD')===cur)earnings+=(o.commPerUnit||0)*(o.qty||0);}if(status==='delivered'){pieces+=(o.qty||0);succeeded++;}if(status==='cancelled')failed++;});return{earnings,pieces,succeeded,failed};}
+function __mkbdDateMatches(d,sel){if(!d)return false;if(sel.day&&__mkbdDays[d.getDay()]!==sel.day)return false;if(sel.month&&__mkbdMonths[d.getMonth()]!==sel.month)return false;if(sel.year&&String(d.getFullYear())!==sel.year)return false;return true;}
+function __mkbdFilterOrders(sel){return (orders||[]).filter(o=>__mkbdDateMatches(o._createdAt,sel));}
+function __mkbdGenerateData(sel){const cur=window.__lateenWalletCur;const noFilter=!sel.day&&!sel.month&&!sel.year;const list=noFilter?(orders||[]):__mkbdFilterOrders(sel);let earnings=0,pieces=0,succeeded=0,failed=0;list.forEach(o=>{const status=o._status||'pending';const isEarn=status==='approved'||status==='confirmed'||status==='delivered'||status==='cancelled';if(isEarn){if(!cur||(o._curCode||'USD')===cur)earnings+=(o.commPerUnit||0)*(o.qty||0);}if(status==='delivered'){pieces+=(o.qty||0);succeeded++;}if(status==='cancelled')failed++;});(orders||[]).forEach(o=>{if(!o._refundedAt)return;if(cur&&(o._curCode||'USD')!==cur)return;if(noFilter||__mkbdDateMatches(o._refundedAt,sel))earnings-=(o.commPerUnit||0)*(o.qty||0);});return{earnings,pieces,succeeded,failed};}
 function __ordFrac(n){if(n===1)return'طلبيه واحده';if(n===2)return'طلبيتين';return n+' طلبيات';}
 function mkbdRenderBreakdown(){const grid=document.getElementById('mkbd-grid');if(!grid)return;const data=__mkbdGenerateData(__mkbdSelected);const total=data.succeeded+data.failed;const succPct=total>0?Math.round((data.succeeded/total)*100):0;const failPct=total>0?Math.round((data.failed/total)*100):0;const sym=(typeof window.__lateenSelSym==='function')?window.__lateenSelSym():'$';const ar=__ar();const succLbl=ar?'الطلبات تم تسليمها':'Succeeded';const failLbl=ar?'الطلبات لم يتم تسليمها':'Failed';const succSub=ar?('من أصل '+__ordFrac(total)):(succPct+'%');const failSub=ar?('من أصل '+__ordFrac(total)):(failPct+'%');const netLbl=ar?'صافي الأرباح منذ إنشاء الحساب':'Net earnings';const piecesLbl=ar?'قطع تم بيعها':'Pieces sold';grid.innerHTML=`
     <div class="mkbd-box"><div class="mkbd-box-label" data-no-i18n>${netLbl}</div><div class="mkbd-box-value">${__moneyH(data.earnings,sym,window.__lateenWalletCur)}</div></div>
@@ -625,7 +636,7 @@ async function refreshNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
   const dot=document.getElementById('notif-dot');
-  if(dot)dot.style.display=list.some(n=>!n.read_at)?'block':'none';
+  if(dot){const unreadCount=list.filter(n=>!n.read_at).length;if(unreadCount>0){dot.textContent=unreadCount>99?'99+':String(unreadCount);dot.style.display='flex';}else{dot.textContent='';dot.style.display='none';}}
   const root=document.getElementById('notif-list');
   if(!root)return;
   // Always reflect unread server state so red dots show on first paint when opening the page.
@@ -639,7 +650,8 @@ async function refreshNotifications(){
   const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const localize=(n)=>{const title=n.title,body=n.body;
     if(n.kind==='payout_paid'||title==='Withdrawal successful'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const amtNum=d&&d.amount!=null?Number(d.amount):null;const amtStr=amtNum!=null&&!isNaN(amtNum)?amtNum.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):null;const amtLine=amtStr?__t('Amount: '+amtStr+' LYD','المبلغ: '+amtStr+' د.ل'):'';const doneLine=__t('Your withdrawal has been paid successfully.','تم تحويل مبلغ السحب إلى حسابك بنجاح.');return{t:__t('Withdrawal Completed','تم تحويل المبلغ'),b:amtLine?(amtLine+'\n'+doneLine):doneLine};}
-    if(n.kind==='payout_note'||title==='Withdrawal request needs attention')return{t:__t('Withdrawal request needs attention','طلب السحب يحتاج إلى مراجعة'),b:body||''};
+    if(n.kind==='payout_note'||title==='Withdrawal request needs attention')return{t:__t('Withdrawal failed, tap to know more','فشل إيداع المبلغ من محفظتك إلى حسابك، انفر لمعرفه المزيد'),b:body||''};
+    if(n.kind==='order_refunded'||title==='Order refunded'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const amtNum=d&&d.amount!=null?Number(d.amount):null;const amtStr=amtNum!=null&&!isNaN(amtNum)?amtNum.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):null;const pname=(d&&d.product_name)||'';const enT=(pname?pname+' ':'')+'fee was refunded back to the customer';const enB=amtStr!=null?('-'+amtStr+' was deducted from your wallet to the customer'):'';const arT='عربون '+(pname?pname+' ':'')+'تم استرجاعه للزبون،';const arB=amtStr!=null?('و تم خصم -'+amtStr+' من حسابك إلى الزبون'):'';return{t:__t(enT,arT),b:__t(enB,arB)};}
     if(n.kind==='order_failed'||title==='Order failed'||title==='Cash on Delivery Failed')return{t:__t('Cash on Delivery Failed','فشل الدفع عند الاستلام'),b:__t('The customer did not receive the product','لم يستلم الزبون المنتج')};
     if(n.kind==='order_delivered'||title==='Order Delivered')return{t:__t('Order Delivered','تم تسليم الطلب'),b:__t('The customer has received the product','استلم الزبون المنتج')};
     if(n.kind==='receipt_verified'||title==='Receipt Verified')return{t:__t('Receipt Verified','تم اعتماد الإيصال'),b:__t('Your payment receipt has been verified. Your balance is now updated','تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.')};
@@ -654,27 +666,31 @@ async function refreshNotifications(){
     const isVerified=n.kind==='receipt_verified';
     const isRejected=n.kind==='receipt_rejected';
     const isReportReviewed=n.kind==='report_reviewed';
-    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed;
-    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected)?'#e07070':((isDelivered||isVerified||isReportReviewed)?'#2dbd8f':'#7f77dd')));
+    const isRefunded=n.kind==='order_refunded';
     const isNote=n.kind==='payout_note';
-    const mainText=isNote?(L.b||L.t):L.t;
+    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote;
+    const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected||isRefunded)?'#e07070':((isDelivered||isVerified||isReportReviewed)?'#2dbd8f':'#7f77dd')));
+    const mainText=L.t;
     const subText=isNote?'':L.b;
     let detailsHtml='';
     if(expandable && n.data){
       let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
       if(d){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
-        const borderColor=(isFailed||isRejected)?'#2a1a1a':'#142a20';
+        const borderColor=(isFailed||isRejected||isRefunded||isNote)?'#2a1a1a':'#142a20';
         const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
         const receiptImg=isRejected&&d.receipt_url&&/^(https?:|data:|\/)/.test(String(d.receipt_url))?`<div style="margin:0 0 10px 0"><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">${__t('Receipt','الإيصال')}</div><img src="${esc(d.receipt_url)}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:10px;display:block;background:#0f0f0f"/></div>`:'';
-        const adminNote=isRejected&&d.admin_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Admin note','ملاحظات الأدمن')}:</b> ${esc(d.admin_notes)}</div>`:'';
+        const adminNoteText=isRejected?d.admin_notes:((isRefunded||isNote)?d.admin_comment:'');
+        const adminNote=adminNoteText?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Admin note','ملاحظات الأدمن')}:</b> ${esc(adminNoteText)}</div>`:'';
         const bizNotes=isFailed&&d.business_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Business owner notes','ملاحظات التاجر')}:</b> ${esc(d.business_notes)}</div>`:'';
         const reportTypeLbl=isReportReviewed?(d.report_type==='product'?__t('Product','المنتج'):(d.report_type==='merchant'?__t('Merchant','التاجر'):__t('Other','أخرى'))):'';
+        const reportMsgBlock=isReportReviewed&&d.report_message?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Your report','بلاغك')}:</b> ${esc(d.report_message)}</div>`:'';
         detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid ${borderColor}">
           ${photo}
           ${receiptImg}
           ${row(__t('Order Code','كود الطلبيه'),d.order_code)}
           ${isReportReviewed?row(__t('Report type','نوع البلاغ'),reportTypeLbl):''}
+          ${reportMsgBlock}
           ${row(__t('Product','المنتج'),d.product_name)}
           ${row(__t('Qty','الكمية'),d.qty)}
           ${row(__t('Customer','الزبون'),d.customer_name)}

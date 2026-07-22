@@ -376,8 +376,10 @@ async function admReject(id){
 }
 async function admRefundOrder(id){
   if(!confirm("Refund this order?\n\nThis removes its platform fee from your total platform fee metrics on the Home page, and deducts the marketer's fee for this order from their wallet balance. It does not change the order's status elsewhere in the app. This can't be undone."))return;
+  const comment=prompt('Add a note for the marketer? (optional — leave blank to skip)');
+  if(comment===null)return;
   try{
-    await window.LateenAPI.admin.refundOrder(id);
+    await window.LateenAPI.admin.refundOrder(id,comment.trim());
     admLoadVerify();
     admLoadMetrics();
   }catch(e){alert('Refund failed: '+e.message);}
