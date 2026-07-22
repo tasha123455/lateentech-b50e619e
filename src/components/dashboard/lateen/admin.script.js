@@ -1039,6 +1039,10 @@ function admEmpCycle(emp){
   return {y,m,cycleIndex,payday,nextPayday};
 }
 function admEmpIsPaid(emp,cyc){return (emp.payments||[]).some(x=>x.period_year===cyc.y&&x.period_month===cyc.m);}
+/* A freshly-listed employee's cycle payday is 30 days out -- the pay button
+   should not be actionable ("Mark as Paid") before that date arrives. Until
+   then it just shows a greyed-out "Pending" state. */
+function admEmpIsDue(cyc){return new Date()>=cyc.payday;}
 
 async function admLoadEmployees(){
   const root=document.getElementById('employees-list');
@@ -1080,8 +1084,12 @@ function admRenderEmployees(){
   root.innerHTML=filtered.map(e=>{
     const cyc=cycles.get(e.id);
     const paid=admEmpIsPaid(e,cyc);
+    const due=admEmpIsDue(cyc);
     const paydayLabel=admEmpFmtDate(paid?cyc.nextPayday:cyc.payday);
-    const status=paid?'<span style="color:#2dbd8f">Paid · next due '+paydayLabel+'</span>':'<span style="color:#e07070">Pending · due '+paydayLabel+'</span>';
+    const status=paid?'<span style="color:#2dbd8f">Paid · next due '+paydayLabel+'</span>':(due?'<span style="color:#e07070">Pending · due '+paydayLabel+'</span>':'<span style="color:#9e9b97">Pending · due '+paydayLabel+'</span>');
+    const btnClass=paid?'paid':(due?'':'not-due');
+    const btnLabel=paid?'Paid ✓':(due?'Mark as Paid':'Pending');
+    const btnDisabled=paid||!due;
     return `<div class="adm-emp-row">
       <div class="adm-emp-top">
         <div class="adm-emp-av">${admEsc(admInitials(e.full_name))}</div>
@@ -1098,7 +1106,7 @@ function admRenderEmployees(){
         ${e.notes?`<div style="grid-column:1/-1;color:#9e9b97;font-style:italic;">${admEsc(e.notes)}</div>`:''}
       </div>
       <div class="adm-emp-actions">
-        <button class="adm-emp-pay-btn ${paid?'paid':''}" ${paid?'disabled':''} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${paid?'Paid ✓':'Mark as Paid'}</button>
+        <button class="adm-emp-pay-btn ${btnClass}" ${btnDisabled?'disabled':''} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${btnLabel}</button>
         <button class="adm-emp-link-btn" onclick="admOpenEmpHist('${e.id}')">History</button>
         <button class="adm-emp-link-btn" onclick="admOpenEmpForm('${e.id}')">Edit</button>
       </div>
@@ -1123,6 +1131,8 @@ async function admPayEmp(id,amount){
   const e=admEmpCache.find(x=>x.id===id);
   if(!e)return;
   const cyc=admEmpCycle(e);
+  if(admEmpIsPaid(e,cyc))return;
+  if(!admEmpIsDue(cyc))return;
   const due=admEmpFmtDate(cyc.payday);
   if(!confirm('Mark '+e.full_name+' as paid for the cycle due '+due+' ('+admMoney(amount)+')?'))return;
   try{
