@@ -39,6 +39,7 @@
   --color-business: var(--business);
   --color-business-foreground: var(--business-foreground);
   --color-business-tint: var(--business-tint);
+  --color-shopper-tint: var(--shopper-tint);
   --color-text-1: var(--text-1);
   --color-text-2: var(--text-2);
   --color-text-3: var(--text-3);
@@ -95,6 +96,9 @@
   --business: oklch(0.72 0.14 165);
   --business-foreground: oklch(0.72 0.14 165);
   --business-tint: oklch(0.32 0.06 165);
+
+  /* Shopper — rose #e0637a / #3a1620 */
+  --shopper-tint: oklch(0.28 0.075 15);
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: Georgia, "Times New Roman", serif;
