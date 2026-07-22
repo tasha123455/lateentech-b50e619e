@@ -989,7 +989,7 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
           ${buildOrdActions(o)}
         </div>
       </div>`;}catch(err){console.error('[Lateen] renderOrders item',err,o);return '';}}).join('');el.querySelectorAll('.hero-scroll').forEach(scroller=>{let t;scroller.addEventListener('scroll',()=>{clearTimeout(t);t=setTimeout(()=>{const idx=Math.round(scroller.scrollLeft/(scroller.clientWidth||1));const dots=scroller.parentElement.querySelectorAll('.hero-dots .d');dots.forEach((d,i)=>d.classList.toggle('active',i===idx));},60);});});}
-function toggle(id){expandedId=expandedId===id?null:id;applyFilters();}
+function toggle(id){expandedId=expandedId===id?null:id;const card=document.querySelector(`.order-card[data-id="${id}"]`);if(card)card.classList.toggle('expanded');}
 document.addEventListener('click',function(e){const t=e.target.closest('[data-action="toggle"]');if(t){const card=t.closest('.order-card');if(card)toggle(card.dataset.id);}});
 
 recomputeAnalytics();
