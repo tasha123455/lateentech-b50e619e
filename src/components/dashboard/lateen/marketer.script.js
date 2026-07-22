@@ -1,3 +1,4 @@
+
 function __splitCC(p){var s=String(p||'').trim();if(!s)return{cc:'',num:''};var m=s.match(/^(\+\d{1,3})[\s-]*(.*)$/);if(m)return{cc:'\u200E'+m[1]+'\u200E',num:'\u200E'+m[2].replace(/\s+/g,'')+'\u200E'};return{cc:'',num:'\u200E'+s+'\u200E'};}
 function __dispPhone(p){var s=__splitCC(p);return s.cc?(s.cc+' | '+s.num):s.num;}
 function __fmtDT(v){var d=new Date(v);if(isNaN(d.getTime()))return'';var ar=__ar();var datePart=(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();var h=d.getHours();var mins=String(d.getMinutes()).padStart(2,'0');var isPM=h>=12;h=h%12;if(h===0)h=12;var ampm=ar?(isPM?'مساءً':'صباحاً'):(isPM?'PM':'AM');return'\u200E'+datePart+', '+h+':'+mins+' '+ampm+'\u200E';}
@@ -239,38 +240,14 @@ function onCityChange(){const city=document.getElementById('f-city').value;const
 function __maxQtyForSelection(){if(!currentProduct)return Infinity;let m=Number(currentProduct.q)||0;const vg=currentProduct.vg||[];for(const g of vg){const v=selectedVariants[g.name];if(!v)continue;const it=(g.items||[]).find(x=>x&&x.val===v);if(it&&typeof it.qty==='number'&&Number.isFinite(it.qty))m=Math.min(m,it.qty);}return m;}
 function changeQty(d){const nq=Math.max(1,qty+d);const mx=__maxQtyForSelection();if(d>0&&nq>mx){const ar=(typeof __ar==='function'&&__ar());alert(ar?`الكميه اكثر من ${mx} غير متوفر`:`Quantity more than ${mx} unavailable`);return;}qty=nq;document.getElementById('qty-display').textContent=qty;updateFeeCard();persistOpenDraft();}
 function selectVariant(type,val,el){const g=type==='size'?'size-chips':'color-chips';document.querySelectorAll('#'+g+' .vchip').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');if(type==='size')selectedSize=val;else selectedColor=val;persistOpenDraft();updateSubmitState();}
-window.__fileDialogGuardUntil=0;
-function pendingReceiptKey(){return'lateen_mk_pending_receipt_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}
-function __clearPendingReceiptMarker(){try{localStorage.removeItem(pendingReceiptKey());}catch(e){}}
-/* Ghost-click fix: after the native photo/camera picker closes and focus
-   returns to the page, some mobile browsers/WebViews replay a click at the
-   old touch position. If the layout shifted while the picker was open, that
-   replayed click can land on the modal's dark backdrop instead of the
-   upload box, firing closeForm() and wiping the in-progress upload. So the
-   backdrop's close-on-tap is routed through closeFormBgTap() below, which
-   ignores taps in the brief window right after opening the picker or while
-   an upload is still in flight. Deliberate taps (Cancel/back button) still
-   call closeForm() directly and are unaffected. */
-/* Reload-resilience fix: on some Android devices opening the system photo/
-   camera picker backgrounds this tab hard enough that Chrome reclaims its
-   memory and silently reloads the page once you return — wiping every bit
-   of in-memory state (the open form, the order being filled in, all of it)
-   with no error, which looks exactly like "it closes immediately and isn't
-   sent." We can't stop the OS from doing that, so instead the in-progress
-   order is checkpointed to localStorage right before handing off to the
-   picker; if the page does get reloaded, the check near the bottom of this
-   file (search __clearPendingReceiptMarker) notices the checkpoint and
-   reopens the same order automatically so the receipt can be reattached. */
-function triggerUpload(){try{persistOpenDraft();}catch(e){}try{if(editingId)localStorage.setItem(pendingReceiptKey(),JSON.stringify({id:editingId,ts:Date.now()}));}catch(e){}window.__fileDialogGuardUntil=Date.now()+1500;const el=document.getElementById('file-input');if(el)el.click();}
-function closeFormBgTap(){if(Date.now()<window.__fileDialogGuardUntil)return;if(window.__uploadingReceipt)return;closeForm();}
-window.addEventListener('focus',function(){if(window.__fileDialogGuardUntil){window.__fileDialogGuardUntil=Date.now()+700;setTimeout(__clearPendingReceiptMarker,3000);}});
-async function onFileUpload(input){if(!input.files.length)return;__clearPendingReceiptMarker();const file=input.files[0];const box=document.getElementById('upload-box');const lbl=document.getElementById('upload-label');lbl.classList.remove('done','err');box.classList.remove('has-file','error');box.classList.add('uploading');lbl.innerHTML='<span class="upload-spinner"></span>Uploading '+file.name+'…';if(!window.LateenAPI||!window.LateenAPI.uploadReceipt){box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload service not ready — refresh and try again';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();return;}try{receiptUrl=await window.LateenAPI.uploadReceipt(file);hasReceipt=true;box.classList.remove('uploading');box.classList.add('has-file');lbl.classList.add('done');lbl.textContent='✓ Receipt ready · '+file.name;persistOpenDraft();updateSubmitState();}catch(e){console.error('[Lateen] uploadReceipt',e);box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload failed — tap to try again ('+(e.message||e)+')';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();}}
+function triggerUpload(){const el=document.getElementById('file-input');if(el)el.click();}
+async function onFileUpload(input){if(!input.files.length)return;const file=input.files[0];const box=document.getElementById('upload-box');const lbl=document.getElementById('upload-label');lbl.classList.remove('done','err');box.classList.remove('has-file','error');box.classList.add('uploading');lbl.innerHTML='<span class="upload-spinner"></span>Uploading '+file.name+'…';if(!window.LateenAPI||!window.LateenAPI.uploadReceipt){box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload service not ready — refresh and try again';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();return;}try{receiptUrl=await window.LateenAPI.uploadReceipt(file);hasReceipt=true;box.classList.remove('uploading');box.classList.add('has-file');lbl.classList.add('done');lbl.textContent='✓ Receipt ready · '+file.name;persistOpenDraft();updateSubmitState();}catch(e){console.error('[Lateen] uploadReceipt',e);box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload failed — tap to try again ('+(e.message||e)+')';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();}}
 function setDeposit(val){depositConfirmed=val;document.getElementById('dep-yes').classList.toggle('active',val===true);document.getElementById('dep-no').classList.toggle('active',val===false);updateSubmitState();}
 function updateSubmitState(){const btn=document.getElementById('submit-btn');if(!btn)return;let needVariant=false;if(currentProduct){const vgList=(currentProduct.vg&&currentProduct.vg.length)?currentProduct.vg:[...(currentProduct.sizes&&currentProduct.sizes.length?[{name:'Size',items:currentProduct.sizes}]:[]),...(currentProduct.colors&&currentProduct.colors.length?[{name:'Colour',items:currentProduct.colors}]:[])];for(const g of vgList){if(!(selectedVariants[g.name]||'').trim()){needVariant=true;break;}}}const __qtyRow=document.getElementById('qty-row');if(__qtyRow)__qtyRow.style.display=(currentProduct&&!needVariant)?'flex':'none';btn.disabled=needVariant;btn.style.opacity=needVariant?'.5':'1';btn.style.cursor=needVariant?'not-allowed':'pointer';const lbl=btn.querySelector('[data-i18n]');if(hasReceipt&&!needVariant){if(lbl){lbl.setAttribute('data-i18n','Send Order to Business Owner');lbl.textContent=(window.__lateenT&&window.__lateenT('Send Order to Business Owner'))||'Send Order to Business Owner';}btn.style.background='#2dbd8f';btn.style.color='#fff';btn.title='Receipt will go to admin for verification, then forwarded to the business owner.';}else{const key=editingId?'Save changes':'Save order';if(lbl){lbl.setAttribute('data-i18n',key);lbl.textContent=(window.__lateenT&&window.__lateenT(key))||key;}btn.style.background='';btn.style.color='';btn.title=needVariant?'Please choose the product variant to continue':'Saved locally. Upload a receipt to send for verification.';}}
 async function saveDraftNow(){await submitOrder({forceDraft:true});}
 function __mktFrozenBlock(){const p=window.__profileData;if(p&&p.frozen_at){const ar=(typeof __ar==='function'&&__ar());alert(ar?'تم تجميد الحساب مؤقتاً':'Account temporarily frozen');return true;}return false;}
 function openForm(order){if(__mktFrozenBlock())return;editingId=order?order.id:null;resetForm();if(order)prefillForm(order);const ttl=document.getElementById('form-title-text');if(ttl)ttl.textContent=order?'Edit order':'New order';document.getElementById('form-overlay').classList.add('open');try{document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';}catch(e){}['f-name','f-phone','f-whatsapp','f-address','f-notes'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.__wired){el.addEventListener('input',()=>{updateSubmitState();persistOpenDraft();});el.__wired=true;}});['f-product','f-country','f-city'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.__wiredPersist){el.addEventListener('change',()=>setTimeout(persistOpenDraft,0));el.__wiredPersist=true;}});updateSubmitState();}
-function closeForm(){__clearPendingReceiptMarker();document.getElementById('form-overlay').classList.remove('open');try{document.body.style.overflow='';document.documentElement.style.overflow='';}catch(e){}resetForm();}
+function closeForm(){document.getElementById('form-overlay').classList.remove('open');try{document.body.style.overflow='';document.documentElement.style.overflow='';}catch(e){}resetForm();}
 function setWhatsAppOpen(open){const sec=document.getElementById('wa-section');const chev=document.getElementById('wa-chevron');const btn=document.getElementById('wa-toggle');if(!sec)return;sec.classList.toggle('open',!!open);sec.setAttribute('aria-hidden',open?'false':'true');if(btn)btn.setAttribute('aria-expanded',open?'true':'false');if(chev)chev.style.transform=open?'rotate(180deg)':'';}
 let __waRequired=false;
 function __applyWaRequiredUI(p){__waRequired=!!(p&&p.reqPhone);const star=document.getElementById('wa-required-star');const opt=document.getElementById('wa-opt-suffix');const chev=document.getElementById('wa-chevron');if(star)star.style.display=__waRequired?'inline':'none';if(opt)opt.style.display=__waRequired?'none':'inline';if(chev)chev.style.display=__waRequired?'none':'';if(__waRequired)setWhatsAppOpen(true);}
@@ -715,13 +692,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 __lateenRefreshWalletAndPayout();refreshNotifications();
 setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
-/* If a pending-receipt checkpoint survived a reload (see triggerUpload /
-   __clearPendingReceiptMarker above), the picker interaction never made it
-   back to a live page last time. Reopen that same order automatically so
-   the person isn't left staring at a bare order list wondering what
-   happened — they can just try attaching the receipt again. */
-(function(){try{const raw=localStorage.getItem(pendingReceiptKey());if(!raw)return;localStorage.removeItem(pendingReceiptKey());const marker=JSON.parse(raw);if(!marker||!marker.id||Date.now()-(marker.ts||0)>600000)return;const draft=orders.find(o=>o.id===marker.id);if(!draft)return;setTimeout(()=>{try{openForm(draft);const lbl=document.getElementById('upload-label');if(lbl&&!hasReceipt){const ar=(typeof __ar==='function'&&__ar());lbl.textContent=ar?"يبدو أن الرفع لم يكتمل — يرجى المحاولة مرة أخرى":"Upload didn't finish last time — please try attaching the receipt again";}}catch(e){}},60);}catch(e){}})();
-loadBrowse().then(()=>loadOrders());refreshWallet();refreshProfile();
+loadBrowse().then(()=>loadOrders()).then(()=>{try{if(typeof window.__lateenResumeReceiptFlow==='function')window.__lateenResumeReceiptFlow();}catch(e){}});refreshWallet();refreshProfile();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
   /* Coalesce realtime bursts so lists don't re-render multiple times in a
      row (which caused visible flicker when a mutation lands). */
@@ -740,8 +711,8 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
    be rendered again, don't touch innerHTML — removes the "list vanishes
    then reappears" flash right after a local create/edit. */
 (function(){
-  const _ro=renderOrders;let __sigO='';
-  if(typeof _ro==='function'){renderOrders=function(){try{const s=JSON.stringify((orders||[]).map(o=>[o.id,o.dbId||'',o._status||'',o.qty,o.hasReceipt?1:0,o.receiptUrl||'',o.adminNotes||'',o.businessNotes||'']));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
+  const _ro=window.renderOrders;let __sigO='';
+  if(typeof _ro==='function'){window.renderOrders=function(){try{const s=JSON.stringify((orders||[]).map(o=>[o.id,o.dbId||'',o._status||'',o.qty,o.hasReceipt?1:0,o.receiptUrl||'',o.adminNotes||'',o.businessNotes||'']));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
 })();
 /* Same signature-skip trick, applied to the browse grid: re-opening the
    Browse tab called go()->rg2(l) every time and rebuilt the whole grid
@@ -749,8 +720,8 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
    list hadn't changed at all. That's the "products hit blank for a sec
    then reload" flash. */
 (function(){
-  const _rg2=rg2;let __sigBrw='';
-  if(typeof _rg2==='function'){rg2=function(l){try{const s=JSON.stringify((l||[]).map(p=>[p.id,p.sv?1:0,p.pr,p.pct,p.n]));if(s===__sigBrw)return;__sigBrw=s;}catch(e){}return _rg2.apply(this,arguments);};}
+  const _rg2=window.rg2;let __sigBrw='';
+  if(typeof _rg2==='function'){window.rg2=function(l){try{const s=JSON.stringify((l||[]).map(p=>[p.id,p.sv?1:0,p.pr,p.pct,p.n]));if(s===__sigBrw)return;__sigBrw=s;}catch(e){}return _rg2.apply(this,arguments);};}
 })();
 /* persist page + scroll across refresh */
 (function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
@@ -767,16 +738,16 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   window.__uploadingReceipt = false;
   let __deferredLoad = false;
 
-  const _renderOrders = renderOrders;
+  const _renderOrders = window.renderOrders;
   if (typeof _renderOrders === 'function') {
-    renderOrders = function(){
+    window.renderOrders = function(){
       if (window.__uploadingReceipt) { __deferredLoad = true; return; }
       return _renderOrders.apply(this, arguments);
     };
   }
-  const _loadOrders = loadOrders;
+  const _loadOrders = window.loadOrders;
   if (typeof _loadOrders === 'function') {
-    loadOrders = function(){
+    window.loadOrders = function(){
       if (window.__uploadingReceipt) { __deferredLoad = true; return Promise.resolve(); }
       return _loadOrders.apply(this, arguments);
     };
@@ -791,22 +762,132 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
     }
   }
 
-  const _onOrderReceiptFile = onOrderReceiptFile;
+  const _onOrderReceiptFile = window.onOrderReceiptFile;
   if (typeof _onOrderReceiptFile === 'function') {
-    onOrderReceiptFile = async function(input){
+    window.onOrderReceiptFile = async function(input){
       if (!input || !input.files || !input.files.length) return;
       beginUpload();
       try { return await _onOrderReceiptFile.call(this, input); }
       finally { endUpload(); }
     };
   }
-  const _onFileUpload = onFileUpload;
+  const _onFileUpload = window.onFileUpload;
   if (typeof _onFileUpload === 'function') {
-    onFileUpload = async function(input){
+    window.onFileUpload = async function(input){
       if (!input || !input.files || !input.files.length) return;
       beginUpload();
       try { return await _onFileUpload.call(this, input); }
       finally { endUpload(); }
     };
   }
+})();
+
+/* Receipt-upload resume.
+   Opening the native photo/file picker on Android can cause the OS to
+   reclaim (kill) the browser tab in the background when memory is tight.
+   When the user returns, the page reloads from scratch and every
+   in-memory state — the open order, the product picked, the in-progress
+   upload — is gone. That's what shows up as "the page jitters and closes,
+   and the receipt never sends." We can't stop Android from doing that,
+   but we can checkpoint enough right before the native picker opens so
+   the next load can put the user back where they left off instead of a
+   bare, unexplained orders list. This covers BOTH entry points: the "new
+   order" form's receipt box (file-input) and "Re-upload receipt" / "Add
+   receipt & send" / the "How to collect fee" upload button on existing
+   orders (file-input-order, via uploadOrderReceipt). */
+(function(){
+  const RESUME_KEY = 'lateen_receipt_resume_v1';
+  function readResume(){ try { return JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); } catch(e){ return null; } }
+  function writeResume(o){ try { localStorage.setItem(RESUME_KEY, JSON.stringify(o)); } catch(e){} }
+  function clearResume(){ try { localStorage.removeItem(RESUME_KEY); } catch(e){} }
+  window.__lateenClearReceiptResume = clearResume;
+
+  // 1) New-order form: "upload-box" is a <label for="file-input">, so the
+  // native picker opens with no JS in between today. The input's own
+  // click listeners still run first, before the browser shows the OS
+  // dialog, so this is where we checkpoint the draft.
+  const fi = document.getElementById('file-input');
+  if (fi && !fi.__resumeWired) {
+    fi.__resumeWired = true;
+    fi.addEventListener('click', function(){
+      try { if (typeof persistOpenDraft === 'function') persistOpenDraft(); } catch(e){}
+      try {
+        const id = (typeof editingId !== 'undefined') ? editingId : null;
+        if (id && typeof loadDrafts === 'function' && loadDrafts().some(d => d.id === id)) {
+          writeResume({ kind:'form', draftId:id, ts:Date.now() });
+        }
+      } catch(e){}
+    });
+  }
+
+  // 2) Orders list re-upload: checkpoint which order before the picker
+  // opens (this also covers instrUpload(), which calls this same function).
+  const _uploadOrderReceipt = window.uploadOrderReceipt;
+  if (typeof _uploadOrderReceipt === 'function') {
+    window.uploadOrderReceipt = function(id){
+      writeResume({ kind:'order', orderId:id, ts:Date.now() });
+      return _uploadOrderReceipt.apply(this, arguments);
+    };
+  }
+
+  // 3) Proof the page survived: once either handler is actually running
+  // with a chosen file, the checkpoint has done its job — clear it so a
+  // normal, successful upload never shows a resume prompt later.
+  const _onFileUploadR = window.onFileUpload;
+  if (typeof _onFileUploadR === 'function') {
+    window.onFileUpload = function(input){
+      if (input && input.files && input.files.length) clearResume();
+      return _onFileUploadR.apply(this, arguments);
+    };
+  }
+  const _onOrderReceiptFileR = window.onOrderReceiptFile;
+  if (typeof _onOrderReceiptFileR === 'function') {
+    window.onOrderReceiptFile = function(input){
+      if (input && input.files && input.files.length) clearResume();
+      return _onOrderReceiptFileR.apply(this, arguments);
+    };
+  }
+
+  // 4) Deliberate close (Cancel / back / tap outside the form): nothing to
+  // resume, so a normal cancel doesn't leave a stale prompt behind.
+  const _closeFormR = window.closeForm;
+  if (typeof _closeFormR === 'function') {
+    window.closeForm = function(){ clearResume(); return _closeFormR.apply(this, arguments); };
+  }
+
+  // 5) Picker dismissed (cancelled) and the page survived without a
+  // reload: #3 already covers "picked a file"; this covers "picked
+  // nothing" so a harmless cancel doesn't leave a stale marker behind
+  // either.
+  let __resumeFocusTimer = null;
+  function __maybeClearOnReturn(){
+    if (__resumeFocusTimer) clearTimeout(__resumeFocusTimer);
+    __resumeFocusTimer = setTimeout(() => { if (readResume()) clearResume(); }, 1200);
+  }
+  window.addEventListener('focus', __maybeClearOnReturn);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') __maybeClearOnReturn(); });
+
+  // 6) Resume check — run once at bootstrap, after drafts/orders/products
+  // have loaded, so there's something real to reopen or point to.
+  window.__lateenResumeReceiptFlow = function(){
+    const r = readResume();
+    if (!r) return;
+    clearResume(); // one-shot: don't keep re-prompting on every future load
+    const ar = (typeof __ar === 'function' && __ar());
+    const notice = ar ? 'الرفع لم يكتمل في المرة السابقة — يرجى المحاولة مرة أخرى.' : "Upload didn't finish last time — please try attaching the receipt again.";
+    if (r.kind === 'form') {
+      const draft = (typeof loadDrafts === 'function' ? loadDrafts() : []).find(d => d.id === r.draftId);
+      if (draft && typeof openForm === 'function') {
+        openForm(draft);
+        const lbl = document.getElementById('upload-label');
+        if (lbl && !hasReceipt) lbl.textContent = notice;
+      }
+    } else if (r.kind === 'order') {
+      setTimeout(() => {
+        const card = document.querySelector('.order[data-oid="'+String(r.orderId).replace(/"/g,'')+'"]');
+        if (card) { card.classList.add('open'); card.scrollIntoView({ behavior:'smooth', block:'center' }); }
+        alert(notice);
+      }, 300);
+    }
+  };
 })();
