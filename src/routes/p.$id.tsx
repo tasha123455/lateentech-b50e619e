@@ -47,19 +47,26 @@ function PublicProductPage() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select(
-          "id,business_id,name,code,category,description,price,currency,photos,sizes,colors,variant_groups,qty,reserved_qty,status,deleted_at",
-        )
-        .eq("id", id)
-        .maybeSingle();
-      if (!alive) return;
-      if (error) setErr(error.message);
-      else if (!data || data.status !== "active" || data.deleted_at)
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select(
+            "id,business_id,name,code,category,description,price,currency,photos,sizes,colors,variant_groups,qty,reserved_qty,status,deleted_at",
+          )
+          .eq("id", id)
+          .maybeSingle();
+        if (!alive) return;
+        if (error) setErr(error.message);
+        else if (!data || data.status !== "active" || data.deleted_at)
+          setErr("This product is no longer available.");
+        else setP(data as PublicProduct);
+      } catch (e) {
+        if (!alive) return;
+        console.error("[public product] failed to load", e);
         setErr("This product is no longer available.");
-      else setP(data as PublicProduct);
-      setLoading(false);
+      } finally {
+        if (alive) setLoading(false);
+      }
     })();
     return () => {
       alive = false;
@@ -91,6 +98,8 @@ function PublicProductPage() {
   }
 
   const photos = (p.photos ?? []).filter(Boolean);
+  const sizes = Array.isArray(p.sizes) ? p.sizes : [];
+  const colors = Array.isArray(p.colors) ? p.colors : [];
   const available = Math.max(0, (p.qty ?? 0) - (p.reserved_qty ?? 0));
   const isMarketer = !!user && role === "marketer";
   const returnTo = `/p/${p.id}`;
@@ -139,27 +148,27 @@ function PublicProductPage() {
           </p>
         )}
 
-        {(p.sizes?.length || p.colors?.length) ? (
+        {(sizes.length > 0 || colors.length > 0) ? (
           <div className="mt-5 space-y-3">
-            {p.sizes && p.sizes.length > 0 && (
+            {sizes.length > 0 && (
               <div>
                 <div className="mb-1.5 text-xs font-medium text-text-2">Sizes</div>
                 <div className="flex flex-wrap gap-1.5">
-                  {p.sizes.map((s) => (
-                    <span key={s} className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-1">
-                      {s}
+                  {sizes.map((s, i) => (
+                    <span key={i} className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-1">
+                      {String(s)}
                     </span>
                   ))}
                 </div>
               </div>
             )}
-            {p.colors && p.colors.length > 0 && (
+            {colors.length > 0 && (
               <div>
                 <div className="mb-1.5 text-xs font-medium text-text-2">Colors</div>
                 <div className="flex flex-wrap gap-1.5">
-                  {p.colors.map((c) => (
-                    <span key={c} className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-1">
-                      {c}
+                  {colors.map((c, i) => (
+                    <span key={i} className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-1">
+                      {String(c)}
                     </span>
                   ))}
                 </div>
