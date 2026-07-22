@@ -1047,7 +1047,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
 
 <!-- ORDER FORM OVERLAY -->
 <div class="overlay" id="form-overlay" style="position:fixed;inset:0;">
-  <div class="overlay-bg" onclick="closeFormBgTap()"></div>
+  <div class="overlay-bg" onclick="closeForm()"></div>
   <div class="sheet">
     <div class="sheet-handle"></div>
 
@@ -1177,12 +1177,14 @@ body.lang-ar .pd-iban-row{display:none !important;}
           <span data-i18n="Payment details">Payment details</span>
         </button>
       </div>
-      <div class="upload-box dashed-lg" id="upload-box" onclick="triggerUpload()" style="margin-bottom:0;">
+      <div id="receipt-resume-banner" style="display:none;margin:0 0 10px;padding:10px 12px;border-radius:10px;background:rgba(234,179,8,0.10);border:0.5px solid rgba(234,179,8,0.35);color:#eab308;font-size:12px;font-weight:600;line-height:1.5;" data-no-i18n></div>
+      <label class="upload-box dashed-lg" id="upload-box" onclick="openReceiptPicker('form')" style="margin-bottom:0;">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <div class="upload-icon-label" id="upload-label" data-i18n="Tap to upload receipt">Tap to upload receipt</div>
-      </div>
-      <input type="file" id="file-input" accept="image/*,application/pdf" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;" onchange="onFileUpload(this)"/>
-      <input type="file" id="file-input-order" accept="image/*,application/pdf" style="display:none" onchange="onOrderReceiptFile(this)"/>
+      </label>
+      <input type="file" id="receipt-cam-input" accept="image/*" capture="environment" style="display:none" onchange="__receiptFileChosen(this)"/>
+      <input type="file" id="receipt-gallery-input" accept="image/*" style="display:none" onchange="__receiptFileChosen(this)"/>
+      <input type="file" id="receipt-files-input" accept="image/*,application/pdf" style="display:none" onchange="__receiptFileChosen(this)"/>
     </div>
 
 
@@ -1263,6 +1265,41 @@ body.lang-ar .pd-iban-row{display:none !important;}
       </div>
     </div>
     <div id="prod-picker-list" style="flex:1;overflow-y:auto;padding:0 1.25rem 1.25rem;display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+</div>
+
+<!-- RECEIPT PICKER OVERLAY -->
+<div class="overlay" id="receipt-picker-overlay" style="z-index:1300;position:fixed;inset:0;">
+  <div class="overlay-bg" onclick="closeReceiptPicker()"></div>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" data-i18n="Add payment receipt">Add payment receipt</div>
+    <div class="sheet-sub" data-i18n="Choose where the receipt is coming from">Choose where the receipt is coming from</div>
+    <div class="menu-item" onclick="__receiptPickerPick('camera')" role="button" tabindex="0">
+      <div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89ee8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+      <div style="flex:1;min-width:0">
+        <div class="menu-item-label" data-i18n="Take photo (Camera)">Take photo (Camera)</div>
+        <div class="menu-item-sub" data-i18n="Use your camera">Use your camera</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="menu-item" onclick="__receiptPickerPick('gallery')" role="button" tabindex="0">
+      <div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89ee8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <div style="flex:1;min-width:0">
+        <div class="menu-item-label" data-i18n="Choose from Gallery">Choose from Gallery</div>
+        <div class="menu-item-sub" data-i18n="Pick an existing photo">Pick an existing photo</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="menu-item" onclick="__receiptPickerPick('files')" role="button" tabindex="0">
+      <div class="menu-icon-wrap mi-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89ee8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div style="flex:1;min-width:0">
+        <div class="menu-item-label" data-i18n="Upload from Files">Upload from Files</div>
+        <div class="menu-item-sub" data-i18n="Photos, PDF, or other files">Photos, PDF, or other files</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <button class="cancel-btn" style="margin-top:10px" onclick="closeReceiptPicker()" data-i18n="Cancel">Cancel</button>
   </div>
 </div>
 

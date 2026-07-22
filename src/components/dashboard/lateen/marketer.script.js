@@ -240,7 +240,7 @@ function onCityChange(){const city=document.getElementById('f-city').value;const
 function __maxQtyForSelection(){if(!currentProduct)return Infinity;let m=Number(currentProduct.q)||0;const vg=currentProduct.vg||[];for(const g of vg){const v=selectedVariants[g.name];if(!v)continue;const it=(g.items||[]).find(x=>x&&x.val===v);if(it&&typeof it.qty==='number'&&Number.isFinite(it.qty))m=Math.min(m,it.qty);}return m;}
 function changeQty(d){const nq=Math.max(1,qty+d);const mx=__maxQtyForSelection();if(d>0&&nq>mx){const ar=(typeof __ar==='function'&&__ar());alert(ar?`الكميه اكثر من ${mx} غير متوفر`:`Quantity more than ${mx} unavailable`);return;}qty=nq;document.getElementById('qty-display').textContent=qty;updateFeeCard();persistOpenDraft();}
 function selectVariant(type,val,el){const g=type==='size'?'size-chips':'color-chips';document.querySelectorAll('#'+g+' .vchip').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');if(type==='size')selectedSize=val;else selectedColor=val;persistOpenDraft();updateSubmitState();}
-function triggerUpload(){const el=document.getElementById('file-input');if(el)el.click();}
+function triggerUpload(){openReceiptPicker('form');}
 async function onFileUpload(input){if(!input.files.length)return;const file=input.files[0];const box=document.getElementById('upload-box');const lbl=document.getElementById('upload-label');lbl.classList.remove('done','err');box.classList.remove('has-file','error');box.classList.add('uploading');lbl.innerHTML='<span class="upload-spinner"></span>Uploading '+file.name+'…';if(!window.LateenAPI||!window.LateenAPI.uploadReceipt){box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload service not ready — refresh and try again';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();return;}try{receiptUrl=await window.LateenAPI.uploadReceipt(file);hasReceipt=true;box.classList.remove('uploading');box.classList.add('has-file');lbl.classList.add('done');lbl.textContent='✓ Receipt ready · '+file.name;persistOpenDraft();updateSubmitState();}catch(e){console.error('[Lateen] uploadReceipt',e);box.classList.remove('uploading');box.classList.add('error');lbl.classList.add('err');lbl.textContent='Upload failed — tap to try again ('+(e.message||e)+')';hasReceipt=false;receiptUrl='';input.value='';updateSubmitState();}}
 function setDeposit(val){depositConfirmed=val;document.getElementById('dep-yes').classList.toggle('active',val===true);document.getElementById('dep-no').classList.toggle('active',val===false);updateSubmitState();}
 function updateSubmitState(){const btn=document.getElementById('submit-btn');if(!btn)return;let needVariant=false;if(currentProduct){const vgList=(currentProduct.vg&&currentProduct.vg.length)?currentProduct.vg:[...(currentProduct.sizes&&currentProduct.sizes.length?[{name:'Size',items:currentProduct.sizes}]:[]),...(currentProduct.colors&&currentProduct.colors.length?[{name:'Colour',items:currentProduct.colors}]:[])];for(const g of vgList){if(!(selectedVariants[g.name]||'').trim()){needVariant=true;break;}}}const __qtyRow=document.getElementById('qty-row');if(__qtyRow)__qtyRow.style.display=(currentProduct&&!needVariant)?'flex':'none';btn.disabled=needVariant;btn.style.opacity=needVariant?'.5':'1';btn.style.cursor=needVariant?'not-allowed':'pointer';const lbl=btn.querySelector('[data-i18n]');if(hasReceipt&&!needVariant){if(lbl){lbl.setAttribute('data-i18n','Send Order to Business Owner');lbl.textContent=(window.__lateenT&&window.__lateenT('Send Order to Business Owner'))||'Send Order to Business Owner';}btn.style.background='#2dbd8f';btn.style.color='#fff';btn.title='Receipt will go to admin for verification, then forwarded to the business owner.';}else{const key=editingId?'Save changes':'Save order';if(lbl){lbl.setAttribute('data-i18n',key);lbl.textContent=(window.__lateenT&&window.__lateenT(key))||key;}btn.style.background='';btn.style.color='';btn.title=needVariant?'Please choose the product variant to continue':'Saved locally. Upload a receipt to send for verification.';}}
@@ -252,7 +252,7 @@ function setWhatsAppOpen(open){const sec=document.getElementById('wa-section');c
 let __waRequired=false;
 function __applyWaRequiredUI(p){__waRequired=!!(p&&p.reqPhone);const star=document.getElementById('wa-required-star');const opt=document.getElementById('wa-opt-suffix');const chev=document.getElementById('wa-chevron');if(star)star.style.display=__waRequired?'inline':'none';if(opt)opt.style.display=__waRequired?'none':'inline';if(chev)chev.style.display=__waRequired?'none':'';if(__waRequired)setWhatsAppOpen(true);}
 function toggleWhatsApp(e){if(e){e.preventDefault();e.stopPropagation();}if(__waRequired)return;const sec=document.getElementById('wa-section');const willOpen=!(sec&&sec.classList.contains('open'));setWhatsAppOpen(willOpen);if(willOpen)setTimeout(()=>{const inp=document.getElementById('f-whatsapp');if(inp)inp.focus();},0);}
-function resetForm(){const __spb=document.getElementById('stale-product-banner');if(__spb){__spb.style.display='none';__spb.textContent='';}['f-name','f-phone','f-whatsapp','f-address','f-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('f-product').value='';document.getElementById('f-country').value='';document.getElementById('f-city').innerHTML='<option value="">— Select country first —</option>';document.getElementById('f-city').disabled=true;['prod-info','biz-costs','fee-card','summary-card','delivery-card'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});['size-group','color-group','qty-row','variant-groups'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});const vgh=document.getElementById('variant-groups');if(vgh)vgh.innerHTML='';document.getElementById('delivery-card').style.display='none';document.getElementById('location-fields').style.display='none';{const el=document.getElementById('delivery-section-label');if(el)el.style.display='none';}document.getElementById('address-field').style.display='none';document.getElementById('no-delivery-note').style.display='none';document.getElementById('upload-box').classList.remove('has-file');document.getElementById('upload-label').textContent='Tap to upload receipt';document.getElementById('upload-label').classList.remove('done');document.getElementById('file-input').value='';document.getElementById('qty-display').textContent='1';document.getElementById('country-hint').textContent='';document.getElementById('city-hint').textContent='';setWhatsAppOpen(false);__applyWaRequiredUI(null);currentProduct=null;currentDelivery=null;qty=1;selectedSize='';selectedColor='';selectedVariants={};depositConfirmed=null;hasReceipt=false;receiptUrl='';if(typeof syncProductPickerLabel==='function')syncProductPickerLabel();}
+function resetForm(){const __spb=document.getElementById('stale-product-banner');if(__spb){__spb.style.display='none';__spb.textContent='';}const __rrb=document.getElementById('receipt-resume-banner');if(__rrb){__rrb.style.display='none';__rrb.textContent='';}['f-name','f-phone','f-whatsapp','f-address','f-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('f-product').value='';document.getElementById('f-country').value='';document.getElementById('f-city').innerHTML='<option value="">— Select country first —</option>';document.getElementById('f-city').disabled=true;['prod-info','biz-costs','fee-card','summary-card','delivery-card'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});['size-group','color-group','qty-row','variant-groups'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});const vgh=document.getElementById('variant-groups');if(vgh)vgh.innerHTML='';document.getElementById('delivery-card').style.display='none';document.getElementById('location-fields').style.display='none';{const el=document.getElementById('delivery-section-label');if(el)el.style.display='none';}document.getElementById('address-field').style.display='none';document.getElementById('no-delivery-note').style.display='none';document.getElementById('upload-box').classList.remove('has-file');document.getElementById('upload-label').textContent='Tap to upload receipt';document.getElementById('upload-label').classList.remove('done');['receipt-cam-input','receipt-gallery-input','receipt-files-input'].forEach(fid=>{const fel=document.getElementById(fid);if(fel)fel.value='';});document.getElementById('qty-display').textContent='1';document.getElementById('country-hint').textContent='';document.getElementById('city-hint').textContent='';setWhatsAppOpen(false);__applyWaRequiredUI(null);currentProduct=null;currentDelivery=null;qty=1;selectedSize='';selectedColor='';selectedVariants={};depositConfirmed=null;hasReceipt=false;receiptUrl='';if(typeof syncProductPickerLabel==='function')syncProductPickerLabel();}
 function __stripCC(v){var s=String(v||'').replace(/[\u200E\u200F]/g,'').trim();if(!s)return{cc:'',num:''};var m=s.match(/^\+(\d{1,3})[\s-]*(.*)$/);if(m){return{cc:'+'+m[1],num:m[2].replace(/\D/g,'')};}return{cc:'',num:s.replace(/\D/g,'')};}
 function prefillForm(o){document.getElementById('f-name').value=o.customerName;var _p=__stripCC(o.phone);var _w=__stripCC(o.whatsapp);document.getElementById('f-phone').value=_p.num;if(_p.cc){var cs=document.getElementById('f-ccode');if(cs&&Array.from(cs.options).some(op=>op.value===_p.cc))cs.value=_p.cc;}document.getElementById('f-whatsapp').value=_w.num;if(_w.cc){var ws=document.getElementById('f-wcode');if(ws&&Array.from(ws.options).some(op=>op.value===_w.cc))ws.value=_w.cc;}if(o.whatsapp)setWhatsAppOpen(true);document.getElementById('f-product').value=o.productKey;document.getElementById('f-notes').value=o.notes||'';hasReceipt=!!o.hasReceipt;receiptUrl=o.receiptUrl||'';if(hasReceipt){const box=document.getElementById('upload-box');const lbl=document.getElementById('upload-label');if(box){box.classList.add('has-file');}if(lbl){lbl.classList.add('done');lbl.textContent='✓ Receipt already uploaded';}}onProductChange();{const __spb=document.getElementById('stale-product-banner');if(__spb){const __live=currentProduct;const __ar2=(typeof __ar==='function'&&__ar());if(__live&&o.productName&&__live.name&&__live.name!==o.productName){__spb.textContent=__ar2?`⚠ قد يكون اسم أو تفاصيل هذا المنتج ("${o.productName}") قد تغيّرت منذ حفظ هذه المسودة. المنتج الحالي: "${__live.name}". يرجى المراجعة قبل الإرسال.`:`⚠ This product's details may have changed since this draft was saved. It was "${o.productName}" — it now shows as "${__live.name}". Please review before sending.`;__spb.style.display='block';}else{__spb.style.display='none';__spb.textContent='';}}}qty=o.qty||1;document.getElementById('qty-display').textContent=qty;document.getElementById('f-country').value=o.countryCode;onCountryChange();setTimeout(()=>{document.getElementById('f-city').value=o.city;onCityChange();document.getElementById('f-address').value=o.address||'';selectedSize=o.size||'';selectedColor=o.color||'';selectedVariants={};if(Array.isArray(o.selectedVariants)&&o.selectedVariants.length){o.selectedVariants.forEach(sv=>{if(sv&&sv.name)selectedVariants[sv.name]=sv.value||'';});}else if(currentProduct){const vgl=(currentProduct.vg&&currentProduct.vg.length)?currentProduct.vg:[];const vals=[selectedSize,selectedColor];vgl.forEach((g,i)=>{if(vals[i])selectedVariants[g.name]=vals[i];});}document.querySelectorAll('#variant-groups select.pd-variant-sel').forEach(sel=>{const vgn=sel.getAttribute('data-vgn')||'';const v=selectedVariants[vgn];if(v)sel.value=v;});if(selectedSize)document.querySelectorAll('#size-chips .vchip').forEach(c=>{if(c.textContent===selectedSize)c.classList.add('selected');});if(selectedColor)document.querySelectorAll('#color-chips .vchip').forEach(c=>{if(c.textContent===selectedColor)c.classList.add('selected');});updateFeeCard();updateSubmitState();},50);}
 function draftKey(){return'lateen_drafts_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}
@@ -305,10 +305,26 @@ function __ocVariants(o){const p=__ocProduct(o);if(Array.isArray(o.selectedVaria
 function toggleOrderCard(id){const el=document.querySelector('.order[data-oid="'+id+'"]');if(el)el.classList.toggle('open');}
 function __ocSyncDots(oid){const tr=document.getElementById('photo-track-'+oid);const dw=document.getElementById('photo-dots-'+oid);if(!tr||!dw)return;const w=tr.clientWidth||1;const idx=Math.round(tr.scrollLeft/w);dw.querySelectorAll('.photo-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));}
 function viewOrderReceipt(id){const o=orders.find(x=>x.id===id);if(!o||!o.receiptUrl)return;try{window.open(o.receiptUrl,'_blank','noopener');}catch(e){}}
-function uploadOrderReceipt(id){__pendingReceiptOrderId=id;const el=document.getElementById('file-input-order');if(el){el.value='';el.click();}}
+function uploadOrderReceipt(id){openReceiptPicker(id);}
 function showHowToCollectFee(){const ar=(typeof __ar==='function'&&__ar());alert(ar?'بعد اعتماد الطلب، تُضاف عمولتك إلى محفظتك تلقائيًا. يمكنك طلب السحب من صفحة المحفظة عند وصول الرصيد إلى الحد الأدنى.':'Once the order is approved, your commission is added to your wallet automatically. You can request a payout from the Wallet page when your balance reaches the minimum.');}
 async function __waitLateenAPI(ms){const t0=Date.now();while(Date.now()-t0<ms){if(window.LateenAPI&&window.LateenAPI.uploadReceipt)return true;await new Promise(r=>setTimeout(r,80));}return !!(window.LateenAPI&&window.LateenAPI.uploadReceipt);}
 async function onOrderReceiptFile(input){if(!input.files.length)return;const file=input.files[0];const id=__pendingReceiptOrderId;__pendingReceiptOrderId=null;input.value='';const o=orders.find(x=>x.id===id);if(!o)return;const ar=(typeof __ar==='function'&&__ar());const ready=await __waitLateenAPI(3000);if(!ready){alert(ar?'خدمة الرفع غير جاهزة — حدّث الصفحة وأعد المحاولة':'Upload service not ready — refresh and try again.');return;}const btn=document.querySelector('.order[data-oid="'+id+'"] .receipt-btn');if(btn){btn.disabled=true;btn.textContent=(ar?'جاري الرفع…':'Uploading…');}let url='';try{url=await window.LateenAPI.uploadReceipt(file);}catch(e){console.error('[Lateen] uploadReceipt',e);alert((ar?'فشل الرفع: ':'Upload failed: ')+(e.message||e));renderOrders();return;}try{const oldReceipt=o.receiptUrl||'';if(o.dbId){await window.LateenAPI.reuploadReceipt(o.dbId,url,oldReceipt);}o.receiptUrl=url;o.hasReceipt=true;o.receiptUploadedAt=new Date().toISOString();if(o.dbId){o._status='pending';o.adminNotes='';}else{editingId=o.id;openForm(o);return;}}catch(e){console.error('[Lateen] reuploadReceipt',e);alert((ar?'تعذر تحديث الطلب: ':'Could not update order: ')+(e.message||e));renderOrders();return;}try{renderOrders();}catch(e){console.warn('[Lateen] renderOrders after reupload',e);}try{recomputeAnalytics();}catch(e){console.warn('[Lateen] recomputeAnalytics after reupload',e);}try{refreshWallet&&refreshWallet();}catch(e){}try{if(typeof loadOrders==='function')loadOrders();}catch(e){}}
+
+/* ===== Custom receipt picker (camera / gallery / files) =====
+   Replaces the direct-to-OS-picker upload box. Both entry points (the
+   new-order form's upload box, and the Orders list re-upload button)
+   open this same sheet via openReceiptPicker('form'|orderId). */
+let __receiptPickerTarget=null;
+const __RECEIPT_RESUME_KEY='lateen_mk_receipt_resume';
+function openReceiptPicker(target){if(!target)return;if(target!=='form')__pendingReceiptOrderId=target;__receiptPickerTarget=target;const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.add('open');}
+function closeReceiptPicker(){const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.remove('open');}
+function __receiptCheckpoint(){try{let ordId=null;if(__receiptPickerTarget==='form'){persistOpenDraft();ordId=editingId;}else{ordId=__receiptPickerTarget;}if(!ordId)return;localStorage.setItem(__RECEIPT_RESUME_KEY,JSON.stringify({id:ordId,source:__receiptPickerTarget==='form'?'form':'order',ts:Date.now()}));}catch(e){}}
+function __receiptClearResume(){try{localStorage.removeItem(__RECEIPT_RESUME_KEY);}catch(e){}}
+function __receiptPickerPick(kind){const inputId=kind==='camera'?'receipt-cam-input':(kind==='gallery'?'receipt-gallery-input':'receipt-files-input');const el=document.getElementById(inputId);if(!el)return;__receiptCheckpoint();closeReceiptPicker();el.value='';el.click();}
+function __receiptFileChosen(input){__receiptClearResume();const target=__receiptPickerTarget;__receiptPickerTarget=null;if(!input||!input.files||!input.files.length)return;if(target==='form'){onFileUpload(input);}else{__pendingReceiptOrderId=target||__pendingReceiptOrderId;onOrderReceiptFile(input);}}
+function __lateenShowResumeToast(msg){try{let t=document.getElementById('receipt-resume-toast');if(t)t.remove();t=document.createElement('div');t.id='receipt-resume-toast';t.setAttribute('data-no-i18n','');t.textContent=msg;t.style.cssText='position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);max-width:360px;width:calc(100% - 32px);background:#1e1e1e;border:0.5px solid rgba(234,179,8,.4);color:#eab308;font-size:12.5px;font-weight:600;line-height:1.4;padding:11px 14px;border-radius:12px;z-index:2000;box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center;';document.body.appendChild(t);setTimeout(()=>{if(t&&t.parentNode)t.remove();},6000);}catch(e){}}
+function __lateenApplyReceiptResume(){let marker=null;try{marker=JSON.parse(localStorage.getItem(__RECEIPT_RESUME_KEY)||'null');}catch(e){}if(!marker||!marker.id)return;if(!marker.ts||Date.now()-marker.ts>30*60*1000){__receiptClearResume();return;}const o=(orders||[]).find(x=>x.id===marker.id);if(!o){__receiptClearResume();return;}const ar=(typeof __ar==='function'&&__ar());const msg=ar?'لم يكتمل الرفع آخر مرة — يرجى إرفاق الإيصال مرة أخرى.':"Upload didn't finish last time — please try attaching the receipt again.";if(marker.source==='form'){editingId=o.id;openForm(o);const banner=document.getElementById('receipt-resume-banner');if(banner){banner.textContent=msg;banner.style.display='block';}}else{try{if(typeof goTo==='function')goTo('pg-orders');setTimeout(()=>{const card=document.querySelector('.order[data-oid="'+o.id+'"]');if(card){card.classList.add('open');try{card.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}__lateenShowResumeToast(msg);},120);}catch(e){__lateenShowResumeToast(msg);}}__receiptClearResume();}
+
 let marketerOrderFilter='all';
 function setOrderFilter(f,el){marketerOrderFilter=f;document.querySelectorAll('#pg-orders .ord-fchip').forEach(c=>c.classList.remove('active'));if(el)el.classList.add('active');renderOrders();}
 function __ordMatchesFilter(o,f){if(f==='all')return true;if(f==='failed')return o._status==='cancelled';if(f==='approved')return o._status==='approved'||o._status==='confirmed'||o._status==='delivered';return o._status===f;}
@@ -692,7 +708,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
 __lateenRefreshWalletAndPayout();refreshNotifications();
 setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
-loadBrowse().then(()=>loadOrders()).then(()=>{try{if(typeof window.__lateenResumeReceiptFlow==='function')window.__lateenResumeReceiptFlow();}catch(e){}});refreshWallet();refreshProfile();
+loadBrowse().then(()=>loadOrders()).then(()=>{try{__lateenApplyReceiptResume();}catch(e){console.warn('[Lateen] receipt resume check',e);}});refreshWallet();refreshProfile();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
   /* Coalesce realtime bursts so lists don't re-render multiple times in a
      row (which caused visible flicker when a mutation lands). */
@@ -782,112 +798,16 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   }
 })();
 
-/* Receipt-upload resume.
-   Opening the native photo/file picker on Android can cause the OS to
-   reclaim (kill) the browser tab in the background when memory is tight.
-   When the user returns, the page reloads from scratch and every
-   in-memory state — the open order, the product picked, the in-progress
-   upload — is gone. That's what shows up as "the page jitters and closes,
-   and the receipt never sends." We can't stop Android from doing that,
-   but we can checkpoint enough right before the native picker opens so
-   the next load can put the user back where they left off instead of a
-   bare, unexplained orders list. This covers BOTH entry points: the "new
-   order" form's receipt box (file-input) and "Re-upload receipt" / "Add
-   receipt & send" / the "How to collect fee" upload button on existing
-   orders (file-input-order, via uploadOrderReceipt). */
+/* Receipt-picker cancel detection.
+   Modern mobile browsers fire a 'cancel' event on the <input type=file>
+   itself when the native picker is dismissed with nothing chosen. Use it
+   to clear the resume checkpoint immediately, so a deliberate cancel
+   doesn't leave a stale "upload didn't finish" prompt behind. On older
+   browsers without this event the checkpoint just expires on its own
+   (see the 30-minute cutoff in __lateenApplyReceiptResume). */
 (function(){
-  const RESUME_KEY = 'lateen_receipt_resume_v1';
-  function readResume(){ try { return JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); } catch(e){ return null; } }
-  function writeResume(o){ try { localStorage.setItem(RESUME_KEY, JSON.stringify(o)); } catch(e){} }
-  function clearResume(){ try { localStorage.removeItem(RESUME_KEY); } catch(e){} }
-  window.__lateenClearReceiptResume = clearResume;
-
-  // 1) New-order form: "upload-box" is a <label for="file-input">, so the
-  // native picker opens with no JS in between today. The input's own
-  // click listeners still run first, before the browser shows the OS
-  // dialog, so this is where we checkpoint the draft.
-  const fi = document.getElementById('file-input');
-  if (fi && !fi.__resumeWired) {
-    fi.__resumeWired = true;
-    fi.addEventListener('click', function(){
-      try { if (typeof persistOpenDraft === 'function') persistOpenDraft(); } catch(e){}
-      try {
-        const id = (typeof editingId !== 'undefined') ? editingId : null;
-        if (id && typeof loadDrafts === 'function' && loadDrafts().some(d => d.id === id)) {
-          writeResume({ kind:'form', draftId:id, ts:Date.now() });
-        }
-      } catch(e){}
-    });
-  }
-
-  // 2) Orders list re-upload: checkpoint which order before the picker
-  // opens (this also covers instrUpload(), which calls this same function).
-  const _uploadOrderReceipt = window.uploadOrderReceipt;
-  if (typeof _uploadOrderReceipt === 'function') {
-    window.uploadOrderReceipt = function(id){
-      writeResume({ kind:'order', orderId:id, ts:Date.now() });
-      return _uploadOrderReceipt.apply(this, arguments);
-    };
-  }
-
-  // 3) Proof the page survived: once either handler is actually running
-  // with a chosen file, the checkpoint has done its job — clear it so a
-  // normal, successful upload never shows a resume prompt later.
-  const _onFileUploadR = window.onFileUpload;
-  if (typeof _onFileUploadR === 'function') {
-    window.onFileUpload = function(input){
-      if (input && input.files && input.files.length) clearResume();
-      return _onFileUploadR.apply(this, arguments);
-    };
-  }
-  const _onOrderReceiptFileR = window.onOrderReceiptFile;
-  if (typeof _onOrderReceiptFileR === 'function') {
-    window.onOrderReceiptFile = function(input){
-      if (input && input.files && input.files.length) clearResume();
-      return _onOrderReceiptFileR.apply(this, arguments);
-    };
-  }
-
-  // 4) Deliberate close (Cancel / back / tap outside the form): nothing to
-  // resume, so a normal cancel doesn't leave a stale prompt behind.
-  const _closeFormR = window.closeForm;
-  if (typeof _closeFormR === 'function') {
-    window.closeForm = function(){ clearResume(); return _closeFormR.apply(this, arguments); };
-  }
-
-  // 5) Picker dismissed (cancelled) and the page survived without a
-  // reload: #3 already covers "picked a file"; this covers "picked
-  // nothing" so a harmless cancel doesn't leave a stale marker behind
-  // either.
-  let __resumeFocusTimer = null;
-  function __maybeClearOnReturn(){
-    if (__resumeFocusTimer) clearTimeout(__resumeFocusTimer);
-    __resumeFocusTimer = setTimeout(() => { if (readResume()) clearResume(); }, 1200);
-  }
-  window.addEventListener('focus', __maybeClearOnReturn);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') __maybeClearOnReturn(); });
-
-  // 6) Resume check — run once at bootstrap, after drafts/orders/products
-  // have loaded, so there's something real to reopen or point to.
-  window.__lateenResumeReceiptFlow = function(){
-    const r = readResume();
-    if (!r) return;
-    clearResume(); // one-shot: don't keep re-prompting on every future load
-    const ar = (typeof __ar === 'function' && __ar());
-    const notice = ar ? 'الرفع لم يكتمل في المرة السابقة — يرجى المحاولة مرة أخرى.' : "Upload didn't finish last time — please try attaching the receipt again.";
-    if (r.kind === 'form') {
-      const draft = (typeof loadDrafts === 'function' ? loadDrafts() : []).find(d => d.id === r.draftId);
-      if (draft && typeof openForm === 'function') {
-        openForm(draft);
-        const lbl = document.getElementById('upload-label');
-        if (lbl && !hasReceipt) lbl.textContent = notice;
-      }
-    } else if (r.kind === 'order') {
-      setTimeout(() => {
-        const card = document.querySelector('.order[data-oid="'+String(r.orderId).replace(/"/g,'')+'"]');
-        if (card) { card.classList.add('open'); card.scrollIntoView({ behavior:'smooth', block:'center' }); }
-        alert(notice);
-      }, 300);
-    }
-  };
+  ['receipt-cam-input','receipt-gallery-input','receipt-files-input'].forEach(function(id){
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('cancel', function(){ __receiptClearResume(); __receiptPickerTarget = null; });
+  });
 })();
