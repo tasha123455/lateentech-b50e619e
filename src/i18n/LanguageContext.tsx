@@ -124,7 +124,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // frame as hydration — no visible English flash first.
   useLayoutEffect(() => {
     try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
+      let stored = window.localStorage.getItem(STORAGE_KEY);
+      if (!stored) {
+        // First visit: detect device language. Persist so this only ever runs once.
+        const navLang = (navigator.language || "").toLowerCase();
+        stored = navLang.startsWith("ar") ? "ar" : "en";
+        try { window.localStorage.setItem(STORAGE_KEY, stored); } catch { /* ignore */ }
+      }
       if (stored === "ar") setLangState("ar");
     } catch { /* ignore */ }
   }, []);
