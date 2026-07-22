@@ -664,6 +664,10 @@ export const DICT: Record<string, string> = {
   "Take photo (Camera)": "التقاط صورة (الكاميرا)",
   "Choose from Gallery": "اختيار من الاستوديو",
   "Upload from Files": "رفع من الملفات",
+  "Add payment receipt": "إضافة إيصال الدفع",
+  "Use your camera": "استخدم الكاميرا",
+  "Pick an existing photo": "اختر صورة من هاتفك",
+  "Photos, PDF, or other files": "صور أو PDF أو ملفات أخرى",
   "Save as Draft (keep editing later)": "حفظ كمسودة (الاستمرار في التعديل لاحقاً)",
 
   // ===== Order details / receipts =====
