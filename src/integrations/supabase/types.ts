@@ -465,7 +465,6 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          pause_requested: boolean
           photos: string[]
           platform_fee: number
           price: number
@@ -499,7 +498,6 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          pause_requested?: boolean
           photos?: string[]
           platform_fee?: number
           price?: number
@@ -533,7 +531,6 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          pause_requested?: boolean
           photos?: string[]
           platform_fee?: number
           price?: number
