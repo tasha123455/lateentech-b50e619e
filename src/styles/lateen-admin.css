@@ -72,6 +72,9 @@
 .lateen-admin .adm-emp-pay-btn.paid {
   background: #2a2a2a; color: #5e5c58; cursor: not-allowed;
 }
+.lateen-admin .adm-emp-pay-btn.not-due {
+  background: #2a2a2a; color: #5e5c58; cursor: not-allowed;
+}
 .lateen-admin .adm-emp-link-btn {
   height: 34px; padding: 0 14px; border-radius: 17px;
   background: transparent; border: 0.5px solid #333330; color: #9e9b97;
