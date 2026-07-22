@@ -185,6 +185,9 @@ if(typeof window!=='undefined'){window.__pdToggleZones=__pdToggleZones;window.__
 /* Affiliate "soon" popup */
 function openAffSoon(){const el=document.getElementById('affSoon');if(!el)return;const t=__pdT();const msg=document.getElementById('affSoonMsg');if(msg)msg.innerHTML=__escH(t.soonTxt)+' <span class="soon-badge">'+__escH(t.soonMsg)+'</span>';el.style.display='flex';try{document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';}catch(e){}}
 function closeAffSoon(){const el=document.getElementById('affSoon');if(el)el.style.display='none';if(!document.getElementById('dov')?.classList.contains('open')){try{document.body.style.overflow='';document.documentElement.style.overflow='';}catch(e){}}}
+/* Points & prizes "soon" popup */
+function openPointsSoon(){const el=document.getElementById('pointsSoon');if(!el)return;el.style.display='flex';try{document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';}catch(e){}}
+function closePointsSoon(){const el=document.getElementById('pointsSoon');if(el)el.style.display='none';if(!document.getElementById('dov')?.classList.contains('open')){try{document.body.style.overflow='';document.documentElement.style.overflow='';}catch(e){}}}
 /* Share */
 async function shareProd(id){const p=P.find(x=>x.id===id);if(!p)return;const t=__pdT();const url=(location.origin||'')+'/p/'+p.id;const text=p.n+' — '+__moneyS(p.pr,p.cur.s,p.cur.code);try{if(navigator.share){await navigator.share({title:p.n,text,url});return;}}catch(e){if(e&&e.name==='AbortError')return;}try{await navigator.clipboard.writeText(text+'\n'+url);alert(__ar()?'تم نسخ رابط المنتج':'Product link copied');}catch(e){alert(text+'\n'+url);}}
 /* Fullscreen photo lightbox with swipe */
