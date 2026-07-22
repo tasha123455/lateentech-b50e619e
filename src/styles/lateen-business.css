@@ -1,5 +1,5 @@
  
-* { box-sizing: border-box; margin: 0; padding: 0; } 
+.lateen-business * { box-sizing: border-box; margin: 0; padding: 0; } 
 :root {
   --color-background-primary: #1e1e1e;
   --color-background-secondary: #2a2a2a;
