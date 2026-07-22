@@ -936,6 +936,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_broadcast_notification: {
+        Args: { _body: string; _photo?: string; _title: string }
+        Returns: number
+      }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_get_user_email: { Args: { _user_id: string }; Returns: string }
       admin_list_user_emails: {
@@ -1155,6 +1159,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_send_notification: {
+        Args: {
+          _body: string
+          _photo?: string
+          _title: string
+          _user_id: string
+        }
+        Returns: undefined
       }
       admin_set_product_status: {
         Args: { _product_id: string; _status: string }
