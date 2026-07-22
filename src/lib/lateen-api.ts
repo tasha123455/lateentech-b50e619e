@@ -947,10 +947,15 @@ export function createLateenApi(userId: string) {
       },
       async getMetrics() {
         const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at";
-        const [ordersAttempt, profilesRes, productsRes] = await Promise.all([
+        const [ordersAttempt, profilesRes, productsRes, empPaymentsRes] = await Promise.all([
           supabase.from("orders").select(`${orderColumns}, refunded_at`),
           supabase.from("profiles").select("id, created_at"),
           supabase.from("products").select("id, created_at").is("deleted_at", null),
+          // amount + paid_at only — these rows survive employee deletion (see
+          // employee_payments_keep_history_on_delete migration) so historical
+          // paid salaries keep counting against total profit even after the
+          // employee record itself is gone.
+          supabase.from("employee_payments").select("amount, paid_at"),
         ]);
         if (profilesRes.error) throw profilesRes.error;
         if (productsRes.error) throw productsRes.error;
@@ -1028,6 +1033,9 @@ export function createLateenApi(userId: string) {
           })),
           profiles: profiles.map((p) => ({ created_at: p.created_at })),
           products: products.map((p) => ({ created_at: p.created_at })),
+          employeePayments: (
+            (empPaymentsRes.data ?? []) as Array<{ amount: number; paid_at: string }>
+          ).map((p) => ({ amount: Number(p.amount || 0), paid_at: p.paid_at })),
         };
       },
     },
