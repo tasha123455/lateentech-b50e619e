@@ -1117,9 +1117,13 @@ async function refreshBizNotifications(){
       b=__ar()
         ? `${author} قيّم المنتج ${pname} ${rating} ${rating===1?'نجمة':'نجوم'}`
         : `${author} rated ${pname} ${rating} ${rating===1?'star':'stars'}`;
+      const photoUrl=(d&&d.photo)||'';
+      const photoHtml=photoUrl?`<div style="margin-top:8px;width:64px;height:64px;border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--color-border-secondary)" onclick="event.stopPropagation();mpOpenLightbox('${String(photoUrl).replace(/'/g,"\\'")}')"><img src="${esc(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"/></div>`:'';
       if(d&&d.text){
         const stars='★'.repeat(rating)+'☆'.repeat(Math.max(0,5-rating));
-        reviewDetails=`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#181818;border:0.5px solid #232323;font-size:12px;color:var(--color-text-primary)"><div style="color:#e9b949;letter-spacing:2px;margin-bottom:4px">${stars}</div>${esc(d.text)}</div>`;
+        reviewDetails=`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#181818;border:0.5px solid #232323;font-size:12px;color:var(--color-text-primary)"><div style="color:#e9b949;letter-spacing:2px;margin-bottom:4px">${stars}</div>${esc(d.text)}${photoHtml}</div>`;
+      }else if(photoHtml){
+        reviewDetails=photoHtml;
       }
     }
     const isAdminMsg=n.kind==='admin_message';
