@@ -58,6 +58,7 @@ export type LateenProduct = {
   cover_focus_x: number;
   cover_focus_y: number;
   status: "active" | "paused";
+  pause_requested: boolean;
   sold: number;
   revenue: number;
   biz_name: string | null;
@@ -120,7 +121,17 @@ export function createLateenApi(userId: string) {
     },
 
     async setStatus(id: string, status: "active" | "paused") {
-      const { error } = await supabase.from("products").update({ status }).eq("id", id);
+      const { error } = await supabase.from("products").update({ status, pause_requested: false }).eq("id", id);
+      if (error) throw error;
+    },
+
+    // Called when the business owner tries to pause a product that still has
+    // active marketer orders. We can't pause it yet (see products_lock_while_active
+    // in the DB), so we just queue the intent -- a DB trigger on orders flips
+    // the product to 'paused' automatically the moment its active marketer
+    // count reaches 0.
+    async requestPauseProduct(id: string) {
+      const { error } = await supabase.from("products").update({ pause_requested: true }).eq("id", id);
       if (error) throw error;
     },
 
