@@ -618,8 +618,11 @@ export function createLateenApi(userId: string) {
       // Marks an already-approved order as refunded. Does not touch status,
       // wallets, or stock — it only stamps refunded_at, which getMetrics()
       // uses to stop counting that order's platform fee from that point on.
-      async refundOrder(id: string) {
-        const { error } = await supabase.rpc("admin_refund_order", { _order_id: id });
+      async refundOrder(id: string, comment?: string) {
+        const { error } = await supabase.rpc(
+          "admin_refund_order" as never,
+          { _order_id: id, _comment: (comment ?? "") as string } as never,
+        );
         if (error) throw error;
       },
       // Receipts the admin has already reviewed (approved or rejected).
