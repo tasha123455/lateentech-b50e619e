@@ -770,6 +770,24 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.rpc("admin_set_user_frozen", { _user_id: userId, _frozen: false });
         if (error) throw error;
       },
+      async sendUserNotification(userId: string, title: string, body: string, photoUrl?: string | null) {
+        const { error } = await supabase.rpc("admin_send_notification", {
+          _user_id: userId,
+          _title: title,
+          _body: body,
+          _photo: photoUrl ?? null,
+        });
+        if (error) throw error;
+      },
+      async broadcastNotification(title: string, body: string, photoUrl?: string | null) {
+        const { data, error } = await supabase.rpc("admin_broadcast_notification", {
+          _title: title,
+          _body: body,
+          _photo: photoUrl ?? null,
+        });
+        if (error) throw error;
+        return (data ?? 0) as number;
+      },
       async listAllProducts(search?: string) {
         const term = search && search.trim();
         let q = supabase.from("products").select("*").is("deleted_at", null);
