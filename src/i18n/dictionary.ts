@@ -6,8 +6,10 @@ export const DICT: Record<string, string> = {
   "Performance marketing, zero upfront cost": "تسويق بالأداء، من غير أي تكلفة مسبقة",
   "Lateen — Performance marketing, zero upfront cost": "Lateen — تسويق بالأداء، من غير أي تكلفة مسبقة",
   "Who are you?": "من إنت؟",
-  "Promote products & earn commission": "سوّق للمنتجات واكسب عمولتك",
-  "List products & grow your sales": "اعرض منتجاتك وزيد مبيعاتك",
+  "Where can I find it?": "وين نلقى حاجتي؟",
+  "Browse products & buy easily": "تصفح المنتجات واشتري بسهولة",
+  "Promote products & earn your commissions instantly": "سوّق للمنتجات و أكسب و أنت في مكانك",
+  "List your products and let marketers increase your sales": "اعرض منتجاتك وخلي المسوّق يزيد مبيعاتك",
   "New here? Selecting a role will walk you through sign-up.": "جديد معانا؟ اختار نوع حسابك وحنمشوا معاك خطوة بخطوة للتسجيل.",
   "By continuing you agree to our": "باستمرارك، إنت توافق على",
   "Terms": "الشروط والأحكام",
@@ -15,6 +17,7 @@ export const DICT: Record<string, string> = {
 
   // ===== Global & Navigation =====
   "Menu": "القائمة",
+  "Your points and prizes": "نقاطك و الجوائز",
   "Home": "الرئيسية",
   "Browse": "تصفح المنتجات",
   "Browse products": "تصفح المنتجات",
