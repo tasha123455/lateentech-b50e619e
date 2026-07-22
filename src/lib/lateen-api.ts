@@ -775,7 +775,7 @@ export function createLateenApi(userId: string) {
           _user_id: userId,
           _title: title,
           _body: body,
-          _photo: photoUrl ?? null,
+          _photo: photoUrl ?? undefined,
         });
         if (error) throw error;
       },
@@ -783,7 +783,7 @@ export function createLateenApi(userId: string) {
         const { data, error } = await supabase.rpc("admin_broadcast_notification", {
           _title: title,
           _body: body,
-          _photo: photoUrl ?? null,
+          _photo: photoUrl ?? undefined,
         });
         if (error) throw error;
         return (data ?? 0) as number;
