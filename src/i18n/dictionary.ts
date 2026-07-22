@@ -555,7 +555,7 @@ export const DICT: Record<string, string> = {
   "Your order will not be sent to the business owner until you upload proof of the upfront payment.": "الطلب ما يوصلش لصاحب النشاط إلا بعد رفع إيصال دفع العربون.",
   "Once your payment is reviewed and approved, the amount will appear in your Wallet as secured funds.": "بعد مراجعة الإيصال والموافقة عليه، قيمة العربون تنزل في محفظتك كرصيد مضمون يمكن سحبه.",
   "This system protects the rights and responsibilities of both marketers and business owners.": "النظام هذا يحفظ حقوق والتزامات المسوّق وصاحب النشاط.",
-  "Payments made outside the platform are not protected, and the platform accepts no responsibility for any off-platform transactions.": "أي دفعات تتم خارج المنصة تكون على مسؤولية أصحابها، والمنصة غير مسؤولة عنها بأي شكل.",
+  "Payments made outside the platform are not protected, and the platform accepts no responsibility for any fraud for off-platform transactions.": "أي دفعات تتم خارج المنصة تكون على مسؤولية أصحابها، والمنصة غير مسؤولة عنها في حالات النصب و الإحتيال بأي شكل.",
   "The amount shown is calculated per unit. If you increase the quantity, the required upfront payment increases accordingly.": "القيمة المعروضة تخص قطعة واحدة. وإذا زدت الكمية، قيمة العربون تزيد بنفس النسبة.",
   "After completing the payment, upload your payment receipt to continue.": "بعد إتمام التحويل، ارفع إيصال الدفع حتى يتم متابعة الطلب.",
   "The fee is deducted from the product price, and is not an additional charge.": "قيمة العربون تُخصم من سعر المنتج، وليست مبلغاً إضافياً على سعر المنتج.",
