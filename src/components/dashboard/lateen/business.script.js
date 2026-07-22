@@ -1096,7 +1096,7 @@ async function refreshBizNotifications(){
   try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
   const dot=document.getElementById('notif-dot');
   const onNotifPage=document.getElementById('pg-notif')&&document.getElementById('pg-notif').classList.contains('active');
-  if(dot)dot.style.display=(!onNotifPage&&list.some(n=>!n.read_at))?'block':'none';
+  if(dot){const unreadCount=list.filter(n=>!n.read_at).length;if(!onNotifPage&&unreadCount>0){dot.textContent=unreadCount>99?'99+':String(unreadCount);dot.style.display='flex';}else{dot.textContent='';dot.style.display='none';}}
   const root=document.getElementById('notif-list');
   if(!root)return;
   const tr=(en,ar)=>__ar()?ar:en;
