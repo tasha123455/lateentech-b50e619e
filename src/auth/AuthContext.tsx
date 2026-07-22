@@ -66,8 +66,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!nextSession?.user) {
         setRole(null);
         setLoading(false);
+        try {
+          const w = window as unknown as { progressier?: { remove?: () => void } };
+          w.progressier?.remove?.();
+        } catch { /* ignore */ }
         return;
       }
+
+      // Tell Progressier who this device belongs to so DB-triggered pushes
+      // reach the right user. Safe to call repeatedly.
+      try {
+        const u = nextSession.user;
+        const w = window as unknown as {
+          progressier?: { add?: (p: Record<string, unknown>) => void };
+        };
+        w.progressier?.add?.({
+          id: u.id,
+          email: u.email ?? undefined,
+        });
+      } catch { /* ignore */ }
+
 
 
       try {
