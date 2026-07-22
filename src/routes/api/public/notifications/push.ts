@@ -57,6 +57,22 @@ export const Route = createFileRoute("/api/public/notifications/push")({
         }
 
         try {
+          // Progressier caps title at 50 chars and body at 100 chars — an
+          // oversized value causes Progressier to reject the whole request,
+          // and since this whole path is fire-and-forget (errors here never
+          // surface to the admin), that rejection was silently swallowed.
+          // Trim defensively so a longer admin comment can't take down the
+          // entire push (title included).
+          const pushTitle = (payload.title ?? "").slice(0, 50);
+          const pushBody = (payload.body ?? "").slice(0, 100);
+
+          // The photo lives inside `data`, under different keys depending on
+          // notification kind: admin-composed messages use `photo`, order
+          // notifications use `product_photo`. Check both so any kind of
+          // notification with an attached photo shows it in the push.
+          const notifData = (payload.data ?? {}) as { photo?: string; product_photo?: string };
+          const image = notifData.product_photo || notifData.photo || undefined;
+
           const res = await fetch(`https://progressier.app/${progressierId}/send`, {
             method: "POST",
             headers: {
@@ -65,9 +81,10 @@ export const Route = createFileRoute("/api/public/notifications/push")({
             },
             body: JSON.stringify({
               recipients: { id: payload.user_id },
-              title: payload.title,
-              body: payload.body ?? "",
+              title: pushTitle,
+              body: pushBody,
               url: "/dashboard",
+              ...(image ? { image } : {}),
             }),
           });
           const text = await res.text();
