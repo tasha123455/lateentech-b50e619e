@@ -479,32 +479,163 @@ function admRenderUsers(list){
   const root=document.getElementById('users-list');
   if(!list.length){root.innerHTML='<div class="adm-empty">No users found.</div>';return;}
   root.innerHTML=list.map(u=>{
+    const uid=u.id;
     const name=u.business_name||u.full_name||'Unnamed';
+    const nameSafe=admEsc(name).replace(/'/g,"&#39;");
     const role=u.role||'marketer';
     const pillClass=role==='admin'?'adm-role-admin':role==='business'?'adm-role-business':'adm-role-marketer';
     const canImpersonate=role==='marketer'||role==='business';
-    const goBtn=canImpersonate?`<button class="adm-go-btn" onclick="admGoToAccount('${u.id}','${role}','${admEsc(name).replace(/'/g,"&#39;")}')">Go to Account</button>`:'';
+    const goBtn=canImpersonate?`<button class="adm-go-btn" onclick="admGoToAccount('${uid}','${role}','${nameSafe}')">Go to Account</button>`:'';
     const isBanned=!!u.banned_at;
     const isFrozen=!!u.frozen_at;
-    const freezeBtn=canImpersonate?`<button class="adm-go-btn" style="background:${isFrozen?'#cce5ff':'#e2e3e5'};color:${isFrozen?'#004085':'#495057'};border-color:${isFrozen?'#b8daff':'#d6d8db'};" onclick="admToggleFreeze('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}',${isFrozen})">${isFrozen?'Unfreeze':'Freeze'}</button>`:'';
-    const banBtn=`<button class="adm-go-btn" style="background:${isBanned?'#e2e3e5':'#fff3cd'};color:${isBanned?'#495057':'#856404'};border-color:${isBanned?'#d6d8db':'#ffeeba'};" onclick="admToggleBan('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}',${isBanned})">${isBanned?'Unban':'Ban Email'}</button>`;
+    const freezeBtn=canImpersonate?`<button class="adm-go-btn" style="background:${isFrozen?'#cce5ff':'#e2e3e5'};color:${isFrozen?'#004085':'#495057'};border-color:${isFrozen?'#b8daff':'#d6d8db'};" onclick="admToggleFreeze('${uid}','${nameSafe}',${isFrozen})">${isFrozen?'Unfreeze':'Freeze'}</button>`:'';
+    const banBtn=`<button class="adm-go-btn" style="background:${isBanned?'#e2e3e5':'#fff3cd'};color:${isBanned?'#495057':'#856404'};border-color:${isBanned?'#d6d8db':'#ffeeba'};" onclick="admToggleBan('${uid}','${nameSafe}',${isBanned})">${isBanned?'Unban':'Ban Email'}</button>`;
     const flags=(isBanned?'<span style="font-size:11px;color:#c00;font-weight:600;margin-inline-end:8px;">Banned</span>':'')+(isFrozen?'<span style="font-size:11px;color:#004085;font-weight:600;">Frozen</span>':'');
-    return `<div class="adm-user-row">
-      <div class="adm-user-av">${admEsc(admInitials(name))}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="adm-row-name">${admEsc(name)}</div>
-        <div class="adm-row-sub">${admEsc(u.email||'no email')} · ${admEsc(u.phone||'no phone')} · ${admWhen(u.created_at)}</div>
-        ${flags?`<div style="margin-top:2px;">${flags}</div>`:''}
-      </div>
-      <div class="adm-user-actions">
+    return `<div class="adm-user-card">
+      <div class="adm-user-row" onclick="admToggleUserCard('${uid}')">
+        <div class="adm-user-av">${admEsc(admInitials(name))}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="adm-row-name">${admEsc(name)}</div>
+          <div class="adm-row-sub">${admEsc(u.email||'no email')} · ${admEsc(u.phone||'no phone')} · ${admWhen(u.created_at)}</div>
+          ${flags?`<div style="margin-top:2px;">${flags}</div>`:''}
+        </div>
         <span class="adm-role-pill ${pillClass}">${admEsc(role)}</span>
-        ${goBtn}
-        ${freezeBtn}
-        <button class="adm-go-btn" style="background:#fee;color:#c00;border-color:#fcc;" onclick="admDeleteUser('${u.id}','${admEsc(name).replace(/'/g,"&#39;")}')">Remove</button>
-        ${banBtn}
+        <span class="adm-user-chev" id="chev-${uid}">▾</span>
+      </div>
+      <div class="adm-expand" id="exp-${uid}">
+        <div class="adm-user-actions">
+          ${goBtn}
+          ${freezeBtn}
+          <button class="adm-go-btn" style="background:#fee;color:#c00;border-color:#fcc;" onclick="admDeleteUser('${uid}','${nameSafe}')">Remove</button>
+          ${banBtn}
+        </div>
+        <div class="adm-notif-box">
+          <div class="adm-notif-lbl">Notification title (what they see first)</div>
+          <input type="text" class="adm-notif-inp" id="un-title-${uid}" placeholder="e.g. Your account was reviewed" />
+          <div class="adm-notif-lbl">Notification content (shown when tapped)</div>
+          <textarea class="adm-notif-textarea" id="un-body-${uid}" placeholder="Full message…"></textarea>
+          <div class="adm-notif-photo-row">
+            <div class="adm-notif-photo-add" id="un-photo-add-${uid}" onclick="document.getElementById('un-photo-input-${uid}').click()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <div class="adm-notif-photo-preview" id="un-photo-preview-${uid}" style="display:none;">
+              <img id="un-photo-img-${uid}" src="" onclick="admLightbox(document.getElementById('un-photo-img-${uid}').src)"/>
+              <button type="button" class="adm-notif-photo-x" onclick="admRemoveUserNotifPhoto('${uid}')">×</button>
+            </div>
+            <input type="file" id="un-photo-input-${uid}" accept="image/*" style="display:none" onchange="admPickUserNotifPhoto('${uid}',this)"/>
+            <span class="adm-notif-hint" id="un-photo-hint-${uid}">Attach photo (optional)</span>
+          </div>
+          <button class="adm-notif-send-btn" id="un-send-${uid}" onclick="admSendUserNotification('${uid}','${nameSafe}')">Send Notification</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
+
+let admUserNotifPhoto={};
+function admToggleUserCard(uid){
+  const exp=document.getElementById('exp-'+uid);
+  const chev=document.getElementById('chev-'+uid);
+  if(!exp)return;
+  const isOpen=exp.classList.toggle('open');
+  if(chev)chev.classList.toggle('open',isOpen);
+}
+async function admPickUserNotifPhoto(uid,inp){
+  const file=inp&&inp.files&&inp.files[0];if(!file)return;
+  const hint=document.getElementById('un-photo-hint-'+uid);
+  if(hint)hint.textContent='Uploading…';
+  try{
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    const url=await window.LateenAPI.uploadPhoto(file);
+    admUserNotifPhoto[uid]=url;
+    const prev=document.getElementById('un-photo-preview-'+uid);
+    const img=document.getElementById('un-photo-img-'+uid);
+    const add=document.getElementById('un-photo-add-'+uid);
+    if(img)img.src=url;
+    if(prev)prev.style.display='block';
+    if(add)add.style.display='none';
+    if(hint)hint.textContent='';
+  }catch(e){console.error('[admin] notif photo upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  if(inp)inp.value='';
+}
+function admRemoveUserNotifPhoto(uid){
+  delete admUserNotifPhoto[uid];
+  const prev=document.getElementById('un-photo-preview-'+uid);
+  const add=document.getElementById('un-photo-add-'+uid);
+  const hint=document.getElementById('un-photo-hint-'+uid);
+  if(prev)prev.style.display='none';
+  if(add)add.style.display='flex';
+  if(hint)hint.textContent='Attach photo (optional)';
+}
+async function admSendUserNotification(uid,name){
+  const titleEl=document.getElementById('un-title-'+uid);
+  const bodyEl=document.getElementById('un-body-'+uid);
+  const title=titleEl?titleEl.value.trim():'';
+  const body=bodyEl?bodyEl.value.trim():'';
+  if(!title){alert('Type the notification title first.');return;}
+  const btn=document.getElementById('un-send-'+uid);
+  if(btn){btn.disabled=true;btn.textContent='Sending…';}
+  try{
+    await window.LateenAPI.admin.sendUserNotification(uid,title,body,admUserNotifPhoto[uid]||null);
+    if(titleEl)titleEl.value='';
+    if(bodyEl)bodyEl.value='';
+    admRemoveUserNotifPhoto(uid);
+    alert('Notification sent to '+name+'.');
+    admToggleUserCard(uid);
+  }catch(e){alert('Failed: '+e.message);}
+  if(btn){btn.disabled=false;btn.textContent='Send Notification';}
+}
+
+let admBroadcastPhotoUrl=null;
+function admToggleBroadcastPanel(){
+  const panel=document.getElementById('adm-broadcast-panel');
+  if(panel)panel.classList.toggle('open');
+}
+async function admPickBroadcastPhoto(inp){
+  const file=inp&&inp.files&&inp.files[0];if(!file)return;
+  const hint=document.getElementById('bn-photo-hint');
+  if(hint)hint.textContent='Uploading…';
+  try{
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    const url=await window.LateenAPI.uploadPhoto(file);
+    admBroadcastPhotoUrl=url;
+    const prev=document.getElementById('bn-photo-preview');
+    const img=document.getElementById('bn-photo-img');
+    const add=document.getElementById('bn-photo-add');
+    if(img)img.src=url;
+    if(prev)prev.style.display='block';
+    if(add)add.style.display='none';
+    if(hint)hint.textContent='';
+  }catch(e){console.error('[admin] broadcast photo upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  if(inp)inp.value='';
+}
+function admRemoveBroadcastPhoto(){
+  admBroadcastPhotoUrl=null;
+  const prev=document.getElementById('bn-photo-preview');
+  const add=document.getElementById('bn-photo-add');
+  const hint=document.getElementById('bn-photo-hint');
+  if(prev)prev.style.display='none';
+  if(add)add.style.display='flex';
+  if(hint)hint.textContent='Attach photo (optional)';
+}
+async function admSendBroadcastNotification(){
+  const titleEl=document.getElementById('bn-title');
+  const bodyEl=document.getElementById('bn-body');
+  const title=titleEl?titleEl.value.trim():'';
+  const body=bodyEl?bodyEl.value.trim():'';
+  if(!title){alert('Type the notification title first.');return;}
+  if(!confirm('Send this notification to ALL marketers?'))return;
+  const btn=document.getElementById('bn-send-btn');
+  if(btn){btn.disabled=true;btn.textContent='Sending…';}
+  try{
+    const count=await window.LateenAPI.admin.broadcastNotification(title,body,admBroadcastPhotoUrl);
+    if(titleEl)titleEl.value='';
+    if(bodyEl)bodyEl.value='';
+    admRemoveBroadcastPhoto();
+    alert('Notification sent to '+count+' marketer(s).');
+    admToggleBroadcastPanel();
+  }catch(e){alert('Failed: '+e.message);}
+  if(btn){btn.disabled=false;btn.textContent='Send to All Marketers';}
 }
 
 async function admDeleteUser(userId,name){

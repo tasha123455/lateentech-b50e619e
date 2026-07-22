@@ -56,14 +56,33 @@
 .adm-empty { padding: 32px 16px; text-align: center; color: var(--txt-3); font-size: 12px; }
 .adm-search { width: 100%; height: 38px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 0 14px; color: var(--txt-1); font-family: var(--font); font-size: 13px; margin-bottom: 12px; }
 .adm-search:focus { outline: none; border-color: var(--accent); }
-.adm-user-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); }
-.adm-user-row:last-child { border-bottom: none; }
+.adm-user-card { border-bottom: 0.5px solid var(--border-2); }
+.adm-user-card:last-child { border-bottom: none; }
+.adm-user-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 14px; cursor: pointer; }
 .adm-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--txt-2); flex-shrink: 0; }
-.lateen-admin .adm-user-actions { flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
+.lateen-admin .adm-user-actions { flex-wrap: wrap; justify-content: flex-start; row-gap: 6px; }
 .adm-role-pill { font-size: 9px; padding: 2px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .adm-role-marketer { background: #2d2b4e; color: #a09efc; }
 .adm-role-business { background: var(--ok-tint); color: var(--ok); }
 .adm-role-admin { background: var(--accent-tint); color: var(--accent); }
+.adm-user-chev { font-size: 11px; color: var(--txt-3); transition: transform 0.2s ease; flex-shrink: 0; }
+.adm-user-chev.open { transform: rotate(180deg); }
+.adm-notif-box { margin-top: 12px; padding-top: 12px; border-top: 0.5px dashed var(--border-2); display: grid; gap: 8px; }
+.adm-notif-lbl { font-size: 11px; color: var(--txt-2); font-weight: 500; }
+.adm-notif-inp, .adm-notif-textarea { width: 100%; background: var(--card); border: 0.5px solid var(--border); border-radius: 10px; padding: 9px 11px; color: var(--txt-1); font-family: var(--font); font-size: 13px; outline: none; }
+.adm-notif-inp:focus, .adm-notif-textarea:focus { border-color: var(--accent); }
+.adm-notif-textarea { min-height: 64px; resize: vertical; }
+.adm-notif-photo-row { display: flex; align-items: center; gap: 8px; }
+.adm-notif-photo-add { width: 40px; height: 40px; border-radius: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--txt-2); flex-shrink: 0; }
+.adm-notif-photo-preview { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+.adm-notif-photo-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; cursor: zoom-in; }
+.adm-notif-photo-x { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #000; color: #fff; border: none; font-size: 12px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.adm-notif-hint { font-size: 11px; color: var(--txt-3); }
+.adm-notif-send-btn { background: var(--accent); color: #1a1a1a; border: none; border-radius: 12px; padding: 10px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+.adm-notif-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.adm-broadcast-btn { display: flex; align-items: center; gap: 6px; background: var(--accent-tint); color: var(--accent); border: 0.5px solid var(--accent); border-radius: 14px; font-size: 12px; font-weight: 600; padding: 7px 12px; cursor: pointer; font-family: var(--font); flex-shrink: 0; }
+.adm-broadcast-panel { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 14px; margin-bottom: 12px; display: none; }
+.adm-broadcast-panel.open { display: grid; gap: 8px; }
 .adm-payout-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); gap: 10px; }
 .adm-payout-row:last-child { border-bottom: none; }
 .adm-pay-info { flex: 1; min-width: 0; }
@@ -508,7 +527,34 @@
 
   <!-- USERS -->
   <section class="adm-page" id="adm-users">
-    <div class="adm-h1">User Directory</div>
+    <div class="adm-h1-row">
+      <div class="adm-h1" style="margin-bottom:0;">User Directory</div>
+      <button class="adm-broadcast-btn" id="adm-broadcast-btn" onclick="admToggleBroadcastPanel()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Send Notification
+      </button>
+    </div>
+    <div class="adm-broadcast-panel" id="adm-broadcast-panel">
+      <div class="adm-notif-lbl">Notification title (what marketers see first)</div>
+      <input type="text" class="adm-notif-inp" id="bn-title" placeholder="e.g. New update available" />
+      <div class="adm-notif-lbl">Notification content (shown when tapped)</div>
+      <textarea class="adm-notif-textarea" id="bn-body" placeholder="Full message…"></textarea>
+      <div class="adm-notif-photo-row">
+        <div class="adm-notif-photo-add" id="bn-photo-add" onclick="document.getElementById('bn-photo-input').click()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="adm-notif-photo-preview" id="bn-photo-preview" style="display:none;">
+          <img id="bn-photo-img" src="" onclick="admLightbox(document.getElementById('bn-photo-img').src)"/>
+          <button type="button" class="adm-notif-photo-x" onclick="admRemoveBroadcastPhoto()">×</button>
+        </div>
+        <input type="file" id="bn-photo-input" accept="image/*" style="display:none" onchange="admPickBroadcastPhoto(this)"/>
+        <span class="adm-notif-hint" id="bn-photo-hint">Attach photo (optional)</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:2px;">
+        <button class="adm-btn adm-btn-ghost" onclick="admToggleBroadcastPanel()">Cancel</button>
+        <button class="adm-notif-send-btn" style="flex:1;" id="bn-send-btn" onclick="admSendBroadcastNotification()">Send to All Marketers</button>
+      </div>
+    </div>
     <div class="adm-filter-row" id="user-filter-row">
       <button class="adm-filter-chip on" data-role="" onclick="admSetUserFilter('',this)">All</button>
       <button class="adm-filter-chip" data-role="marketer" onclick="admSetUserFilter('marketer',this)">Marketers</button>

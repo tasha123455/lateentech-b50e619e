@@ -657,6 +657,7 @@ async function refreshNotifications(){
     if(n.kind==='receipt_verified'||title==='Receipt Verified')return{t:__t('Receipt Verified','تم اعتماد الإيصال'),b:__t('Your payment receipt has been verified. Your balance is now updated','تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.')};
     if(n.kind==='receipt_rejected'||title==='Receipt rejected by the admin')return{t:__t('Receipt rejected by the admin','تم رفض الإيصال من قبل الأدمن'),b:''};
     if(n.kind==='report_reviewed'||title==='Report reviewed')return{t:__t('Report reviewed','تمت مراجعة البلاغ'),b:body||''};
+    if(n.kind==='admin_message')return{t:title,b:''};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
@@ -668,7 +669,8 @@ async function refreshNotifications(){
     const isReportReviewed=n.kind==='report_reviewed';
     const isRefunded=n.kind==='order_refunded';
     const isNote=n.kind==='payout_note';
-    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote;
+    const isAdminMsg=n.kind==='admin_message';
+    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote||isAdminMsg;
     const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected||isRefunded)?'#e07070':((isDelivered||isVerified||isReportReviewed)?'#2dbd8f':'#7f77dd')));
     const mainText=L.t;
     const subText=isNote?'':L.b;
@@ -678,16 +680,19 @@ async function refreshNotifications(){
       if(d){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
         const borderColor=(isFailed||isRejected||isRefunded||isNote)?'#2a1a1a':'#142a20';
-        const photo=d.product_photo&&/^(https?:|data:|\/)/.test(String(d.product_photo))?`<div style="margin:-2px 0 10px 0"><img src="${esc(d.product_photo)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
+        const photoUrl=d.product_photo||d.photo;
+        const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
         const receiptImg=isRejected&&d.receipt_url&&/^(https?:|data:|\/)/.test(String(d.receipt_url))?`<div style="margin:0 0 10px 0"><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">${__t('Receipt','الإيصال')}</div><img src="${esc(d.receipt_url)}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:10px;display:block;background:#0f0f0f"/></div>`:'';
         const adminNoteText=isRejected?d.admin_notes:((isRefunded||isNote)?d.admin_comment:'');
         const adminNote=adminNoteText?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Admin note','ملاحظات الأدمن')}:</b> ${esc(adminNoteText)}</div>`:'';
         const bizNotes=isFailed&&d.business_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Business owner notes','ملاحظات التاجر')}:</b> ${esc(d.business_notes)}</div>`:'';
         const reportTypeLbl=isReportReviewed?(d.report_type==='product'?__t('Product','المنتج'):(d.report_type==='merchant'?__t('Merchant','التاجر'):__t('Other','أخرى'))):'';
         const reportMsgBlock=isReportReviewed&&d.report_message?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Your report','بلاغك')}:</b> ${esc(d.report_message)}</div>`:'';
+        const adminMsgContent=isAdminMsg&&d.message?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap">${esc(d.message)}</div>`:'';
         detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid ${borderColor}">
           ${photo}
           ${receiptImg}
+          ${adminMsgContent}
           ${row(__t('Order Code','كود الطلبيه'),d.order_code)}
           ${isReportReviewed?row(__t('Report type','نوع البلاغ'),reportTypeLbl):''}
           ${reportMsgBlock}
