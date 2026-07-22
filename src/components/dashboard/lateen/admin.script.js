@@ -87,7 +87,7 @@ async function admLoadMetrics(){
   if(!document.getElementById('heroValue'))return; // v2 home analytics markup not present on this page
   try{
     const m=await window.LateenAPI.admin.getMetrics();
-    admHomeRaw={orders:m.orders||[],profiles:m.profiles||[],products:m.products||[]};
+    admHomeRaw={orders:m.orders||[],profiles:m.profiles||[],products:m.products||[],employeePayments:m.employeePayments||[]};
     const setStat=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=Number(val||0).toLocaleString();};
     setStat('statActiveUsers',m.activeUsers);
     setStat('statTotalUsers',m.totalUsers);
@@ -887,10 +887,25 @@ let admEmpCache=[];
 let admEmpFilter=''; // '', 'pending', 'paid'
 let admEmpSearchQ='';
 
-function admEmpPeriod(){const d=new Date();return {y:d.getFullYear(),m:d.getMonth()+1};}
-function admEmpIsPaid(emp,p){return (emp.payments||[]).some(x=>x.period_year===p.y&&x.period_month===p.m);}
 function admEmpFmtDate(d){if(!d)return '—';const dt=new Date(d);return dt.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});}
-function admEmpNextPayday(p){const next=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};return ADM_MONTH_NAMES[next.m-1]+' '+next.y;}
+/* Every employee's payday is exactly 30 days after they were hired, then
+   every 30 days after that — not tied to the calendar month. This returns
+   the employee's *current* pay cycle: a (y,m) key used to look up/record
+   payments (kept compatible with the employee_payments table's existing
+   period_year/period_month columns, just counted from hire date instead of
+   the calendar), plus the real payday date for this cycle and the next one. */
+function admEmpCycle(emp){
+  const hired=new Date((emp.hired_at||new Date().toISOString().slice(0,10))+'T00:00:00');
+  const now=new Date();
+  const daysSince=Math.max(0,Math.floor((now-hired)/86400000));
+  const cycleIndex=Math.floor(daysSince/30);
+  const totalMonths=hired.getFullYear()*12+hired.getMonth()+cycleIndex;
+  const y=Math.floor(totalMonths/12), m=(totalMonths%12)+1;
+  const payday=new Date(hired); payday.setDate(payday.getDate()+(cycleIndex+1)*30);
+  const nextPayday=new Date(hired); nextPayday.setDate(nextPayday.getDate()+(cycleIndex+2)*30);
+  return {y,m,cycleIndex,payday,nextPayday};
+}
+function admEmpIsPaid(emp,cyc){return (emp.payments||[]).some(x=>x.period_year===cyc.y&&x.period_month===cyc.m);}
 
 async function admLoadEmployees(){
   const root=document.getElementById('employees-list');
@@ -907,13 +922,14 @@ async function admLoadEmployees(){
 
 function admRenderEmployees(){
   const root=document.getElementById('employees-list');
-  const p=admEmpPeriod();
-  const periodLabel=ADM_MONTH_NAMES[p.m-1]+' '+p.y;
+  const cycles=new Map();
   let totalSalary=0,paidAmt=0,pendingAmt=0,paidCount=0;
   admEmpCache.forEach(e=>{
+    const cyc=admEmpCycle(e);
+    cycles.set(e.id,cyc);
     const sal=Number(e.monthly_salary||0);
     totalSalary+=sal;
-    if(admEmpIsPaid(e,p)){paidAmt+=sal;paidCount++;}else{pendingAmt+=sal;}
+    if(admEmpIsPaid(e,cyc)){paidAmt+=sal;paidCount++;}else{pendingAmt+=sal;}
   });
   document.getElementById('emp-total-salary').innerHTML=admMoneyH(totalSalary);
   document.getElementById('emp-paid-amt').innerHTML=admMoneyH(paidAmt);
@@ -922,16 +938,17 @@ function admRenderEmployees(){
   document.getElementById('emp-paid-count').textContent=paidCount;
 
   const filtered=admEmpCache.filter(e=>{
-    const paid=admEmpIsPaid(e,p);
+    const paid=admEmpIsPaid(e,cycles.get(e.id));
     if(admEmpFilter==='paid'&&!paid)return false;
     if(admEmpFilter==='pending'&&paid)return false;
     return true;
   });
   if(!filtered.length){root.innerHTML='<div class="adm-empty">No employees match.</div>';return;}
   root.innerHTML=filtered.map(e=>{
-    const paid=admEmpIsPaid(e,p);
-    const status=paid?'<span style="color:#2dbd8f">Paid · '+periodLabel+'</span>':'<span style="color:#e07070">Pending · '+periodLabel+'</span>';
-    const payday=paid?admEmpNextPayday(p):periodLabel;
+    const cyc=cycles.get(e.id);
+    const paid=admEmpIsPaid(e,cyc);
+    const paydayLabel=admEmpFmtDate(paid?cyc.nextPayday:cyc.payday);
+    const status=paid?'<span style="color:#2dbd8f">Paid · next due '+paydayLabel+'</span>':'<span style="color:#e07070">Pending · due '+paydayLabel+'</span>';
     return `<div class="adm-emp-row">
       <div class="adm-emp-top">
         <div class="adm-emp-av">${admEsc(admInitials(e.full_name))}</div>
@@ -943,7 +960,7 @@ function admRenderEmployees(){
       </div>
       <div class="adm-emp-meta">
         <div>Hired <b>${admEmpFmtDate(e.hired_at)}</b></div>
-        <div>Payday <b>${admEsc(payday)}</b></div>
+        <div>Payday <b>${admEsc(paydayLabel)}</b></div>
         <div style="grid-column:1/-1;">Status: ${status}</div>
         ${e.notes?`<div style="grid-column:1/-1;color:#9e9b97;font-style:italic;">${admEsc(e.notes)}</div>`:''}
       </div>
@@ -970,13 +987,15 @@ function admEmpSearch(q){
 }
 
 async function admPayEmp(id,amount){
-  const p=admEmpPeriod();
   const e=admEmpCache.find(x=>x.id===id);
   if(!e)return;
-  if(!confirm('Mark '+e.full_name+' as paid for '+ADM_MONTH_NAMES[p.m-1]+' '+p.y+' ('+admMoney(amount)+')?'))return;
+  const cyc=admEmpCycle(e);
+  const due=admEmpFmtDate(cyc.payday);
+  if(!confirm('Mark '+e.full_name+' as paid for the cycle due '+due+' ('+admMoney(amount)+')?'))return;
   try{
-    await window.LateenAPI.admin.payEmployee({employee_id:id,period_year:p.y,period_month:p.m,amount:Number(amount)});
+    await window.LateenAPI.admin.payEmployee({employee_id:id,period_year:cyc.y,period_month:cyc.m,amount:Number(amount)});
     await admLoadEmployees();
+    if(document.getElementById('adm-home')?.classList.contains('active'))admLoadMetrics();
   }catch(err){alert('Failed: '+err.message);}
 }
 
@@ -1114,6 +1133,34 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
     return Math.round(sum*100)/100;
   }
 
+  // Real employee-salary-paid sum for whichever day/month/year is selected
+  // (or all-time if none is) — same filter logic as getFees(), but reading
+  // admHomeRaw.employeePayments (paid_at is when a salary was actually marked
+  // paid). These rows survive an employee being deleted, so a deletion never
+  // changes this total. Used to derive total profit = fees − salaries paid.
+  function getEmployeeSalaryPaid(){
+    const raw = admHomeRaw;
+    if(!raw || !raw.employeePayments) return 0;
+    let rows = raw.employeePayments;
+    if(selected.year){
+      const y = Number(selected.year);
+      rows = rows.filter(p => new Date(p.paid_at).getFullYear() === y);
+    } else if(selected.month){
+      const [y,m] = selected.month.split('-').map(Number);
+      rows = rows.filter(p => {
+        const d = new Date(p.paid_at);
+        return d.getFullYear()===y && (d.getMonth()+1)===m;
+      });
+    } else if(selected.day){
+      rows = rows.filter(p => {
+        const d = new Date(p.paid_at);
+        return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === selected.day;
+      });
+    }
+    const sum = rows.reduce((s,p) => s + Number(p.amount||0), 0);
+    return Math.round(sum*100)/100;
+  }
+
   // Real point-in-time snapshot of a metric "as of" a given timestamp — e.g.
   // total users who had signed up by then, or the rolling-30-day active-user
   // count ending then. Used for both the stat-card totals and every point on
@@ -1156,7 +1203,32 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
     else if(selected.month) sub = 'إجمالي أرباح شهر ' + monthMap[selected.month];
     else if(selected.day) sub = 'إجمالي أرباح يوم ' + dayMap[selected.day];
     document.getElementById('heroSub').textContent = sub;
+    renderProfitCard();
   }
+
+  // Total profit = platform fees minus employee salaries actually marked as
+  // paid, both counted within the same day/month/year filter as the hero
+  // card above. Lives collapsed under the hero card; only re-renders its
+  // numbers eagerly (cheap), the panel itself only opens on tap.
+  let admProfitOpen = false;
+  function renderProfitCard(){
+    const valEl = document.getElementById('heroProfitValue');
+    if(!valEl) return; // markup not present on this page
+    const fees = getFees();
+    const salaries = getEmployeeSalaryPaid();
+    const profit = Math.round((fees - salaries) * 100) / 100;
+    valEl.innerHTML = '<span class="cur-sym">د.ل</span>' + profit.toFixed(2);
+    const bd = document.getElementById('heroProfitBreakdown');
+    if(bd) bd.innerHTML = 'رسوم المنصة ' + admMoneyH(fees) + ' − رواتب الموظفين المدفوعة ' + admMoneyH(salaries);
+  }
+function admToggleProfitCard(){
+    admProfitOpen = !admProfitOpen;
+    const toggle = document.getElementById('heroProfitToggle');
+    const panel = document.getElementById('heroProfitPanel');
+    if(toggle) toggle.classList.toggle('open', admProfitOpen);
+    if(panel) panel.classList.toggle('open', admProfitOpen);
+    if(admProfitOpen) renderProfitCard();
+}
 
   function buildDropdown(listEl, items, filterKey, rangeName){
     listEl.innerHTML = '';

@@ -262,6 +262,19 @@
   line-height:1; margin-bottom: 14px; font-variant-numeric: tabular-nums;
 }
 .adm-home-v2 .hero-sub{ font-size: 12.5px; color: var(--text-3); }
+.adm-home-v2 .hero-profit-toggle{
+  width:100%; margin-top:20px; padding-top:16px;
+  border:none; border-top:1px solid var(--line); background:none;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  font-family:inherit; font-size:13px; font-weight:600; color: var(--text-2);
+  cursor:pointer;
+}
+.adm-home-v2 .hero-profit-toggle .chev{ font-size:10px; transition: transform 0.2s; flex-shrink:0; }
+.adm-home-v2 .hero-profit-toggle.open .chev{ transform: rotate(180deg); }
+.adm-home-v2 .hero-profit-panel{ display:none; margin-top:14px; }
+.adm-home-v2 .hero-profit-panel.open{ display:block; }
+.adm-home-v2 .hero-profit-value{ font-size:30px; font-weight:800; color: var(--text); line-height:1; margin-bottom:8px; font-variant-numeric: tabular-nums; }
+.adm-home-v2 .hero-profit-breakdown{ font-size:11.5px; color: var(--text-3); }
 
 /* ---- Stats list: one quiet card, rows instead of many boxes ---- */
 .adm-home-v2 .stats-card{
@@ -376,6 +389,17 @@
     <div class="hero-label">إجمالي رسوم المنصة المحصّلة</div>
     <div class="hero-value" id="heroValue"><span class="cur-sym">د.ل</span>…</div>
     <div class="hero-sub" id="heroSub">إجمالي الأرباح من الطلبيات المؤكدة والمسلّمة</div>
+
+    <!-- Collapsed: total profit = platform fees minus employee salaries paid,
+         same day/month/year filter as the hero value above. -->
+    <button class="hero-profit-toggle" id="heroProfitToggle" onclick="admToggleProfitCard()">
+      <span>صافي الربح (بعد خصم رواتب الموظفين)</span>
+      <span class="chev">▾</span>
+    </button>
+    <div class="hero-profit-panel" id="heroProfitPanel">
+      <div class="hero-profit-value" id="heroProfitValue"><span class="cur-sym">د.ل</span>…</div>
+      <div class="hero-profit-breakdown" id="heroProfitBreakdown"></div>
+    </div>
   </div>
 
   <!-- Stats list -->
@@ -542,14 +566,14 @@
       <div class="adm-stat full">
         <div class="adm-stat-label">Total Monthly Salaries</div>
         <div class="adm-stat-value" id="emp-total-salary"><span class="cur-sym">د.ل</span>0.00</div>
-        <div class="adm-stat-sub"><span id="emp-count">0</span> employees · <span id="emp-paid-count">0</span> paid this month</div>
+        <div class="adm-stat-sub"><span id="emp-count">0</span> employees · <span id="emp-paid-count">0</span> paid this cycle</div>
       </div>
       <div class="adm-stat">
-        <div class="adm-stat-label">Paid This Month</div>
+        <div class="adm-stat-label">Paid This Cycle</div>
         <div class="adm-stat-value" id="emp-paid-amt"><span class="cur-sym">د.ل</span>0.00</div>
       </div>
       <div class="adm-stat">
-        <div class="adm-stat-label">Pending This Month</div>
+        <div class="adm-stat-label">Pending This Cycle</div>
         <div class="adm-stat-value" id="emp-pending-amt" style="color:var(--danger)"><span class="cur-sym">د.ل</span>0.00</div>
       </div>
     </div>
