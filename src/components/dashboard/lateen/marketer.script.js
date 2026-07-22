@@ -657,7 +657,7 @@ async function refreshNotifications(){
     if(n.kind==='receipt_verified'||title==='Receipt Verified')return{t:__t('Receipt Verified','تم اعتماد الإيصال'),b:__t('Your payment receipt has been verified. Your balance is now updated','تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.')};
     if(n.kind==='receipt_rejected'||title==='Receipt rejected by the admin')return{t:__t('Receipt rejected by the admin','تم رفض الإيصال من قبل الأدمن'),b:''};
     if(n.kind==='report_reviewed'||title==='Report reviewed')return{t:__t('Report reviewed','تمت مراجعة البلاغ'),b:body||''};
-    if(n.kind==='admin_message')return{t:title,b:''};
+    if(n.kind==='admin_message'||n.kind==='admin_broadcast')return{t:title,b:''};
     return{t:title,b:body||''};
   };
   root.innerHTML=list.map(n=>{
@@ -669,7 +669,7 @@ async function refreshNotifications(){
     const isReportReviewed=n.kind==='report_reviewed';
     const isRefunded=n.kind==='order_refunded';
     const isNote=n.kind==='payout_note';
-    const isAdminMsg=n.kind==='admin_message';
+    const isAdminMsg=n.kind==='admin_message'||n.kind==='admin_broadcast';
     const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote||isAdminMsg;
     const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected||isRefunded)?'#e07070':((isDelivered||isVerified||isReportReviewed)?'#2dbd8f':'#7f77dd')));
     const mainText=L.t;
@@ -688,7 +688,8 @@ async function refreshNotifications(){
         const bizNotes=isFailed&&d.business_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Business owner notes','ملاحظات التاجر')}:</b> ${esc(d.business_notes)}</div>`:'';
         const reportTypeLbl=isReportReviewed?(d.report_type==='product'?__t('Product','المنتج'):(d.report_type==='merchant'?__t('Merchant','التاجر'):__t('Other','أخرى'))):'';
         const reportMsgBlock=isReportReviewed&&d.report_message?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Your report','بلاغك')}:</b> ${esc(d.report_message)}</div>`:'';
-        const adminMsgContent=isAdminMsg&&d.message?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap">${esc(d.message)}</div>`:'';
+        const adminMsgText=isAdminMsg?(d.message||n.body||''):'';
+        const adminMsgContent=adminMsgText?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap">${esc(adminMsgText)}</div>`:'';
         detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid ${borderColor}">
           ${photo}
           ${receiptImg}

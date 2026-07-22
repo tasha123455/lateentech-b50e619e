@@ -1106,7 +1106,7 @@ async function refreshBizNotifications(){
   root.innerHTML=list.map(n=>{
     let t=n.title,b=n.body||'';
     if(n.kind==='new_order'||t==='New order'){t=tr('New order','طلب جديد');b=tr('A new order has been received. Check the Orders page.','وصلك طلب جديد. راجع صفحة الطلبات.');}
-    if(n.kind==='admin_message')b='';
+    if(n.kind==='admin_message'||n.kind==='admin_broadcast')b='';
     let reviewDetails='';
     if(n.kind==='product_review'){
       let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
@@ -1126,7 +1126,7 @@ async function refreshBizNotifications(){
         reviewDetails=photoHtml;
       }
     }
-    const isAdminMsg=n.kind==='admin_message';
+    const isAdminMsg=n.kind==='admin_message'||n.kind==='admin_broadcast';
     const expandable=n.kind==='new_order'||isAdminMsg;
     const color=n.kind==='new_order'?'#34c77b':(n.kind==='product_review'?'#e9b949':'#7f77dd');
     let detailsHtml='';
@@ -1136,7 +1136,8 @@ async function refreshBizNotifications(){
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
         const photoUrl=d.product_photo||d.photo;
         const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
-        const adminMsgContent=isAdminMsg&&d.message?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap">${esc(d.message)}</div>`:'';
+        const adminMsgText=isAdminMsg?(d.message||n.body||''):'';
+        const adminMsgContent=adminMsgText?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap">${esc(adminMsgText)}</div>`:'';
         detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #142a20">
           ${photo}
           ${adminMsgContent}
