@@ -5,6 +5,7 @@ export const Route = createFileRoute("/api/public/notifications/push")({
     handlers: {
       POST: async ({ request }) => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { sendWebPush, readVapidKeysFromEnv } = await import("@/lib/web-push.server");
 
         // Verify shared secret from vault (matches the DB trigger's header).
         const auth = request.headers.get("authorization") ?? "";
@@ -46,65 +47,86 @@ export const Route = createFileRoute("/api/public/notifications/push")({
           return new Response("Missing fields", { status: 400 });
         }
 
-        const apiKey = process.env.PROGRESSIER_API_KEY;
-        const progressierId = process.env.PROGRESSIER_ID ?? "nUtQboT7clW7ctdwUT0Y";
-        if (!apiKey) {
-          // Gracefully no-op if key not configured — the in-app notification still saved.
-          console.warn("[push] PROGRESSIER_API_KEY not set; skipping push");
-          return new Response(JSON.stringify({ ok: true, skipped: "no_api_key" }), {
+        const vapid = readVapidKeysFromEnv();
+        if (!vapid) {
+          // Gracefully no-op if keys aren't configured — the in-app notification still saved.
+          console.warn("[push] VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY_JWK not set; skipping push");
+          return new Response(JSON.stringify({ ok: true, skipped: "no_vapid_keys" }), {
             headers: { "content-type": "application/json" },
           });
         }
 
-        try {
-          // Progressier caps title at 50 chars and body at 100 chars — an
-          // oversized value causes Progressier to reject the whole request,
-          // and since this whole path is fire-and-forget (errors here never
-          // surface to the admin), that rejection was silently swallowed.
-          // Trim defensively so a longer admin comment can't take down the
-          // entire push (title included).
-          const pushTitle = (payload.title ?? "").slice(0, 50);
-          const pushBody = (payload.body ?? "").slice(0, 100);
+        // Keep payload comfortably under the ~4KB push message size limit.
+        const pushTitle = (payload.title ?? "").slice(0, 120);
+        const pushBody = (payload.body ?? "").slice(0, 300);
 
-          // The photo lives inside `data`, under different keys depending on
-          // notification kind: admin-composed messages use `photo`, order
-          // notifications use `product_photo`. Check both so any kind of
-          // notification with an attached photo shows it in the push.
-          const notifData = (payload.data ?? {}) as { photo?: string; product_photo?: string };
-          const image = notifData.product_photo || notifData.photo || undefined;
+        // The photo lives inside `data`, under different keys depending on notification
+        // kind: admin-composed messages use `photo`, order notifications use `product_photo`.
+        const notifData = (payload.data ?? {}) as { photo?: string; product_photo?: string };
+        const image = notifData.product_photo || notifData.photo || undefined;
 
-          const res = await fetch(`https://progressier.app/${progressierId}/send`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-              recipients: { id: payload.user_id },
-              title: pushTitle,
-              body: pushBody,
-              url: "/dashboard",
-              ...(image ? { image } : {}),
-            }),
-          });
-          const text = await res.text();
-          if (!res.ok) {
-            console.error("[push] Progressier error", res.status, text);
-            return new Response(JSON.stringify({ ok: false, status: res.status }), {
-              status: 200,
-              headers: { "content-type": "application/json" },
-            });
-          }
-          return new Response(JSON.stringify({ ok: true }), {
-            headers: { "content-type": "application/json" },
-          });
-        } catch (e) {
-          console.error("[push] fetch failed", e);
-          return new Response(JSON.stringify({ ok: false }), {
+        const { data: subs, error: subsErr } = await supabaseAdmin
+          .from("push_subscriptions")
+          .select("id, endpoint, p256dh, auth")
+          .eq("user_id", payload.user_id);
+
+        if (subsErr) {
+          console.error("[push] failed to load subscriptions", subsErr);
+          return new Response(JSON.stringify({ ok: false, error: "subscriptions_lookup_failed" }), {
             status: 200,
             headers: { "content-type": "application/json" },
           });
         }
+        if (!subs || subs.length === 0) {
+          // Nobody has push enabled for this user yet — not an error.
+          return new Response(JSON.stringify({ ok: true, sent: 0 }), {
+            headers: { "content-type": "application/json" },
+          });
+        }
+
+        const notifPayload = {
+          title: pushTitle,
+          body: pushBody,
+          url: "/dashboard",
+          id: payload.id,
+          ...(image ? { image } : {}),
+        };
+
+        let sent = 0;
+        let failed = 0;
+        const staleIds: string[] = [];
+
+        await Promise.all(
+          subs.map(async (row) => {
+            try {
+              const result = await sendWebPush(
+                { endpoint: row.endpoint, p256dh: row.p256dh, auth: row.auth },
+                notifPayload,
+                vapid,
+              );
+              if (result.ok) {
+                sent += 1;
+              } else if (result.gone) {
+                staleIds.push(row.id);
+              } else {
+                failed += 1;
+                console.error("[push] send failed", result.status, result.body);
+              }
+            } catch (e) {
+              failed += 1;
+              console.error("[push] send threw", e);
+            }
+          }),
+        );
+
+        if (staleIds.length > 0) {
+          const { error: delErr } = await supabaseAdmin.from("push_subscriptions").delete().in("id", staleIds);
+          if (delErr) console.error("[push] failed to clean up stale subscriptions", delErr);
+        }
+
+        return new Response(JSON.stringify({ ok: true, sent, failed, removed: staleIds.length }), {
+          headers: { "content-type": "application/json" },
+        });
       },
     },
   },
