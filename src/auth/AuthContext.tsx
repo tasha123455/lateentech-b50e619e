@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { subscribeToPush, unsubscribeFromPush } from "@/lib/push-client";
 
 export type Role = "marketer" | "business" | "admin";
 
@@ -66,25 +67,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!nextSession?.user) {
         setRole(null);
         setLoading(false);
-        try {
-          const w = window as unknown as { progressier?: { remove?: () => void } };
-          w.progressier?.remove?.();
-        } catch { /* ignore */ }
         return;
       }
 
-      // Tell Progressier who this device belongs to so DB-triggered pushes
-      // reach the right user. Safe to call repeatedly.
-      try {
-        const u = nextSession.user;
-        const w = window as unknown as {
-          progressier?: { add?: (p: Record<string, unknown>) => void };
-        };
-        w.progressier?.add?.({
-          id: u.id,
-          email: u.email ?? undefined,
-        });
-      } catch { /* ignore */ }
+      // Subscribe this device for push notifications (self-hosted, VAPID-based).
+      // Safe to call repeatedly — no-ops if already subscribed or permission was denied.
+      void subscribeToPush(nextSession.user.id);
 
 
 
@@ -267,6 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
+    try { await unsubscribeFromPush(); } catch { /* ignore */ }
     await supabase.auth.signOut();
   }, []);
 
