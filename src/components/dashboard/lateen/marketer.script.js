@@ -675,15 +675,16 @@ async function refreshNotifications(){
     const mainText=L.t;
     const subText=isNote?'':L.b;
     let detailsHtml='';
-    if(expandable && n.data){
+    if(expandable){
       let d=n.data; if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
-      if(d){
+      if(!d) d={};
+      {
         const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
         const borderColor=(isFailed||isRejected||isRefunded||isNote)?'#2a1a1a':'#142a20';
         const photoUrl=d.product_photo||d.photo;
         const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
         const receiptImg=isRejected&&d.receipt_url&&/^(https?:|data:|\/)/.test(String(d.receipt_url))?`<div style="margin:0 0 10px 0"><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">${__t('Receipt','الإيصال')}</div><img src="${esc(d.receipt_url)}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:10px;display:block;background:#0f0f0f"/></div>`:'';
-        const adminNoteText=isRejected?d.admin_notes:((isRefunded||isNote)?d.admin_comment:'');
+        const adminNoteText=isRejected?d.admin_notes:((isRefunded||isNote)?(d.admin_comment||d.admin_note||(isNote?(n.body||''):'')):'');
         const adminNote=adminNoteText?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Admin note','ملاحظات الأدمن')}:</b> ${esc(adminNoteText)}</div>`:'';
         const bizNotes=isFailed&&d.business_notes?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Business owner notes','ملاحظات التاجر')}:</b> ${esc(d.business_notes)}</div>`:'';
         const reportTypeLbl=isReportReviewed?(d.report_type==='product'?__t('Product','المنتج'):(d.report_type==='merchant'?__t('Merchant','التاجر'):__t('Other','أخرى'))):'';
