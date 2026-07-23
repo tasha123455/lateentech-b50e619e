@@ -1,0 +1,8 @@
+{
+  "name": "Lateen",
+  "short_name": "Lateen",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#2dbd8f"
+}
