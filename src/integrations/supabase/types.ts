@@ -307,6 +307,7 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refund_note: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -346,6 +347,7 @@ export type Database = {
           qty?: number
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
+          refund_note?: string | null
           refunded_at?: string | null
           reviewed_at?: string | null
           selected_variants?: Json
@@ -385,6 +387,7 @@ export type Database = {
           qty?: number
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
+          refund_note?: string | null
           refunded_at?: string | null
           reviewed_at?: string | null
           selected_variants?: Json
@@ -890,6 +893,7 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refund_note: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -991,7 +995,7 @@ export type Database = {
         }
       }
       admin_refund_order: {
-        Args: { _order_id: string }
+        Args: { _comment?: string; _order_id: string }
         Returns: {
           admin_notes: string | null
           business_id: string
@@ -1021,6 +1025,7 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refund_note: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1069,6 +1074,7 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refund_note: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1117,6 +1123,7 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refund_note: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1255,6 +1262,7 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refund_note: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1339,6 +1347,7 @@ export type Database = {
           qty: number
           receipt_uploaded_at: string | null
           receipt_url: string | null
+          refund_note: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1388,6 +1397,7 @@ export type Database = {
               qty: number
               receipt_uploaded_at: string | null
               receipt_url: string | null
+              refund_note: string | null
               refunded_at: string | null
               reviewed_at: string | null
               selected_variants: Json
@@ -1436,6 +1446,7 @@ export type Database = {
               qty: number
               receipt_uploaded_at: string | null
               receipt_url: string | null
+              refund_note: string | null
               refunded_at: string | null
               reviewed_at: string | null
               selected_variants: Json
