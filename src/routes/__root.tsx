@@ -90,13 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "manifest",
-        href: "https://progressier.app/nUtQboT7clW7ctdwUT0Y/progressier.json",
-      },
-    ],
-    scripts: [
-      {
-        defer: true,
-        src: "https://progressier.app/nUtQboT7clW7ctdwUT0Y/script.js",
+        href: "/manifest.json",
       },
     ],
   }),
