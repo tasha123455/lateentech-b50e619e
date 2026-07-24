@@ -19,6 +19,7 @@ import { Route as BusinessRegisterRouteImport } from './routes/business.register
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicNotificationsVapidPublicKeyRouteImport } from './routes/api/public/notifications/vapid-public-key'
 import { Route as ApiPublicNotificationsPushRouteImport } from './routes/api/public/notifications/push'
 
 const DashboardRoute = DashboardRouteImport.update({
@@ -72,6 +73,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNotificationsVapidPublicKeyRoute =
+  ApiPublicNotificationsVapidPublicKeyRouteImport.update({
+    id: '/api/public/notifications/vapid-public-key',
+    path: '/api/public/notifications/vapid-public-key',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicNotificationsPushRoute =
   ApiPublicNotificationsPushRouteImport.update({
     id: '/api/public/notifications/push',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
+  '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -101,6 +109,7 @@ export interface FileRoutesByTo {
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
+  '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -115,6 +124,7 @@ export interface FileRoutesById {
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
+  '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/marketer/signin'
     | '/p/$id'
     | '/api/public/notifications/push'
+    | '/api/public/notifications/vapid-public-key'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/marketer/signin'
     | '/p/$id'
     | '/api/public/notifications/push'
+    | '/api/public/notifications/vapid-public-key'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -156,6 +168,7 @@ export interface FileRouteTypes {
     | '/marketer/signin'
     | '/p/$id'
     | '/api/public/notifications/push'
+    | '/api/public/notifications/vapid-public-key'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -170,6 +183,7 @@ export interface RootRouteChildren {
   MarketerSigninRoute: typeof MarketerSigninRoute
   PIdRoute: typeof PIdRoute
   ApiPublicNotificationsPushRoute: typeof ApiPublicNotificationsPushRoute
+  ApiPublicNotificationsVapidPublicKeyRoute: typeof ApiPublicNotificationsVapidPublicKeyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -247,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/notifications/vapid-public-key': {
+      id: '/api/public/notifications/vapid-public-key'
+      path: '/api/public/notifications/vapid-public-key'
+      fullPath: '/api/public/notifications/vapid-public-key'
+      preLoaderRoute: typeof ApiPublicNotificationsVapidPublicKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/notifications/push': {
       id: '/api/public/notifications/push'
       path: '/api/public/notifications/push'
@@ -266,6 +287,8 @@ const rootRouteChildren: RootRouteChildren = {
   MarketerSigninRoute: MarketerSigninRoute,
   PIdRoute: PIdRoute,
   ApiPublicNotificationsPushRoute: ApiPublicNotificationsPushRoute,
+  ApiPublicNotificationsVapidPublicKeyRoute:
+    ApiPublicNotificationsVapidPublicKeyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
@@ -273,3 +296,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
