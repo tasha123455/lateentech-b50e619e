@@ -763,7 +763,7 @@ async function renderTransactions(){
     const amtLine=amtStr?`<div class="notif-body" style="color:${color};font-weight:600;font-size:13px">${sign}${__txnEsc(amtStr)} ${__txnEsc(sym)}</div>`:'';
     const dt=(typeof __fmtDT==='function')?__fmtDT(n.created_at):new Date(n.created_at).toLocaleString();
     const photoUrl=d.product_photo||d.photo;
-    const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:200px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
+    const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
     let detailRows;
     if(type==='withdraw'){
       detailRows=__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
@@ -773,8 +773,14 @@ async function renderTransactions(){
         __txnRow(__t('Product','المنتج'),d.product_name,true)+
         __txnRow(__t('Qty','الكمية'),d.qty)+
         __txnRow(__t('Customer','الزبون'),d.customer_name,true)+
+        (function(){const p=__splitCC(d.customer_phone);return __txnRow(__t('Phone','الهاتف'),p.cc?(p.cc+' | '+p.num):p.num);})()+
+        (d.customer_whatsapp?(function(){const w=__splitCC(d.customer_whatsapp);return __txnRow(__t('WhatsApp','واتساب'),w.cc?(w.cc+' | '+w.num):w.num);})():'')+
         __txnRow(__t('City','المدينة'),d.customer_city)+
         __txnRow(__t('Country','الدولة'),d.customer_country)+
+        __txnRow(__t('Address','العنوان'),d.customer_address,true)+
+        __txnRow(__t('Size','المقاس'),d.size,true)+
+        __txnRow(__t('Colour','اللون'),d.color,true)+
+        (d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> <span data-no-i18n>${__txnEsc(d.customer_notes)}</span></div>`:'')+
         ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
     }
     const detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323">${detailRows}</div>`;
