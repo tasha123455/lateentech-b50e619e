@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
 import { LanguageProvider, FloatingLanguageToggle } from "@/i18n/LanguageContext";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 function NotFoundComponent() {
   return (
@@ -82,6 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "theme-color", content: "#2dbd8f" },
     ],
     links: [
       {
@@ -91,6 +93,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "manifest",
         href: "/manifest.json",
+      },
+      {
+        rel: "icon",
+        href: "/icon-192.png",
+        type: "image/png",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/icon-192.png",
       },
     ],
   }),
@@ -123,6 +134,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <LanguageProvider>
           <AuthProvider>{children}</AuthProvider>
           <FloatingLanguageToggle />
+          <InstallPrompt />
         </LanguageProvider>
         <Scripts />
       </body>
