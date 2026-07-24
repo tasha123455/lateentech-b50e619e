@@ -94,6 +94,7 @@ async function admLoadMetrics(){
     setStat('statTotalProducts',m.totalProducts);
     setStat('statPiecesSold',m.piecesSold);
     setStat('statSucceeded',m.succeededUpfronts);
+    setStat('statSucceededPieces',m.succeededPiecesSold);
     const heroErr=document.getElementById('heroError'); if(heroErr) heroErr.remove();
     renderHero();
     renderChart();
@@ -1333,6 +1334,15 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       // A refunded order no longer counts as a successful upfront.
       return raw.orders.filter(o => o.reviewed_at && !o.refunded_at && new Date(o.reviewed_at).getTime() <= ts).length;
     }
+    if(key === 'succeededPieces'){
+      // Same "succeeded" definition as the Pieces sold box in the business
+      // breakdown and marketer analytics page (status === 'delivered'),
+      // totaled across every order on the platform.
+      return raw.orders.reduce((s,o) => {
+        if(!o.delivered_at) return s;
+        return new Date(o.delivered_at).getTime() <= ts ? s + Number(o.qty||0) : s;
+      }, 0);
+    }
     if(key === 'activeUsers'){
       const windowStart = ts - 30*86400000;
       const set = new Set();
@@ -1515,7 +1525,8 @@ function admToggleProfitCard(){
     { key:'totalUsers',    label:'إجمالي المستخدمين',  color:'#9d8fd9', data: [] },
     { key:'totalProducts', label:'إجمالي المنتجات',    color:'#d98fa0', data: [] },
     { key:'piecesSold',    label:'Pieces Sold',        color:'#7fd9a8', data: [] },
-    { key:'succeeded',     label:'Succeeded Upfronts', color:'#caa05a', data: [] }
+    { key:'succeeded',     label:'Succeeded Upfronts', color:'#caa05a', data: [] },
+    { key:'succeededPieces', label:'Succeeded Pieces Sold', color:'#5ec9c4', data: [] }
   ];
 
   function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }

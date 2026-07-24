@@ -487,6 +487,19 @@
       </div>
       <div class="stat-value" id="statSucceeded">…</div>
     </div>
+
+    <div class="stat-row">
+      <div class="stat-left">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Succeeded Pieces Sold</div>
+          <div class="stat-sub">Delivered orders only, lifetime</div>
+        </div>
+      </div>
+      <div class="stat-value" id="statSucceededPieces">…</div>
+    </div>
   </div>
 
   <!-- Analytics chart -->
@@ -500,6 +513,7 @@
       <button class="chip" data-metric="totalProducts">إجمالي المنتجات</button>
       <button class="chip" data-metric="piecesSold">Pieces Sold</button>
       <button class="chip" data-metric="succeeded">Succeeded Upfronts</button>
+      <button class="chip" data-metric="succeededPieces">Succeeded Pieces Sold</button>
     </div>
     <div class="chart-wrap">
       <canvas id="analyticsChart"></canvas>
