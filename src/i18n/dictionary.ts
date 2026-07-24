@@ -42,6 +42,8 @@ export const DICT: Record<string, string> = {
  "Soon": "قريباً",
  "More": "المزيد",
  "More countries": "دول أخرى",
+ "OK": "حسناً",
+ "— More — Soon": "— المزيد — قريباً",
   "Change": "تغيير",
   "Remove": "حذف",
   "Delete": "مسح",
@@ -567,6 +569,7 @@ export const DICT: Record<string, string> = {
   "No orders found.": "لم يتم العثور على طلبيات.",
   "No orders yet.": "لا توجد طلبيات حتى الآن.",
   "Tap the button below to add your first order.": "اضغط على الزر تحت لإضافة أول طلبية.",
+  "Tap the button above to add your first order.": "اضغط على الزر أعلاه لإضافة أول طلبية.",
   "No products found.": "لم يتم العثور على منتجات.",
   "No products yet.": "لا توجد منتجات حتى الآن.",
   "No saved products yet.": "لا توجد منتجات محفوظة بعد.",
@@ -852,6 +855,10 @@ export const DICT: Record<string, string> = {
 
   // ===== Comprehensive audit additions =====
   "Alerts": "التنبيهات",
+  "decrease": "تقليل",
+  "increase": "زيادة",
+  "Info": "معلومات",
+  "Important info about upfront deposit": "معلومات مهمة عن العربون المسبق",
   "Setting up your account…": "جارٍ إعداد حسابك…",
   "If this persists, sign out and pick a role again.": "إذا استمرت المشكلة، سجّل الخروج واختر دورك من جديد.",
   "Edit Employee": "تعديل بيانات الموظف",
