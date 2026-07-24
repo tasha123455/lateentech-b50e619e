@@ -1,3 +1,7 @@
+/* i18n: any user-typed value rendered here (product name/desc/code, variant
+   names, notes, addresses, reviews, transaction details, etc.) must be
+   wrapped in data-no-i18n or it can get auto-translated — see the block
+   above SKIP_TAGS in src/i18n/LanguageContext.tsx for why/how. */
 
 function __splitCC(p){var s=String(p||'').trim();if(!s)return{cc:'',num:''};var m=s.match(/^(\+\d{1,3})[\s-]*(.*)$/);if(m)return{cc:'\u200E'+m[1]+'\u200E',num:'\u200E'+m[2].replace(/\s+/g,'')+'\u200E'};return{cc:'',num:'\u200E'+s+'\u200E'};}
 function __dispPhone(p){var s=__splitCC(p);return s.cc?(s.cc+' | '+s.num):s.num;}
