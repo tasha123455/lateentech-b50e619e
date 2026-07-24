@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { translate } from "./dictionary";
+import { LateenLogo } from "@/components/brand/LateenLogo";
 
 export type Lang = "en" | "ar";
 
@@ -145,13 +146,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // frame as hydration — no visible English flash first.
   useLayoutEffect(() => {
     try {
-      let stored = window.localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
-        // First visit: detect device language. Persist so this only ever runs once.
-        const navLang = (navigator.language || "").toLowerCase();
-        stored = navLang.startsWith("ar") ? "ar" : "en";
-        try { window.localStorage.setItem(STORAGE_KEY, stored); } catch { /* ignore */ }
-      }
+      // No auto-detection here: if nothing is stored yet, this is a first
+      // visit and <LanguageGate> (rendered in the root shell) is solely
+      // responsible for asking the user to choose and persisting it via
+      // setLang below. We only read + apply an already-made choice.
+      const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored === "ar") setLangState("ar");
     } catch { /* ignore */ }
   }, []);
@@ -327,6 +326,156 @@ export function FloatingLanguageToggle() {
       <span aria-hidden style={{ fontSize: 14 }}>🌐</span>
       <span>{label}</span>
     </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// First-visit language gate. Shown once — before the person has ever chosen
+// a language — as a full-screen, non-dismissible screen with two buttons
+// (English / العربية). Once a choice is made it's persisted via setLang
+// (same STORAGE_KEY the rest of this file reads), so this never appears
+// again on later visits, sign-ins, or sign-outs. Uses the same
+// layout-effect-before-paint technique as LanguageProvider above so there
+// is no flash of the app underneath on a first visit.
+export function LanguageGate() {
+  const { setLang } = useLanguage();
+  const [show, setShow] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useLayoutEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (!stored) setShow(true);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (!show) return;
+    const raf = requestAnimationFrame(() => setVisible(true));
+    let prevBody = "";
+    let prevHtml = "";
+    try {
+      prevBody = document.body.style.overflow;
+      prevHtml = document.documentElement.style.overflow;
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } catch { /* ignore */ }
+    return () => {
+      cancelAnimationFrame(raf);
+      try {
+        document.body.style.overflow = prevBody;
+        document.documentElement.style.overflow = prevHtml;
+      } catch { /* ignore */ }
+    };
+  }, [show]);
+
+  const choose = useCallback((l: Lang) => {
+    setLang(l);
+    setShow(false);
+  }, [setLang]);
+
+  if (!show) return null;
+
+  return (
+    <div
+      data-no-i18n
+      role="dialog"
+      aria-modal="true"
+      aria-label="Choose your language / اختر لغتك"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 999999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0D0D0D",
+        padding: 24,
+      }}
+    >
+      <style>{`
+        .lateen-lg-btn { transition: transform 150ms ease, background 150ms ease, border-color 150ms ease; }
+        .lateen-lg-btn:active { transform: scale(0.98); }
+        .lateen-lg-btn-en:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.24); }
+        .lateen-lg-btn-ar:hover { background: rgba(45,189,143,0.14); border-color: rgba(45,189,143,0.6); }
+      `}</style>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          maxWidth: 340,
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(10px)",
+          transition: "opacity 320ms ease, transform 380ms ease",
+        }}
+      >
+        <div style={{ marginBottom: 44, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          <LateenLogo size={50} />
+          <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 19, color: "#f0eeeb", letterSpacing: 0.2 }}>
+            Lateen
+          </span>
+        </div>
+
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ fontSize: 21, fontWeight: 600, color: "#f0eeeb", marginBottom: 6 }}>
+            Choose your language
+          </div>
+          <div
+            dir="rtl"
+            style={{
+              fontSize: 21,
+              fontWeight: 600,
+              color: "#9e9b97",
+              fontFamily: "'Segoe UI','Tahoma','Noto Sans Arabic',system-ui,sans-serif",
+            }}
+          >
+            اختر لغتك
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%" }}>
+          <button
+            type="button"
+            className="lateen-lg-btn lateen-lg-btn-en"
+            onClick={() => choose("en")}
+            style={{
+              height: 58,
+              borderRadius: 14,
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: "rgba(255,255,255,0.04)",
+              color: "#f0eeeb",
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            }}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            dir="rtl"
+            className="lateen-lg-btn lateen-lg-btn-ar"
+            onClick={() => choose("ar")}
+            style={{
+              height: 58,
+              borderRadius: 14,
+              border: "1px solid rgba(45,189,143,0.45)",
+              background: "rgba(45,189,143,0.10)",
+              color: "#f0eeeb",
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "'Segoe UI','Tahoma','Noto Sans Arabic',system-ui,sans-serif",
+            }}
+          >
+            العربية
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
