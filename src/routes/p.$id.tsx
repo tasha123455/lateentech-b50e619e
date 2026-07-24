@@ -49,7 +49,7 @@ function PublicProductPage() {
     (async () => {
       try {
         const { data, error } = await supabase
-          .from("products")
+          .from("products_public_view")
           .select(
             "id,business_id,name,code,category,description,price,currency,photos,sizes,colors,variant_groups,qty,reserved_qty,status,deleted_at",
           )
