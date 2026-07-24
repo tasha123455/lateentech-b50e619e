@@ -720,6 +720,80 @@ async function refreshNotifications(){
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
 
+/* ===== Marketer wallet transactions (التحركات) =====
+   Collapsible card built from the marketer's existing notifications feed:
+   receipt_verified -> commission added, order_refunded -> amount deducted,
+   payout_paid -> withdrawal completed. Tapping a row expands details, same
+   pattern as the Notifications page. Purely additive — refreshNotifications()
+   and loadOrders() are only wrapped, never edited. */
+function txnToggleOpen(){const toggle=document.getElementById('txnToggle');const wrap=document.getElementById('txnWrap');if(!toggle||!wrap)return;const isOpen=wrap.classList.toggle('open');toggle.classList.toggle('open',isOpen);}
+function __txnEsc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function __txnRow(k,v){return v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${__txnEsc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${__txnEsc(v)}</span></div>`:'';}
+async function renderTransactions(){
+  const list=document.getElementById('txn-list');
+  if(!list||!window.LateenAPI||!window.LateenAPI.listNotifications)return;
+  let notifs=[];
+  try{notifs=await window.LateenAPI.listNotifications();}catch(e){console.error('[Lateen] transactions',e);return;}
+  const kinds={receipt_verified:'add',order_refunded:'subtract',payout_paid:'withdraw'};
+  const rows=(notifs||[]).filter(n=>kinds[n.kind]).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(!rows.length){list.innerHTML='<div class="empty-center" style="padding:40px 20px"><div class="empty-text" style="text-align:center;color:var(--color-text-secondary);font-size:13px">'+__t('No transactions yet.','لا توجد تحركات بعد.')+'</div></div>';return;}
+  const sym=(typeof window.__lateenSelSym==='function')?window.__lateenSelSym():'د.ل';
+  list.innerHTML=rows.map(n=>{
+    let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}if(!d)d={};
+    const type=kinds[n.kind];
+    let amount=null,title='';
+    if(type==='add'){
+      const ord=(typeof orders!=='undefined'?orders:[]).find(o=>o.dbId===d.order_id);
+      amount=ord?(ord.commPerUnit||0)*(ord.qty||0):(d.amount!=null?Number(d.amount):null);
+      title=__t('Commission added','عمولة مضافة');
+    }else if(type==='subtract'){
+      amount=d.amount!=null?Number(d.amount):null;
+      title=__t('Order refunded','استرجاع طلب');
+    }else{
+      amount=d.amount!=null?Number(d.amount):null;
+      title=__t('Withdrawal completed','تم سحب المبلغ');
+    }
+    const color=type==='add'?'#35c98f':(type==='withdraw'?'#7f77dd':'#e2685f');
+    const sign=type==='add'?'+':'-';
+    const amtStr=amount!=null?amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):null;
+    const amtLine=amtStr?`<div class="notif-body" style="color:${color};font-weight:600;font-size:13px">${sign}${__txnEsc(amtStr)} ${__txnEsc(sym)}</div>`:'';
+    const dt=(typeof __fmtDT==='function')?__fmtDT(n.created_at):new Date(n.created_at).toLocaleString();
+    const photoUrl=d.product_photo||d.photo;
+    const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:200px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
+    let detailRows;
+    if(type==='withdraw'){
+      detailRows=__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
+    }else{
+      detailRows=photo+
+        __txnRow(__t('Order Code','كود الطلبيه'),d.order_code)+
+        __txnRow(__t('Product','المنتج'),d.product_name)+
+        __txnRow(__t('Qty','الكمية'),d.qty)+
+        __txnRow(__t('Customer','الزبون'),d.customer_name)+
+        __txnRow(__t('City','المدينة'),d.customer_city)+
+        __txnRow(__t('Country','الدولة'),d.customer_country)+
+        ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> ${__txnEsc(d.admin_comment||d.admin_note)}</div>`:'');
+    }
+    const detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323">${detailRows}</div>`;
+    return `<div class="notif-item" onclick="(function(el){var d=el.querySelector('[data-nd]');if(d)d.style.display=d.style.display==='none'?'block':'none';})(this)" style="cursor:pointer">
+      <div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${sign}</div>
+      <div style="flex:1;min-width:0">
+        <div class="notif-title">${__txnEsc(title)}</div>
+        ${amtLine}
+        ${detailsHtml}
+        <div class="notif-time">${__txnEsc(dt)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.renderTransactions=renderTransactions;
+/* Refresh the Transactions card whenever notifications refresh (initial load,
+   realtime updates, notifications page open/close) and whenever orders load
+   (so commission amounts can be matched to their order). Both wraps are
+   additive only — the original functions run first, unchanged. */
+(function(){const _rn=refreshNotifications;refreshNotifications=async function(){await _rn.apply(this,arguments);try{renderTransactions();}catch(e){}};window.refreshNotifications=refreshNotifications;})();
+(function(){const _lo=loadOrders;loadOrders=async function(){await _lo.apply(this,arguments);try{renderTransactions();}catch(e){}};window.loadOrders=loadOrders;})();
+renderTransactions();
+
 /* Keep payout state refreshed after withdrawal attempts */
 (function(){const _orig=confirmWithdraw;confirmWithdraw=async function(){await _orig.apply(this,arguments);await __lateenRefreshWalletAndPayout();};window.confirmWithdraw=confirmWithdraw;})();
 

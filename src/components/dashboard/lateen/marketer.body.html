@@ -535,6 +535,32 @@
         </div>
       </div>
     </div>
+
+    <div class="mkbd-card">
+      <button class="mkbd-toggle" id="txnToggle" onclick="txnToggleOpen()">
+        <span class="mkbd-toggle-left">
+          <span class="mkbd-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 2l4 4-4 4"></path>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <path d="M7 22l-4-4 4-4"></path>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+          </span>
+          <span>Transactions</span>
+        </span>
+        <span class="mkbd-chev">▾</span>
+      </button>
+      <div class="mkbd-wrap" id="txnWrap">
+        <div class="mkbd-inner">
+          <div class="mkbd-body">
+            <div class="notif-list" id="txn-list" style="margin-top:16px">
+              <div class="empty-center" style="padding:40px 20px"><div class="empty-text" style="text-align:center;color:var(--color-text-secondary);font-size:13px">No transactions yet.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- BROWSE -->
