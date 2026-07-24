@@ -396,8 +396,8 @@ export function LanguageGate() {
       <style>{`
         .lateen-lg-btn { transition: transform 150ms ease, background 150ms ease, border-color 150ms ease; }
         .lateen-lg-btn:active { transform: scale(0.98); }
-        .lateen-lg-btn-en:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.24); }
-        .lateen-lg-btn-ar:hover { background: rgba(45,189,143,0.14); border-color: rgba(45,189,143,0.6); }
+        .lateen-lg-btn-en:hover { background: rgba(45,189,143,0.14); border-color: rgba(45,189,143,0.6); }
+        .lateen-lg-btn-ar:hover { background: rgba(108,100,212,0.14); border-color: rgba(108,100,212,0.6); }
       `}</style>
       <div
         style={{
@@ -443,8 +443,8 @@ export function LanguageGate() {
             style={{
               height: 58,
               borderRadius: 14,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(45,189,143,0.45)",
+              background: "rgba(45,189,143,0.10)",
               color: "#f0eeeb",
               fontSize: 16,
               fontWeight: 600,
@@ -462,8 +462,8 @@ export function LanguageGate() {
             style={{
               height: 58,
               borderRadius: 14,
-              border: "1px solid rgba(45,189,143,0.45)",
-              background: "rgba(45,189,143,0.10)",
+              border: "1px solid rgba(108,100,212,0.45)",
+              background: "rgba(108,100,212,0.10)",
               color: "#f0eeeb",
               fontSize: 16,
               fontWeight: 600,
