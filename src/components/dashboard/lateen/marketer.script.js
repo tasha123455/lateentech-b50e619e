@@ -728,7 +728,7 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
    and loadOrders() are only wrapped, never edited. */
 function txnToggleOpen(){const toggle=document.getElementById('txnToggle');const wrap=document.getElementById('txnWrap');if(!toggle||!wrap)return;const isOpen=wrap.classList.toggle('open');toggle.classList.toggle('open',isOpen);}
 function __txnEsc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function __txnRow(k,v){return v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${__txnEsc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${__txnEsc(v)}</span></div>`:'';}
+function __txnRow(k,v,noTranslate){return v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${__txnEsc(k)}</span><span ${noTranslate?'data-no-i18n ':''}style="color:var(--color-text-primary);text-align:right">${__txnEsc(v)}</span></div>`:'';}
 async function renderTransactions(){
   const list=document.getElementById('txn-list');
   if(!list||!window.LateenAPI||!window.LateenAPI.listNotifications)return;
@@ -766,12 +766,12 @@ async function renderTransactions(){
     }else{
       detailRows=photo+
         __txnRow(__t('Order Code','كود الطلبيه'),d.order_code)+
-        __txnRow(__t('Product','المنتج'),d.product_name)+
+        __txnRow(__t('Product','المنتج'),d.product_name,true)+
         __txnRow(__t('Qty','الكمية'),d.qty)+
-        __txnRow(__t('Customer','الزبون'),d.customer_name)+
+        __txnRow(__t('Customer','الزبون'),d.customer_name,true)+
         __txnRow(__t('City','المدينة'),d.customer_city)+
         __txnRow(__t('Country','الدولة'),d.customer_country)+
-        ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> ${__txnEsc(d.admin_comment||d.admin_note)}</div>`:'');
+        ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
     }
     const detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323">${detailRows}</div>`;
     return `<div class="notif-item" onclick="(function(el){var d=el.querySelector('[data-nd]');if(d)d.style.display=d.style.display==='none'?'block':'none';})(this)" style="cursor:pointer">
