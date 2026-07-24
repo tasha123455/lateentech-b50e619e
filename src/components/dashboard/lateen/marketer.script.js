@@ -672,7 +672,8 @@ async function refreshNotifications(){
     const isRefunded=n.kind==='order_refunded';
     const isNote=n.kind==='payout_note';
     const isAdminMsg=n.kind==='admin_message'||n.kind==='admin_broadcast';
-    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote||isAdminMsg;
+    const isPaid=n.kind==='payout_paid';
+    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote||isAdminMsg||isPaid;
     const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected||isRefunded)?'#e07070':((isDelivered||isVerified||isReportReviewed)?'#2dbd8f':'#7f77dd')));
     const mainText=L.t;
     const subText=isNote?'':L.b;
@@ -766,7 +767,7 @@ async function renderTransactions(){
     const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
     let detailRows;
     if(type==='withdraw'){
-      detailRows=__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
+      detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
     }else{
       detailRows=photo+
         __txnRow(__t('Order Code','كود الطلبيه'),d.order_code)+

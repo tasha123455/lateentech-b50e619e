@@ -421,6 +421,7 @@ async function admLoadPayouts(){
         ${detail('Notes',u.payout_notes)}
       </div>`:`<div class="adm-pay-details adm-pay-details-empty">No payout details on file — contact the marketer.</div>`;
       const liveBal=p.wallet&&p.wallet.balance!=null?Number(p.wallet.balance):Number(p.amount||0);
+      const rcpt=admPayoutReceipt[p.id];
       return `<div class="adm-payout-card">
         <div class="adm-payout-row">
           <div class="adm-user-av" data-no-i18n>${admEsc(admInitials(name))}</div>
@@ -432,6 +433,17 @@ async function admLoadPayouts(){
           <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal},'${encodeURIComponent(fmtAmt(liveBal))}')">Paid</button>
         </div>
         ${detailsHtml}
+        <div class="adm-notif-photo-row" style="padding:10px 14px 0;">
+          <div class="adm-notif-photo-add" id="pr-photo-add-${p.id}" style="display:${rcpt?'none':'flex'};" onclick="document.getElementById('pr-photo-input-${p.id}').click()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div class="adm-notif-photo-preview" id="pr-photo-preview-${p.id}" style="display:${rcpt?'block':'none'};">
+            <img id="pr-photo-img-${p.id}" src="${rcpt?admEsc(rcpt):''}" onclick="admLightbox(document.getElementById('pr-photo-img-${p.id}').src)"/>
+            <button type="button" class="adm-notif-photo-x" onclick="admRemovePayoutReceipt('${p.id}')">×</button>
+          </div>
+          <input type="file" id="pr-photo-input-${p.id}" accept="image/*" style="display:none" onchange="admPickPayoutReceipt('${p.id}',this)"/>
+          <span class="adm-notif-hint" id="pr-photo-hint-${p.id}">${rcpt?'Receipt attached':'Attach transfer receipt photo to mark as paid'}</span>
+        </div>
         <div style="display:flex;gap:6px;padding:10px 14px 12px;border-top:0.5px solid var(--border-2);">
           <input id="adm-note-${p.id}" type="text" placeholder="Send a note to the marketer (e.g. missing IBAN)" style="flex:1;height:34px;padding:0 10px;border-radius:8px;border:0.5px solid var(--border-2);background:#0f0f0f;color:#fff;font-size:12px;" />
           <button class="adm-btn" style="padding:0 12px;" onclick="admSendPayoutNote('${p.id}')">Send note</button>
@@ -441,10 +453,45 @@ async function admLoadPayouts(){
   }catch(e){console.error('[admin] payouts',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
+let admPayoutReceipt={};
+async function admPickPayoutReceipt(id,inp){
+  const file=inp&&inp.files&&inp.files[0];if(!file)return;
+  const hint=document.getElementById('pr-photo-hint-'+id);
+  if(hint)hint.textContent='Uploading…';
+  try{
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    const url=await window.LateenAPI.uploadPhoto(file);
+    admPayoutReceipt[id]=url;
+    const prev=document.getElementById('pr-photo-preview-'+id);
+    const img=document.getElementById('pr-photo-img-'+id);
+    const add=document.getElementById('pr-photo-add-'+id);
+    if(img)img.src=url;
+    if(prev)prev.style.display='block';
+    if(add)add.style.display='none';
+    if(hint)hint.textContent='Receipt attached';
+  }catch(e){console.error('[admin] payout receipt upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  if(inp)inp.value='';
+}
+function admRemovePayoutReceipt(id){
+  delete admPayoutReceipt[id];
+  const prev=document.getElementById('pr-photo-preview-'+id);
+  const add=document.getElementById('pr-photo-add-'+id);
+  const hint=document.getElementById('pr-photo-hint-'+id);
+  if(prev)prev.style.display='none';
+  if(add)add.style.display='flex';
+  if(hint)hint.textContent='Attach transfer receipt photo to mark as paid';
+}
 async function admMarkPaid(id,amt,label){
   const shown=label?decodeURIComponent(label):admMoney(amt);
+  const receiptUrl=admPayoutReceipt[id];
+  if(!receiptUrl){alert('Attach a photo of the transfer receipt first.');return;}
   if(!confirm('Confirm you have manually transferred '+shown+'? This will reduce the marketer\'s balance.'))return;
-  try{await window.LateenAPI.admin.markPayoutPaid(id);await admLoadPayouts();if(document.getElementById('adm-home')?.classList.contains('active'))admLoadMetrics();}catch(e){alert('Failed: '+e.message);}
+  try{
+    await window.LateenAPI.admin.markPayoutPaid(id,receiptUrl);
+    delete admPayoutReceipt[id];
+    await admLoadPayouts();
+    if(document.getElementById('adm-home')?.classList.contains('active'))admLoadMetrics();
+  }catch(e){alert('Failed: '+e.message);}
 }
 async function admSendPayoutNote(id){
   const el=document.getElementById('adm-note-'+id);
