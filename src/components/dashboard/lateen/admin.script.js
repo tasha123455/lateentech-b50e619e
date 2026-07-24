@@ -179,9 +179,9 @@ function admRenderVerifyList(){
       : `<span class="adm-mkt-badge clear">All clear</span>`;
     const contact=admEsc([m.phone,m.email].filter(Boolean).join(' · '));
     return `<div class="adm-mkt-row" onclick="admOpenMktDetail('${m.id}')">
-      <div class="adm-mkt-av">${admEsc(admInitials(m.name))}</div>
+      <div class="adm-mkt-av" data-no-i18n>${admEsc(admInitials(m.name))}</div>
       <div class="adm-mkt-main">
-        <div class="adm-mkt-name-row"><span class="adm-mkt-name">${admEsc(m.name)}</span>${badge}</div>
+        <div class="adm-mkt-name-row"><span class="adm-mkt-name" data-no-i18n>${admEsc(m.name)}</span>${badge}</div>
         <div class="adm-mkt-contact">${contact}</div>
       </div>
       <div class="adm-mkt-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div>
@@ -237,9 +237,9 @@ function admRenderMktDetailShell(){
   const contact=admEsc([m.phone,m.email].filter(Boolean).join(' · '));
   body.innerHTML=`
     <div class="adm-mkt-detail-head">
-      <div class="adm-mkt-av">${admEsc(admInitials(m.name))}</div>
+      <div class="adm-mkt-av" data-no-i18n>${admEsc(admInitials(m.name))}</div>
       <div>
-        <div class="adm-mkt-detail-name">${admEsc(m.name)}</div>
+        <div class="adm-mkt-detail-name" data-no-i18n>${admEsc(m.name)}</div>
         <div class="adm-mkt-detail-contact">${contact}</div>
       </div>
     </div>
@@ -307,11 +307,11 @@ function admMktDetailCard(o){
   const created='Created: '+admWhenFull(o.created_at);
   const uploaded=o.receipt_uploaded_at?'Uploaded: '+admWhenFull(o.receipt_uploaded_at):'';
   const customerLine=(customerName||customerPhone)
-    ?`<div class="adm-row-sub" style="margin-top:2px;">Customer: ${admEsc([customerName,customerPhone].filter(Boolean).join(' · '))}</div>`
+    ?`<div class="adm-row-sub" style="margin-top:2px;">Customer: <span data-no-i18n>${admEsc([customerName,customerPhone].filter(Boolean).join(' · '))}</span></div>`
     :'';
 
   const noteBlock=(o.status==='rejected')
-    ?`<div class="adm-note-block"><div class="adm-note-block-label">Admin note</div><div class="adm-note-block-text">${o.admin_notes&&String(o.admin_notes).trim()?admEsc(o.admin_notes):'No note was provided.'}</div></div>`
+    ?`<div class="adm-note-block"><div class="adm-note-block-label">Admin note</div><div class="adm-note-block-text">${o.admin_notes&&String(o.admin_notes).trim()?`<span data-no-i18n>${admEsc(o.admin_notes)}</span>`:'No note was provided.'}</div></div>`
     :'';
 
   const reviewedLine=(o.status!=='pending'&&o.reviewed_at)
@@ -403,7 +403,7 @@ async function admLoadPayouts(){
       const curCode=p.wallet&&p.wallet.currency&&p.wallet.currency.code?p.wallet.currency.code:'';
       const fmtAmt=(n)=>typeof window.__money==='function'?window.__money(n,cur,curCode):admMoney(n);
       const fmtAmtH=(n)=>typeof window.__moneyH==='function'?window.__moneyH(n,cur,curCode):admMoneyH(n);
-      const detail=(label,val)=>val?`<div class="adm-pay-detail-row"><span class="adm-pay-detail-k">${admEsc(label)}</span><span class="adm-pay-detail-v">${admEsc(val)}</span></div>`:'';
+      const detail=(label,val)=>val?`<div class="adm-pay-detail-row"><span class="adm-pay-detail-k">${admEsc(label)}</span><span class="adm-pay-detail-v" data-no-i18n>${admEsc(val)}</span></div>`:'';
       const hasAny=u.payout_method||u.payout_bank_name||u.payout_account_holder||u.payout_account_number||u.payout_iban||u.payout_swift||u.payout_notes;
       const detailsHtml=hasAny?`<div class="adm-pay-details">
         ${detail('Method',u.payout_method)}
@@ -417,9 +417,9 @@ async function admLoadPayouts(){
       const liveBal=p.wallet&&p.wallet.balance!=null?Number(p.wallet.balance):Number(p.amount||0);
       return `<div class="adm-payout-card">
         <div class="adm-payout-row">
-          <div class="adm-user-av">${admEsc(admInitials(name))}</div>
+          <div class="adm-user-av" data-no-i18n>${admEsc(admInitials(name))}</div>
           <div class="adm-pay-info">
-            <div class="adm-pay-name">${admEsc(name)}</div>
+            <div class="adm-pay-name" data-no-i18n>${admEsc(name)}</div>
             <div class="adm-pay-sub">${admEsc(phone)} · ${admWhen(p.requested_at)}</div>
           </div>
           <div class="adm-pay-amt"><div>${fmtAmtH(liveBal)}</div></div>
@@ -493,9 +493,9 @@ function admRenderUsers(list){
     const flags=(isBanned?'<span style="font-size:11px;color:#c00;font-weight:600;margin-inline-end:8px;">Banned</span>':'')+(isFrozen?'<span style="font-size:11px;color:#004085;font-weight:600;">Frozen</span>':'');
     return `<div class="adm-user-card">
       <div class="adm-user-row" onclick="admToggleUserCard('${uid}')">
-        <div class="adm-user-av">${admEsc(admInitials(name))}</div>
+        <div class="adm-user-av" data-no-i18n>${admEsc(admInitials(name))}</div>
         <div style="flex:1;min-width:0;">
-          <div class="adm-row-name">${admEsc(name)}</div>
+          <div class="adm-row-name" data-no-i18n>${admEsc(name)}</div>
           <div class="adm-row-sub">${admEsc(u.email||'no email')} · ${admEsc(u.phone||'no phone')} · ${admWhen(u.created_at)}</div>
           ${flags?`<div style="margin-top:2px;">${flags}</div>`:''}
         </div>
@@ -700,7 +700,7 @@ async function admLoadProducts(){
     if(!list.length){root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">'+(admProductSearchQ?'No products match your search.':'No products yet.')+'</div>';return;}
     root.innerHTML=list.map(p=>{
       const photo=Array.isArray(p.photos)&&p.photos[0];
-      const img=photo?`<img src="${admEsc(photo)}" alt="${admEsc(p.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>`:'📦';
+      const img=photo?`<img src="${admEsc(photo)}" alt="${admEsc(p.name)}" data-no-i18n style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>`:'📦';
       const isHidden=p.status==='hidden';
       const pill=isHidden?'<span class="adm-status-pill">Hidden</span>':'';
       const nameAttr=admEsc(p.name).replace(/'/g,"&#39;");
@@ -720,7 +720,7 @@ async function admLoadProducts(){
           </div>
         </div>
         <div class="cb2">
-          <div class="cn">${admEsc(p.name)}</div>
+          <div class="cn" data-no-i18n>${admEsc(p.name)}</div>
           <div class="cr">
             <div class="cpr">${admMoneyH(p.price)}</div>
             <div class="cco">${Number(p.comm_pct||0)}%</div>
@@ -775,7 +775,7 @@ async function admOpenProduct(id){
     const gallery=photos.length
       ?`<div class="pd-gallery"><div class="pd-gallery-track" id="admPdGalleryTrack">${photos.map(u=>`<div class="pd-gallery-slide" onclick="admLightbox('${admEsc(u)}')"><img src="${admEsc(u)}" alt=""/></div>`).join('')}</div>${photos.length>1?`<div class="pd-gallery-dots" id="admPdGalleryDots">${photos.map((_,i)=>`<span class="pd-gd-dot${i===0?' on':''}"></span>`).join('')}</div>`:''}</div>`
       :`<div class="pd-gallery pd-gallery-empty"><div class="pd-gallery-slide" style="font-size:64px;">📦</div></div>`;
-    const descBlock=p.description?`<div class="pd-sec-ttl">Description</div><div class="pd-desc">${admEsc(p.description)}</div>`:'';
+    const descBlock=p.description?`<div class="pd-sec-ttl">Description</div><div class="pd-desc" data-no-i18n>${admEsc(p.description)}</div>`:'';
 
     // Earn box — same 3-row breakdown as the marketer's sheet (commission,
     // platform fee, deposit = the two combined), reworded from "your" to
@@ -802,7 +802,7 @@ async function admOpenProduct(id){
       ?p.variant_groups.map(g=>({name:g.name||'',items:(g.items||[]).map(__ni).filter(x=>x.val)})).filter(g=>g.items.length)
       :[...(p.sizes&&p.sizes.length?[{name:'Size',items:p.sizes.map(__ni)}]:[]),...(p.colors&&p.colors.length?[{name:'Colour',items:p.colors.map(__ni)}]:[])];
     const variantChev='<svg class="pd-variant-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-    const variantBlock=vg.map((g,gi)=>`<div class="pd-variant"><div class="pd-variant-lbl">${admEsc(g.name)}</div><div class="pd-variant-sel-wrap"><select class="pd-variant-sel" id="admPdVsel${gi}">${g.items.map(x=>{
+    const variantBlock=vg.map((g,gi)=>`<div class="pd-variant"><div class="pd-variant-lbl" data-no-i18n>${admEsc(g.name)}</div><div class="pd-variant-sel-wrap"><select class="pd-variant-sel" data-no-i18n id="admPdVsel${gi}">${g.items.map(x=>{
       const q=x.qty;
       const oos=q===0;
       const suffix=q===null?'':(q>0?` · ${q} left`:' · out of stock');
@@ -816,7 +816,7 @@ async function admOpenProduct(id){
     const cityText=cityCount?(cityCount===1?'1 city':cityCount+' cities'):'—';
     const zonesInner=deliveryEntries.map(([code,z])=>{
       const cities=z&&z.cities?Object.entries(z.cities):[];
-      return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span>${admEsc(city)}</span><span>Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliver ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
+      return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span data-no-i18n>${admEsc(city)}</span><span>Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliver ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
     }).join('');
     const shipsToRow=deliveryEntries.length?`<div class="pd-row pd-row-tap" onclick="admPdToggle('admPdZones')">
         <div class="pd-row-ic">${icPin}</div>
@@ -833,17 +833,17 @@ async function admOpenProduct(id){
         <div class="pd-row-lbl">In stock</div>
         <div class="pd-row-val${low?' am':''}">${qty} pcs${vg.length?chev.replace('class="pd-chev"','class="pd-chev" id="admPdStockChev"'):''}</div>
       </div>
-      ${vg.length?`<div id="admPdStock" class="pd-zones" style="display:none;">${vg.map(g=>`<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(g.name)}</div>${g.items.map(it=>`<div class="pd-zone-city"><span>${admEsc(it.val)}</span><span>${it.qty===null?'—':it.qty+' pcs'}</span></div>`).join('')}</div>`).join('')}</div>`:''}`;
+      ${vg.length?`<div id="admPdStock" class="pd-zones" style="display:none;">${vg.map(g=>`<div class="pd-zone-card"><div class="pd-zone-hd" data-no-i18n>${admEsc(g.name)}</div>${g.items.map(it=>`<div class="pd-zone-city"><span data-no-i18n>${admEsc(it.val)}</span><span>${it.qty===null?'—':it.qty+' pcs'}</span></div>`).join('')}</div>`).join('')}</div>`:''}`;
 
     const ownerName=owner.business_name||owner.full_name||p.biz_name||'Unknown';
-    const ownerOther=owner.business_name&&owner.full_name&&owner.business_name!==owner.full_name?`<div class="adm-pd-owner-row">Business owner name: <span>${admEsc(owner.full_name)}</span></div>`:'';
+    const ownerOther=owner.business_name&&owner.full_name&&owner.business_name!==owner.full_name?`<div class="adm-pd-owner-row">Business owner name: <span data-no-i18n>${admEsc(owner.full_name)}</span></div>`:'';
     const ownerEmail=owner.email?`<div class="adm-pd-owner-row">Email: <span>${admEsc(owner.email)}</span></div>`:'';
 
     body.innerHTML=`
       <div class="pd-card">
         <div class="pd-hd-row">
-          <div class="pd-hd-name">${admEsc(p.name)}</div>
-          <div class="pd-hd-code"><span class="pd-hd-code-lbl">Product code:</span> ${admEsc(p.code||'—')}</div>
+          <div class="pd-hd-name" data-no-i18n>${admEsc(p.name)}</div>
+          <div class="pd-hd-code"><span class="pd-hd-code-lbl">Product code:</span> <span data-no-i18n>${admEsc(p.code||'—')}</span></div>
         </div>
       </div>
       ${gallery}
@@ -867,7 +867,7 @@ async function admOpenProduct(id){
       <div class="pd-row"><div class="pd-row-ic">${icRevenue}</div><div class="pd-row-lbl">Revenue</div><div class="pd-row-val">${curH}${Number(p.revenue||0).toFixed(2)}</div></div>
       <div class="pd-sec-ttl">Business owner</div>
       <div class="adm-pd-owner">
-        <div class="adm-pd-owner-name">${admEsc(ownerName)}</div>
+        <div class="adm-pd-owner-name" data-no-i18n>${admEsc(ownerName)}</div>
         ${ownerOther}
         <div class="adm-pd-owner-row">Phone: <span>${admEsc(owner.phone||'—')}</span></div>
         ${ownerEmail}
@@ -961,13 +961,13 @@ function admRenderReports(){
     const prodBlock=r.product_id?`<div class="rpt-mini-prod" onclick="admOpenProduct('${r.product_id}')">
         ${thumb}
         <div class="rpt-mini-info">
-          <div class="rpt-name">${admEsc(product.name||'Product no longer available')}</div>
-          <div class="rpt-sub">${product.price!=null?admMoney(product.price):''}${product.code?' · '+admEsc(product.code):''}</div>
+          <div class="rpt-name">${product.name?`<span data-no-i18n>${admEsc(product.name)}</span>`:'Product no longer available'}</div>
+          <div class="rpt-sub">${product.price!=null?admMoney(product.price):''}${product.code?' · <span data-no-i18n>'+admEsc(product.code)+'</span>':''}</div>
         </div>
       </div>`:'';
     const bizRow=r.business_id?`<div class="rpt-biz-row">
         <div style="min-width:0;">
-          <div class="rpt-name">${admEsc(businessName)}</div>
+          <div class="rpt-name" data-no-i18n>${admEsc(businessName)}</div>
           <div class="rpt-sub">${admEsc(business.phone||'no phone')}</div>
         </div>
         <button class="adm-go-btn" onclick="admGoToAccount('${r.business_id}','business','${businessNameSafe}')">Go to business account</button>
@@ -977,21 +977,21 @@ function admRenderReports(){
           <textarea class="rpt-comment-ta" id="rpt-comment-${r.id}" placeholder="Write your review of this report — the marketer will see it as 'Report reviewed'"></textarea>
           <button class="adm-btn adm-btn-acc" style="width:100%;" onclick="admResolveReport('${r.id}')">Send review to marketer</button>
         </div>`
-      :`<div class="rpt-resolved-note"><b>Admin comment:</b> ${admEsc(r.admin_comment||'')}<div style="margin-top:4px;opacity:0.8;font-size:11px;">Reviewed ${admWhen(r.resolved_at)}</div></div>`;
+      :`<div class="rpt-resolved-note"><b>Admin comment:</b> <span data-no-i18n>${admEsc(r.admin_comment||'')}</span><div style="margin-top:4px;opacity:0.8;font-size:11px;">Reviewed ${admWhen(r.resolved_at)}</div></div>`;
     return `<div class="rpt-card">
       <div class="rpt-top">
         <span class="rpt-type-pill">${admReportTypeLabel(r.report_type)}</span>
         <span class="rpt-status-pill ${isOpen?'rpt-status-open':'rpt-status-resolved'}">${isOpen?'Open':'Resolved'}</span>
       </div>
       <div class="rpt-reporter-row">
-        <div class="adm-user-av">${admEsc(admInitials(reporterName))}</div>
+        <div class="adm-user-av" data-no-i18n>${admEsc(admInitials(reporterName))}</div>
         <div style="flex:1;min-width:120px;">
-          <div class="rpt-name">${admEsc(reporterName)}</div>
+          <div class="rpt-name" data-no-i18n>${admEsc(reporterName)}</div>
           <div class="rpt-sub">${admEsc(reporter.phone||'no phone')} · ${admWhen(r.created_at)}</div>
         </div>
         <button class="adm-go-btn" onclick="admGoToAccount('${r.reporter_id}','marketer','${reporterNameSafe}')">Go to marketer account</button>
       </div>
-      <div class="rpt-msg">${admEsc(r.message)}</div>
+      <div class="rpt-msg" data-no-i18n>${admEsc(r.message)}</div>
       ${prodBlock}
       ${bizRow}
       ${commentBlock}
@@ -1092,10 +1092,10 @@ function admRenderEmployees(){
     const btnDisabled=paid||!due;
     return `<div class="adm-emp-row">
       <div class="adm-emp-top">
-        <div class="adm-emp-av">${admEsc(admInitials(e.full_name))}</div>
+        <div class="adm-emp-av" data-no-i18n>${admEsc(admInitials(e.full_name))}</div>
         <div style="flex:1;min-width:0;">
-          <div class="adm-emp-name">${admEsc(e.full_name)} <span style="color:#9e9b97;font-weight:400;">· ${admEsc(e.employee_number)}</span></div>
-          <div class="adm-emp-sub">${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}</div>
+          <div class="adm-emp-name" data-no-i18n>${admEsc(e.full_name)} <span style="color:#9e9b97;font-weight:400;">· ${admEsc(e.employee_number)}</span></div>
+          <div class="adm-emp-sub" data-no-i18n>${admEsc(e.job_title||'—')} · ${admEsc(e.email||'no email')}</div>
         </div>
         <div style="text-align:right;font-size:13px;font-weight:500;color:#f5b441;">${admMoneyH(e.monthly_salary)}</div>
       </div>
@@ -1103,7 +1103,7 @@ function admRenderEmployees(){
         <div>Hired <b>${admEmpFmtDate(e.hired_at)}</b></div>
         <div>Payday <b>${admEsc(paydayLabel)}</b></div>
         <div style="grid-column:1/-1;">Status: ${status}</div>
-        ${e.notes?`<div style="grid-column:1/-1;color:#9e9b97;font-style:italic;">${admEsc(e.notes)}</div>`:''}
+        ${e.notes?`<div style="grid-column:1/-1;color:#9e9b97;font-style:italic;" data-no-i18n>${admEsc(e.notes)}</div>`:''}
       </div>
       <div class="adm-emp-actions">
         <button class="adm-emp-pay-btn ${btnClass}" ${btnDisabled?'disabled':''} onclick="admPayEmp('${e.id}',${e.monthly_salary})">${btnLabel}</button>
@@ -1202,8 +1202,8 @@ function admOpenEmpHist(id){
   const total=pays.reduce((s,p)=>s+Number(p.amount||0),0);
   body.innerHTML=`
     <div style="padding:18px 18px 8px;">
-      <div style="font-size:16px;font-weight:600;">${admEsc(e.full_name)}</div>
-      <div style="font-size:12px;color:#9e9b97;margin-top:2px;">${admEsc(e.employee_number)} · ${admEsc(e.job_title||'—')}</div>
+      <div style="font-size:16px;font-weight:600;" data-no-i18n>${admEsc(e.full_name)}</div>
+      <div style="font-size:12px;color:#9e9b97;margin-top:2px;" data-no-i18n>${admEsc(e.employee_number)} · ${admEsc(e.job_title||'—')}</div>
       <div style="margin-top:10px;font-size:13px;">Total paid: <b style="color:#2dbd8f;">${admMoneyH(total)}</b> across ${pays.length} payment${pays.length===1?'':'s'}</div>
     </div>
     <div class="adm-section" style="margin:0 18px 18px;">
