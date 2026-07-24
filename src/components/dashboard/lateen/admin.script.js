@@ -247,7 +247,7 @@ function admRenderMktDetailShell(){
       <button class="adm-filter-chip ${__admMktDetailTab==='new'?'on':''}" id="adm-mkt-tab-new" onclick="admMktDetailTab('new')">New (${m.pending.length})</button>
       <button class="adm-filter-chip ${__admMktDetailTab==='history'?'on':''}" id="adm-mkt-tab-history" onclick="admMktDetailTab('history')">History (${m.history.length})</button>
     </div>
-    <input class="adm-search" id="adm-mkt-search" placeholder="Search by product, customer name, or phone" value="${admEsc(__admMktDetailSearch)}" oninput="admMktDetailSearch(this.value)" />
+    <input class="adm-search" id="adm-mkt-search" placeholder="Search by product, customer name, phone, or order code" value="${admEsc(__admMktDetailSearch)}" oninput="admMktDetailSearch(this.value)" />
     <div id="adm-mkt-detail-list"></div>
   `;
   admRenderMktDetailList();
@@ -264,7 +264,8 @@ function admRenderMktDetailList(){
     const product=((o.product&&o.product.name)||'').toLowerCase();
     const custName=(o.customer_name||'').toLowerCase();
     const custPhone=(o.customer_phone||'').toLowerCase();
-    return product.includes(q)||custName.includes(q)||custPhone.includes(q);
+    const orderCode=('#'+(o.order_number||String(o.id||'').slice(0,8))).toLowerCase();
+    return product.includes(q)||custName.includes(q)||custPhone.includes(q)||orderCode.includes(q);
   };
   const list=q?baseList.filter(matches):baseList;
   if(!list.length){
@@ -306,7 +307,8 @@ function admMktDetailCard(o){
 
   const created='Created: '+admWhenFull(o.created_at);
   const uploaded=o.receipt_uploaded_at?'Uploaded: '+admWhenFull(o.receipt_uploaded_at):'';
-  const detailsSub=`<details class="adm-order-details" style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;color:#9e9b97;list-style:none;">▸ Order code &amp; timestamps</summary><div style="margin-top:6px;font-size:12px;color:#c9c8c4;line-height:1.6;"><div><b>#</b> <span data-no-i18n>${admEsc(o.id)}</span></div><div>${created}</div>${uploaded?`<div>${uploaded}</div>`:''}</div></details>`;
+  const orderCode='#'+(o.order_number||String(o.id||'').slice(0,8).toUpperCase());
+  const detailsSub=`<details class="adm-order-details" style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;color:#9e9b97;list-style:none;">▸ Order code &amp; timestamps</summary><div style="margin-top:6px;font-size:12px;color:#c9c8c4;line-height:1.6;"><div><span data-no-i18n>${admEsc(orderCode)}</span></div><div>${created}</div>${uploaded?`<div>${uploaded}</div>`:''}</div></details>`;
   const customerLine=(customerName||customerPhone)
     ?`<div class="adm-row-sub" style="margin-top:2px;">Customer: <span data-no-i18n>${admEsc([customerName,customerPhone].filter(Boolean).join(' · '))}</span></div>`
     :'';
