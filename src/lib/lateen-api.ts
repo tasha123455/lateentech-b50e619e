@@ -1038,9 +1038,9 @@ export function createLateenApi(userId: string) {
         // business/marketer's own orders.
         const succeededPiecesSold = orders.reduce((sum, o) => (o.status === "delivered" ? sum + Number(o.qty || 0) : sum), 0);
         // "Succeeded Upfronts" = orders whose payment receipt was approved by an admin
-        // (reviewed_at is only ever set by admin_approve_order), regardless of what
-        // happened to the order afterward.
-        const succeededUpfronts = orders.filter((o) => !!o.reviewed_at).length;
+        // (reviewed_at is only ever set by admin_approve_order), minus any that were
+        // later refunded — a refunded receipt no longer counts as a successful upfront.
+        const succeededUpfronts = orders.filter((o) => !!o.reviewed_at && !o.refunded_at).length;
 
         const monthAgo = Date.now() - 30 * 86400000;
         const activeUsers = new Set<string>();
@@ -1064,13 +1064,20 @@ export function createLateenApi(userId: string) {
           // all-time) client-side, without extra round-trips per filter click.
           orders: orders.map((o) => ({
             qty: Number(o.qty || 0),
-            fee: feeEligible(o) ? Number(o.platform_fee || 0) * Number(o.qty || 0) : 0,
+            // Fee "as earned" on the day the order reached a fee-eligible status,
+            // regardless of any later refund. The client applies the refund's
+            // reversal separately, dated to when the refund actually happened
+            // (see getFees() in admin.script.js) — so a refund shows up as its
+            // own negative entry on its own date instead of erasing the
+            // original day's history.
+            fee: feeEligibleStatuses.has(o.status) ? Number(o.platform_fee || 0) * Number(o.qty || 0) : 0,
             marketer_id: o.marketer_id,
             business_id: o.business_id,
             created_at: o.created_at,
             confirmed_at: o.confirmed_at,
             reviewed_at: o.reviewed_at,
             delivered_at: o.delivered_at,
+            refunded_at: o.refunded_at ?? null,
           })),
           profiles: profiles.map((p) => ({ created_at: p.created_at })),
           products: products.map((p) => ({ created_at: p.created_at })),
