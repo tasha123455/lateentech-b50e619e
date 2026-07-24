@@ -639,6 +639,8 @@ export const DICT: Record<string, string> = {
   "Clear selection": "مسح التحديد",
   "Analytics": "الإحصائيات",
   "Breakdown": "الإحصائيات",
+  "Transactions": "التحركات",
+  "No transactions yet.": "لا توجد تحركات بعد.",
 
   // ===== Entities (lowercase plurals) =====
   "products": "منتجات",
