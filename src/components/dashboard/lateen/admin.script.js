@@ -306,6 +306,7 @@ function admMktDetailCard(o){
 
   const created='Created: '+admWhenFull(o.created_at);
   const uploaded=o.receipt_uploaded_at?'Uploaded: '+admWhenFull(o.receipt_uploaded_at):'';
+  const detailsSub=`<details class="adm-order-details" style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;color:#9e9b97;list-style:none;">▸ Order code &amp; timestamps</summary><div style="margin-top:6px;font-size:12px;color:#c9c8c4;line-height:1.6;"><div><b>#</b> <span data-no-i18n>${admEsc(o.id)}</span></div><div>${created}</div>${uploaded?`<div>${uploaded}</div>`:''}</div></details>`;
   const customerLine=(customerName||customerPhone)
     ?`<div class="adm-row-sub" style="margin-top:2px;">Customer: <span data-no-i18n>${admEsc([customerName,customerPhone].filter(Boolean).join(' · '))}</span></div>`
     :'';
@@ -344,7 +345,7 @@ function admMktDetailCard(o){
       </div>
       <div class="adm-row-amt">${admMoneyH(platformFee)}</div>
     </div>
-    <div class="adm-row-sub" style="margin-top:8px;">${created}${uploaded?' · '+uploaded:''}</div>
+    ${detailsSub}
     ${customerLine}
     ${noteBlock}
     <div class="adm-order-detail-rows" style="margin-top:8px;">
@@ -1034,8 +1035,11 @@ function admEmpCycle(emp){
   const cycleIndex=Math.floor(daysSince/30);
   const totalMonths=hired.getFullYear()*12+hired.getMonth()+cycleIndex;
   const y=Math.floor(totalMonths/12), m=(totalMonths%12)+1;
-  const payday=new Date(hired); payday.setDate(payday.getDate()+(cycleIndex+1)*30);
-  const nextPayday=new Date(hired); nextPayday.setDate(nextPayday.getDate()+(cycleIndex+2)*30);
+  // QA/testing account: employee_number "5050505050" is payable on hire date
+  // (and every 30 days thereafter) instead of waiting a full month.
+  const isQA=String(emp.employee_number||'').trim()==='5050505050';
+  const payday=new Date(hired); payday.setDate(payday.getDate()+(cycleIndex+(isQA?0:1))*30);
+  const nextPayday=new Date(hired); nextPayday.setDate(nextPayday.getDate()+(cycleIndex+(isQA?1:2))*30);
   return {y,m,cycleIndex,payday,nextPayday};
 }
 function admEmpIsPaid(emp,cyc){return (emp.payments||[]).some(x=>x.period_year===cyc.y&&x.period_month===cyc.m);}
@@ -1324,7 +1328,8 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       }, 0);
     }
     if(key === 'succeeded'){
-      return raw.orders.filter(o => o.reviewed_at && new Date(o.reviewed_at).getTime() <= ts).length;
+      // A refunded order no longer counts as a successful upfront.
+      return raw.orders.filter(o => o.reviewed_at && !o.refunded_at && new Date(o.reviewed_at).getTime() <= ts).length;
     }
     if(key === 'activeUsers'){
       const windowStart = ts - 30*86400000;
@@ -1585,9 +1590,12 @@ function admToggleProfitCard(){
         data: m.data,
         borderColor: m.color,
         backgroundColor: m.color,
-        pointRadius: 0,
-        pointHoverRadius: 4,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointHitRadius: 12,
         pointBackgroundColor: m.color,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
         borderWidth: 2,
         tension: 0.35,
         fill: false
@@ -1596,11 +1604,13 @@ function admToggleProfitCard(){
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
+      interaction: { mode: 'nearest', intersect: false, axis: 'x' },
       plugins: {
         legend: { display: false },
         tooltip: {
+          enabled: true,
           rtl: true,
+          displayColors: true,
           backgroundColor: '#1d1d20',
           borderColor: 'rgba(255,255,255,0.1)',
           borderWidth: 1,
@@ -1608,7 +1618,10 @@ function admToggleProfitCard(){
           titleFont: { family: 'Cairo', size: 11 },
           bodyFont: { family: 'Cairo', size: 11 },
           titleColor: '#9c9c9c',
-          bodyColor: '#f3f3f1'
+          bodyColor: '#f3f3f1',
+          callbacks: {
+            label: (ctx) => ' ' + (ctx.dataset.label || '') + ': ' + Number(ctx.parsed.y || 0).toLocaleString()
+          }
         }
       },
       scales: {
