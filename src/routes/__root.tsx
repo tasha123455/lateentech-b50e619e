@@ -10,7 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
-import { LanguageProvider, FloatingLanguageToggle } from "@/i18n/LanguageContext";
+import { LanguageProvider, FloatingLanguageToggle, LanguageGate } from "@/i18n/LanguageContext";
 import { InstallPrompt } from "@/components/InstallPrompt";
 
 function NotFoundComponent() {
@@ -128,13 +128,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var k='lateen_lang';var v=localStorage.getItem(k);if(!v){var nav=(navigator.language||navigator.userLanguage||'').toLowerCase();v=nav.indexOf('ar')===0?'ar':'en';try{localStorage.setItem(k,v);}catch(e){}}if(v==='ar'){var h=document.documentElement;h.setAttribute('lang','ar');h.setAttribute('dir','rtl');}}catch(e){}})();",
+              "(function(){try{var k='lateen_lang';var v=localStorage.getItem(k);if(v==='ar'){var h=document.documentElement;h.setAttribute('lang','ar');h.setAttribute('dir','rtl');}}catch(e){}})();",
           }}
         />
         <LanguageProvider>
           <AuthProvider>{children}</AuthProvider>
           <FloatingLanguageToggle />
           <InstallPrompt />
+          <LanguageGate />
         </LanguageProvider>
         <Scripts />
       </body>
