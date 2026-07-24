@@ -92,7 +92,6 @@ async function admLoadMetrics(){
     setStat('statActiveUsers',m.activeUsers);
     setStat('statTotalUsers',m.totalUsers);
     setStat('statTotalProducts',m.totalProducts);
-    setStat('statPiecesSold',m.piecesSold);
     setStat('statSucceeded',m.succeededUpfronts);
     setStat('statSucceededPieces',m.succeededPiecesSold);
     const heroErr=document.getElementById('heroError'); if(heroErr) heroErr.remove();
@@ -1330,10 +1329,15 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
     if(key === 'totalProducts'){
       return raw.products.filter(p => new Date(p.created_at).getTime() <= ts).length;
     }
-    if(key === 'piecesSold'){
+    if(key === 'platformFee'){
+      // Cumulative platform fee collected as of ts — same fee-eligibility
+      // and refund-reversal logic as the hero card's getFees(), just
+      // accumulated over time instead of bucketed to one day/month/year.
       return raw.orders.reduce((s,o) => {
-        if(!o.confirmed_at) return s;
-        return new Date(o.confirmed_at).getTime() <= ts ? s + Number(o.qty||0) : s;
+        let v = 0;
+        if(new Date(o.created_at).getTime() <= ts) v += Number(o.fee||0);
+        if(o.refunded_at && new Date(o.refunded_at).getTime() <= ts) v -= Number(o.fee||0);
+        return s + v;
       }, 0);
     }
     if(key === 'succeeded'){
@@ -1536,7 +1540,7 @@ function admToggleProfitCard(){
     { key:'activeUsers',   label:'المستخدمون النشطون', color:'#7fa8d9', data: [] },
     { key:'totalUsers',    label:'إجمالي المستخدمين',  color:'#9d8fd9', data: [] },
     { key:'totalProducts', label:'إجمالي المنتجات',    color:'#d98fa0', data: [] },
-    { key:'piecesSold',    label:'Pieces Sold',        color:'#7fd9a8', data: [] },
+    { key:'platformFee',   label:'رسوم المنصة',        color:'#7fd9a8', data: [] },
     { key:'succeeded',     label:'Succeeded Upfronts', color:'#caa05a', data: [] },
     { key:'succeededPieces', label:'Succeeded Pieces Sold', color:'#5ec9c4', data: [] }
   ];
