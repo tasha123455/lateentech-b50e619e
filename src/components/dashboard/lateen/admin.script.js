@@ -1260,26 +1260,32 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
 
   // Real platform-fee sum for whichever day/month/year is selected (or all-time
   // if none is). Reads from admHomeRaw.orders, populated by admLoadMetrics().
+  // A refund is its own dated event: the fee an order earned still counts on
+  // the day it was created, and the refund subtracts that same amount back
+  // out on the day the refund actually happened — so refunding an order from
+  // an earlier period shows up as a negative entry on today's date instead of
+  // silently erasing that earlier period's history.
+  function inSelectedRange(iso){
+    if(!iso) return false;
+    const d = new Date(iso);
+    if(selected.year) return d.getFullYear() === Number(selected.year);
+    if(selected.month){
+      const [y,m] = selected.month.split('-').map(Number);
+      return d.getFullYear()===y && (d.getMonth()+1)===m;
+    }
+    if(selected.day){
+      return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === selected.day;
+    }
+    return true;
+  }
   function getFees(){
     const raw = admHomeRaw;
     if(!raw) return 0;
-    let rows = raw.orders;
-    if(selected.year){
-      const y = Number(selected.year);
-      rows = rows.filter(o => new Date(o.created_at).getFullYear() === y);
-    } else if(selected.month){
-      const [y,m] = selected.month.split('-').map(Number);
-      rows = rows.filter(o => {
-        const d = new Date(o.created_at);
-        return d.getFullYear()===y && (d.getMonth()+1)===m;
-      });
-    } else if(selected.day){
-      rows = rows.filter(o => {
-        const d = new Date(o.created_at);
-        return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === selected.day;
-      });
-    }
-    const sum = rows.reduce((s,o) => s + Number(o.fee||0), 0);
+    let sum = 0;
+    raw.orders.forEach(o => {
+      if(inSelectedRange(o.created_at)) sum += Number(o.fee||0);
+      if(o.refunded_at && inSelectedRange(o.refunded_at)) sum -= Number(o.fee||0);
+    });
     return Math.round(sum*100)/100;
   }
 
@@ -1331,8 +1337,14 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       }, 0);
     }
     if(key === 'succeeded'){
-      // A refunded order no longer counts as a successful upfront.
-      return raw.orders.filter(o => o.reviewed_at && !o.refunded_at && new Date(o.reviewed_at).getTime() <= ts).length;
+      // Counts once reviewed, and a refund reverses that count back out
+      // starting exactly at the refund's own timestamp — so the line only
+      // dips on the date the refund actually happened.
+      return raw.orders.reduce((s,o) => {
+        if(!o.reviewed_at || new Date(o.reviewed_at).getTime() > ts) return s;
+        if(o.refunded_at && new Date(o.refunded_at).getTime() <= ts) return s;
+        return s + 1;
+      }, 0);
     }
     if(key === 'succeededPieces'){
       // Same "succeeded" definition as the Pieces sold box in the business
