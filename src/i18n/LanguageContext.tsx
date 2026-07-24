@@ -71,6 +71,27 @@ function applyAttributes(el: Element, lang: Lang) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// IMPORTANT — read this before adding any new dashboard feature.
+//
+// walkAndTranslate() below scans the rendered DOM and swaps any text node
+// whose full trimmed content exactly matches a dictionary key. It has NO
+// way to tell "static app label" apart from "text a business/marketer/admin
+// typed" — a product named "All", a custom variant type called "New", a
+// typed note/address/review, etc. will get silently swapped to Arabic if it
+// happens to match a dictionary word.
+//
+// Rule: any time you render a free-typed value into the DOM (product name,
+// description, code, variant type/value names, notes, messages, addresses,
+// review author/text, admin comments, etc.) in admin.script.js,
+// business.script.js, or marketer.script.js, wrap it with `data-no-i18n` —
+// either directly on the element, or via the existing `row(k, v, noTranslate)`
+// helper pattern used throughout those files. Do this automatically as part
+// of building the feature, not as a later cleanup pass.
+//
+// Do NOT wrap fixed-vocabulary/picker-driven values (country, city,
+// category, order status labels) — those are meant to translate normally.
+// ─────────────────────────────────────────────────────────────────────────
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "CODE", "PRE", "TEXTAREA"]);
 
 function shouldSkip(el: Element): boolean {
