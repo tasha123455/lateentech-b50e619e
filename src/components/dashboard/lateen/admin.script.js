@@ -306,6 +306,7 @@ function admMktDetailCard(o){
 
   const created='Created: '+admWhenFull(o.created_at);
   const uploaded=o.receipt_uploaded_at?'Uploaded: '+admWhenFull(o.receipt_uploaded_at):'';
+  const detailsSub=`<details class="adm-order-details" style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;color:#9e9b97;list-style:none;">▸ Order code &amp; timestamps</summary><div style="margin-top:6px;font-size:12px;color:#c9c8c4;line-height:1.6;"><div><b>#</b> <span data-no-i18n>${admEsc(o.id)}</span></div><div>${created}</div>${uploaded?`<div>${uploaded}</div>`:''}</div></details>`;
   const customerLine=(customerName||customerPhone)
     ?`<div class="adm-row-sub" style="margin-top:2px;">Customer: <span data-no-i18n>${admEsc([customerName,customerPhone].filter(Boolean).join(' · '))}</span></div>`
     :'';
