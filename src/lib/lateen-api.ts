@@ -978,7 +978,7 @@ export function createLateenApi(userId: string) {
         return data;
       },
       async getMetrics() {
-        const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at";
+        const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at, delivered_at";
         const [ordersAttempt, profilesRes, productsRes, empPaymentsRes] = await Promise.all([
           supabase.from("orders").select(`${orderColumns}, refunded_at`),
           supabase.from("profiles").select("id, created_at"),
@@ -1014,6 +1014,7 @@ export function createLateenApi(userId: string) {
           confirmed_at: string | null;
           reviewed_at: string | null;
           refunded_at?: string | null;
+          delivered_at: string | null;
         }>;
         const profiles = (profilesRes.data ?? []) as Array<{ id: string; created_at: string }>;
         const products = (productsRes.data ?? []) as Array<{ id: string; created_at: string }>;
@@ -1030,6 +1031,12 @@ export function createLateenApi(userId: string) {
         );
         // "Pieces Sold" = units on orders that actually reached the confirmed stage (or later).
         const piecesSold = orders.reduce((sum, o) => (o.confirmed_at ? sum + Number(o.qty || 0) : sum), 0);
+        // "Succeeded Pieces Sold" = units on orders that were actually delivered
+        // (status === 'delivered'), i.e. the same "succeeded" definition used by
+        // the Pieces sold box in the business breakdown and the marketer analytics
+        // page — just totaled across every order on the platform instead of one
+        // business/marketer's own orders.
+        const succeededPiecesSold = orders.reduce((sum, o) => (o.status === "delivered" ? sum + Number(o.qty || 0) : sum), 0);
         // "Succeeded Upfronts" = orders whose payment receipt was approved by an admin
         // (reviewed_at is only ever set by admin_approve_order), regardless of what
         // happened to the order afterward.
@@ -1051,6 +1058,7 @@ export function createLateenApi(userId: string) {
           totalProducts: products.length,
           piecesSold,
           succeededUpfronts,
+          succeededPiecesSold,
           // Raw, lightweight rows so the Home dashboard can compute accurate
           // historical breakdowns for every date filter (day / month / year /
           // all-time) client-side, without extra round-trips per filter click.
@@ -1062,6 +1070,7 @@ export function createLateenApi(userId: string) {
             created_at: o.created_at,
             confirmed_at: o.confirmed_at,
             reviewed_at: o.reviewed_at,
+            delivered_at: o.delivered_at,
           })),
           profiles: profiles.map((p) => ({ created_at: p.created_at })),
           products: products.map((p) => ({ created_at: p.created_at })),
