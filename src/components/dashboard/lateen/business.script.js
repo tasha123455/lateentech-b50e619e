@@ -354,7 +354,7 @@ function mpSlidesHtml(p){
     const icon=p.currency?(p.currency.flag||'📦'):'📦';
     return `<div class="mp-p-thumb-slide mp-p-thumb-empty">${icon}</div>`;
   }
-  return photos.map(url=>`<div class="mp-p-thumb-slide"><img src="${mpEsc(url)}" alt="${mpEsc(p.name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.parentElement.classList.add('mp-p-thumb-empty');this.replaceWith(Object.assign(document.createElement('span'),{textContent:'📦'}));"/></div>`).join('');
+  return photos.map(url=>`<div class="mp-p-thumb-slide"><img src="${mpEsc(url)}" alt="${mpEsc(p.name)}" data-no-i18n loading="eager" decoding="async" onerror="this.onerror=null;this.parentElement.classList.add('mp-p-thumb-empty');this.replaceWith(Object.assign(document.createElement('span'),{textContent:'📦'}));"/></div>`).join('');
 }
 
 function mpDotsHtml(p){
@@ -509,7 +509,7 @@ function mpVariantBoxes(p,sel,list){
         return `<div class="mp-vg-value-row">
           <div class="mp-vg-value-top">
             ${swatch}
-            <span class="mp-vg-value-name">${mpEsc(x.val)}</span>
+            <span class="mp-vg-value-name" data-no-i18n>${mpEsc(x.val)}</span>
             <div class="mp-vg-bar-track"><div class="mp-vg-bar-fill ${low}" style="width:${pct}%"></div></div>
           </div>
           <div class="mp-vg-mini-grid">
@@ -520,14 +520,14 @@ function mpVariantBoxes(p,sel,list){
         </div>`;
       }).join('');
       return `<div class="mp-variant-group-box">
-        <div class="mp-vg-title-row"><span class="mp-vg-title">${mpEsc(g.name||'Variant')}</span><span class="mp-vg-total">${total} ${__ar()?'بالمخزون':'in stock'}</span></div>
+        <div class="mp-vg-title-row"><span class="mp-vg-title">${g.name?`<span data-no-i18n>${mpEsc(g.name)}</span>`:'Variant'}</span><span class="mp-vg-total">${total} ${__ar()?'بالمخزون':'in stock'}</span></div>
         ${rows}
       </div>`;
     }).join('');
   }
   const chips=[];
-  if(p.sizes&&p.sizes.length)chips.push(...p.sizes.map(v=>`<span class="mp-variant-chip">${__ar()?'المقاس':'Size'}: ${mpEsc(v)}</span>`));
-  if(p.colors&&p.colors.length)chips.push(...p.colors.map(v=>`<span class="mp-variant-chip">${__ar()?'اللون':'Colour'}: ${mpEsc(v)}</span>`));
+  if(p.sizes&&p.sizes.length)chips.push(...p.sizes.map(v=>`<span class="mp-variant-chip">${__ar()?'المقاس':'Size'}: <span data-no-i18n>${mpEsc(v)}</span></span>`));
+  if(p.colors&&p.colors.length)chips.push(...p.colors.map(v=>`<span class="mp-variant-chip">${__ar()?'اللون':'Colour'}: <span data-no-i18n>${mpEsc(v)}</span></span>`));
   if(!chips.length)return '';
   return `<div class="mp-variant-chip-row">${chips.join('')}</div>`;
 }
@@ -603,7 +603,7 @@ function mpReviewsFold(p){
   const list=(window.__bizReviewsByProduct&&window.__bizReviewsByProduct[p.id])||[];
   const sub=list.length?`${(list.reduce((s,r)=>s+(Number(r.rating)||0),0)/list.length).toFixed(1)} ★ · ${list.length} ${__ar()?'تقييم':'reviews'}`:(__ar()?'لا توجد تقييمات بعد':'No reviews yet');
   const body=list.length
-    ?list.map(r=>{const stars=Math.max(0,Math.min(5,Number(r.rating)||0));const initials=(r.author||'M').trim().charAt(0).toUpperCase();const ava=r.avatar?`<span class="avatar" style="width:20px;height:20px;font-size:9px;flex-shrink:0;background-image:url('${mpEsc(r.avatar)}')"></span>`:`<span class="avatar" style="width:20px;height:20px;font-size:9px;flex-shrink:0;">${mpEsc(initials)}</span>`;const photoHtml=r.photo?`<div style="margin-top:6px;width:56px;height:56px;border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--mp-border);" onclick="event.stopPropagation();mpOpenLightbox('${String(r.photo).replace(/'/g,"\\'")}')"><img src="${mpEsc(r.photo)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"/></div>`:'';return `<div class="mp-review-item"><div class="mp-review-top"><span style="display:flex;align-items:center;gap:6px;min-width:0;">${ava}<span class="mp-review-name">${mpEsc(r.author||'Marketer')}</span></span><span class="mp-review-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span></div>${r.text?`<div class="mp-review-text">${mpEsc(r.text)}</div>`:''}${photoHtml}</div>`;}).join('')
+    ?list.map(r=>{const stars=Math.max(0,Math.min(5,Number(r.rating)||0));const initials=(r.author||'M').trim().charAt(0).toUpperCase();const ava=r.avatar?`<span class="avatar" style="width:20px;height:20px;font-size:9px;flex-shrink:0;background-image:url('${mpEsc(r.avatar)}')"></span>`:`<span class="avatar" style="width:20px;height:20px;font-size:9px;flex-shrink:0;">${mpEsc(initials)}</span>`;const photoHtml=r.photo?`<div style="margin-top:6px;width:56px;height:56px;border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--mp-border);" onclick="event.stopPropagation();mpOpenLightbox('${String(r.photo).replace(/'/g,"\\'")}')"><img src="${mpEsc(r.photo)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"/></div>`:'';return `<div class="mp-review-item"><div class="mp-review-top"><span style="display:flex;align-items:center;gap:6px;min-width:0;">${ava}<span class="mp-review-name">${r.author?`<span data-no-i18n>${mpEsc(r.author)}</span>`:'Marketer'}</span></span><span class="mp-review-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span></div>${r.text?`<div class="mp-review-text" data-no-i18n>${mpEsc(r.text)}</div>`:''}${photoHtml}</div>`;}).join('')
     :`<div class="mp-empty-note">${__ar()?'ستظهر التقييمات هنا بعد نشر المنتج وبيعه.':'Reviews will show up here once this product is published and sold.'}</div>`;
   return `<div class="mp-fold-section">
     <div class="mp-fold-head" onclick="event.stopPropagation();mpToggleFold('reviews-${p.id}')">
@@ -645,23 +645,23 @@ function mpRenderCard(p){
         </div>
       </div>
       <div class="mp-p-info">
-        <p class="mp-p-name-collapsed">${mpEsc(p.name)}</p>
+        <p class="mp-p-name-collapsed" data-no-i18n>${mpEsc(p.name)}</p>
         <span class="mp-p-price-collapsed">${fmtP(p.price)}</span>
       </div>
       <div class="mp-p-status-strip">${mpStatusBadges(p)}</div>
       <div class="mp-p-code-corner">
         <span class="mp-code-label">${__ar()?'كود المنتج':'Product code'}</span>
-        <span class="mp-code-val">${mpEsc(p.code)}</span>
+        <span class="mp-code-val" data-no-i18n>${mpEsc(p.code)}</span>
       </div>
       <div class="mp-p-chevron">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="mp-p-info-expanded">
         <div class="mp-p-name-price-row">
-          <p class="mp-p-name-exp">${mpEsc(p.name)}</p>
+          <p class="mp-p-name-exp" data-no-i18n>${mpEsc(p.name)}</p>
           <span class="mp-p-price-exp">${fmtP(p.price)}</span>
         </div>
-        ${p.desc?`<p class="mp-p-desc-exp">${mpEsc(p.desc)}</p>`:''}
+        ${p.desc?`<p class="mp-p-desc-exp" data-no-i18n>${mpEsc(p.desc)}</p>`:''}
       </div>
     </div>
     ${eq===0?`<div class="mp-oos-banner">${__ar()?'أكتب الكميه لعرض منتجك للمسوّقين':'Enter the quantity to show your product to marketers'}</div>`:''}
@@ -671,7 +671,7 @@ function mpRenderCard(p){
         <div class="mp-details-top-row">
           <div class="mp-details-code-pill">
             <span class="mp-code-label">${__ar()?'كود المنتج':'Product code'}</span>
-            <span class="mp-code-val">${mpEsc(p.code)}</span>
+            <span class="mp-code-val" data-no-i18n>${mpEsc(p.code)}</span>
           </div>
           <div class="mp-analytics-btn-outer" id="mp-abtn-${p.id}" onclick="event.stopPropagation();mpToggleAnalytics('${p.id}')">
             <div class="mp-analytics-icon"><span style="height:5px;opacity:.5"></span><span style="height:9px;opacity:.7"></span><span style="height:13px"></span></div>
@@ -985,7 +985,7 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
               ${codBanner}
             </div>
           </div>
-          ${o.notes?`<div class="notes-box"><b>Marketer note:</b> ${o.notes}</div>`:''}
+          ${o.notes?`<div class="notes-box"><b>Marketer note:</b> <span data-no-i18n>${o.notes}</span></div>`:''}
           ${receiptLink}
           ${buildOrdActions(o)}
         </div>
@@ -1122,7 +1122,7 @@ async function refreshBizNotifications(){
       const photoHtml=photoUrl?`<div style="margin-top:8px;width:64px;height:64px;border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--color-border-secondary)" onclick="event.stopPropagation();mpOpenLightbox('${String(photoUrl).replace(/'/g,"\\'")}')"><img src="${esc(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"/></div>`:'';
       if(d&&d.text){
         const stars='★'.repeat(rating)+'☆'.repeat(Math.max(0,5-rating));
-        reviewDetails=`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#181818;border:0.5px solid #232323;font-size:12px;color:var(--color-text-primary)"><div style="color:#e9b949;letter-spacing:2px;margin-bottom:4px">${stars}</div>${esc(d.text)}${photoHtml}</div>`;
+        reviewDetails=`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#181818;border:0.5px solid #232323;font-size:12px;color:var(--color-text-primary)"><div style="color:#e9b949;letter-spacing:2px;margin-bottom:4px">${stars}</div><span data-no-i18n>${esc(d.text)}</span>${photoHtml}</div>`;
       }else if(photoHtml){
         reviewDetails=photoHtml;
       }
@@ -1134,32 +1134,32 @@ async function refreshBizNotifications(){
     if(expandable&&n.data){
       let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
       if(d){
-        const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
+        const row=(k,v,noTranslate)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span ${noTranslate?'data-no-i18n ':''}style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
         const photoUrl=d.product_photo||d.photo;
         const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
         const adminMsgText=isAdminMsg?(d.message||n.body||''):'';
-        const adminMsgContent=adminMsgText?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap">${esc(adminMsgText)}</div>`:'';
+        const adminMsgContent=adminMsgText?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap" data-no-i18n>${esc(adminMsgText)}</div>`:'';
         detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #142a20">
           ${photo}
           ${adminMsgContent}
           ${row(tr('Order Code','كود الطلبيه'),d.order_code)}
-          ${row(tr('Product','المنتج'),d.product_name)}
+          ${row(tr('Product','المنتج'),d.product_name,true)}
           ${row(tr('Qty','الكمية'),d.qty)}
-          ${row(tr('Customer','الزبون'),d.customer_name)}
+          ${row(tr('Customer','الزبون'),d.customer_name,true)}
           ${(function(){var p=__splitCC(d.customer_phone);return row(tr('Phone','الهاتف'),p.cc?(p.cc+' | '+p.num):p.num);})()}
           ${d.customer_whatsapp?(function(){var w=__splitCC(d.customer_whatsapp);return row(tr('WhatsApp or additional phone number','واتساب أو رقم هاتف إضافي'),w.cc?(w.cc+' | '+w.num):w.num);})():''}
           ${row(tr('City','المدينة'),d.customer_city)}
           ${row(tr('Country','الدولة'),d.customer_country)}
-          ${row(tr('Address','العنوان'),d.customer_address)}
-          ${(Array.isArray(d.selected_variants)&&d.selected_variants.length)?d.selected_variants.map(sv=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span data-no-i18n style="color:var(--color-text-secondary)">${esc(sv.name||'')}</span><span data-no-i18n style="color:var(--color-text-primary);text-align:right">${esc(sv.value||'')}</span></div>`).join(''):(row(tr('Size','المقاس'),d.size)+row(tr('Colour','اللون'),d.color))}
-          ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${tr('Marketer note','ملاحظات المسوق')}:</b> ${esc(d.customer_notes)}</div>`:''}
+          ${row(tr('Address','العنوان'),d.customer_address,true)}
+          ${(Array.isArray(d.selected_variants)&&d.selected_variants.length)?d.selected_variants.map(sv=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span data-no-i18n style="color:var(--color-text-secondary)">${esc(sv.name||'')}</span><span data-no-i18n style="color:var(--color-text-primary);text-align:right">${esc(sv.value||'')}</span></div>`).join(''):(row(tr('Size','المقاس'),d.size,true)+row(tr('Colour','اللون'),d.color,true))}
+          ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${tr('Marketer note','ملاحظات المسوق')}:</b> <span data-no-i18n>${esc(d.customer_notes)}</span></div>`:''}
         </div>`;
       }
     }
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
     const isNew=!n.read_at;
     const rightDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title">${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
+    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   }).join('');
 }
 window.refreshBizNotifications=refreshBizNotifications;

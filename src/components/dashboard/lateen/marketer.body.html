@@ -1133,7 +1133,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
       </div>
       <div class="field" style="margin-bottom:0">
         <label id="prod-field-label" style="display:flex;align-items:center;gap:6px;justify-content:flex-end"><span data-i18n="Product">Product</span> <span style="color:#e07070">*</span><span style="color:#7f77dd"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 12 3 4 7l8 4 8-4z"/><path d="M4 7v10l8 4 8-4V7"/></svg></span></label>
-        <select id="f-product" onchange="onProductChange()" style="display:none"><option value=""></option></select>
+        <select id="f-product" data-no-i18n onchange="onProductChange()" style="display:none"><option value=""></option></select>
         <button type="button" id="prod-picker-btn" onclick="openProductPicker()" style="width:100%;text-align:left;background:#2a2a2a;border:0.5px solid #3a3a3a;border-radius:10px;padding:10px 12px;color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);cursor:pointer;display:flex;align-items:center;gap:10px;min-height:48px;">
           <div id="prod-picker-thumb" style="width:34px;height:34px;border-radius:8px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0;">📦</div>
           <div style="flex:1;min-width:0;"><div id="prod-picker-label" style="font-size:13px;color:var(--color-text-secondary);" data-i18n="Select a saved product">Select a saved product</div><div id="prod-picker-sub" style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px;display:none;"></div></div>

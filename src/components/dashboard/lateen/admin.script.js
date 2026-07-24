@@ -342,7 +342,7 @@ function admMktDetailCard(o){
         <div class="adm-thumb-block">${receiptThumb}<span class="adm-thumb-block-label">Receipt</span></div>
       </div>
       <div class="adm-row-mid">
-        <div class="adm-row-name">${admEsc(product)}</div>
+        <div class="adm-row-name">${(o.product&&o.product.name)?`<span data-no-i18n>${admEsc(product)}</span>`:admEsc(product)}</div>
         <div style="margin-top:5px;">${statusPill}</div>
       </div>
       <div class="adm-row-amt">${admMoneyH(platformFee)}</div>
