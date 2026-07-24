@@ -714,8 +714,11 @@ export function createLateenApi(userId: string) {
         const w = new Map((wallets ?? []).map((row) => [row.user_id as string, row]));
         return rows.map((r) => ({ ...r, user: m.get(r.user_id) ?? null, wallet: w.get(r.user_id) ?? null }));
       },
-      async markPayoutPaid(id: string) {
-        const { error } = await supabase.rpc("admin_mark_payout_paid", { _payout_id: id });
+      async markPayoutPaid(id: string, receiptUrl: string) {
+        const { error } = await supabase.rpc("admin_mark_payout_paid", {
+          _payout_id: id,
+          _receipt_url: receiptUrl,
+        });
         if (error) throw error;
       },
       async notePayout(id: string, note: string) {
