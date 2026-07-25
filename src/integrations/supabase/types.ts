@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_requests: {
+        Row: {
+          admin_comment: string | null
+          cancelled_at: string | null
+          id: string
+          requested_at: string
+          resolved_at: string | null
+          reviewed_by: string | null
+          role: string
+          scheduled_for: string | null
+          status: string
+          user_id: string
+          wallet_balance: number
+          wallet_pending: number
+        }
+        Insert: {
+          admin_comment?: string | null
+          cancelled_at?: string | null
+          id?: string
+          requested_at?: string
+          resolved_at?: string | null
+          reviewed_by?: string | null
+          role: string
+          scheduled_for?: string | null
+          status?: string
+          user_id: string
+          wallet_balance?: number
+          wallet_pending?: number
+        }
+        Update: {
+          admin_comment?: string | null
+          cancelled_at?: string | null
+          id?: string
+          requested_at?: string
+          resolved_at?: string | null
+          reviewed_by?: string | null
+          role?: string
+          scheduled_for?: string | null
+          status?: string
+          user_id?: string
+          wallet_balance?: number
+          wallet_pending?: number
+        }
+        Relationships: []
+      }
       email_bans: {
         Row: {
           banned_by: string | null
@@ -1264,6 +1309,29 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_resolve_deletion_request: {
+        Args: { _action: string; _comment: string; _id: string }
+        Returns: {
+          admin_comment: string | null
+          cancelled_at: string | null
+          id: string
+          requested_at: string
+          resolved_at: string | null
+          reviewed_by: string | null
+          role: string
+          scheduled_for: string | null
+          status: string
+          user_id: string
+          wallet_balance: number
+          wallet_pending: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "account_deletion_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_resolve_report: {
         Args: { _comment: string; _report_id: string }
         Returns: {
@@ -1347,6 +1415,29 @@ export type Database = {
         Returns: undefined
       }
       admin_unban_email: { Args: { _email: string }; Returns: undefined }
+      cancel_account_deletion: {
+        Args: { _id: string }
+        Returns: {
+          admin_comment: string | null
+          cancelled_at: string | null
+          id: string
+          requested_at: string
+          resolved_at: string | null
+          reviewed_by: string | null
+          role: string
+          scheduled_for: string | null
+          status: string
+          user_id: string
+          wallet_balance: number
+          wallet_pending: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "account_deletion_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       confirm_order: {
         Args: { _order_id: string }
         Returns: {
@@ -1618,6 +1709,29 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      request_account_deletion: {
+        Args: { _role: string }
+        Returns: {
+          admin_comment: string | null
+          cancelled_at: string | null
+          id: string
+          requested_at: string
+          resolved_at: string | null
+          reviewed_by: string | null
+          role: string
+          scheduled_for: string | null
+          status: string
+          user_id: string
+          wallet_balance: number
+          wallet_pending: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "account_deletion_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       request_payout: {
         Args: { _amount: number }
