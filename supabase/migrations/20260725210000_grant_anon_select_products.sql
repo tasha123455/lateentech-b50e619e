@@ -1,0 +1,13 @@
+-- The 20260725204630 migration set products_public_view to
+-- security_invoker=true, which makes the view run with the querying role's
+-- own table-level privileges (not the view owner's) when it touches
+-- public.products underneath. The anon role was never given a base
+-- table-level SELECT grant on public.products — only RLS *row* policies
+-- existed for it — so every anonymous /p/:id visit failed outright with
+-- "permission denied for table products" before RLS was even evaluated.
+--
+-- This does not widen what anonymous visitors can see: the existing
+-- "Public can view active products" RLS policy (status='active' AND
+-- deleted_at IS NULL) still governs which rows are visible. This grant only
+-- lets that policy actually run for the anon role.
+GRANT SELECT ON public.products TO anon;
