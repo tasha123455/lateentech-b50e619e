@@ -129,7 +129,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
-          employee_id: string
+          employee_id: string | null
           id: string
           notes: string | null
           paid_at: string
@@ -139,7 +139,7 @@ export type Database = {
         Insert: {
           amount?: number
           created_at?: string
-          employee_id: string
+          employee_id?: string | null
           id?: string
           notes?: string | null
           paid_at?: string
@@ -149,7 +149,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
-          employee_id?: string
+          employee_id?: string | null
           id?: string
           notes?: string | null
           paid_at?: string
@@ -240,6 +240,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products_marketer_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -413,6 +420,13 @@ export type Database = {
             referencedRelation: "products_marketer_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payouts: {
@@ -422,6 +436,7 @@ export type Database = {
           id: string
           noted_at: string | null
           paid_at: string | null
+          receipt_url: string | null
           requested_at: string
           status: string
           user_id: string
@@ -432,6 +447,7 @@ export type Database = {
           id?: string
           noted_at?: string | null
           paid_at?: string | null
+          receipt_url?: string | null
           requested_at?: string
           status?: string
           user_id: string
@@ -442,6 +458,7 @@ export type Database = {
           id?: string
           noted_at?: string | null
           paid_at?: string | null
+          receipt_url?: string | null
           requested_at?: string
           status?: string
           user_id?: string
@@ -707,6 +724,13 @@ export type Database = {
             referencedRelation: "products_marketer_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reports_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suppressed_emails: {
@@ -870,6 +894,63 @@ export type Database = {
         }
         Relationships: []
       }
+      products_public_view: {
+        Row: {
+          business_id: string | null
+          category: string | null
+          code: string | null
+          colors: Json | null
+          currency: Json | null
+          deleted_at: string | null
+          description: string | null
+          id: string | null
+          name: string | null
+          photos: string[] | null
+          price: number | null
+          qty: number | null
+          reserved_qty: number | null
+          sizes: Json | null
+          status: string | null
+          variant_groups: Json | null
+        }
+        Insert: {
+          business_id?: string | null
+          category?: string | null
+          code?: string | null
+          colors?: Json | null
+          currency?: Json | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string | null
+          name?: string | null
+          photos?: string[] | null
+          price?: number | null
+          qty?: number | null
+          reserved_qty?: number | null
+          sizes?: Json | null
+          status?: string | null
+          variant_groups?: Json | null
+        }
+        Update: {
+          business_id?: string | null
+          category?: string | null
+          code?: string | null
+          colors?: Json | null
+          currency?: Json | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string | null
+          name?: string | null
+          photos?: string[] | null
+          price?: number | null
+          qty?: number | null
+          reserved_qty?: number | null
+          sizes?: Json | null
+          status?: string | null
+          variant_groups?: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _adjust_variant_qty: {
@@ -990,13 +1071,14 @@ export type Database = {
         }[]
       }
       admin_mark_payout_paid: {
-        Args: { _payout_id: string }
+        Args: { _payout_id: string; _receipt_url?: string }
         Returns: {
           admin_note: string | null
           amount: number
           id: string
           noted_at: string | null
           paid_at: string | null
+          receipt_url: string | null
           requested_at: string
           status: string
           user_id: string
@@ -1016,6 +1098,7 @@ export type Database = {
           id: string
           noted_at: string | null
           paid_at: string | null
+          receipt_url: string | null
           requested_at: string
           status: string
           user_id: string
@@ -1544,6 +1627,7 @@ export type Database = {
           id: string
           noted_at: string | null
           paid_at: string | null
+          receipt_url: string | null
           requested_at: string
           status: string
           user_id: string
