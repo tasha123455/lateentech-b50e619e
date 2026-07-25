@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthContext";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export const Route = createFileRoute("/p/$id")({
   head: () => ({
@@ -68,13 +69,15 @@ function toLabel(v: unknown): string {
   return "";
 }
 
-function currencySymbol(v: PublicProduct["currency"]): string {
+function currencySymbol(v: PublicProduct["currency"], lang: "en" | "ar"): string {
   if (v == null) return "";
   if (typeof v === "string") return v;
   const o = v as Record<string, unknown>;
   const code = String(o.code ?? "").trim().toUpperCase();
   const sym = String(o.symbol ?? "").trim();
-  if (code === "LYD" || sym === "ل.د" || sym === "د.ل") return "\u2066د.ل\u2069";
+  if (code === "LYD" || sym === "ل.د" || sym === "د.ل") {
+    return lang === "ar" ? "\u2066د.ل\u2069" : "LYD";
+  }
   return sym || code || "";
 }
 
@@ -99,6 +102,7 @@ function normVariantGroups(p: PublicProduct): { name: string; items: { val: stri
 function PublicProductPage() {
   const { id } = Route.useParams();
   const { user, role, loading: authLoading } = useAuth();
+  const { lang } = useLanguage();
   const nav = useNavigate();
   const [p, setP] = useState<PublicProduct | null>(null);
   const [loading, setLoading] = useState(true);
@@ -156,7 +160,7 @@ function PublicProductPage() {
   }, [id]);
 
   const variantGroups = useMemo(() => (p ? normVariantGroups(p) : []), [p]);
-  const currencyLabel = p ? currencySymbol(p.currency) : "";
+  const currencyLabel = p ? currencySymbol(p.currency, lang) : "";
   const available = p ? Math.max(0, (p.qty ?? 0) - (p.reserved_qty ?? 0)) : 0;
 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / reviews.length : 0;
@@ -221,15 +225,29 @@ function PublicProductPage() {
   };
 
   return (
-    <div className="mx-auto min-h-screen max-w-[520px] bg-background pb-28">
+    <div className={`mx-auto min-h-screen max-w-[520px] bg-background ${isMarketer || user ? "pb-28" : "pb-40"}`}>
       {/* Photo gallery */}
       <div
-        className="relative aspect-square w-full bg-surface-2"
+        className="relative aspect-square w-full overflow-hidden bg-surface-2"
+        dir="ltr"
         onTouchStart={onGalleryTouchStart}
         onTouchEnd={onGalleryTouchEnd}
       >
         {photos.length > 0 ? (
-          <img src={photos[idx]} alt={p.name} className="h-full w-full object-cover cursor-zoom-in" onClick={() => setLightbox(photos[idx])} />
+          <div
+            className="flex h-full w-full transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${idx * 100}%)` }}
+          >
+            {photos.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={p.name}
+                className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in"
+                onClick={() => setLightbox(photos[i])}
+              />
+            ))}
+          </div>
         ) : (
           <div className="flex h-full w-full items-center justify-center text-4xl">📦</div>
         )}
@@ -258,7 +276,7 @@ function PublicProductPage() {
         {p.code && <div className="mt-0.5 text-xs text-text-3">Code: <span data-no-i18n>{p.code}</span></div>}
         <div className="mt-3 flex items-baseline gap-2">
           <div className="text-2xl font-bold text-text-1">
-            {Number(p.price).toLocaleString()} <span data-no-i18n>{currencyLabel}</span>
+            {Number(p.price).toLocaleString()} <span className="text-sm font-medium" data-no-i18n>{currencyLabel}</span>
           </div>
           <div className={`text-xs ${available > 0 ? "text-business" : "text-destructive"}`}>
             {available > 0 ? `${available} in stock` : "Out of stock"}
@@ -369,7 +387,7 @@ function PublicProductPage() {
                             <div className="grid gap-1.5">
                               {cities.map(([city, v]) => (
                                 <div key={city} className="flex items-center justify-between rounded bg-surface-2 px-2 py-1.5 text-xs">
-                                  <span className="text-text-1" data-no-i18n>{city}</span>
+                                  <span className="text-text-1">{city}</span>
                                   <span className="text-text-2">
                                     Delivery: {Number(v.delivery) || 0} {currencyLabel}
                                   </span>
@@ -445,7 +463,7 @@ function PublicProductPage() {
         ) : (
           <div className="flex flex-col gap-2">
             <Link to="/marketer/register" search={{ next: returnTo } as never} className="block w-full rounded-xl bg-primary py-3 text-center text-sm font-semibold text-primary-foreground">
-              Sign up to sell this product
+              Create an account to sell the product
             </Link>
             <Link to="/marketer/signin" search={{ next: returnTo } as never} className="block w-full rounded-xl border border-border bg-surface py-3 text-center text-sm font-medium text-text-1">
               Sign in
