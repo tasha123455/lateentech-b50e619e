@@ -534,6 +534,11 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Send Notification
       </button>
+      <button class="adm-reports-btn" id="adm-delreq-btn" onclick="admOpenDeletionRequests()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        Deletion Requests
+        <span class="adm-reports-count" id="adm-delreq-count" style="display:none;">0</span>
+      </button>
     </div>
     <div class="adm-broadcast-panel" id="adm-broadcast-panel">
       <div class="adm-notif-lbl">Notification title (what marketers see first)</div>
@@ -603,6 +608,22 @@
         <button class="adm-filter-chip" data-rf="resolved" onclick="admSetReportFilter('resolved',this)">Resolved</button>
       </div>
       <div id="reports-list"><div class="adm-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT DELETION REQUESTS OVERLAY -->
+  <div class="adm-pdetail" id="adm-delreq-ov" onclick="if(event.target===this)admCloseDeletionRequests()">
+    <div class="adm-pdetail-card">
+      <button class="adm-pdetail-close" onclick="admCloseDeletionRequests()">×</button>
+      <div class="adm-h1" style="margin-bottom:12px;">Deletion Requests</div>
+      <div class="adm-filter-row" id="delreq-filter-row" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="adm-filter-chip on" data-rf="" onclick="admSetDelReqFilter('',this)">All</button>
+        <button class="adm-filter-chip" data-rf="wallet_review" onclick="admSetDelReqFilter('wallet_review',this)">Needs Review</button>
+        <button class="adm-filter-chip" data-rf="scheduled" onclick="admSetDelReqFilter('scheduled',this)">Scheduled</button>
+        <button class="adm-filter-chip" data-rf="rejected" onclick="admSetDelReqFilter('rejected',this)">Rejected</button>
+        <button class="adm-filter-chip" data-rf="cancelled" onclick="admSetDelReqFilter('cancelled',this)">Cancelled</button>
+      </div>
+      <div id="delreq-list"><div class="adm-empty">Loading…</div></div>
     </div>
   </div>
 

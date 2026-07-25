@@ -805,6 +805,25 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       <span id="prof-save-txt">Save</span>
     </button>
+    <div style="margin-top:28px;padding-top:16px;border-top:0.5px solid #2a2a2a;">
+      <button type="button" id="prof-delete-btn" onclick="openDeleteAccount()" style="width:100%;background:transparent;color:#e07070;border:1px solid #e07070;border-radius:12px;padding:13px;font-size:13px;font-weight:600;cursor:pointer;">
+        <span data-i18n="Delete my account">Delete my account</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE ACCOUNT OVERLAY -->
+<div class="menu-overlay" id="delacc-overlay">
+  <div class="menu-backdrop" onclick="closeDeleteAccount()"></div>
+  <div style="position:absolute;top:0;bottom:0;left:0;right:0;background:#1e1e1e;padding:1.5rem;overflow-y:auto;display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div style="font-size:17px;font-weight:500;color:#e07070" data-i18n="Delete my account">Delete my account</div>
+      <button onclick="closeDeleteAccount()" style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;padding:4px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="delacc-body" style="flex:1;">
+      <div class="adm-empty" data-no-i18n>Loading…</div>
+    </div>
   </div>
 </div>
 

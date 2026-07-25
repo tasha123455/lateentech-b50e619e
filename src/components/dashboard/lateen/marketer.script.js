@@ -346,7 +346,7 @@ function renderOrders(){
   if(empty)empty.style.display='none';if(!list)return;list.style.display='flex';
   if(!shown.length){list.innerHTML=`<div class="empty-text" style="padding:2rem 1rem;text-align:center">No orders match your search.</div>`;return;}
   const ar=(typeof __ar==='function'&&__ar());
-  const T=ar?{orderCode:'كود الطلبيه',summary:'ملخص الطلب',price:'سعر المنتج',qty:'الكمية',ship:'الشحن',dlv:'التوصيل',total:'الإجمالي',comm:'عمولتك',pendingComm:'قيد المراجعة',upload:'اضغط لرفع الإيصال',reupload:'إعادة رفع الإيصال',addSend:'إضافة إيصال وإرسال',view:'عرض الإيصال المرفوع',how:'كيفية تحصيل العمولة',pDraft:'مسودة · لم تُرسل',pRej:'تم رفض الإيصال',pFail:'فشل الطلب',pOk:'معتمد',pPend:'قيد التحقق',pAwait:'بانتظار تاجر',country:'الدولة',city:'المدينة',address:'العنوان',phone:'هاتف',whatsapp:'واتساب',uploadedAt:'تم رفع الإيصال',reviewedAt:'تمت المراجعة',createdAt:'أُنشئ',adminNoteLbl:'ملاحظات الأدمن',bizNoteLbl:'ملاحظات التاجر',prodChanged:'⚠ تغيّر المنتج',prodChangedNote:'قد يكون اسم أو تفاصيل هذا المنتج قد تغيّرت منذ حفظ هذه المسودة. يرجى المراجعة قبل الإرسال.',noProduct:'لا يوجد منتج'}:{orderCode:'Order code',summary:'Order summary',price:'Product price',qty:'Quantity',ship:'Shipping',dlv:'Delivery',total:'Total',comm:'Your commission',pendingComm:'Pending review',upload:'Upload receipt',reupload:'Re-upload receipt',addSend:'Add receipt & send',view:'View uploaded receipt',how:'How to collect fee',pDraft:'Draft · not sent',pRej:'Receipt rejected',pFail:'Order failed',pOk:'Approved',pPend:'Pending verification',pAwait:'Awaiting business',country:'Country',city:'City',address:'Address',phone:'Phone',whatsapp:'WhatsApp',uploadedAt:'Receipt uploaded',reviewedAt:'Reviewed',createdAt:'Created',adminNoteLbl:'Admin note',bizNoteLbl:'Business owner notes',prodChanged:'⚠ Product changed',prodChangedNote:"This product's name or details may have changed since this draft was saved. Please review before sending.",noProduct:'No product'};
+  const T=ar?{orderCode:'كود الطلبيه',summary:'ملخص الطلب',price:'سعر المنتج',qty:'الكمية',ship:'الشحن',dlv:'التوصيل',total:'الإجمالي',comm:'عمولتك',pendingComm:'قيد المراجعة',upload:'اضغط لرفع الإيصال',reupload:'إعادة رفع الإيصال',addSend:'إضافة إيصال وإرسال',view:'عرض الإيصال المرفوع',how:'كيفية تحصيل العمولة',pDraft:'مسودة · لم تُرسل',pRej:'تم رفض الإيصال',pFail:'فشل الطلب',pOk:'معتمد',pPend:'قيد التحقق',pAwait:'بانتظار تاجر',country:'الدولة',city:'المدينة',address:'العنوان',phone:'هاتف',whatsapp:'واتساب',uploadedAt:'تم رفع الإيصال',reviewedAt:'تمت المراجعة',createdAt:'أُنشئ',adminNoteLbl:'ملاحظات الأدمن',bizNoteLbl:'ملاحظات التاجر',prodChanged:'⚠ تغيّر المنتج',prodChangedNote:'قد يكون اسم أو تفاصيل هذا المنتج قد تغيّرت منذ حفظ هذه المسودة. يرجى المراجعة قبل الإرسال.'}:{orderCode:'Order code',summary:'Order summary',price:'Product price',qty:'Quantity',ship:'Shipping',dlv:'Delivery',total:'Total',comm:'Your commission',pendingComm:'Pending review',upload:'Upload receipt',reupload:'Re-upload receipt',addSend:'Add receipt & send',view:'View uploaded receipt',how:'How to collect fee',pDraft:'Draft · not sent',pRej:'Receipt rejected',pFail:'Order failed',pOk:'Approved',pPend:'Pending verification',pAwait:'Awaiting business',country:'Country',city:'City',address:'Address',phone:'Phone',whatsapp:'WhatsApp',uploadedAt:'Receipt uploaded',reviewedAt:'Reviewed',createdAt:'Created',adminNoteLbl:'Admin note',bizNoteLbl:'Business owner notes',prodChanged:'⚠ Product changed',prodChangedNote:"This product's name or details may have changed since this draft was saved. Please review before sending."};
   const CHECK='<svg class="variant-check" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   const PIN='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b83e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
   const PHONE_ICO='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b83e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
@@ -414,7 +414,7 @@ function renderOrders(){
     const rightExtras=staleTag+commTag;
     const codeChip=`<span class="code-chip">${__escH(T.orderCode)}: <strong>${__escH(o.id)}</strong></span>`;
     const dateStr=o.reserveDate?`<span class="row-date">${__escH(o.reserveDate)}</span>`:'';
-    return `<div class="order ${isApproved?'approved':''}" data-oid="${o.id}"><div class="row" onclick="toggleOrderCard('${o.id}')">${photoWrap}<div class="row-main"><div class="row-name"${(o.customerName||(o.productName&&o.productName!=='(no product)'))?' data-no-i18n':''}>${__escH(o.customerName||(o.productName&&o.productName!=='(no product)'?o.productName:T.noProduct))}</div><div class="row-sub-wrap">${codeChip}${dateStr}</div></div><div class="row-right">${pill}${rightExtras}</div><span class="chev">${CHEV_ICO}</span></div><div class="body-wrap"><div class="body-inner"><div class="body"><div class="product-block"><div class="product-name"${(o.productName&&o.productName!=='(no product)')?' data-no-i18n':''}>${(o.productName&&o.productName!=='(no product)')?__escH(o.productName):T.noProduct}</div>${variantBlock}${__staleDraft?`<div class="admin-note">${ALERT_ICO}<div>${T.prodChangedNote}</div></div>`:''}</div>${contactRow}${addrBlock}${summary}${commBlock}${metaLine}${adminNote}${businessNote}<div class="divider"></div>${receiptCard}<div class="icon-btns-row"><div class="${editCls}" ${editAttr} title="Edit">${EDIT_ICO}</div><div class="${delCls}" ${delAttr} title="Delete">${DEL_ICO}</div></div></div></div></div></div>`;
+    return `<div class="order ${isApproved?'approved':''}" data-oid="${o.id}"><div class="row" onclick="toggleOrderCard('${o.id}')">${photoWrap}<div class="row-main"><div class="row-name" data-no-i18n>${__escH(o.customerName||o.productName||'(no customer)')}</div><div class="row-sub-wrap">${codeChip}${dateStr}</div></div><div class="row-right">${pill}${rightExtras}</div><span class="chev">${CHEV_ICO}</span></div><div class="body-wrap"><div class="body-inner"><div class="body"><div class="product-block"><div class="product-name" data-no-i18n>${__escH(o.productName||'')}</div>${variantBlock}${__staleDraft?`<div class="admin-note">${ALERT_ICO}<div>${T.prodChangedNote}</div></div>`:''}</div>${contactRow}${addrBlock}${summary}${commBlock}${metaLine}${adminNote}${businessNote}<div class="divider"></div>${receiptCard}<div class="icon-btns-row"><div class="${editCls}" ${editAttr} title="Edit">${EDIT_ICO}</div><div class="${delCls}" ${delAttr} title="Delete">${DEL_ICO}</div></div></div></div></div></div>`;
   }).join('');
 }
 function editOrder(id){if(__mktFrozenBlock())return;const o=orders.find(x=>x.id===id);if(!o)return;if(o._status==='pending'||o._status==='approved'||o._status==='confirmed'||o._status==='delivered'||o._status==='cancelled')return;openForm(o);}
@@ -659,6 +659,8 @@ async function refreshNotifications(){
     if(n.kind==='receipt_verified'||title==='Receipt Verified')return{t:__t('Receipt Verified','تم اعتماد الإيصال'),b:__t('Your payment receipt has been verified. Your balance is now updated','تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.')};
     if(n.kind==='receipt_rejected'||title==='Receipt rejected by the admin')return{t:__t('Receipt rejected by the admin','تم رفض الإيصال من قبل الأدمن'),b:''};
     if(n.kind==='report_reviewed'||title==='Report reviewed')return{t:__t('Report reviewed','تمت مراجعة البلاغ'),b:body||''};
+    if(n.kind==='account_deletion_scheduled'||title==='Account deletion scheduled'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const sched=d&&d.scheduled_for?new Date(d.scheduled_for):null;const dateStr=sched?sched.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'';return{t:__t('Account deletion scheduled','تم جدولة حذف حسابك'),b:__t('Your account will be permanently deleted on '+dateStr+'. You can cancel anytime before then from your profile.','سيتم حذف حسابك نهائياً بتاريخ '+dateStr+'. يمكنك إلغاء الطلب في أي وقت قبل ذلك من صفحة حسابك.')};}
+    if(n.kind==='account_deletion_rejected'||title==='Account deletion request declined')return{t:__t('Account deletion request declined','تم رفض طلب حذف حسابك'),b:body||''};
     if(n.kind==='admin_message'||n.kind==='admin_broadcast')return{t:title,b:''};
     return{t:title,b:body||''};
   };
@@ -672,8 +674,7 @@ async function refreshNotifications(){
     const isRefunded=n.kind==='order_refunded';
     const isNote=n.kind==='payout_note';
     const isAdminMsg=n.kind==='admin_message'||n.kind==='admin_broadcast';
-    const isPaid=n.kind==='payout_paid';
-    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote||isAdminMsg||isPaid;
+    const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote||isAdminMsg;
     const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected||isRefunded)?'#e07070':((isDelivered||isVerified||isReportReviewed)?'#2dbd8f':'#7f77dd')));
     const mainText=L.t;
     const subText=isNote?'':L.b;
@@ -685,7 +686,7 @@ async function refreshNotifications(){
         const row=(k,v,noTranslate)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span ${noTranslate?'data-no-i18n ':''}style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
         const borderColor=(isFailed||isRejected||isRefunded||isNote)?'#2a1a1a':'#142a20';
         const photoUrl=d.product_photo||d.photo;
-        const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block${isPaid?';cursor:zoom-in':''}"${isPaid?` onclick="event.stopPropagation();openFullPhoto('${String(photoUrl).replace(/'/g,"\\'")}')"`:''}/></div>`:'';
+        const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
         const receiptImg=isRejected&&d.receipt_url&&/^(https?:|data:|\/)/.test(String(d.receipt_url))?`<div style="margin:0 0 10px 0"><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">${__t('Receipt','الإيصال')}</div><img src="${esc(d.receipt_url)}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:10px;display:block;background:#0f0f0f"/></div>`:'';
         const adminNoteText=isRejected?d.admin_notes:((isRefunded||isNote)?(d.admin_comment||d.admin_note||(isNote?(n.body||''):'')):'');
         const adminNote=adminNoteText?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Admin note','ملاحظات الأدمن')}:</b> <span data-no-i18n>${esc(adminNoteText)}</span></div>`:'';
@@ -764,10 +765,10 @@ async function renderTransactions(){
     const amtLine=amtStr?`<div class="notif-body" style="color:${color};font-weight:600;font-size:13px">${sign}${__txnEsc(amtStr)} ${__txnEsc(sym)}</div>`:'';
     const dt=(typeof __fmtDT==='function')?__fmtDT(n.created_at):new Date(n.created_at).toLocaleString();
     const photoUrl=d.product_photo||d.photo;
-    const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block${type==='withdraw'?';cursor:zoom-in':''}"${type==='withdraw'?` onclick="event.stopPropagation();openFullPhoto('${String(photoUrl).replace(/'/g,"\\'")}')"`:''}/></div>`:'';
+    const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
     let detailRows;
     if(type==='withdraw'){
-      detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
+      detailRows=__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
     }else{
       detailRows=photo+
         __txnRow(__t('Order Code','كود الطلبيه'),d.order_code)+
@@ -919,3 +920,75 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
     if (el) el.addEventListener('cancel', function(){ __receiptClearResume(); __receiptPickerTarget = null; });
   });
 })();
+
+/* ========== Delete Account ========== */
+async function openDeleteAccount(){
+  const ov=document.getElementById('delacc-overlay');
+  if(!ov)return;
+  ov.classList.add('open');
+  await renderDeleteAccountModal();
+}
+function closeDeleteAccount(){
+  const ov=document.getElementById('delacc-overlay');
+  if(ov)ov.classList.remove('open');
+}
+async function renderDeleteAccountModal(){
+  const root=document.getElementById('delacc-body');
+  if(!root)return;
+  root.innerHTML='<div class="adm-empty" data-no-i18n>'+__t('Loading…','جارِ التحميل…')+'</div>';
+  let existing=null;
+  try{ existing=await window.LateenAPI.getAccountDeletionStatus(); }catch(e){}
+  let wallet=null;
+  try{ wallet=await window.LateenAPI.getWallet(); }catch(e){}
+  const bal=(wallet&&Number(wallet.balance))||0;
+  const pending=(wallet&&Number(wallet.pending))||0;
+
+  if(existing&&existing.status==='scheduled'){
+    const d=new Date(existing.scheduled_for);
+    const dateStr=d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+    root.innerHTML=`
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-size:14px;color:var(--color-text-primary);margin-bottom:8px;">${__t('Your account is scheduled for deletion on','حسابك مجدول للحذف بتاريخ')} <b data-no-i18n>${dateStr}</b>.</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px;">${__t('Changed your mind? You can cancel anytime before that date.','غيّرت رأيك؟ يمكنك الإلغاء في أي وقت قبل هذا التاريخ.')}</div>
+        <button onclick="confirmCancelDeletion('${existing.id}')" style="width:100%;background:#8b83e8;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;">${__t('Cancel deletion','إلغاء الحذف')}</button>
+      </div>`;
+    return;
+  }
+  if(existing&&existing.status==='wallet_review'){
+    root.innerHTML=`
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-size:14px;color:var(--color-text-primary);margin-bottom:8px;">${__t('Your request is with our team','طلبك قيد المراجعة من فريقنا')}</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px;">${__t("You have a wallet balance, so an admin needs to settle it with you before deletion is scheduled. We'll notify you once it's reviewed.",'لديك رصيد في محفظتك، لذا يحتاج الأدمن لتسويته معك قبل جدولة الحذف. سنُعلمك فور المراجعة.')}</div>
+        <button onclick="confirmCancelDeletion('${existing.id}')" style="width:100%;background:transparent;color:var(--color-text-secondary);border:1px solid #3a3a3a;border-radius:12px;padding:13px;font-size:13px;cursor:pointer;">${__t('Cancel request','إلغاء الطلب')}</button>
+      </div>`;
+    return;
+  }
+
+  const hasFunds=(bal>0||pending>0);
+  const fundsWarning=hasFunds?`<div style="margin:14px 0;padding:12px;border-radius:10px;background:#2a1a1a;color:#f0c0c0;font-size:12px;line-height:1.6;">${__t('You have a wallet balance. Your request will be sent to an admin to settle your balance with you before your account is scheduled for deletion.','لديك رصيد في محفظتك. سيتم إرسال طلبك إلى الأدمن لتسوية رصيدك معك قبل جدولة حذف حسابك.')}</div>`:'';
+  root.innerHTML=`
+    <div style="padding:6px 0;">
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:6px;">${__t('This will permanently delete your account, products, and order history after a 14-day grace period. You can cancel anytime before then.','سيؤدي هذا إلى حذف حسابك ومنتجاتك وسجل طلباتك نهائياً بعد فترة سماح مدتها 14 يوماً. يمكنك الإلغاء في أي وقت قبل ذلك.')}</div>
+      ${fundsWarning}
+      <button onclick="confirmRequestDeletion()" style="width:100%;margin-top:16px;background:#e07070;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;">${__t('Yes, delete my account','نعم، احذف حسابي')}</button>
+      <button onclick="closeDeleteAccount()" style="width:100%;margin-top:10px;background:transparent;color:var(--color-text-secondary);border:1px solid #3a3a3a;border-radius:12px;padding:13px;font-size:13px;cursor:pointer;">${__t('Never mind','تراجع')}</button>
+    </div>`;
+}
+async function confirmRequestDeletion(){
+  if(!confirm(__t('Are you sure? This starts the account deletion process.','هل أنت متأكد؟ سيبدأ هذا عملية حذف الحساب.')))return;
+  try{
+    await window.LateenAPI.requestAccountDeletion('marketer');
+    await renderDeleteAccountModal();
+  }catch(e){alert('Failed: '+e.message);}
+}
+async function confirmCancelDeletion(id){
+  if(!confirm(__t('Cancel your account deletion request?','هل تريد إلغاء طلب حذف الحساب؟')))return;
+  try{
+    await window.LateenAPI.cancelAccountDeletion(id);
+    await renderDeleteAccountModal();
+  }catch(e){alert('Failed: '+e.message);}
+}
+window.openDeleteAccount=openDeleteAccount;
+window.closeDeleteAccount=closeDeleteAccount;
+window.confirmRequestDeletion=confirmRequestDeletion;
+window.confirmCancelDeletion=confirmCancelDeletion;

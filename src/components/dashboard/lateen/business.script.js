@@ -1111,6 +1111,8 @@ async function refreshBizNotifications(){
   root.innerHTML=list.map(n=>{
     let t=n.title,b=n.body||'';
     if(n.kind==='new_order'||t==='New order'){t=tr('New order','طلب جديد');b=tr('A new order has been received. Check the Orders page.','وصلك طلب جديد. راجع صفحة الطلبات.');}
+    if(n.kind==='account_deletion_scheduled'||t==='Account deletion scheduled'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const sched=d&&d.scheduled_for?new Date(d.scheduled_for):null;const dateStr=sched?sched.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'';t=tr('Account deletion scheduled','تم جدولة حذف حسابك');b=tr('Your account will be permanently deleted on '+dateStr+'. You can cancel anytime before then from your profile.','سيتم حذف حسابك نهائياً بتاريخ '+dateStr+'. يمكنك إلغاء الطلب في أي وقت قبل ذلك من صفحة حسابك.');}
+    if(n.kind==='account_deletion_rejected'||t==='Account deletion request declined'){t=tr('Account deletion request declined','تم رفض طلب حذف حسابك');}
     if(n.kind==='admin_message'||n.kind==='admin_broadcast')b='';
     let reviewDetails='';
     if(n.kind==='product_review'){
@@ -1190,3 +1192,76 @@ refreshBizNotifications();
    map is refreshed (see refreshBizNotifications below) we just need to
    re-render the products list so the Reviews fold picks up the latest
    data — renderProducts() already does that on every call. */
+
+/* ========== Delete Account ========== */
+function __t(en,ar){return __ar()?ar:en;}
+async function openDeleteAccount(){
+  const ov=document.getElementById('delacc-overlay');
+  if(!ov)return;
+  ov.classList.add('open');
+  await renderDeleteAccountModal();
+}
+function closeDeleteAccount(){
+  const ov=document.getElementById('delacc-overlay');
+  if(ov)ov.classList.remove('open');
+}
+async function renderDeleteAccountModal(){
+  const root=document.getElementById('delacc-body');
+  if(!root)return;
+  root.innerHTML='<div class="adm-empty" data-no-i18n>'+__t('Loading…','جارِ التحميل…')+'</div>';
+  let existing=null;
+  try{ existing=await window.LateenAPI.getAccountDeletionStatus(); }catch(e){}
+  let wallet=null;
+  try{ wallet=await window.LateenAPI.getWallet(); }catch(e){}
+  const bal=(wallet&&Number(wallet.balance))||0;
+  const pending=(wallet&&Number(wallet.pending))||0;
+
+  if(existing&&existing.status==='scheduled'){
+    const d=new Date(existing.scheduled_for);
+    const dateStr=d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+    root.innerHTML=`
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-size:14px;color:var(--color-text-primary);margin-bottom:8px;">${__t('Your account is scheduled for deletion on','حسابك مجدول للحذف بتاريخ')} <b data-no-i18n>${dateStr}</b>.</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px;">${__t('Changed your mind? You can cancel anytime before that date.','غيّرت رأيك؟ يمكنك الإلغاء في أي وقت قبل هذا التاريخ.')}</div>
+        <button onclick="confirmCancelDeletion('${existing.id}')" style="width:100%;background:#34c77b;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;">${__t('Cancel deletion','إلغاء الحذف')}</button>
+      </div>`;
+    return;
+  }
+  if(existing&&existing.status==='wallet_review'){
+    root.innerHTML=`
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-size:14px;color:var(--color-text-primary);margin-bottom:8px;">${__t('Your request is with our team','طلبك قيد المراجعة من فريقنا')}</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px;">${__t("You have a wallet balance, so an admin needs to settle it with you before deletion is scheduled. We'll notify you once it's reviewed.",'لديك رصيد في محفظتك، لذا يحتاج الأدمن لتسويته معك قبل جدولة الحذف. سنُعلمك فور المراجعة.')}</div>
+        <button onclick="confirmCancelDeletion('${existing.id}')" style="width:100%;background:transparent;color:var(--color-text-secondary);border:1px solid #3a3a3a;border-radius:12px;padding:13px;font-size:13px;cursor:pointer;">${__t('Cancel request','إلغاء الطلب')}</button>
+      </div>`;
+    return;
+  }
+
+  const hasFunds=(bal>0||pending>0);
+  const fundsWarning=hasFunds?`<div style="margin:14px 0;padding:12px;border-radius:10px;background:#2a1a1a;color:#f0c0c0;font-size:12px;line-height:1.6;">${__t('You have a wallet balance. Your request will be sent to an admin to settle your balance with you before your account is scheduled for deletion.','لديك رصيد في محفظتك. سيتم إرسال طلبك إلى الأدمن لتسوية رصيدك معك قبل جدولة حذف حسابك.')}</div>`:'';
+  root.innerHTML=`
+    <div style="padding:6px 0;">
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:6px;">${__t('This will permanently delete your account, products, and order history after a 14-day grace period. You can cancel anytime before then.','سيؤدي هذا إلى حذف حسابك ومنتجاتك وسجل طلباتك نهائياً بعد فترة سماح مدتها 14 يوماً. يمكنك الإلغاء في أي وقت قبل ذلك.')}</div>
+      ${fundsWarning}
+      <button onclick="confirmRequestDeletion()" style="width:100%;margin-top:16px;background:#e07070;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;">${__t('Yes, delete my account','نعم، احذف حسابي')}</button>
+      <button onclick="closeDeleteAccount()" style="width:100%;margin-top:10px;background:transparent;color:var(--color-text-secondary);border:1px solid #3a3a3a;border-radius:12px;padding:13px;font-size:13px;cursor:pointer;">${__t('Never mind','تراجع')}</button>
+    </div>`;
+}
+async function confirmRequestDeletion(){
+  if(!confirm(__t('Are you sure? This starts the account deletion process.','هل أنت متأكد؟ سيبدأ هذا عملية حذف الحساب.')))return;
+  try{
+    await window.LateenAPI.requestAccountDeletion('business');
+    await renderDeleteAccountModal();
+  }catch(e){alert('Failed: '+e.message);}
+}
+async function confirmCancelDeletion(id){
+  if(!confirm(__t('Cancel your account deletion request?','هل تريد إلغاء طلب حذف الحساب؟')))return;
+  try{
+    await window.LateenAPI.cancelAccountDeletion(id);
+    await renderDeleteAccountModal();
+  }catch(e){alert('Failed: '+e.message);}
+}
+window.openDeleteAccount=openDeleteAccount;
+window.closeDeleteAccount=closeDeleteAccount;
+window.confirmRequestDeletion=confirmRequestDeletion;
+window.confirmCancelDeletion=confirmCancelDeletion;
