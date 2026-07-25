@@ -1062,11 +1062,109 @@ async function admResolveReport(id){
   }catch(e){alert('Failed: '+e.message);}
 }
 
+/* ========== Account Deletion Requests ========== */
+let admDelReqCache=[];
+let admDelReqFilter='';
+function admDelReqStatusLabel(s){return s==='wallet_review'?'Needs Review':(s==='scheduled'?'Scheduled':(s==='rejected'?'Rejected':(s==='cancelled'?'Cancelled':'Completed')));}
+async function admLoadDeletionRequests(){
+  try{
+    admDelReqCache=await window.LateenAPI.admin.listDeletionRequests();
+  }catch(e){console.error('[admin] listDeletionRequests',e);return;}
+  const needsReview=admDelReqCache.filter(r=>r.status==='wallet_review').length;
+  const badge=document.getElementById('adm-delreq-count');
+  if(badge){badge.style.display=needsReview>0?'inline-block':'none';badge.textContent=String(needsReview);}
+  if(document.getElementById('adm-delreq-ov')?.classList.contains('open'))admRenderDeletionRequests();
+}
+function admSetDelReqFilter(f,el){
+  admDelReqFilter=f;
+  document.querySelectorAll('#delreq-filter-row .adm-filter-chip').forEach(c=>c.classList.remove('on'));
+  if(el)el.classList.add('on');
+  admRenderDeletionRequests();
+}
+function admOpenDeletionRequests(){
+  const ov=document.getElementById('adm-delreq-ov');
+  if(!ov)return;
+  ov.classList.add('open');
+  if(!admDelReqCache.length){
+    const root=document.getElementById('delreq-list');
+    if(root)root.innerHTML='<div class="adm-empty">Loading…</div>';
+  }else{
+    admRenderDeletionRequests();
+  }
+  admLoadDeletionRequests();
+}
+function admCloseDeletionRequests(){
+  const ov=document.getElementById('adm-delreq-ov');
+  if(ov)ov.classList.remove('open');
+}
+function admRenderDeletionRequests(){
+  const root=document.getElementById('delreq-list');
+  if(!root)return;
+  const list=admDelReqFilter?admDelReqCache.filter(r=>r.status===admDelReqFilter):admDelReqCache;
+  if(!list.length){root.innerHTML='<div class="adm-empty">No requests'+(admDelReqFilter?' in this filter':'')+'.</div>';return;}
+  root.innerHTML=list.map(r=>{
+    const person=r.person||{};
+    const name=person.business_name||person.full_name||'Unknown user';
+    const nameSafe=admEsc(name).replace(/'/g,'&#39;');
+    const wallet=r.live_wallet||{};
+    const bal=Number(wallet.balance!=null?wallet.balance:r.wallet_balance)||0;
+    const pending=Number(wallet.pending!=null?wallet.pending:r.wallet_pending)||0;
+    const hasFunds=bal>0||pending>0;
+    const needsReview=r.status==='wallet_review';
+    const walletBlock=hasFunds?`<div class="rpt-resolved-note" style="background:#2a1a1a;color:#f0c0c0;">Wallet balance: <b>${admMoney(bal)}</b>${pending>0?' · Pending: <b>'+admMoney(pending)+'</b>':''}</div>`:`<div class="rpt-resolved-note">Wallet is empty.</div>`;
+    let actionBlock='';
+    if(needsReview){
+      actionBlock=`<div class="rpt-comment-box">
+          <textarea class="rpt-comment-ta" id="delreq-comment-${r.id}" placeholder="Optional note for approval, or the reason if you're rejecting this request"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="adm-btn adm-btn-acc" style="flex:1;" onclick="admResolveDeletionRequest('${r.id}','approve')">Approve &amp; schedule deletion</button>
+            <button class="adm-go-btn" style="flex:1;background:#fee;color:#c00;border-color:#fcc;" onclick="admResolveDeletionRequest('${r.id}','reject')">Reject</button>
+          </div>
+        </div>`;
+    }else if(r.status==='scheduled'){
+      actionBlock=`<div class="rpt-resolved-note"><b>Scheduled for:</b> ${admWhenFull(r.scheduled_for)}</div>`;
+    }else{
+      actionBlock=`<div class="rpt-resolved-note"><b>Admin comment:</b> <span data-no-i18n>${admEsc(r.admin_comment||'')}</span><div style="margin-top:4px;opacity:0.8;font-size:11px;">Reviewed ${admWhen(r.resolved_at)}</div></div>`;
+    }
+    return `<div class="rpt-card">
+      <div class="rpt-top">
+        <span class="rpt-type-pill">${r.role==='business'?'Business':'Marketer'}</span>
+        <span class="rpt-status-pill ${needsReview?'rpt-status-open':'rpt-status-resolved'}">${admDelReqStatusLabel(r.status)}</span>
+      </div>
+      <div class="rpt-reporter-row">
+        <div class="adm-user-av" data-no-i18n>${admEsc(admInitials(name))}</div>
+        <div style="flex:1;min-width:120px;">
+          <div class="rpt-name" data-no-i18n>${admEsc(name)}</div>
+          <div class="rpt-sub">${admEsc(person.phone||'no phone')} · Requested ${admWhen(r.requested_at)}</div>
+        </div>
+        <button class="adm-go-btn" onclick="admGoToAccount('${r.user_id}','${r.role}','${nameSafe}')">Go to Account</button>
+      </div>
+      ${walletBlock}
+      ${actionBlock}
+    </div>`;
+  }).join('');
+}
+async function admResolveDeletionRequest(id,action){
+  const ta=document.getElementById('delreq-comment-'+id);
+  const comment=(ta&&ta.value||'').trim();
+  if(action==='reject'){
+    if(!comment){alert('Write a reason before rejecting this request.');return;}
+    if(!confirm('Reject this deletion request? The user will be notified with your reason.'))return;
+  }else{
+    if(!confirm('Approve this deletion request? The account will be permanently deleted in 14 days, and the user will be notified.'))return;
+  }
+  try{
+    await window.LateenAPI.admin.resolveDeletionRequest(id,action,comment||null);
+    await admLoadDeletionRequests();
+  }catch(e){alert('Failed: '+e.message);}
+}
+
 /* boot */
 admLoadMetrics();
 admLoadReports();
+admLoadDeletionRequests();
 setInterval(()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}},10000);
-if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-wallets',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-payouts',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-reports',()=>{admLoadReports();}));}
+if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-wallets',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-payouts',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-reports',()=>{admLoadReports();}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-deletion-requests',()=>{admLoadDeletionRequests();}));}
 
 /* ========== Employees & Payroll ========== */
 let admEmpCache=[];

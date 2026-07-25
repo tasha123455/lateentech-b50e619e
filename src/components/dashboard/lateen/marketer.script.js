@@ -581,7 +581,7 @@ function __ppdSetPicker(key,val){const inp=document.getElementById('ppd-'+key);c
 function toggleProfPicker(key){const list=document.getElementById('prof-'+key+'-list');if(!list)return;const otherKey=key==='country'?'wacc':'country';const other=document.getElementById('prof-'+otherKey+'-list');if(other)other.style.display='none';list.style.display=list.style.display==='none'?'block':'none';}
 function pickProfCountry(){const list=document.getElementById('prof-country-list');if(list)list.style.display='none';}
 function pickProfWaCc(){const list=document.getElementById('prof-wacc-list');if(list)list.style.display='none';}
-function openProfile(){const t=__profT();const p=window.__profileData||{};const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};const setPhone=(id,v)=>{const e=document.getElementById(id);if(!e)return;var s=(typeof __stripCC==='function')?__stripCC(v):{num:String(v||'').replace(/^\+\d{1,3}[\s-]*/,'')};e.value=s.num||'';};const setTxt=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};setTxt('prof-title',t.title);setTxt('prof-lbl-name',t.name);const __pnEl=document.getElementById('prof-name');if(__pnEl)__pnEl.placeholder=t.namePh;setTxt('prof-lbl-phone',t.phone);setTxt('prof-lbl-email',t.email);setTxt('prof-lbl-wa',t.wa);setTxt('prof-lbl-wa-opt',t.opt);setTxt('prof-save-txt',t.save);setTxt('prof-avatar-hint',t.hint);set('prof-name',p.full_name);const __pp=document.getElementById('prof-phone');if(__pp)__pp.value=__dispPhone(p.phone);set('prof-email',p.email);setPhone('prof-whatsapp',p.whatsapp);const __waCcTxt=document.getElementById('prof-wacc-txt');if(__waCcTxt){const __waCc=(typeof __stripCC==='function'?__stripCC(p.whatsapp):{}).cc;__waCcTxt.textContent=__waCc||'\u200E+218\u200E';}const __ctTxt=document.getElementById('prof-country-txt');if(__ctTxt)__ctTxt.textContent='🇱🇾 '+(__ar()?'ليبيا':'Libya');__ppdSetPicker('method',p.payout_method);set('ppd-bank',p.payout_bank_name);set('ppd-holder',p.payout_account_holder);set('ppd-acct',p.payout_account_number);set('ppd-phone',p.payout_account_number);set('ppd-iban',p.payout_iban);set('ppd-swift',p.payout_swift);set('ppd-notes',p.payout_notes);const d=__pdLoadDraft();Object.keys(d).forEach(id=>{if(!d[id])return;const key=id.replace(/^pd-/,'');if(key==='country'||key==='method')__ppdSetPicker(key,d[id]);else set('ppd-'+key,d[id]);});__pdOnMethodChange('ppd');__pdWireInputs();const name=p.full_name||'';const initials=__firstChar(name);__applyAvatarTo(document.getElementById('prof-avatar'),p.avatar_signed_url,initials);const ov=document.getElementById('profile-overlay');if(ov)ov.classList.add('open');const md=document.getElementById('menu-overlay');if(md)md.classList.remove('open');(async()=>{try{if(window.LateenAPI&&window.LateenAPI.getProfile){const fresh=await window.LateenAPI.getProfile();if(fresh){window.__profileData=fresh;set('prof-name',fresh.full_name);const __pp2=document.getElementById('prof-phone');if(__pp2)__pp2.value=__dispPhone(fresh.phone);set('prof-email',fresh.email);setPhone('prof-whatsapp',fresh.whatsapp);const __waCcTxt2=document.getElementById('prof-wacc-txt');if(__waCcTxt2){const __waCc2=(typeof __stripCC==='function'?__stripCC(fresh.whatsapp):{}).cc;__waCcTxt2.textContent=__waCc2||'\u200E+218\u200E';}__applyAvatarTo(document.getElementById('prof-avatar'),fresh.avatar_signed_url,__firstChar(fresh.full_name||''));__ppdSetPicker('method',fresh.payout_method);set('ppd-bank',fresh.payout_bank_name);set('ppd-holder',fresh.payout_account_holder);set('ppd-acct',fresh.payout_account_number);set('ppd-phone',fresh.payout_account_number);set('ppd-iban',fresh.payout_iban);set('ppd-swift',fresh.payout_swift);set('ppd-notes',fresh.payout_notes);__pdOnMethodChange('ppd');}}}catch(e){console.error('[Lateen] openProfile refetch failed',e);}})();}
+function openProfile(){const t=__profT();const p=window.__profileData||{};const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};const setPhone=(id,v)=>{const e=document.getElementById(id);if(!e)return;var s=(typeof __stripCC==='function')?__stripCC(v):{num:String(v||'').replace(/^\+\d{1,3}[\s-]*/,'')};e.value=s.num||'';};const setTxt=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};setTxt('prof-title',t.title);setTxt('prof-lbl-name',t.name);const __pnEl=document.getElementById('prof-name');if(__pnEl)__pnEl.placeholder=t.namePh;setTxt('prof-lbl-phone',t.phone);setTxt('prof-lbl-email',t.email);setTxt('prof-lbl-wa',t.wa);setTxt('prof-lbl-wa-opt',t.opt);setTxt('prof-save-txt',t.save);setTxt('prof-avatar-hint',t.hint);set('prof-name',p.full_name);const __pp=document.getElementById('prof-phone');if(__pp)__pp.value=__dispPhone(p.phone);set('prof-email',p.email);setPhone('prof-whatsapp',p.whatsapp);const __waCcTxt=document.getElementById('prof-wacc-txt');if(__waCcTxt){const __waCc=(typeof __stripCC==='function'?__stripCC(p.whatsapp):{}).cc;__waCcTxt.textContent=__waCc||'\u200E+218\u200E';}const __ctTxt=document.getElementById('prof-country-txt');if(__ctTxt)__ctTxt.textContent='🇱🇾 '+(__ar()?'ليبيا':'Libya');__ppdSetPicker('method',p.payout_method);set('ppd-bank',p.payout_bank_name);set('ppd-holder',p.payout_account_holder);set('ppd-acct',p.payout_account_number);set('ppd-phone',p.payout_account_number);set('ppd-iban',p.payout_iban);set('ppd-swift',p.payout_swift);set('ppd-notes',p.payout_notes);const d=__pdLoadDraft();Object.keys(d).forEach(id=>{if(!d[id])return;const key=id.replace(/^pd-/,'');if(key==='country'||key==='method')__ppdSetPicker(key,d[id]);else set('ppd-'+key,d[id]);});__pdOnMethodChange('ppd');__pdWireInputs();const name=p.full_name||'';const initials=__firstChar(name);__applyAvatarTo(document.getElementById('prof-avatar'),p.avatar_signed_url,initials);const ov=document.getElementById('profile-overlay');if(ov)ov.classList.add('open');const md=document.getElementById('menu-overlay');if(md)md.classList.remove('open');refreshDeleteAccountSlot();(async()=>{try{if(window.LateenAPI&&window.LateenAPI.getProfile){const fresh=await window.LateenAPI.getProfile();if(fresh){window.__profileData=fresh;set('prof-name',fresh.full_name);const __pp2=document.getElementById('prof-phone');if(__pp2)__pp2.value=__dispPhone(fresh.phone);set('prof-email',fresh.email);setPhone('prof-whatsapp',fresh.whatsapp);const __waCcTxt2=document.getElementById('prof-wacc-txt');if(__waCcTxt2){const __waCc2=(typeof __stripCC==='function'?__stripCC(fresh.whatsapp):{}).cc;__waCcTxt2.textContent=__waCc2||'\u200E+218\u200E';}__applyAvatarTo(document.getElementById('prof-avatar'),fresh.avatar_signed_url,__firstChar(fresh.full_name||''));__ppdSetPicker('method',fresh.payout_method);set('ppd-bank',fresh.payout_bank_name);set('ppd-holder',fresh.payout_account_holder);set('ppd-acct',fresh.payout_account_number);set('ppd-phone',fresh.payout_account_number);set('ppd-iban',fresh.payout_iban);set('ppd-swift',fresh.payout_swift);set('ppd-notes',fresh.payout_notes);__pdOnMethodChange('ppd');}}}catch(e){console.error('[Lateen] openProfile refetch failed',e);}})();}
 function closeProfile(){const ov=document.getElementById('profile-overlay');if(ov)ov.classList.remove('open');}
 async function pickAvatar(inp){const f=inp&&inp.files&&inp.files[0];if(!f)return;const t=__profT();if(f.size>5*1024*1024){alert(t.tooBig);inp.value='';return;}const hint=document.getElementById('prof-avatar-hint');if(hint)hint.textContent=t.uploading;try{const url=await window.LateenAPI.uploadAvatar(f);const av=document.getElementById('prof-avatar');__applyAvatarTo(av,url,'');if(window.__profileData)window.__profileData.avatar_signed_url=url;await refreshProfile();if(hint)hint.textContent=t.hint;}catch(e){console.error(e);alert(__ar&&__ar()?'فشل رفع الصورة':'Upload failed');if(hint)hint.textContent=t.hint;}finally{inp.value='';}}
 async function saveProfile(){const t=__profT();const btn=document.getElementById('prof-save');const txt=document.getElementById('prof-save-txt');const name=(document.getElementById('prof-name')||{}).value||'';const waNum=(document.getElementById('prof-whatsapp')||{}).value||'';const waDigits=waNum.replace(/\D/g,'');const ar=(typeof __ar==='function'&&__ar());if(waDigits&&!/^09[1-4]\d{7}$/.test(waDigits)){alert(ar?'رقم الهاتف يجب أن يكون 10 أرقام ويبدأ بـ 091 أو 092 أو 093 أو 094':'Phone must be 10 digits and start with 091, 092, 093, or 094.');return;}const __mainPhoneDigits=(typeof __stripCC==='function'?__stripCC((window.__profileData||{}).phone):{}).num||'';if(waDigits&&__mainPhoneDigits&&waDigits===__mainPhoneDigits){alert(ar?'لا يمكن أن يكون رقم الهاتف الإضافي نفس رقم الهاتف الأساسي':'Additional phone number can\'t be the same as your phone number.');return;}const wa=waDigits?('+218'+waDigits):'';const pdMethod=(document.getElementById('ppd-method')||{}).value||'';const phoneMeta=__pdPhoneMeta(pdMethod);const isPhoneMethod=!!phoneMeta;const pdBank=(document.getElementById('ppd-bank')||{}).value||'';const pdHolder=(document.getElementById('ppd-holder')||{}).value||'';const pdAcct=(document.getElementById('ppd-acct')||{}).value||'';const pdPhone=(document.getElementById('ppd-phone')||{}).value||'';const pdIban=(document.getElementById('ppd-iban')||{}).value||'';const pdSwift=(document.getElementById('ppd-swift')||{}).value||'';const pdNotes=(document.getElementById('ppd-notes')||{}).value||'';if(isPhoneMethod&&!new RegExp('^('+phoneMeta.prefixes.join('|')+')\\d{7}$').test(pdPhone.trim())){alert(__t('Please enter a valid phone number. '+phoneMeta.hintEn+'.','الرجاء إدخال رقم هاتف صحيح. '+phoneMeta.hintAr+'.'));return;}const patch={full_name:name.trim()||null,whatsapp:wa.trim()||null,payout_method:pdMethod.trim()||null,payout_bank_name:isPhoneMethod?null:(pdBank.trim()||null),payout_account_holder:isPhoneMethod?null:(pdHolder.trim()||null),payout_account_number:isPhoneMethod?(pdPhone.trim()||null):(pdAcct.trim()||null),payout_iban:isPhoneMethod?null:(pdIban.trim()||null),payout_swift:isPhoneMethod?null:(pdSwift.trim()||null),payout_notes:pdNotes.trim()||null};if(btn){btn.disabled=true;btn.style.opacity='.7';}if(txt)txt.textContent=t.saving;try{await window.LateenAPI.updateProfile(patch);await refreshProfile();if(txt)txt.textContent=t.saved;setTimeout(()=>{if(txt)txt.textContent=t.save;if(btn){btn.disabled=false;btn.style.opacity='1';}closeProfile();},700);}catch(e){console.error(e);alert(__ar&&__ar()?'فشل الحفظ':'Save failed');if(txt)txt.textContent=t.save;if(btn){btn.disabled=false;btn.style.opacity='1';}}}
@@ -666,6 +666,8 @@ async function refreshNotifications(){
     if(n.kind==='receipt_verified'||title==='Receipt Verified')return{t:__t('Receipt Verified','تم اعتماد الإيصال'),b:__t('Your payment receipt has been verified. Your balance is now updated','تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.')};
     if(n.kind==='receipt_rejected'||title==='Receipt rejected by the admin')return{t:__t('Receipt rejected by the admin','تم رفض الإيصال من قبل الأدمن'),b:''};
     if(n.kind==='report_reviewed'||title==='Report reviewed')return{t:__t('Report reviewed','تمت مراجعة البلاغ'),b:body||''};
+    if(n.kind==='account_deletion_scheduled'||title==='Account deletion scheduled'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const sched=d&&d.scheduled_for?new Date(d.scheduled_for):null;const dateStr=sched?sched.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'';return{t:__t('Account deletion scheduled','سوف يتم حذف حسابك'),b:__t('Your account will be permanently deleted on '+dateStr+'. You can cancel anytime from your profile info page.','سيتم حذف حسابك نهائياً بتاريخ '+dateStr+'. يمكنك إلغاء الطلب في أي وقت من صفحه معلوماتك الشخصيه.')};}
+    if(n.kind==='account_deletion_rejected'||title==='Account deletion request declined')return{t:__t('Account deletion request declined','تم رفض طلب حذف حسابك'),b:body||''};
     if(n.kind==='admin_message'||n.kind==='admin_broadcast')return{t:title,b:''};
     return{t:title,b:body||''};
   };
@@ -926,3 +928,100 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
     if (el) el.addEventListener('cancel', function(){ __receiptClearResume(); __receiptPickerTarget = null; });
   });
 })();
+
+/* ========== Delete Account ==========
+   Status is fetched once when the profile page opens (refreshDeleteAccountSlot,
+   called from openProfile) and cached on window.__delAccStatus / __delAccWallet.
+   Both the profile-page slot and the modal render synchronously from that cache,
+   so opening the modal never shows a loading state. */
+async function refreshDeleteAccountSlot(){
+  try{ window.__delAccStatus=await window.LateenAPI.getAccountDeletionStatus(); }catch(e){ window.__delAccStatus=null; }
+  try{ window.__delAccWallet=await window.LateenAPI.getWallet(); }catch(e){ window.__delAccWallet=null; }
+  renderDeleteAccountSlot();
+}
+function renderDeleteAccountSlot(){
+  const slot=document.getElementById('prof-delete-slot');
+  if(!slot)return;
+  const existing=window.__delAccStatus;
+  if(existing&&existing.status==='scheduled'){
+    const d=new Date(existing.scheduled_for);
+    const dateStr=d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+    slot.innerHTML=`<div onclick="openDeleteAccount()" style="cursor:pointer;text-align:right;font-size:12px;line-height:1.5;color:#e07070;">${__t('Account deletion scheduled for','حذف الحساب مجدول بتاريخ')} <b data-no-i18n>${dateStr}</b></div>`;
+  }else if(existing&&existing.status==='wallet_review'){
+    slot.innerHTML=`<div onclick="openDeleteAccount()" style="cursor:pointer;text-align:right;font-size:12px;line-height:1.5;color:#e07070;">${__t('Deletion request under review','طلب حذف الحساب قيد المراجعة')}</div>`;
+  }else{
+    slot.innerHTML=`<button type="button" id="prof-delete-btn" onclick="openDeleteAccount()" style="background:transparent;color:#e07070;border:1px solid #e07070;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">${__t('Delete my account','حذف الحساب')}</button>`;
+  }
+}
+function openDeleteAccount(){
+  const ov=document.getElementById('delacc-overlay');
+  if(!ov)return;
+  const titleEl=document.getElementById('delacc-title-txt');
+  if(titleEl)titleEl.textContent=__t('Delete my account','إحذف حسابك');
+  ov.classList.add('open');
+  renderDeleteAccountModal();
+}
+function closeDeleteAccount(){
+  const ov=document.getElementById('delacc-overlay');
+  if(ov)ov.classList.remove('open');
+}
+function renderDeleteAccountModal(){
+  const root=document.getElementById('delacc-body');
+  if(!root)return;
+  const existing=window.__delAccStatus||null;
+  const wallet=window.__delAccWallet||null;
+  const bal=(wallet&&Number(wallet.balance))||0;
+  const pending=(wallet&&Number(wallet.pending))||0;
+
+  if(existing&&existing.status==='scheduled'){
+    const d=new Date(existing.scheduled_for);
+    const dateStr=d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+    root.innerHTML=`
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-size:14px;color:var(--color-text-primary);margin-bottom:8px;">${__t('Your account is scheduled for deletion on','حسابك مجدول للحذف بتاريخ')} <b data-no-i18n>${dateStr}</b>.</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px;">${__t('Changed your mind? You can cancel anytime before that date.','غيّرت رأيك؟ يمكنك الإلغاء في أي وقت قبل هذا التاريخ.')}</div>
+        <button onclick="confirmCancelDeletion('${existing.id}')" style="width:100%;background:#8b83e8;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;">${__t('Cancel deletion','إلغاء الحذف')}</button>
+      </div>`;
+    return;
+  }
+  if(existing&&existing.status==='wallet_review'){
+    root.innerHTML=`
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-size:14px;color:var(--color-text-primary);margin-bottom:8px;">${__t('Your request is with our team','طلبك قيد المراجعة من فريقنا')}</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px;">${__t("You have a wallet balance, so an admin needs to settle it with you before deletion is scheduled. We'll notify you once it's reviewed.",'لديك رصيد في محفظتك، لذا يحتاج الأدمن لتسويته معك قبل جدولة الحذف. سنُعلمك فور المراجعة.')}</div>
+        <button onclick="confirmCancelDeletion('${existing.id}')" style="width:100%;background:transparent;color:var(--color-text-secondary);border:1px solid #3a3a3a;border-radius:12px;padding:13px;font-size:13px;cursor:pointer;">${__t('Cancel request','إلغاء الطلب')}</button>
+      </div>`;
+    return;
+  }
+
+  const hasFunds=(bal>0||pending>0);
+  const fundsWarning=hasFunds?`<div style="margin:14px 0;padding:12px;border-radius:10px;background:#2a1a1a;color:#f0c0c0;font-size:12px;line-height:1.6;">${__t('You have a wallet balance. Your request will be sent to an admin to settle your balance with you before your account is scheduled for deletion.','لديك رصيد في محفظتك. سيتم إرسال طلبك إلى الأدمن لتسوية رصيدك معك قبل جدولة حذف حسابك.')}</div>`:'';
+  root.innerHTML=`
+    <div style="padding:6px 0;">
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:6px;">${__t('This will permanently delete your account after a 14-day grace period. You can cancel anytime from your profile info page.','سيؤدي هذا إلى حذف حسابك نهائياً بعد فترة سماح مدتها 14 يوماً. يمكنك الإلغاء في أي وقت قبل ذلك من صفحه معلوماتك الشخصيه.')}</div>
+      ${fundsWarning}
+      <button onclick="confirmRequestDeletion()" style="width:100%;margin-top:16px;background:#e07070;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;">${__t('Yes, delete my account','نعم، احذف حسابي')}</button>
+      <button onclick="closeDeleteAccount()" style="width:100%;margin-top:10px;background:transparent;color:var(--color-text-secondary);border:1px solid #3a3a3a;border-radius:12px;padding:13px;font-size:13px;cursor:pointer;">${__t('Never mind','تراجع')}</button>
+    </div>`;
+}
+async function confirmRequestDeletion(){
+  if(!confirm(__t('Are you sure? This starts the account deletion process.','هل أنت متأكد؟ سيبدأ هذا عملية حذف الحساب.')))return;
+  try{
+    window.__delAccStatus=await window.LateenAPI.requestAccountDeletion('marketer');
+    renderDeleteAccountModal();
+    renderDeleteAccountSlot();
+  }catch(e){alert('Failed: '+e.message);}
+}
+async function confirmCancelDeletion(id){
+  if(!confirm(__t('Cancel your account deletion request?','هل تريد إلغاء طلب حذف الحساب؟')))return;
+  try{
+    await window.LateenAPI.cancelAccountDeletion(id);
+    window.__delAccStatus=null;
+    renderDeleteAccountModal();
+    renderDeleteAccountSlot();
+  }catch(e){alert('Failed: '+e.message);}
+}
+window.openDeleteAccount=openDeleteAccount;
+window.closeDeleteAccount=closeDeleteAccount;
+window.confirmRequestDeletion=confirmRequestDeletion;
+window.confirmCancelDeletion=confirmCancelDeletion;
