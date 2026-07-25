@@ -421,6 +421,7 @@ async function admLoadPayouts(){
         ${detail('Notes',u.payout_notes)}
       </div>`:`<div class="adm-pay-details adm-pay-details-empty">No payout details on file — contact the marketer.</div>`;
       const liveBal=p.wallet&&p.wallet.balance!=null?Number(p.wallet.balance):Number(p.amount||0);
+      const rcpt=admPayoutReceipt[p.id];
       return `<div class="adm-payout-card">
         <div class="adm-payout-row">
           <div class="adm-user-av" data-no-i18n>${admEsc(admInitials(name))}</div>
@@ -432,6 +433,17 @@ async function admLoadPayouts(){
           <button class="adm-btn adm-btn-acc" style="flex:0 0 auto;padding:0 14px;" onclick="admMarkPaid('${p.id}',${liveBal},'${encodeURIComponent(fmtAmt(liveBal))}')">Paid</button>
         </div>
         ${detailsHtml}
+        <div class="adm-notif-photo-row" style="padding:10px 14px 0;">
+          <div class="adm-notif-photo-add" id="pr-photo-add-${p.id}" style="display:${rcpt?'none':'flex'};" onclick="document.getElementById('pr-photo-input-${p.id}').click()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div class="adm-notif-photo-preview" id="pr-photo-preview-${p.id}" style="display:${rcpt?'block':'none'};">
+            <img id="pr-photo-img-${p.id}" src="${rcpt?admEsc(rcpt):''}" onclick="admLightbox(document.getElementById('pr-photo-img-${p.id}').src)"/>
+            <button type="button" class="adm-notif-photo-x" onclick="admRemovePayoutReceipt('${p.id}')">×</button>
+          </div>
+          <input type="file" id="pr-photo-input-${p.id}" accept="image/*" style="display:none" onchange="admPickPayoutReceipt('${p.id}',this)"/>
+          <span class="adm-notif-hint" id="pr-photo-hint-${p.id}">${rcpt?'Receipt attached':'Attach transfer receipt photo to mark as paid'}</span>
+        </div>
         <div style="display:flex;gap:6px;padding:10px 14px 12px;border-top:0.5px solid var(--border-2);">
           <input id="adm-note-${p.id}" type="text" placeholder="Send a note to the marketer (e.g. missing IBAN)" style="flex:1;height:34px;padding:0 10px;border-radius:8px;border:0.5px solid var(--border-2);background:#0f0f0f;color:#fff;font-size:12px;" />
           <button class="adm-btn" style="padding:0 12px;" onclick="admSendPayoutNote('${p.id}')">Send note</button>
@@ -441,10 +453,45 @@ async function admLoadPayouts(){
   }catch(e){console.error('[admin] payouts',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
+let admPayoutReceipt={};
+async function admPickPayoutReceipt(id,inp){
+  const file=inp&&inp.files&&inp.files[0];if(!file)return;
+  const hint=document.getElementById('pr-photo-hint-'+id);
+  if(hint)hint.textContent='Uploading…';
+  try{
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    const url=await window.LateenAPI.uploadPhoto(file);
+    admPayoutReceipt[id]=url;
+    const prev=document.getElementById('pr-photo-preview-'+id);
+    const img=document.getElementById('pr-photo-img-'+id);
+    const add=document.getElementById('pr-photo-add-'+id);
+    if(img)img.src=url;
+    if(prev)prev.style.display='block';
+    if(add)add.style.display='none';
+    if(hint)hint.textContent='Receipt attached';
+  }catch(e){console.error('[admin] payout receipt upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  if(inp)inp.value='';
+}
+function admRemovePayoutReceipt(id){
+  delete admPayoutReceipt[id];
+  const prev=document.getElementById('pr-photo-preview-'+id);
+  const add=document.getElementById('pr-photo-add-'+id);
+  const hint=document.getElementById('pr-photo-hint-'+id);
+  if(prev)prev.style.display='none';
+  if(add)add.style.display='flex';
+  if(hint)hint.textContent='Attach transfer receipt photo to mark as paid';
+}
 async function admMarkPaid(id,amt,label){
   const shown=label?decodeURIComponent(label):admMoney(amt);
+  const receiptUrl=admPayoutReceipt[id];
+  if(!receiptUrl){alert('Attach a photo of the transfer receipt first.');return;}
   if(!confirm('Confirm you have manually transferred '+shown+'? This will reduce the marketer\'s balance.'))return;
-  try{await window.LateenAPI.admin.markPayoutPaid(id);await admLoadPayouts();if(document.getElementById('adm-home')?.classList.contains('active'))admLoadMetrics();}catch(e){alert('Failed: '+e.message);}
+  try{
+    await window.LateenAPI.admin.markPayoutPaid(id,receiptUrl);
+    delete admPayoutReceipt[id];
+    await admLoadPayouts();
+    if(document.getElementById('adm-home')?.classList.contains('active'))admLoadMetrics();
+  }catch(e){alert('Failed: '+e.message);}
 }
 async function admSendPayoutNote(id){
   const el=document.getElementById('adm-note-'+id);
@@ -1015,109 +1062,11 @@ async function admResolveReport(id){
   }catch(e){alert('Failed: '+e.message);}
 }
 
-/* ========== Account Deletion Requests ========== */
-let admDelReqCache=[];
-let admDelReqFilter='';
-function admDelReqStatusLabel(s){return s==='wallet_review'?'Needs Review':(s==='scheduled'?'Scheduled':(s==='rejected'?'Rejected':(s==='cancelled'?'Cancelled':'Completed')));}
-async function admLoadDeletionRequests(){
-  try{
-    admDelReqCache=await window.LateenAPI.admin.listDeletionRequests();
-  }catch(e){console.error('[admin] listDeletionRequests',e);return;}
-  const needsReview=admDelReqCache.filter(r=>r.status==='wallet_review').length;
-  const badge=document.getElementById('adm-delreq-count');
-  if(badge){badge.style.display=needsReview>0?'inline-block':'none';badge.textContent=String(needsReview);}
-  if(document.getElementById('adm-delreq-ov')?.classList.contains('open'))admRenderDeletionRequests();
-}
-function admSetDelReqFilter(f,el){
-  admDelReqFilter=f;
-  document.querySelectorAll('#delreq-filter-row .adm-filter-chip').forEach(c=>c.classList.remove('on'));
-  if(el)el.classList.add('on');
-  admRenderDeletionRequests();
-}
-function admOpenDeletionRequests(){
-  const ov=document.getElementById('adm-delreq-ov');
-  if(!ov)return;
-  ov.classList.add('open');
-  if(!admDelReqCache.length){
-    const root=document.getElementById('delreq-list');
-    if(root)root.innerHTML='<div class="adm-empty">Loading…</div>';
-  }else{
-    admRenderDeletionRequests();
-  }
-  admLoadDeletionRequests();
-}
-function admCloseDeletionRequests(){
-  const ov=document.getElementById('adm-delreq-ov');
-  if(ov)ov.classList.remove('open');
-}
-function admRenderDeletionRequests(){
-  const root=document.getElementById('delreq-list');
-  if(!root)return;
-  const list=admDelReqFilter?admDelReqCache.filter(r=>r.status===admDelReqFilter):admDelReqCache;
-  if(!list.length){root.innerHTML='<div class="adm-empty">No requests'+(admDelReqFilter?' in this filter':'')+'.</div>';return;}
-  root.innerHTML=list.map(r=>{
-    const person=r.person||{};
-    const name=person.business_name||person.full_name||'Unknown user';
-    const nameSafe=admEsc(name).replace(/'/g,'&#39;');
-    const wallet=r.live_wallet||{};
-    const bal=Number(wallet.balance!=null?wallet.balance:r.wallet_balance)||0;
-    const pending=Number(wallet.pending!=null?wallet.pending:r.wallet_pending)||0;
-    const hasFunds=bal>0||pending>0;
-    const needsReview=r.status==='wallet_review';
-    const walletBlock=hasFunds?`<div class="rpt-resolved-note" style="background:#2a1a1a;color:#f0c0c0;">Wallet balance: <b>${admMoney(bal)}</b>${pending>0?' · Pending: <b>'+admMoney(pending)+'</b>':''}</div>`:`<div class="rpt-resolved-note">Wallet is empty.</div>`;
-    let actionBlock='';
-    if(needsReview){
-      actionBlock=`<div class="rpt-comment-box">
-          <textarea class="rpt-comment-ta" id="delreq-comment-${r.id}" placeholder="Optional note for approval, or the reason if you're rejecting this request"></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px;">
-            <button class="adm-btn adm-btn-acc" style="flex:1;" onclick="admResolveDeletionRequest('${r.id}','approve')">Approve &amp; schedule deletion</button>
-            <button class="adm-go-btn" style="flex:1;background:#fee;color:#c00;border-color:#fcc;" onclick="admResolveDeletionRequest('${r.id}','reject')">Reject</button>
-          </div>
-        </div>`;
-    }else if(r.status==='scheduled'){
-      actionBlock=`<div class="rpt-resolved-note"><b>Scheduled for:</b> ${admWhenFull(r.scheduled_for)}</div>`;
-    }else{
-      actionBlock=`<div class="rpt-resolved-note"><b>Admin comment:</b> <span data-no-i18n>${admEsc(r.admin_comment||'')}</span><div style="margin-top:4px;opacity:0.8;font-size:11px;">Reviewed ${admWhen(r.resolved_at)}</div></div>`;
-    }
-    return `<div class="rpt-card">
-      <div class="rpt-top">
-        <span class="rpt-type-pill">${r.role==='business'?'Business':'Marketer'}</span>
-        <span class="rpt-status-pill ${needsReview?'rpt-status-open':'rpt-status-resolved'}">${admDelReqStatusLabel(r.status)}</span>
-      </div>
-      <div class="rpt-reporter-row">
-        <div class="adm-user-av" data-no-i18n>${admEsc(admInitials(name))}</div>
-        <div style="flex:1;min-width:120px;">
-          <div class="rpt-name" data-no-i18n>${admEsc(name)}</div>
-          <div class="rpt-sub">${admEsc(person.phone||'no phone')} · Requested ${admWhen(r.requested_at)}</div>
-        </div>
-        <button class="adm-go-btn" onclick="admGoToAccount('${r.user_id}','${r.role}','${nameSafe}')">Go to Account</button>
-      </div>
-      ${walletBlock}
-      ${actionBlock}
-    </div>`;
-  }).join('');
-}
-async function admResolveDeletionRequest(id,action){
-  const ta=document.getElementById('delreq-comment-'+id);
-  const comment=(ta&&ta.value||'').trim();
-  if(action==='reject'){
-    if(!comment){alert('Write a reason before rejecting this request.');return;}
-    if(!confirm('Reject this deletion request? The user will be notified with your reason.'))return;
-  }else{
-    if(!confirm('Approve this deletion request? The account will be permanently deleted in 14 days, and the user will be notified.'))return;
-  }
-  try{
-    await window.LateenAPI.admin.resolveDeletionRequest(id,action,comment||null);
-    await admLoadDeletionRequests();
-  }catch(e){alert('Failed: '+e.message);}
-}
-
 /* boot */
 admLoadMetrics();
 admLoadReports();
-admLoadDeletionRequests();
 setInterval(()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}},10000);
-if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-wallets',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-payouts',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-reports',()=>{admLoadReports();}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-deletion-requests',()=>{admLoadDeletionRequests();}));}
+if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-wallets',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-payouts',()=>{try{if(document.getElementById('adm-payouts')?.classList.contains('active'))admLoadPayouts();}catch(e){}}));window.__lateenUnsubs.push(window.LateenAPI.subscribe('admin-reports',()=>{admLoadReports();}));}
 
 /* ========== Employees & Payroll ========== */
 let admEmpCache=[];

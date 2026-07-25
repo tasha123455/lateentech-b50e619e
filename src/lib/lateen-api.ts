@@ -519,31 +519,6 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
-    async requestAccountDeletion(role: "marketer" | "business") {
-      const { data, error } = await supabase.rpc("request_account_deletion", { _role: role });
-      if (error) throw error;
-      return data;
-    },
-
-    async cancelAccountDeletion(id: string) {
-      const { data, error } = await supabase.rpc("cancel_account_deletion", { _id: id });
-      if (error) throw error;
-      return data;
-    },
-
-    async getAccountDeletionStatus() {
-      const { data, error } = await supabase
-        .from("account_deletion_requests")
-        .select("*")
-        .eq("user_id", userId)
-        .in("status", ["wallet_review", "scheduled"])
-        .order("requested_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-
     subscribe(
       key:
         | "my-products"
@@ -555,8 +530,7 @@ export function createLateenApi(userId: string) {
         | "notifications"
         | "admin-wallets"
         | "admin-payouts"
-        | "admin-reports"
-        | "admin-deletion-requests",
+        | "admin-reports",
       onChange: () => void,
     ) {
       const ch = supabase.channel(`lateen-${key}-${userId}-${crypto.randomUUID()}`);
@@ -571,7 +545,6 @@ export function createLateenApi(userId: string) {
       if (key === "admin-wallets") filters.push({ table: "wallets" });
       if (key === "admin-payouts") filters.push({ table: "payouts" });
       if (key === "admin-reports") filters.push({ table: "reports" });
-      if (key === "admin-deletion-requests") filters.push({ table: "account_deletion_requests" });
       for (const f of filters) {
         (
           ch as unknown as {
@@ -741,8 +714,11 @@ export function createLateenApi(userId: string) {
         const w = new Map((wallets ?? []).map((row) => [row.user_id as string, row]));
         return rows.map((r) => ({ ...r, user: m.get(r.user_id) ?? null, wallet: w.get(r.user_id) ?? null }));
       },
-      async markPayoutPaid(id: string) {
-        const { error } = await supabase.rpc("admin_mark_payout_paid", { _payout_id: id });
+      async markPayoutPaid(id: string, receiptUrl: string) {
+        const { error } = await supabase.rpc("admin_mark_payout_paid", {
+          _payout_id: id,
+          _receipt_url: receiptUrl,
+        });
         if (error) throw error;
       },
       async notePayout(id: string, note: string) {
@@ -935,51 +911,6 @@ export function createLateenApi(userId: string) {
       async resolveReport(id: string, comment: string) {
         const { data, error } = await supabase.rpc("admin_resolve_report", {
           _report_id: id,
-          _comment: comment,
-        });
-        if (error) throw error;
-        return data;
-      },
-      async listDeletionRequests() {
-        const { data, error } = await supabase
-          .from("account_deletion_requests")
-          .select("*")
-          .order("requested_at", { ascending: false });
-        if (error) throw error;
-        const reqs = (data ?? []) as Array<{
-          id: string;
-          user_id: string;
-          role: string;
-          status: string;
-          wallet_balance: number;
-          wallet_pending: number;
-          requested_at: string;
-          scheduled_for: string | null;
-          admin_comment: string | null;
-          resolved_at: string | null;
-        }>;
-        if (!reqs.length) return [];
-        const ids = [...new Set(reqs.map((r) => r.user_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, business_name, phone")
-          .in("id", ids);
-        const pmap = new Map((profiles ?? []).map((p: { id: string }) => [p.id, p]));
-        const { data: wallets } = await supabase
-          .from("wallets")
-          .select("user_id, balance, pending")
-          .in("user_id", ids);
-        const wmap = new Map((wallets ?? []).map((w: { user_id: string }) => [w.user_id, w]));
-        return reqs.map((r) => ({
-          ...r,
-          person: pmap.get(r.user_id) ?? null,
-          live_wallet: wmap.get(r.user_id) ?? null,
-        }));
-      },
-      async resolveDeletionRequest(id: string, action: "approve" | "reject", comment: string | null) {
-        const { data, error } = await supabase.rpc("admin_resolve_deletion_request", {
-          _id: id,
-          _action: action,
           _comment: comment,
         });
         if (error) throw error;
