@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthContext";
 
@@ -68,6 +68,16 @@ function toLabel(v: unknown): string {
   return "";
 }
 
+function currencySymbol(v: PublicProduct["currency"]): string {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  const o = v as Record<string, unknown>;
+  const code = String(o.code ?? "").trim().toUpperCase();
+  const sym = String(o.symbol ?? "").trim();
+  if (code === "LYD" || sym === "ل.د" || sym === "د.ل") return "\u2066د.ل\u2069";
+  return sym || code || "";
+}
+
 function normVariantGroups(p: PublicProduct): { name: string; items: { val: string; photo: string; qty: number | null }[] }[] {
   const norm = (v: VariantItem) => {
     if (typeof v === "string") return { val: v, photo: "", qty: null as number | null };
@@ -98,6 +108,7 @@ function PublicProductPage() {
   const [zoneOpen, setZoneOpen] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   // Redirect signed-in marketers into the dashboard's Browse product view.
   useEffect(() => {
@@ -145,7 +156,7 @@ function PublicProductPage() {
   }, [id]);
 
   const variantGroups = useMemo(() => (p ? normVariantGroups(p) : []), [p]);
-  const currencyLabel = p ? (typeof p.currency === "string" ? p.currency : toLabel(p.currency) || "") : "";
+  const currencyLabel = p ? currencySymbol(p.currency) : "";
   const available = p ? Math.max(0, (p.qty ?? 0) - (p.reserved_qty ?? 0)) : 0;
 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / reviews.length : 0;
@@ -194,10 +205,29 @@ function PublicProductPage() {
 
   const deliveryEntries = Object.entries(p.delivery ?? {});
 
+  const onGalleryTouchStart = (e: TouchEvent) => {
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+  };
+  const onGalleryTouchEnd = (e: TouchEvent) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start || photos.length < 2) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    setIdx((i) => (dx < 0 ? Math.min(photos.length - 1, i + 1) : Math.max(0, i - 1)));
+  };
+
   return (
     <div className="mx-auto min-h-screen max-w-[520px] bg-background pb-28">
       {/* Photo gallery */}
-      <div className="relative aspect-square w-full bg-surface-2">
+      <div
+        className="relative aspect-square w-full bg-surface-2"
+        onTouchStart={onGalleryTouchStart}
+        onTouchEnd={onGalleryTouchEnd}
+      >
         {photos.length > 0 ? (
           <img src={photos[idx]} alt={p.name} className="h-full w-full object-cover cursor-zoom-in" onClick={() => setLightbox(photos[idx])} />
         ) : (
@@ -226,7 +256,6 @@ function PublicProductPage() {
       <div className="px-5 pt-5">
         <h1 className="text-lg font-semibold text-text-1"><span data-no-i18n>{p.name}</span></h1>
         {p.code && <div className="mt-0.5 text-xs text-text-3">Code: <span data-no-i18n>{p.code}</span></div>}
-        {p.biz_name && <div className="mt-0.5 text-xs text-text-3">By <span data-no-i18n>{p.biz_name}</span></div>}
         <div className="mt-3 flex items-baseline gap-2">
           <div className="text-2xl font-bold text-text-1">
             {Number(p.price).toLocaleString()} <span data-no-i18n>{currencyLabel}</span>
