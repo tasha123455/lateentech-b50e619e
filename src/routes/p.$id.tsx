@@ -25,7 +25,7 @@ type PublicProduct = {
   category: string | null;
   description: string | null;
   price: number;
-  currency: string;
+  currency: string | { code?: string; symbol?: string; name?: string } | null;
   photos: string[] | null;
   sizes: string[] | null;
   colors: string[] | null;
