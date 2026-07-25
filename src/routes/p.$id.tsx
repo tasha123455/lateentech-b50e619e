@@ -25,7 +25,7 @@ type PublicProduct = {
   category: string | null;
   description: string | null;
   price: number;
-  currency: string;
+  currency: string | { code?: string; symbol?: string; name?: string } | null;
   photos: string[] | null;
   sizes: string[] | null;
   colors: string[] | null;
@@ -98,8 +98,21 @@ function PublicProductPage() {
   }
 
   const photos = (p.photos ?? []).filter(Boolean);
-  const sizes = Array.isArray(p.sizes) ? p.sizes : [];
-  const colors = Array.isArray(p.colors) ? p.colors : [];
+  const toLabel = (v: unknown): string => {
+    if (v == null) return "";
+    if (typeof v === "string" || typeof v === "number") return String(v);
+    if (typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      return String(o.name ?? o.label ?? o.value ?? o.code ?? o.symbol ?? "");
+    }
+    return "";
+  };
+  const sizes = (Array.isArray(p.sizes) ? p.sizes : []).map(toLabel).filter(Boolean);
+  const colors = (Array.isArray(p.colors) ? p.colors : []).map(toLabel).filter(Boolean);
+  const currencyLabel =
+    typeof p.currency === "string"
+      ? p.currency
+      : toLabel(p.currency) || "";
   const available = Math.max(0, (p.qty ?? 0) - (p.reserved_qty ?? 0));
   const isMarketer = !!user && role === "marketer";
   const returnTo = `/p/${p.id}`;
@@ -131,11 +144,11 @@ function PublicProductPage() {
       </div>
 
       <div className="px-5 pt-5">
-        <h1 className="text-lg font-semibold text-text-1">{p.name}</h1>
-        {p.code && <div className="mt-0.5 text-xs text-text-3">{p.code}</div>}
+        <h1 className="text-lg font-semibold text-text-1"><span data-no-i18n>{p.name}</span></h1>
+        {p.code && <div className="mt-0.5 text-xs text-text-3"><span data-no-i18n>{p.code}</span></div>}
         <div className="mt-3 flex items-baseline gap-2">
           <div className="text-2xl font-bold text-text-1">
-            {Number(p.price).toLocaleString()} {p.currency}
+            {Number(p.price).toLocaleString()} <span data-no-i18n>{currencyLabel}</span>
           </div>
           <div className={`text-xs ${available > 0 ? "text-business" : "text-destructive"}`}>
             {available > 0 ? `${available} in stock` : "Out of stock"}
@@ -143,7 +156,7 @@ function PublicProductPage() {
         </div>
 
         {p.description && (
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-text-2">
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-text-2" data-no-i18n>
             {p.description}
           </p>
         )}
