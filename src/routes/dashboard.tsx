@@ -54,9 +54,10 @@ function DashboardPage() {
       const w = window as unknown as {
         openD?: (id: string) => void;
         goTo?: (page: string) => void;
-        P?: Array<{ id: string }>;
+        __lateenGetProducts?: () => Array<{ id: string }>;
       };
-      const ready = typeof w.openD === "function" && typeof w.goTo === "function" && Array.isArray(w.P) && w.P.some((p) => p.id === prod);
+      const list = typeof w.__lateenGetProducts === "function" ? w.__lateenGetProducts() : undefined;
+      const ready = typeof w.openD === "function" && typeof w.goTo === "function" && Array.isArray(list) && list.some((p) => p.id === prod);
       if (ready) {
         try { w.goTo!("pg-browse"); } catch { /* ignore */ }
         try { w.openD!(prod); } catch { /* ignore */ }
