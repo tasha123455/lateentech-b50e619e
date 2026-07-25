@@ -131,11 +131,11 @@ function PublicProductPage() {
       </div>
 
       <div className="px-5 pt-5">
-        <h1 className="text-lg font-semibold text-text-1">{p.name}</h1>
-        {p.code && <div className="mt-0.5 text-xs text-text-3">{p.code}</div>}
+        <h1 className="text-lg font-semibold text-text-1"><span data-no-i18n>{p.name}</span></h1>
+        {p.code && <div className="mt-0.5 text-xs text-text-3"><span data-no-i18n>{p.code}</span></div>}
         <div className="mt-3 flex items-baseline gap-2">
           <div className="text-2xl font-bold text-text-1">
-            {Number(p.price).toLocaleString()} {p.currency}
+            {Number(p.price).toLocaleString()} <span data-no-i18n>{currencyLabel}</span>
           </div>
           <div className={`text-xs ${available > 0 ? "text-business" : "text-destructive"}`}>
             {available > 0 ? `${available} in stock` : "Out of stock"}
@@ -143,7 +143,7 @@ function PublicProductPage() {
         </div>
 
         {p.description && (
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-text-2">
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-text-2" data-no-i18n>
             {p.description}
           </p>
         )}
