@@ -98,8 +98,21 @@ function PublicProductPage() {
   }
 
   const photos = (p.photos ?? []).filter(Boolean);
-  const sizes = Array.isArray(p.sizes) ? p.sizes : [];
-  const colors = Array.isArray(p.colors) ? p.colors : [];
+  const toLabel = (v: unknown): string => {
+    if (v == null) return "";
+    if (typeof v === "string" || typeof v === "number") return String(v);
+    if (typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      return String(o.name ?? o.label ?? o.value ?? o.code ?? o.symbol ?? "");
+    }
+    return "";
+  };
+  const sizes = (Array.isArray(p.sizes) ? p.sizes : []).map(toLabel).filter(Boolean);
+  const colors = (Array.isArray(p.colors) ? p.colors : []).map(toLabel).filter(Boolean);
+  const currencyLabel =
+    typeof p.currency === "string"
+      ? p.currency
+      : toLabel(p.currency) || "";
   const available = Math.max(0, (p.qty ?? 0) - (p.reserved_qty ?? 0));
   const isMarketer = !!user && role === "marketer";
   const returnTo = `/p/${p.id}`;
