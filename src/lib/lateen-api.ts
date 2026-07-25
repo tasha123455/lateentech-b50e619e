@@ -212,6 +212,41 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
+    async listProductReviews(productId: string): Promise<Array<{
+      id: string; marketer_id: string; rating: number; comment: string | null;
+      created_at: string; updated_at: string; author_name: string;
+    }>> {
+      const { data, error } = await supabase.rpc(
+        "list_product_reviews" as never,
+        { _product_id: productId } as never,
+      );
+      if (error) throw error;
+      return (data ?? []) as never;
+    },
+
+    async getMyProductReview(productId: string) {
+      const { data, error } = await supabase
+        .from("product_reviews" as never)
+        .select("id,rating,comment,updated_at")
+        .eq("product_id", productId)
+        .eq("marketer_id", userId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; rating: number; comment: string | null; updated_at: string } | null;
+    },
+
+    async upsertProductReview(productId: string, rating: number, comment: string) {
+      const { error } = await (supabase
+        .from("product_reviews" as never) as unknown as {
+          upsert: (row: Record<string, unknown>, opts?: Record<string, unknown>) => Promise<{ error: unknown }>;
+        })
+        .upsert(
+          { product_id: productId, marketer_id: userId, rating, comment: comment || null },
+          { onConflict: "product_id,marketer_id" },
+        );
+      if (error) throw error;
+    },
+
     async submitReport(payload: { type: string; productId?: string; businessId?: string; message: string }) {
       const { error } = await supabase.from("reports").insert({
         reporter_id: userId,
