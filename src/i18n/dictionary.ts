@@ -617,7 +617,7 @@ export const DICT: Record<string, string> = {
   "· out of stock": "· نفذت الكميه",
   "Sell this product": "بيع هذا المنتج",
   "Open dashboard": "فتح لوحة التحكم",
-  "Sign up to sell this product": "سجّل لبيع هذا المنتج",
+  "Create an account to sell the product": "إنشاء حساب لبيع المنتج",
 
   // ===== Admin =====
   "Admin": "مدير",
