@@ -510,6 +510,58 @@ export type Database = {
         }
         Relationships: []
       }
+      product_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          marketer_id: string
+          product_id: string
+          rating: number
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          marketer_id: string
+          product_id: string
+          rating: number
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          marketer_id?: string
+          product_id?: string
+          rating?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_marketer_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           biz_name: string | null
@@ -941,12 +993,16 @@ export type Database = {
       }
       products_public_view: {
         Row: {
+          biz_name: string | null
           business_id: string | null
           category: string | null
           code: string | null
           colors: Json | null
+          cover_focus_x: number | null
+          cover_focus_y: number | null
           currency: Json | null
           deleted_at: string | null
+          delivery: Json | null
           description: string | null
           id: string | null
           name: string | null
@@ -959,12 +1015,16 @@ export type Database = {
           variant_groups: Json | null
         }
         Insert: {
+          biz_name?: string | null
           business_id?: string | null
           category?: string | null
           code?: string | null
           colors?: Json | null
+          cover_focus_x?: number | null
+          cover_focus_y?: number | null
           currency?: Json | null
           deleted_at?: string | null
+          delivery?: Json | null
           description?: string | null
           id?: string | null
           name?: string | null
@@ -977,12 +1037,16 @@ export type Database = {
           variant_groups?: Json | null
         }
         Update: {
+          biz_name?: string | null
           business_id?: string | null
           category?: string | null
           code?: string | null
           colors?: Json | null
+          cover_focus_x?: number | null
+          cover_focus_y?: number | null
           currency?: Json | null
           deleted_at?: string | null
+          delivery?: Json | null
           description?: string | null
           id?: string | null
           name?: string | null
@@ -1522,6 +1586,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      list_product_reviews: {
+        Args: { _product_id: string }
+        Returns: {
+          author_name: string
+          comment: string
+          created_at: string
+          id: string
+          marketer_id: string
+          rating: number
+          updated_at: string
+        }[]
       }
       mark_delivered: {
         Args: { _order_id: string }
