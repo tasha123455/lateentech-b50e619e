@@ -76,6 +76,12 @@ const PLAT_THRESHOLD=100;
 function platformFeeForPrice(price){const pr=Number(price)||0;return pr>PLAT_THRESHOLD?parseFloat((pr*PLAT).toFixed(2)):PLAT_FIXED;}
 const CN={NG:'Nigeria',GH:'Ghana',EG:'Egypt',KE:'Kenya',ZA:'South Africa',MA:'Morocco'};
 let P=[];
+// LateenShell only auto-exposes top-level `function` declarations onto
+// `window` (see buildScript() in LateenShell.tsx) — a plain `let P=[]`
+// variable is never exported that way, so window.P was always undefined.
+// This getter is a function declaration, so it IS auto-exported, and always
+// reflects the current value of P since it closes over the same binding.
+function __lateenGetProducts(){return P;}
 let __favIds=new Set();
 let __favOrder=[];
 // True remaining stock: when a product has tracked per-variant quantities,
