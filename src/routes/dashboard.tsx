@@ -5,6 +5,10 @@ import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard · Lateen" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    prod: typeof s.prod === "string" ? s.prod : undefined,
+    order: typeof s.order === "string" ? s.order : undefined,
+  }),
   component: DashboardPage,
 });
 
@@ -24,6 +28,7 @@ function readImpersonation(): Impersonation | null {
 function DashboardPage() {
   const { user, role, loading } = useAuth();
   const nav = useNavigate();
+  const { prod } = Route.useSearch();
   const [impersonation, setImpersonation] = useState<Impersonation | null>(() => readImpersonation());
 
   useEffect(() => {
@@ -36,6 +41,33 @@ function DashboardPage() {
       setImpersonation(null);
     }
   }, [impersonation, role]);
+
+  // If /dashboard?prod=<id> is set, wait for the marketer script to initialise
+  // (window.openD + window.P populated by loadBrowse) then switch to Browse and
+  // open that product's detail card — same UX as tapping it in Browse.
+  useEffect(() => {
+    if (!prod || role !== "marketer") return;
+    let cancelled = false;
+    const start = Date.now();
+    const tick = () => {
+      if (cancelled) return;
+      const w = window as unknown as {
+        openD?: (id: string) => void;
+        goTo?: (page: string) => void;
+        P?: Array<{ id: string }>;
+      };
+      const ready = typeof w.openD === "function" && typeof w.goTo === "function" && Array.isArray(w.P) && w.P.some((p) => p.id === prod);
+      if (ready) {
+        try { w.goTo!("pg-browse"); } catch { /* ignore */ }
+        try { w.openD!(prod); } catch { /* ignore */ }
+        return;
+      }
+      if (Date.now() - start > 15000) return;
+      setTimeout(tick, 150);
+    };
+    tick();
+    return () => { cancelled = true; };
+  }, [prod, role]);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center text-text-2">Loading…</div>;
