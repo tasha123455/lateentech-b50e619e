@@ -602,6 +602,23 @@ export const DICT: Record<string, string> = {
   "Go home": "الذهاب للرئيسية",
   "Page not found": "الصفحة غير موجودة",
 
+  // ===== Public product share page (/p/:id, non-registered visitors) =====
+  "Product unavailable": "المنتج غير متاح",
+  "This product is no longer available.": "هذا المنتج لم يعد متاحاً.",
+  "Code:": "الكود:",
+  "Share": "مشاركة",
+  "Delivery to": "التوصيل إلى",
+  "No delivery zones": "لا توجد مناطق توصيل",
+  "No cities": "لا توجد مدن",
+  "Shipping:": "الشحن:",
+  "Delivery:": "التوصيل:",
+  "Reviews (": "التقييمات (",
+  "No reviews yet.": "لا توجد تقييمات بعد.",
+  "· out of stock": "· نفذت الكميه",
+  "Sell this product": "بيع هذا المنتج",
+  "Open dashboard": "فتح لوحة التحكم",
+  "Sign up to sell this product": "سجّل لبيع هذا المنتج",
+
   // ===== Admin =====
   "Admin": "مدير",
   "Admins": "المديرون",
@@ -1070,6 +1087,18 @@ const PATTERNS: Pattern[] = [
   // "Full payment received · £25.00 · 16 May 2026"
   { re: /^Full\s+payment\s+received(?:\s*[·\-]\s*(.+))?$/i,
     build: (m) => m[1] ? `تم استلام كامل المبلغ · ${arMonths(m[1])}` : `تم استلام كامل المبلغ` },
+  // "<n> in stock" (public product share page availability line)
+  { re: /^(\d[\d,]*)\s+in\s+stock$/i, build: (m) => {
+      const n = parseInt(m[1].replace(/,/g, ""), 10);
+      const piece = n === 1 ? "قطعه واحده" : n === 2 ? "قطعتين" : (n > 10 ? `${n} قطعه` : `${n} قطع`);
+      return `متوفر ${piece}`;
+    } },
+  // "<n> left" (public product share page per-variant stock)
+  { re: /^(\d[\d,]*)\s+left$/i, build: (m) => {
+      const n = parseInt(m[1].replace(/,/g, ""), 10);
+      const piece = n === 1 ? "قطعه واحده" : n === 2 ? "قطعتين" : (n > 10 ? `${n} قطعه` : `${n} قطع`);
+      return `متبقي ${piece}`;
+    } },
 ];
 
 // Normalize then lookup. Returns the translation, or null if not in dict.
