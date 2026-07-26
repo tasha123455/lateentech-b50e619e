@@ -516,6 +516,7 @@ export type Database = {
           created_at: string
           id: string
           marketer_id: string
+          photo_url: string | null
           product_id: string
           rating: number
           updated_at: string
@@ -525,6 +526,7 @@ export type Database = {
           created_at?: string
           id?: string
           marketer_id: string
+          photo_url?: string | null
           product_id: string
           rating: number
           updated_at?: string
@@ -534,6 +536,7 @@ export type Database = {
           created_at?: string
           id?: string
           marketer_id?: string
+          photo_url?: string | null
           product_id?: string
           rating?: number
           updated_at?: string
@@ -1591,10 +1594,12 @@ export type Database = {
         Args: { _product_id: string }
         Returns: {
           author_name: string
+          avatar_path: string
           comment: string
           created_at: string
           id: string
           marketer_id: string
+          photo_url: string
           rating: number
           updated_at: string
         }[]
