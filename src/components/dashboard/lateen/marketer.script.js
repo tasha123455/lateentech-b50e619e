@@ -213,7 +213,7 @@ let __pdCurRating=0;
 let __revPhotoUrl='';
 const __revCache={};
 function __revList(pid){return __revCache[pid]||[];}
-async function pickRevPhoto(inp){if(inp)inp.value='';}
+async function pickRevPhoto(inp){const f=inp&&inp.files&&inp.files[0];if(!f)return;const t=__pdT();const hint=document.getElementById('pd-rev-photo-hint');if(!/^image\//.test(f.type)||f.size>5*1024*1024){alert(t.photoErr);inp.value='';return;}if(hint)hint.textContent=t.uploadingPhoto;try{if(!window.LateenAPI||!window.LateenAPI.uploadReviewPhoto)throw new Error('no api');const url=await window.LateenAPI.uploadReviewPhoto(f);__revPhotoUrl=url;const prev=document.getElementById('pd-rev-photo-preview');const addBtn=document.getElementById('pd-rev-photo-add');const img=document.getElementById('pd-rev-photo-img');if(img)img.src=url;if(prev)prev.style.display='block';if(addBtn)addBtn.style.display='none';if(hint)hint.textContent='';}catch(e){console.error('[Lateen] pickRevPhoto',e);alert(t.photoErr);if(hint)hint.textContent=t.addPhoto;}finally{inp.value='';}}
 function removeRevPhoto(){__revPhotoUrl='';const prev=document.getElementById('pd-rev-photo-preview');const addBtn=document.getElementById('pd-rev-photo-add');const hint=document.getElementById('pd-rev-photo-hint');if(prev)prev.style.display='none';if(addBtn)addBtn.style.display='flex';if(hint)hint.textContent='';}
 function setRevStar(n){__pdCurRating=n;const wrap=document.getElementById('pd-rev-stars');if(!wrap)return;[...wrap.querySelectorAll('.pd-rev-star')].forEach(el=>{el.classList.toggle('on',Number(el.getAttribute('data-r'))<=n);});}
 let __revIdx=0;
