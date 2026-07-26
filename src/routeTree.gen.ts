@@ -16,6 +16,7 @@ import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
 import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
 import { Route as BusinessSigninRouteImport } from './routes/business.signin'
 import { Route as BusinessRegisterRouteImport } from './routes/business.register'
+import { Route as LovableAccountDeletionsProcessRouteImport } from './routes/lovable/account-deletions/process'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -57,6 +58,12 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   path: '/business/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableAccountDeletionsProcessRoute =
+  LovableAccountDeletionsProcessRouteImport.update({
+    id: '/lovable/account-deletions/process',
+    path: '/lovable/account-deletions/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
+  '/lovable/account-deletions/process': typeof LovableAccountDeletionsProcessRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -108,6 +116,7 @@ export interface FileRoutesByTo {
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
+  '/lovable/account-deletions/process': typeof LovableAccountDeletionsProcessRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -123,6 +132,7 @@ export interface FileRoutesById {
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
+  '/lovable/account-deletions/process': typeof LovableAccountDeletionsProcessRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/marketer/register'
     | '/marketer/signin'
     | '/p/$id'
+    | '/lovable/account-deletions/process'
     | '/api/public/notifications/push'
     | '/api/public/notifications/vapid-public-key'
     | '/lovable/email/auth/preview'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/marketer/register'
     | '/marketer/signin'
     | '/p/$id'
+    | '/lovable/account-deletions/process'
     | '/api/public/notifications/push'
     | '/api/public/notifications/vapid-public-key'
     | '/lovable/email/auth/preview'
@@ -167,6 +179,7 @@ export interface FileRouteTypes {
     | '/marketer/register'
     | '/marketer/signin'
     | '/p/$id'
+    | '/lovable/account-deletions/process'
     | '/api/public/notifications/push'
     | '/api/public/notifications/vapid-public-key'
     | '/lovable/email/auth/preview'
@@ -182,6 +195,7 @@ export interface RootRouteChildren {
   MarketerRegisterRoute: typeof MarketerRegisterRoute
   MarketerSigninRoute: typeof MarketerSigninRoute
   PIdRoute: typeof PIdRoute
+  LovableAccountDeletionsProcessRoute: typeof LovableAccountDeletionsProcessRoute
   ApiPublicNotificationsPushRoute: typeof ApiPublicNotificationsPushRoute
   ApiPublicNotificationsVapidPublicKeyRoute: typeof ApiPublicNotificationsVapidPublicKeyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -240,6 +254,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/account-deletions/process': {
+      id: '/lovable/account-deletions/process'
+      path: '/lovable/account-deletions/process'
+      fullPath: '/lovable/account-deletions/process'
+      preLoaderRoute: typeof LovableAccountDeletionsProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -286,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketerRegisterRoute: MarketerRegisterRoute,
   MarketerSigninRoute: MarketerSigninRoute,
   PIdRoute: PIdRoute,
+  LovableAccountDeletionsProcessRoute: LovableAccountDeletionsProcessRoute,
   ApiPublicNotificationsPushRoute: ApiPublicNotificationsPushRoute,
   ApiPublicNotificationsVapidPublicKeyRoute:
     ApiPublicNotificationsVapidPublicKeyRoute,
@@ -296,3 +318,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
