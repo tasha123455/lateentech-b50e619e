@@ -212,10 +212,17 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
-    avatarPublicUrl(path: string | null | undefined): string {
+    async avatarPublicUrl(path: string | null | undefined): Promise<string> {
+      // The `avatars` bucket is private (this workspace blocks public storage
+      // buckets), so getPublicUrl() would return a URL that 404s. Use a
+      // long-lived signed URL instead, same as uploadReviewPhoto() below.
       if (!path) return "";
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      return data?.publicUrl || "";
+      try {
+        const { data } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+        return data?.signedUrl ?? "";
+      } catch {
+        return "";
+      }
     },
 
     async uploadReviewPhoto(file: File): Promise<string> {
@@ -240,6 +247,16 @@ export function createLateenApi(userId: string) {
         "list_product_reviews" as never,
         { _product_id: productId } as never,
       );
+      if (error) throw error;
+      return (data ?? []) as never;
+    },
+
+    async listBusinessReviews(): Promise<Array<{
+      id: string; product_id: string; marketer_id: string; rating: number; comment: string | null;
+      created_at: string; updated_at: string; author_name: string;
+      photo_url: string | null; avatar_path: string | null;
+    }>> {
+      const { data, error } = await supabase.rpc("list_business_reviews" as never, {} as never);
       if (error) throw error;
       return (data ?? []) as never;
     },
@@ -608,6 +625,7 @@ export function createLateenApi(userId: string) {
         | "wallet"
         | "payouts"
         | "notifications"
+        | "business-reviews"
         | "admin-wallets"
         | "admin-payouts"
         | "admin-reports"
@@ -623,6 +641,11 @@ export function createLateenApi(userId: string) {
       if (key === "wallet") filters.push({ table: "wallets", filter: `user_id=eq.${userId}` });
       if (key === "payouts") filters.push({ table: "payouts", filter: `user_id=eq.${userId}` });
       if (key === "notifications") filters.push({ table: "notifications", filter: `user_id=eq.${userId}` });
+      // No row-level filter possible here (product_reviews has no business_id
+      // column directly — it's one hop away via product_id), so we just
+      // re-fetch on any change and let list_business_reviews()'s own
+      // ownership filter (products.business_id = auth.uid()) scope it.
+      if (key === "business-reviews") filters.push({ table: "product_reviews" });
       if (key === "admin-wallets") filters.push({ table: "wallets" });
       if (key === "admin-payouts") filters.push({ table: "payouts" });
       if (key === "admin-reports") filters.push({ table: "reports" });
