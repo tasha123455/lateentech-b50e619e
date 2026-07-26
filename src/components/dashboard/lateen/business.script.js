@@ -1105,6 +1105,34 @@ async function refreshBizReviews(){
   try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
 }
 window.refreshBizReviews=refreshBizReviews;
+function __notifToggle(el){
+  const d=el.querySelector('[data-nd]');
+  if(!d)return;
+  const opening=d.style.display==='none'||!d.style.display;
+  if(!opening){d.style.display='none';return;}
+  const iconEl=el.querySelector('.notif-icon-photo');
+  const bigImg=d.querySelector('img');
+  d.style.display='block';
+  if(!iconEl||!bigImg)return;
+  const run=function(){
+    const r0=iconEl.getBoundingClientRect();
+    const r1=bigImg.getBoundingClientRect();
+    if(!r1.width||!r1.height)return;
+    const sx=r0.width/r1.width,sy=r0.height/r1.height;
+    const tx=(r0.left+r0.width/2)-(r1.left+r1.width/2);
+    const ty=(r0.top+r0.height/2)-(r1.top+r1.height/2);
+    bigImg.style.transition='none';
+    bigImg.style.transformOrigin='center center';
+    bigImg.style.borderRadius='50%';
+    bigImg.style.transform='translate('+tx+'px,'+ty+'px) scale('+sx+','+sy+')';
+    void bigImg.offsetWidth;
+    bigImg.style.transition='transform .32s cubic-bezier(.22,.8,.22,1), border-radius .32s ease';
+    bigImg.style.transform='translate(0,0) scale(1,1)';
+    bigImg.style.borderRadius='10px';
+    setTimeout(function(){bigImg.style.transition='';bigImg.style.transform='';bigImg.style.transformOrigin='';},340);
+  };
+  if(bigImg.complete&&bigImg.naturalWidth){run();}else{bigImg.addEventListener('load',run,{once:true});}
+}
 async function refreshBizNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
@@ -1148,7 +1176,8 @@ async function refreshBizNotifications(){
     let __iconD=n.data;if(typeof __iconD==='string'){try{__iconD=JSON.parse(__iconD);}catch(e){__iconD=null;}}if(!__iconD)__iconD={};
     const __iconRaw=n.kind==='product_review'?__iconD.avatar:(__iconD.product_photo||__iconD.photo);
     const iconPhotoUrl=__iconRaw&&/^(https?:|data:|\/)/.test(String(__iconRaw))?__iconRaw:'';
-    const iconHtml=iconPhotoUrl?`<div class="notif-icon notif-icon-photo" style="background-image:url('${esc(iconPhotoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color}">•</div>`;
+    const __reviewInitial=n.kind==='product_review'?((__iconD.author||'M').trim().charAt(0).toUpperCase()||'M'):'';
+    const iconHtml=iconPhotoUrl?`<div class="notif-icon notif-icon-photo" style="background-image:url('${esc(iconPhotoUrl)}')"></div>`:(n.kind==='product_review'?`<div class="notif-icon" style="background:var(--color-background-tertiary);color:var(--color-text-secondary);font-weight:600">${esc(__reviewInitial)}</div>`:`<div class="notif-icon" style="background:${color}22;color:${color}">•</div>`);
     let detailsHtml='';
     if(expandable&&n.data){
       let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
@@ -1175,7 +1204,7 @@ async function refreshBizNotifications(){
         </div>`;
       }
     }
-    const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
+    const clickable=expandable&&detailsHtml?' onclick="__notifToggle(this)" style="cursor:pointer"':'';
     const isNew=!n.read_at;
     const rightDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
     return `<div class="notif-item"${clickable}>${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;

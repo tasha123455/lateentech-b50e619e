@@ -646,6 +646,34 @@ async function refreshPayoutState(){
 async function __lateenRefreshWalletAndPayout(){try{if(typeof refreshWallet==='function')await refreshWallet();else await refreshPayoutState();}catch(e){console.error('[Lateen] wallet/payout refresh',e);}}
 let __notifNewIds = (window.__notifNewIds instanceof Set) ? window.__notifNewIds : new Set();
 window.__notifNewIds = __notifNewIds;
+function __notifToggle(el){
+  const d=el.querySelector('[data-nd]');
+  if(!d)return;
+  const opening=d.style.display==='none'||!d.style.display;
+  if(!opening){d.style.display='none';return;}
+  const iconEl=el.querySelector('.notif-icon-photo');
+  const bigImg=d.querySelector('img');
+  d.style.display='block';
+  if(!iconEl||!bigImg)return;
+  const run=function(){
+    const r0=iconEl.getBoundingClientRect();
+    const r1=bigImg.getBoundingClientRect();
+    if(!r1.width||!r1.height)return;
+    const sx=r0.width/r1.width,sy=r0.height/r1.height;
+    const tx=(r0.left+r0.width/2)-(r1.left+r1.width/2);
+    const ty=(r0.top+r0.height/2)-(r1.top+r1.height/2);
+    bigImg.style.transition='none';
+    bigImg.style.transformOrigin='center center';
+    bigImg.style.borderRadius='50%';
+    bigImg.style.transform='translate('+tx+'px,'+ty+'px) scale('+sx+','+sy+')';
+    void bigImg.offsetWidth;
+    bigImg.style.transition='transform .32s cubic-bezier(.22,.8,.22,1), border-radius .32s ease';
+    bigImg.style.transform='translate(0,0) scale(1,1)';
+    bigImg.style.borderRadius='10px';
+    setTimeout(function(){bigImg.style.transition='';bigImg.style.transform='';bigImg.style.transformOrigin='';},340);
+  };
+  if(bigImg.complete&&bigImg.naturalWidth){run();}else{bigImg.addEventListener('load',run,{once:true});}
+}
 async function refreshNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
@@ -735,7 +763,7 @@ async function refreshNotifications(){
         </div>`;
       }
     }
-    const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
+    const clickable=expandable&&detailsHtml?' onclick="__notifToggle(this)" style="cursor:pointer"':'';
     const isNew=__notifNewIds.has(n.id);
     const rightDot=isNew?'<div class="notif-new-dot" style="flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
     return `<div class="notif-item"${clickable}>${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
@@ -805,7 +833,7 @@ async function renderTransactions(){
         ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
     }
     const detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323">${detailRows}</div>`;
-    return `<div class="notif-item" onclick="(function(el){var d=el.querySelector('[data-nd]');if(d)d.style.display=d.style.display==='none'?'block':'none';})(this)" style="cursor:pointer">
+    return `<div class="notif-item" onclick="__notifToggle(this)" style="cursor:pointer">
       ${iconHtml}
       <div style="flex:1;min-width:0">
         <div class="notif-title">${__txnEsc(title)}</div>
