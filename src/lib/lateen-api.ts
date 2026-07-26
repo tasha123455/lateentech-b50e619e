@@ -212,9 +212,23 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
+    async uploadReviewPhoto(file: File): Promise<string> {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("review-photos")
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      const { data: s } = await supabase.storage
+        .from("review-photos")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      return s?.signedUrl ?? "";
+    },
+
     async listProductReviews(productId: string): Promise<Array<{
       id: string; marketer_id: string; rating: number; comment: string | null;
       created_at: string; updated_at: string; author_name: string;
+      photo_url: string | null; avatar_path: string | null;
     }>> {
       const { data, error } = await supabase.rpc(
         "list_product_reviews" as never,
@@ -227,21 +241,21 @@ export function createLateenApi(userId: string) {
     async getMyProductReview(productId: string) {
       const { data, error } = await supabase
         .from("product_reviews" as never)
-        .select("id,rating,comment,updated_at")
+        .select("id,rating,comment,updated_at,photo_url")
         .eq("product_id", productId)
         .eq("marketer_id", userId)
         .maybeSingle();
       if (error) throw error;
-      return data as { id: string; rating: number; comment: string | null; updated_at: string } | null;
+      return data as { id: string; rating: number; comment: string | null; updated_at: string; photo_url: string | null } | null;
     },
 
-    async upsertProductReview(productId: string, rating: number, comment: string) {
+    async upsertProductReview(productId: string, rating: number, comment: string, photoUrl?: string) {
       const { error } = await (supabase
         .from("product_reviews" as never) as unknown as {
           upsert: (row: Record<string, unknown>, opts?: Record<string, unknown>) => Promise<{ error: unknown }>;
         })
         .upsert(
-          { product_id: productId, marketer_id: userId, rating, comment: comment || null },
+          { product_id: productId, marketer_id: userId, rating, comment: comment || null, photo_url: photoUrl || null },
           { onConflict: "product_id,marketer_id" },
         );
       if (error) throw error;
