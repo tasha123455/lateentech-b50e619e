@@ -17,27 +17,32 @@ export const Route = createFileRoute("/lovable/account-deletions/process")({
       POST: async ({ request }) => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Verify the shared secret from vault (matches the pg_cron job's header),
-        // same pattern as /lovable/email/queue/process and the push webhook.
+        // Verify the shared secret from vault (matches the pg_cron job's header).
+        //
+        // NOTE: this used to fetch the secret's value into the app via
+        // supabaseAdmin.schema("vault").from("decrypted_secrets"), the same
+        // way the push webhook does. That never works: "vault" isn't a
+        // schema the Data API exposes, so the lookup silently fails,
+        // `expected` stays empty, and every request — including the real
+        // cron job's — gets rejected. That was the actual reason scheduled
+        // deletions never fired even once cron and the route were live.
+        // Verifying the secret with a SECURITY DEFINER DB function instead
+        // avoids needing "vault" exposed over REST at all.
         const auth = request.headers.get("authorization") ?? "";
         const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
         if (!bearer) return new Response("Missing bearer", { status: 401 });
 
-        let expected = "";
+        let verified = false;
         try {
-          const { data } = await supabaseAdmin
-            .schema("vault" as never)
-            .from("decrypted_secrets" as never)
-            .select("decrypted_secret")
-            .eq("name", "account_deletion_cron_secret")
-            .maybeSingle();
-          const row = data as { decrypted_secret?: string } | null;
-          expected = row?.decrypted_secret ?? "";
+          const { data } = await supabaseAdmin.rpc("verify_account_deletion_cron_secret" as never, {
+            _secret: bearer,
+          } as never);
+          verified = data === true;
         } catch {
-          /* expected stays empty -> request rejected below */
+          /* verified stays false -> request rejected below */
         }
 
-        if (!expected || bearer !== expected) {
+        if (!verified) {
           return new Response("Unauthorized", { status: 401 });
         }
 
