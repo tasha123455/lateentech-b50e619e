@@ -630,7 +630,12 @@ async function refreshPayoutState(){
     window.__lateenCanWithdraw=true;
     setBtn(true,__t('Withdraw','سحب'));
   }else if(daysLeft>0){
-    stEl.textContent=__t('Next payout in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
+    let msg;
+    if(daysLeft===1)msg=__t('You can withdraw in 1 day','تقدر تسحب بعد يوم واحد');
+    else if(daysLeft===2)msg=__t('You can withdraw in 2 days','تقدر تسحب بعد يومين');
+    else if(daysLeft<=10)msg=__t('You can withdraw in 3–10 days','تقدر تسحب بعد 3 - 10 أيام');
+    else msg=__t('You can withdraw in 11+ days','تقدر تسحب بعد 11+ يوم');
+    stEl.textContent=msg;
     setBtn(false,__t('Withdraw','سحب'));
   }else{
     stEl.textContent=__t('Next payout in 0 days','تقدر تسحب بعد 0 يوم');
