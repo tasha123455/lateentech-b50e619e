@@ -574,7 +574,7 @@ function __avRead(){try{return localStorage.getItem(__avKey())||'';}catch(e){ret
 function __firstChar(s){s=(s||'').trim();if(!s)return'';return[...s][0]||'';}
 function __applyAvatarTo(el,url,initials){if(!el)return;el.style.backgroundImage='';el.style.background=el.style.background||'';if(url){el.textContent='';const img=document.createElement('img');img.decoding='async';img.loading='eager';img.alt='';img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit;';img.onerror=function(){el.textContent=initials||'··';};img.src=url;el.appendChild(img);}else{el.textContent=initials||'··';}}
 (function(){try{const c=__avRead();if(c){['user-avatar','menu-avatar'].forEach(id=>{const el=document.getElementById(id);if(el)__applyAvatarTo(el,c,el.textContent||'··');});}}catch(e){}})();
-async function refreshProfile(){if(!window.LateenAPI||!window.LateenAPI.getProfile)return;try{const p=await window.LateenAPI.getProfile();window.__profileData=p;const name=(p&&p.full_name)||'';const initials=__firstChar(name);const first=name?name.split(/\s+/)[0]:'there';const av=p&&p.avatar_signed_url;__avCache(av||'');['user-avatar','menu-avatar'].forEach(id=>__applyAvatarTo(document.getElementById(id),av,initials));const g=document.getElementById('user-greet');if(g)g.textContent='Hey, '+first;const mn=document.getElementById('menu-name');if(mn)mn.textContent=name||'Welcome';const frozen=!!(p&&p.frozen_at);const dimBtn=(el)=>{if(!el)return;el.disabled=frozen;el.style.opacity=frozen?'0.45':'';el.style.pointerEvents=frozen?'none':'';el.style.cursor=frozen?'not-allowed':'';};dimBtn(document.getElementById('submit-btn'));dimBtn(document.getElementById('add-order-btn'));const ar=(typeof __ar==='function'&&__ar());const frozenTxt=ar?'تم تجميد الحساب مؤقتاً':'Account temporarily frozen';const banner=document.getElementById('wallet-frozen-banner');if(banner){banner.style.display=frozen?'block':'none';banner.textContent=frozenTxt;}const wb=document.getElementById('withdraw-btn');if(wb&&frozen){wb.disabled=true;wb.style.opacity='0.45';wb.style.cursor='not-allowed';wb.classList.add('disabled');}const st=document.getElementById('payout-status');if(st&&frozen){st.textContent=frozenTxt;st.style.color='#eab308';}else if(st){st.style.color='';}if(typeof refreshPayoutState==='function'&&!frozen)refreshPayoutState();}catch(e){console.error('[Lateen] profile',e);}}
+async function refreshProfile(){if(!window.LateenAPI||!window.LateenAPI.getProfile)return;try{const p=await window.LateenAPI.getProfile();window.__profileData=p;const name=(p&&p.full_name)||'';const initials=__firstChar(name);const first=name?name.split(/\s+/)[0]:'there';const av=p&&p.avatar_signed_url;__avCache(av||'');['user-avatar','menu-avatar'].forEach(id=>__applyAvatarTo(document.getElementById(id),av,initials));const g=document.getElementById('user-greet');if(g)g.textContent=(__ar()?'هلا، ':'Hey, ')+first;const mn=document.getElementById('menu-name');if(mn)mn.textContent=name||'Welcome';const frozen=!!(p&&p.frozen_at);const dimBtn=(el)=>{if(!el)return;el.disabled=frozen;el.style.opacity=frozen?'0.45':'';el.style.pointerEvents=frozen?'none':'';el.style.cursor=frozen?'not-allowed':'';};dimBtn(document.getElementById('submit-btn'));dimBtn(document.getElementById('add-order-btn'));const ar=(typeof __ar==='function'&&__ar());const frozenTxt=ar?'تم تجميد الحساب مؤقتاً':'Account temporarily frozen';const banner=document.getElementById('wallet-frozen-banner');if(banner){banner.style.display=frozen?'block':'none';banner.textContent=frozenTxt;}const wb=document.getElementById('withdraw-btn');if(wb&&frozen){wb.disabled=true;wb.style.opacity='0.45';wb.style.cursor='not-allowed';wb.classList.add('disabled');}const st=document.getElementById('payout-status');if(st&&frozen){st.textContent=frozenTxt;st.style.color='#eab308';}else if(st){st.style.color='';}if(typeof refreshPayoutState==='function'&&!frozen)refreshPayoutState();}catch(e){console.error('[Lateen] profile',e);}}
 
 function __profT(){const ar=__ar&&__ar();return{title:ar?'الملف الشخصي':'Profile',name:ar?'الاسم الكامل':'Full name',namePh:ar?'مثال: هيفاء وهبي':'Example: Kim Kardashian',phone:ar?'رقم الهاتف':'Phone number',email:ar?'البريد الإلكتروني':'Email',wa:ar?'واتساب او رقم هاتف إضافي':'WhatsApp or additional phone number',opt:ar?'(اختياري)':'(optional)',save:ar?'حفظ':'Save',saving:ar?'جارٍ الحفظ…':'Saving…',saved:ar?'تم الحفظ':'Saved',hint:ar?'اضغط على أيقونة الكاميرا لتغيير الصورة':'Tap the camera to change photo',tooBig:ar?'الصورة كبيرة جداً (أقصى 5 ميغابايت)':'Image too large (max 5 MB)',uploading:ar?'جارٍ رفع الصورة…':'Uploading photo…'};}
 function __ppdSetPicker(key,val){const inp=document.getElementById('ppd-'+key);const txt=document.getElementById('ppd-'+key+'-txt');if(inp)inp.value=val||'';if(txt){let label=val||'Select…';label=__pdLabel(label);txt.textContent=label;}}
@@ -689,6 +689,10 @@ async function refreshNotifications(){
     const isPaid=n.kind==='payout_paid';
     const expandable=isFailed||isDelivered||isVerified||isRejected||isReportReviewed||isRefunded||isNote||isAdminMsg||isPaid;
     const color=n.kind==='payout_paid'?'#2dbd8f':(n.kind==='payout_note'?'#e07070':((isFailed||isRejected||isRefunded)?'#e07070':((isDelivered||isVerified||isReportReviewed)?'#2dbd8f':'#7f77dd')));
+    let __iconD=n.data;if(typeof __iconD==='string'){try{__iconD=JSON.parse(__iconD);}catch(e){__iconD=null;}}if(!__iconD)__iconD={};
+    const __iconRaw=__iconD.product_photo||__iconD.photo;
+    const iconPhotoUrl=__iconRaw&&/^(https?:|data:|\/)/.test(String(__iconRaw))?__iconRaw:'';
+    const iconHtml=iconPhotoUrl?`<div class="notif-icon notif-icon-photo" style="background-image:url('${esc(iconPhotoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color}">•</div>`;
     const mainText=L.t;
     const subText=isNote?'':L.b;
     let detailsHtml='';
@@ -734,7 +738,7 @@ async function refreshNotifications(){
     const clickable=expandable&&detailsHtml?' onclick="(function(el){var d=el.querySelector(\'[data-nd]\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';})(this)" style="cursor:pointer"':'';
     const isNew=__notifNewIds.has(n.id);
     const rightDot=isNew?'<div class="notif-new-dot" style="flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}><div class="notif-icon" style="background:${color}22;color:${color}">•</div><div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
+    return `<div class="notif-item"${clickable}>${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
@@ -778,7 +782,9 @@ async function renderTransactions(){
     const amtLine=amtStr?`<div class="notif-body" style="color:${color};font-weight:600;font-size:13px">${sign}${__txnEsc(amtStr)} ${__txnEsc(sym)}</div>`:'';
     const dt=(typeof __fmtDT==='function')?__fmtDT(n.created_at):new Date(n.created_at).toLocaleString();
     const photoUrl=d.product_photo||d.photo;
-    const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block${type==='withdraw'?';cursor:zoom-in':''}"${type==='withdraw'?` onclick="event.stopPropagation();openFullPhoto('${String(photoUrl).replace(/'/g,"\\'")}')"`:''}/></div>`:'';
+    const photoUrlValid=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl));
+    const photo=photoUrlValid?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block${type==='withdraw'?';cursor:zoom-in':''}"${type==='withdraw'?` onclick="event.stopPropagation();openFullPhoto('${String(photoUrl).replace(/'/g,"\\'")}')"`:''}/></div>`:'';
+    const iconHtml=(type==='withdraw'&&photoUrlValid)?`<div class="notif-icon notif-icon-photo" style="background-image:url('${__txnEsc(photoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${sign}</div>`;
     let detailRows;
     if(type==='withdraw'){
       detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
@@ -800,7 +806,7 @@ async function renderTransactions(){
     }
     const detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323">${detailRows}</div>`;
     return `<div class="notif-item" onclick="(function(el){var d=el.querySelector('[data-nd]');if(d)d.style.display=d.style.display==='none'?'block':'none';})(this)" style="cursor:pointer">
-      <div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${sign}</div>
+      ${iconHtml}
       <div style="flex:1;min-width:0">
         <div class="notif-title">${__txnEsc(title)}</div>
         ${amtLine}
