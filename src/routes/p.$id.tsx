@@ -451,7 +451,7 @@ function PublicProductPage() {
             <div className="space-y-2">
               {reviews.map((r) => {
                 const initials = (r.author_name || "M").trim().charAt(0).toUpperCase();
-                const date = new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+                const date = new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar-LY" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
                 const avatarUrl = reviewAvatars[r.id];
                 return (
                   <div key={r.id} className="rounded-lg border border-border bg-surface px-3 py-2.5">
