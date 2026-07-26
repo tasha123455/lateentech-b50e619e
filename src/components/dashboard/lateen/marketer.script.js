@@ -633,8 +633,8 @@ async function refreshPayoutState(){
     let msg;
     if(daysLeft===1)msg=__t('You can withdraw in 1 day','تقدر تسحب بعد يوم واحد');
     else if(daysLeft===2)msg=__t('You can withdraw in 2 days','تقدر تسحب بعد يومين');
-    else if(daysLeft<=10)msg=__t('You can withdraw in 3–10 days','تقدر تسحب بعد 3 - 10 أيام');
-    else msg=__t('You can withdraw in 11+ days','تقدر تسحب بعد 11+ يوم');
+    else if(daysLeft<=10)msg=__t('You can withdraw in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' أيام');
+    else msg=__t('You can withdraw in '+daysLeft+' days','تقدر تسحب بعد '+daysLeft+' يوم');
     stEl.textContent=msg;
     setBtn(false,__t('Withdraw','سحب'));
   }else{
