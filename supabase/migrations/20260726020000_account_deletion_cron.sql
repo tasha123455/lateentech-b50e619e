@@ -44,6 +44,7 @@ BEGIN
           url := 'https://project--73d4fe96-27fd-448d-9c26-2d6be279c925.lovable.app/lovable/account-deletions/process',
           headers := jsonb_build_object(
             'Content-Type', 'application/json',
+            'Lovable-Context', 'cron',
             'Authorization', 'Bearer ' || _secret
           ),
           body := '{}'::jsonb
