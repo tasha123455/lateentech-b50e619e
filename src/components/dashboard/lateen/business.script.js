@@ -1106,50 +1106,8 @@ async function refreshBizReviews(){
 }
 window.refreshBizReviews=refreshBizReviews;
 function __notifToggle(el){
-  const d=el.querySelector('[data-nd]');
-  if(!d)return;
-  const iconEl=el.querySelector('.notif-icon-photo');
-  const bigImg=d.querySelector('img');
-  const isOpen=d.style.display==='block';
-  if(!isOpen){
-    d.style.display='block';
-    if(!iconEl||!bigImg)return;
-    const grow=function(){
-      const r0=iconEl.getBoundingClientRect();
-      const r1=bigImg.getBoundingClientRect();
-      if(!r1.width||!r1.height)return;
-      const sx=r0.width/r1.width,sy=r0.height/r1.height;
-      const tx=(r0.left+r0.width/2)-(r1.left+r1.width/2);
-      const ty=(r0.top+r0.height/2)-(r1.top+r1.height/2);
-      bigImg.style.transition='none';
-      bigImg.style.transformOrigin='center center';
-      bigImg.style.borderRadius='50%';
-      bigImg.style.transform='translate('+tx+'px,'+ty+'px) scale('+sx+','+sy+')';
-      void bigImg.offsetWidth;
-      bigImg.style.transition='transform .65s cubic-bezier(.22,.9,.16,1), border-radius .65s ease';
-      bigImg.style.transform='translate(0,0) scale(1,1)';
-      bigImg.style.borderRadius='10px';
-      setTimeout(function(){bigImg.style.transition='';bigImg.style.transform='';bigImg.style.transformOrigin='';},660);
-    };
-    if(bigImg.complete&&bigImg.naturalWidth){grow();}else{bigImg.addEventListener('load',grow,{once:true});}
-  }else{
-    if(!iconEl||!bigImg){d.style.display='none';return;}
-    bigImg.style.transition='none';
-    bigImg.style.transform='none';
-    bigImg.style.borderRadius='10px';
-    void bigImg.offsetWidth;
-    const r0=iconEl.getBoundingClientRect();
-    const r1=bigImg.getBoundingClientRect();
-    if(!r1.width||!r1.height){d.style.display='none';return;}
-    const sx=r0.width/r1.width,sy=r0.height/r1.height;
-    const tx=(r0.left+r0.width/2)-(r1.left+r1.width/2);
-    const ty=(r0.top+r0.height/2)-(r1.top+r1.height/2);
-    bigImg.style.transformOrigin='center center';
-    bigImg.style.transition='transform .5s cubic-bezier(.4,0,.2,1), border-radius .5s ease';
-    bigImg.style.transform='translate('+tx+'px,'+ty+'px) scale('+sx+','+sy+')';
-    bigImg.style.borderRadius='50%';
-    setTimeout(function(){d.style.display='none';bigImg.style.transition='';bigImg.style.transform='';bigImg.style.borderRadius='';bigImg.style.transformOrigin='';},510);
-  }
+  const item=el.closest('.notif-item');
+  if(item)item.classList.toggle('expanded');
 }
 async function refreshBizNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
@@ -1194,6 +1152,7 @@ async function refreshBizNotifications(){
     let __iconD=n.data;if(typeof __iconD==='string'){try{__iconD=JSON.parse(__iconD);}catch(e){__iconD=null;}}if(!__iconD)__iconD={};
     const __iconRaw=n.kind==='product_review'?__iconD.avatar:(__iconD.product_photo||__iconD.photo);
     const iconPhotoUrl=__iconRaw&&/^(https?:|data:|\/)/.test(String(__iconRaw))?__iconRaw:'';
+    const hasPhoto=!!iconPhotoUrl;
     const __reviewInitial=n.kind==='product_review'?((__iconD.author||'M').trim().charAt(0).toUpperCase()||'M'):'';
     const iconHtml=iconPhotoUrl?`<div class="notif-icon notif-icon-photo" style="background-image:url('${esc(iconPhotoUrl)}')"></div>`:(n.kind==='product_review'?`<div class="notif-icon" style="background:var(--color-background-tertiary);color:var(--color-text-secondary);font-weight:600">${esc(__reviewInitial)}</div>`:`<div class="notif-icon" style="background:${color}22;color:${color}">•</div>`);
     let detailsHtml='';
@@ -1202,10 +1161,10 @@ async function refreshBizNotifications(){
       if(d){
         const row=(k,v,noTranslate)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span ${noTranslate?'data-no-i18n ':''}style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
         const photoUrl=d.product_photo||d.photo;
-        const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
+        const photo=(!hasPhoto&&photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl)))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
         const adminMsgText=isAdminMsg?(d.message||n.body||''):'';
         const adminMsgContent=adminMsgText?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap" data-no-i18n>${esc(adminMsgText)}</div>`:'';
-        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #142a20">
+        detailsHtml=`<div class="notif-details-box">
           ${photo}
           ${adminMsgContent}
           ${row(tr('Order Code','كود الطلبيه'),d.order_code)}
@@ -1222,10 +1181,26 @@ async function refreshBizNotifications(){
         </div>`;
       }
     }
-    const clickable=expandable&&detailsHtml?' onclick="__notifToggle(this)" style="cursor:pointer"':'';
     const isNew=!n.read_at;
     const rightDot=isNew?'<div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}>${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
+    if(expandable&&detailsHtml){
+      const photoWrapHtml=hasPhoto?`<div class="notif-photo-wrap"><img src="${esc(iconPhotoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
+      return `<div class="notif-item expandable" data-id="${n.id}">
+        <div class="notif-top" onclick="__notifToggle(this)">
+          ${photoWrapHtml}
+          <div class="notif-row-text">
+            <div style="flex:1;min-width:0">
+              <div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(t)}</div>
+              ${b?`<div class="notif-body">${esc(b)}</div>`:''}
+              <div class="notif-time">${ago(n.created_at)}</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div>
+          </div>
+        </div>
+        <div class="notif-detail-body">${detailsHtml}</div>
+      </div>`;
+    }
+    return `<div class="notif-item">${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   }).join('');
 }
 window.refreshBizNotifications=refreshBizNotifications;
