@@ -1058,7 +1058,7 @@ recomputeAnalytics=function(){
     }
   }catch(e){console.error('[Lateen] biz wallet',e);}
 };
-(async()=>{try{await loadProducts();await loadOrders();await refreshProfile();}catch(e){console.error('[Lateen] business boot',e);}})();
+(async()=>{try{await loadProducts();await loadOrders();await refreshProfile();await refreshBizReviews();}catch(e){console.error('[Lateen] business boot',e);}})();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
   /* Coalesce bursts of realtime events into a single refresh so the list
      doesn't rebuild multiple times back-to-back (which caused visible
@@ -1086,19 +1086,28 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
 let __bizNotifNewIds = (window.__bizNotifNewIds instanceof Set) ? window.__bizNotifNewIds : new Set();
 window.__bizNotifNewIds = __bizNotifNewIds;
 window.__bizReviewsByProduct = window.__bizReviewsByProduct || {};
+/* Reviews shown on product cards come from the real product_reviews table
+   (via list_business_reviews), NOT from notifications. The old approach
+   built this map from the last 50 notification rows, so any review older
+   than the 50 most recent notifications of ANY kind would silently vanish
+   from the dashboard. See refreshBizReviews() below. */
+async function refreshBizReviews(){
+  if(!window.LateenAPI||!window.LateenAPI.listBusinessReviews)return;
+  let rows=[];try{rows=await window.LateenAPI.listBusinessReviews();}catch(e){console.warn('[Lateen] refreshBizReviews',e);return;}
+  const avUrl=async(p)=>{try{return window.LateenAPI&&window.LateenAPI.avatarPublicUrl?(await window.LateenAPI.avatarPublicUrl(p||'')):'';}catch(e){return '';}};
+  const rmap={};
+  await Promise.all((rows||[]).map(async r=>{
+    const entry={author:r.author_name||'Marketer',rating:Number(r.rating)||0,text:r.comment||'',photo:r.photo_url||'',avatar:r.avatar_path?(await avUrl(r.avatar_path)):'',ts:new Date(r.created_at).getTime()};
+    (rmap[r.product_id]=rmap[r.product_id]||[]).push(entry);
+  }));
+  for(const k in rmap){rmap[k].sort((a,b)=>b.ts-a.ts);}
+  window.__bizReviewsByProduct=rmap;
+  try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
+}
+window.refreshBizReviews=refreshBizReviews;
 async function refreshBizNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let list=[];try{list=await window.LateenAPI.listNotifications();}catch(e){return;}
-  /* Build review map from notifications so reviews show in product cards */
-  const rmap={};
-  for(const n of list){
-    if(n.kind!=='product_review')continue;
-    let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
-    if(!d||!d.product_id)continue;
-    (rmap[d.product_id]=rmap[d.product_id]||[]).push({author:d.author||'Marketer',rating:Number(d.rating)||0,text:d.text||'',photo:d.photo||'',avatar:d.avatar||'',ts:new Date(n.created_at).getTime()});
-  }
-  window.__bizReviewsByProduct=rmap;
-  try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
   const dot=document.getElementById('notif-dot');
   const onNotifPage=document.getElementById('pg-notif')&&document.getElementById('pg-notif').classList.contains('active');
   if(dot){const unreadCount=list.filter(n=>!n.read_at).length;if(!onNotifPage&&unreadCount>0){dot.textContent=unreadCount>99?'99+':String(unreadCount);dot.style.display='flex';}else{dot.textContent='';dot.style.display='none';}}
@@ -1184,14 +1193,14 @@ window.refreshBizNotifications=refreshBizNotifications;
   };
   window.goTo=goTo;
 })();
-if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('notifications',()=>refreshBizNotifications()));}
+if(window.LateenAPI&&window.LateenAPI.subscribe){window.__lateenUnsubs=window.__lateenUnsubs||[];window.__lateenUnsubs.push(window.LateenAPI.subscribe('notifications',()=>refreshBizNotifications()));window.__lateenUnsubs.push(window.LateenAPI.subscribe('business-reviews',()=>refreshBizReviews()));}
 refreshBizNotifications();
 
-/* Reviews are now rendered directly inside each product card via
-   mpReviewsFold(), reading from window.__bizReviewsByProduct. When that
-   map is refreshed (see refreshBizNotifications below) we just need to
-   re-render the products list so the Reviews fold picks up the latest
-   data — renderProducts() already does that on every call. */
+/* Reviews are rendered directly inside each product card via
+   mpReviewsFold(), reading from window.__bizReviewsByProduct. That map is
+   populated from the real product_reviews table by refreshBizReviews()
+   above (boot + realtime), which re-renders the products list so the
+   Reviews fold picks up the latest data. */
 
 /* ========== Delete Account ==========
    Status is fetched once when the profile page opens (refreshDeleteAccountSlot,
