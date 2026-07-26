@@ -273,13 +273,10 @@ export function createLateenApi(userId: string) {
     },
 
     async upsertProductReview(productId: string, rating: number, comment: string, photoUrl?: string) {
-      const { error } = await (supabase
-        .from("product_reviews" as never) as unknown as {
-          upsert: (row: Record<string, unknown>, opts?: Record<string, unknown>) => Promise<{ error: unknown }>;
-        })
-        .upsert(
-          { product_id: productId, marketer_id: userId, rating, comment: comment || null, photo_url: photoUrl || null },
-          { onConflict: "product_id,marketer_id" },
+      const { error } = await supabase
+        .from("product_reviews" as never)
+        .insert(
+          { product_id: productId, marketer_id: userId, rating, comment: comment || null, photo_url: photoUrl || null } as never,
         );
       if (error) throw error;
     },
