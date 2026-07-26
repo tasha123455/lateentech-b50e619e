@@ -212,6 +212,12 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
+    avatarPublicUrl(path: string | null | undefined): string {
+      if (!path) return "";
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      return data?.publicUrl || "";
+    },
+
     async uploadReviewPhoto(file: File): Promise<string> {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `${userId}/${crypto.randomUUID()}.${ext}`;
