@@ -1018,7 +1018,7 @@ export function createLateenApi(userId: string) {
         const { data, error } = await supabase.rpc("admin_resolve_deletion_request", {
           _id: id,
           _action: action,
-          _comment: comment,
+          _comment: comment as string,
         });
         if (error) throw error;
         return data;
