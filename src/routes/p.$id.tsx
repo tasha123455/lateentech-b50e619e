@@ -50,7 +50,21 @@ type Review = {
   comment: string | null;
   created_at: string;
   author_name: string;
+  photo_url: string | null;
+  avatar_path: string | null;
 };
+
+// The `avatars` bucket is private, so avatar_path needs a signed URL —
+// review photo_url is already a long-lived signed URL from upload time.
+async function avatarSignedUrl(path: string | null | undefined): Promise<string> {
+  if (!path) return "";
+  try {
+    const { data } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    return data?.signedUrl ?? "";
+  } catch {
+    return "";
+  }
+}
 
 const COUNTRY_NAMES: Record<string, string> = {
   LY: "Libya", EG: "Egypt", TN: "Tunisia", DZ: "Algeria", MA: "Morocco",
@@ -112,13 +126,14 @@ function PublicProductPage() {
   const [zoneOpen, setZoneOpen] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewAvatars, setReviewAvatars] = useState<Record<string, string>>({});
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   // Redirect signed-in marketers into the dashboard's Browse product view.
   useEffect(() => {
     if (authLoading) return;
     if (user && role === "marketer") {
-      nav({ to: "/dashboard", search: { prod: id }, replace: true });
+      nav({ to: "/dashboard", search: { prod: id, order: undefined }, replace: true });
     }
   }, [authLoading, user, role, id, nav]);
 
@@ -153,7 +168,17 @@ function PublicProductPage() {
       try {
         const { data, error } = await supabase.rpc("list_product_reviews" as never, { _product_id: id } as never);
         if (!alive) return;
-        if (!error && Array.isArray(data)) setReviews(data as Review[]);
+        if (!error && Array.isArray(data)) {
+          const rows = data as Review[];
+          setReviews(rows);
+          const entries = await Promise.all(
+            rows
+              .filter((r) => r.avatar_path)
+              .map(async (r) => [r.id, await avatarSignedUrl(r.avatar_path)] as const),
+          );
+          if (!alive) return;
+          setReviewAvatars(Object.fromEntries(entries));
+        }
       } catch { /* ignore */ }
     })();
     return () => { alive = false; };
@@ -427,11 +452,16 @@ function PublicProductPage() {
               {reviews.map((r) => {
                 const initials = (r.author_name || "M").trim().charAt(0).toUpperCase();
                 const date = new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+                const avatarUrl = reviewAvatars[r.id];
                 return (
                   <div key={r.id} className="rounded-lg border border-border bg-surface px-3 py-2.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 text-[11px] font-semibold text-text-2">{initials}</span>
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt="" className="h-6 w-6 flex-shrink-0 rounded-full object-cover" />
+                        ) : (
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 text-[11px] font-semibold text-text-2">{initials}</span>
+                        )}
                         <span className="text-xs text-text-1" data-no-i18n>{r.author_name}</span>
                       </div>
                       <div className="text-[11px] text-text-3">{date}</div>
@@ -441,6 +471,14 @@ function PublicProductPage() {
                     </div>
                     {r.comment && (
                       <div className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-text-2" data-no-i18n>{r.comment}</div>
+                    )}
+                    {r.photo_url && (
+                      <div
+                        className="mt-2 h-14 w-14 cursor-pointer overflow-hidden rounded-lg border border-border"
+                        onClick={() => setLightbox(r.photo_url)}
+                      >
+                        <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                      </div>
                     )}
                   </div>
                 );
@@ -453,11 +491,11 @@ function PublicProductPage() {
       {/* Bottom CTAs */}
       <div className="fixed bottom-0 left-1/2 z-30 w-full max-w-[520px] -translate-x-1/2 border-t border-border bg-surface p-4">
         {isMarketer ? (
-          <Link to="/dashboard" search={{ prod: p.id }} className="block w-full rounded-xl bg-primary py-3 text-center text-sm font-semibold text-primary-foreground">
+          <Link to="/dashboard" search={{ prod: p.id, order: undefined }} className="block w-full rounded-xl bg-primary py-3 text-center text-sm font-semibold text-primary-foreground">
             Sell this product
           </Link>
         ) : user ? (
-          <Link to="/dashboard" className="block w-full rounded-xl bg-primary py-3 text-center text-sm font-semibold text-primary-foreground">
+          <Link to="/dashboard" search={{ prod: undefined, order: undefined }} className="block w-full rounded-xl bg-primary py-3 text-center text-sm font-semibold text-primary-foreground">
             Open dashboard
           </Link>
         ) : (
