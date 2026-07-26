@@ -1105,6 +1105,12 @@ async function refreshBizReviews(){
   try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
 }
 window.refreshBizReviews=refreshBizReviews;
+function __arStarsPhrase(n){
+  if(n===1)return 'نجمه واحده';
+  if(n===2)return 'نجمتين';
+  if(n>=3&&n<=10)return n+' نجوم';
+  return n+' نجمه';
+}
 function __notifToggle(el){
   const item=el.closest('.notif-item');
   if(item)item.classList.toggle('expanded');
@@ -1135,7 +1141,7 @@ async function refreshBizNotifications(){
       const rating=Number(d&&d.rating)||0;
       t=tr('New product review','تقييم جديد للمنتج');
       b=__ar()
-        ? `${author} قيّم المنتج ${pname} ${rating} ${rating===1?'نجمة':'نجوم'}`
+        ? `${author} قيّم المنتج ${pname} ${__arStarsPhrase(rating)}`
         : `${author} rated ${pname} ${rating} ${rating===1?'star':'stars'}`;
       const photoUrl=(d&&d.photo)||'';
       const photoHtml=photoUrl?`<div style="margin-top:8px;width:64px;height:64px;border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--color-border-secondary)" onclick="event.stopPropagation();mpOpenLightbox('${String(photoUrl).replace(/'/g,"\\'")}')"><img src="${esc(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"/></div>`:'';

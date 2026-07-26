@@ -647,50 +647,8 @@ async function __lateenRefreshWalletAndPayout(){try{if(typeof refreshWallet==='f
 let __notifNewIds = (window.__notifNewIds instanceof Set) ? window.__notifNewIds : new Set();
 window.__notifNewIds = __notifNewIds;
 function __notifToggle(el){
-  const d=el.querySelector('[data-nd]');
-  if(!d)return;
-  const iconEl=el.querySelector('.notif-icon-photo');
-  const bigImg=d.querySelector('img');
-  const isOpen=d.style.display==='block';
-  if(!isOpen){
-    d.style.display='block';
-    if(!iconEl||!bigImg)return;
-    const grow=function(){
-      const r0=iconEl.getBoundingClientRect();
-      const r1=bigImg.getBoundingClientRect();
-      if(!r1.width||!r1.height)return;
-      const sx=r0.width/r1.width,sy=r0.height/r1.height;
-      const tx=(r0.left+r0.width/2)-(r1.left+r1.width/2);
-      const ty=(r0.top+r0.height/2)-(r1.top+r1.height/2);
-      bigImg.style.transition='none';
-      bigImg.style.transformOrigin='center center';
-      bigImg.style.borderRadius='50%';
-      bigImg.style.transform='translate('+tx+'px,'+ty+'px) scale('+sx+','+sy+')';
-      void bigImg.offsetWidth;
-      bigImg.style.transition='transform .65s cubic-bezier(.22,.9,.16,1), border-radius .65s ease';
-      bigImg.style.transform='translate(0,0) scale(1,1)';
-      bigImg.style.borderRadius='10px';
-      setTimeout(function(){bigImg.style.transition='';bigImg.style.transform='';bigImg.style.transformOrigin='';},660);
-    };
-    if(bigImg.complete&&bigImg.naturalWidth){grow();}else{bigImg.addEventListener('load',grow,{once:true});}
-  }else{
-    if(!iconEl||!bigImg){d.style.display='none';return;}
-    bigImg.style.transition='none';
-    bigImg.style.transform='none';
-    bigImg.style.borderRadius='10px';
-    void bigImg.offsetWidth;
-    const r0=iconEl.getBoundingClientRect();
-    const r1=bigImg.getBoundingClientRect();
-    if(!r1.width||!r1.height){d.style.display='none';return;}
-    const sx=r0.width/r1.width,sy=r0.height/r1.height;
-    const tx=(r0.left+r0.width/2)-(r1.left+r1.width/2);
-    const ty=(r0.top+r0.height/2)-(r1.top+r1.height/2);
-    bigImg.style.transformOrigin='center center';
-    bigImg.style.transition='transform .5s cubic-bezier(.4,0,.2,1), border-radius .5s ease';
-    bigImg.style.transform='translate('+tx+'px,'+ty+'px) scale('+sx+','+sy+')';
-    bigImg.style.borderRadius='50%';
-    setTimeout(function(){d.style.display='none';bigImg.style.transition='';bigImg.style.transform='';bigImg.style.borderRadius='';bigImg.style.transformOrigin='';},510);
-  }
+  const item=el.closest('.notif-item');
+  if(item)item.classList.toggle('expanded');
 }
 async function refreshNotifications(){
   if(!window.LateenAPI||!window.LateenAPI.listNotifications)return;
@@ -739,6 +697,7 @@ async function refreshNotifications(){
     const __iconRaw=__iconD.product_photo||__iconD.photo;
     const iconPhotoUrl=__iconRaw&&/^(https?:|data:|\/)/.test(String(__iconRaw))?__iconRaw:'';
     const iconHtml=iconPhotoUrl?`<div class="notif-icon notif-icon-photo" style="background-image:url('${esc(iconPhotoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color}">•</div>`;
+    const hasPhoto=!!iconPhotoUrl;
     const mainText=L.t;
     const subText=isNote?'':L.b;
     let detailsHtml='';
@@ -749,7 +708,7 @@ async function refreshNotifications(){
         const row=(k,v,noTranslate)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${esc(k)}</span><span ${noTranslate?'data-no-i18n ':''}style="color:var(--color-text-primary);text-align:right">${esc(v)}</span></div>`:'';
         const borderColor=(isFailed||isRejected||isRefunded||isNote)?'#2a1a1a':'#142a20';
         const photoUrl=d.product_photo||d.photo;
-        const photo=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block${isPaid?';cursor:zoom-in':''}"${isPaid?` onclick="event.stopPropagation();openFullPhoto('${String(photoUrl).replace(/'/g,"\\'")}')"`:''}/></div>`:'';
+        const photo=(!hasPhoto&&photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl)))?`<div style="margin:-2px 0 10px 0"><img src="${esc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block${isPaid?';cursor:zoom-in':''}"${isPaid?` onclick="event.stopPropagation();openFullPhoto('${String(photoUrl).replace(/'/g,"\\'")}')"`:''}/></div>`:'';
         const receiptImg=isRejected&&d.receipt_url&&/^(https?:|data:|\/)/.test(String(d.receipt_url))?`<div style="margin:0 0 10px 0"><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">${__t('Receipt','الإيصال')}</div><img src="${esc(d.receipt_url)}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:10px;display:block;background:#0f0f0f"/></div>`:'';
         const adminNoteText=isRejected?d.admin_notes:((isRefunded||isNote)?(d.admin_comment||d.admin_note||(isNote?(n.body||''):'')):'');
         const adminNote=adminNoteText?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#2a1a1a;color:#f0c0c0;font-size:11px"><b>${__t('Admin note','ملاحظات الأدمن')}:</b> <span data-no-i18n>${esc(adminNoteText)}</span></div>`:'';
@@ -758,7 +717,7 @@ async function refreshNotifications(){
         const reportMsgBlock=isReportReviewed&&d.report_message?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Your report','بلاغك')}:</b> <span data-no-i18n>${esc(d.report_message)}</span></div>`:'';
         const adminMsgText=isAdminMsg?(d.message||n.body||''):'';
         const adminMsgContent=adminMsgText?`<div style="padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:12px;white-space:pre-wrap" data-no-i18n>${esc(adminMsgText)}</div>`:'';
-        detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid ${borderColor}">
+        detailsHtml=`<div class="notif-details-box" style="border-color:${borderColor}">
           ${photo}
           ${receiptImg}
           ${adminMsgContent}
@@ -781,10 +740,26 @@ async function refreshNotifications(){
         </div>`;
       }
     }
-    const clickable=expandable&&detailsHtml?' onclick="__notifToggle(this)" style="cursor:pointer"':'';
     const isNew=__notifNewIds.has(n.id);
     const rightDot=isNew?'<div class="notif-new-dot" style="flex-shrink:0;margin-top:4px;"></div>':'<div style="width:8px;flex-shrink:0;"></div>';
-    return `<div class="notif-item"${clickable}>${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}${detailsHtml}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
+    if(expandable&&detailsHtml){
+      const photoWrapHtml=hasPhoto?`<div class="notif-photo-wrap"><img src="${esc(iconPhotoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
+      return `<div class="notif-item expandable" data-id="${n.id}">
+        <div class="notif-top" onclick="__notifToggle(this)">
+          ${photoWrapHtml}
+          <div class="notif-row-text">
+            <div style="flex:1;min-width:0">
+              <div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(mainText)}</div>
+              ${subText?`<div class="notif-body">${esc(subText)}</div>`:''}
+              <div class="notif-time">${ago(n.created_at)}</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div>
+          </div>
+        </div>
+        <div class="notif-detail-body">${detailsHtml}</div>
+      </div>`;
+    }
+    return `<div class="notif-item">${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(mainText)}</div>${subText?`<div class="notif-body">${esc(subText)}</div>`:''}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   }).join('');
 }
 window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refreshNotifications;
@@ -829,8 +804,9 @@ async function renderTransactions(){
     const dt=(typeof __fmtDT==='function')?__fmtDT(n.created_at):new Date(n.created_at).toLocaleString();
     const photoUrl=d.product_photo||d.photo;
     const photoUrlValid=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl));
-    const photo=photoUrlValid?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block${type==='withdraw'?';cursor:zoom-in':''}"${type==='withdraw'?` onclick="event.stopPropagation();openFullPhoto('${String(photoUrl).replace(/'/g,"\\'")}')"`:''}/></div>`:'';
-    const iconHtml=(type==='withdraw'&&photoUrlValid)?`<div class="notif-icon notif-icon-photo" style="background-image:url('${__txnEsc(photoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${sign}</div>`;
+    const hasIconPhoto=(type==='withdraw'&&photoUrlValid);
+    const photo=(!hasIconPhoto&&photoUrlValid)?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
+    const iconHtml=hasIconPhoto?`<div class="notif-icon notif-icon-photo" style="background-image:url('${__txnEsc(photoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${sign}</div>`;
     let detailRows;
     if(type==='withdraw'){
       detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
@@ -850,15 +826,20 @@ async function renderTransactions(){
         (d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> <span data-no-i18n>${__txnEsc(d.customer_notes)}</span></div>`:'')+
         ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
     }
-    const detailsHtml=`<div class="notif-details" data-nd="1" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#181818;border:0.5px solid #232323">${detailRows}</div>`;
-    return `<div class="notif-item" onclick="__notifToggle(this)" style="cursor:pointer">
-      ${iconHtml}
-      <div style="flex:1;min-width:0">
-        <div class="notif-title">${__txnEsc(title)}</div>
-        ${amtLine}
-        ${detailsHtml}
-        <div class="notif-time">${__txnEsc(dt)}</div>
+    const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
+    const detailsHtml=`<div class="notif-detail-body"><div class="notif-details-box">${detailRows}</div></div>`;
+    return `<div class="notif-item expandable" data-id="${n.id}">
+      <div class="notif-top" onclick="__notifToggle(this)">
+        ${photoWrapHtml}
+        <div class="notif-row-text">
+          <div style="flex:1;min-width:0">
+            <div class="notif-title">${__txnEsc(title)}</div>
+            ${amtLine}
+            <div class="notif-time">${__txnEsc(dt)}</div>
+          </div>
+        </div>
       </div>
+      ${detailsHtml}
     </div>`;
   }).join('');
 }
