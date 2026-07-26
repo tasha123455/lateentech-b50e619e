@@ -707,18 +707,21 @@
     </div>
     <div style="display:grid;gap:10px;">
       <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-name">Full name</span><input id="prof-name" class="pd-inp" placeholder="Example: Kim Kardashian"/></label>
-      <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-phone">Phone number</span><input id="prof-phone" class="pd-inp" readonly dir="ltr" style="opacity:.6;cursor:not-allowed;text-align:left;"/></label>
-      <label class="pd-lbl"><span class="pd-lbl-head" id="prof-lbl-email">Email</span><input id="prof-email" class="pd-inp" readonly style="opacity:.6;cursor:not-allowed;"/></label>
-      <label class="pd-lbl"><span class="pd-lbl-head" data-i18n="Country">Country</span>
-        <button type="button" class="pd-inp pd-picker-btn" id="prof-country-btn" onclick="toggleProfPicker('country')" style="display:flex;align-items:center;justify-content:space-between;" dir="ltr">
-          <span id="prof-country-txt" data-no-i18n>🇱🇾 Libya</span>
-          <span style="opacity:.5;font-size:11px;">▾</span>
-        </button>
-        <div class="pd-picker-list" id="prof-country-list" style="display:none;">
-          <button type="button" class="pd-picker-item" onclick="pickProfCountry()"><span>🇱🇾 <span data-i18n="Libya">Libya</span></span></button>
-          <div class="pd-picker-item pd-picker-disabled"><span data-i18n="More countries">More countries</span><span class="pd-soon-pill" data-i18n="Soon">Soon</span></div>
+      <div id="prof-info-card" style="border:1px solid #2a2a2a;border-radius:14px;padding:14px;display:grid;gap:12px;background:#181818;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <span style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;" id="prof-lbl-phone">Phone number</span>
+          <span id="prof-phone" dir="ltr" style="font-size:13px;color:var(--color-text-primary);" data-no-i18n>—</span>
         </div>
-      </label>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <span style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;" id="prof-lbl-email">Email</span>
+          <span id="prof-email" dir="ltr" style="font-size:13px;color:var(--color-text-primary);text-align:end;word-break:break-all;" data-no-i18n>—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <span style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;" data-i18n="Country">Country</span>
+          <span id="prof-country-txt" style="font-size:13px;color:var(--color-text-primary);" data-no-i18n>🇱🇾 Libya</span>
+        </div>
+      </div>
+      <button type="button" id="prof-change-btn" onclick="openChangeRequest()" style="width:100%;background:transparent;border:1px solid #3a3a3a;color:var(--color-text-primary);border-radius:10px;padding:11px;font-size:13px;font-weight:500;cursor:pointer;">Change</button>
       <label class="pd-lbl"><span class="pd-lbl-head"><span id="prof-lbl-wa">WhatsApp</span> <span style="color:var(--color-text-tertiary);font-size:10px;font-weight:400;" id="prof-lbl-wa-opt">(optional)</span></span>
         <div style="display:flex;gap:6px;">
           <div style="position:relative;flex-shrink:0;">
@@ -808,6 +811,35 @@
     <div style="margin-top:28px;padding-top:16px;border-top:0.5px solid #2a2a2a;">
       <div id="prof-delete-slot" style="display:flex;justify-content:flex-end;"></div>
     </div>
+  </div>
+</div>
+
+<!-- CHANGE REQUEST OVERLAY -->
+<div class="menu-overlay" id="change-request-overlay" style="z-index:110;align-items:center;justify-content:center;">
+  <div class="menu-backdrop" onclick="closeChangeRequest()"></div>
+  <div style="position:relative;width:min(88%,360px);background:#1e1e1e;border-radius:16px;padding:1.25rem;border:0.5px solid #2a2a2a;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;">
+      <div style="font-size:15px;font-weight:500;color:var(--color-text-primary);" id="cr-title">What would you like to change?</div>
+      <button onclick="closeChangeRequest()" style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;padding:4px;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="display:grid;gap:0;margin-bottom:16px;">
+      <label style="display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:0.5px solid #2a2a2a;cursor:pointer;">
+        <input type="checkbox" id="cr-phone" onchange="updateChangeRequestBtn()" style="width:18px;height:18px;accent-color:#8b83e8;flex-shrink:0;"/>
+        <span style="font-size:13px;color:var(--color-text-primary);" id="cr-lbl-phone">Change phone number</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:0.5px solid #2a2a2a;cursor:pointer;">
+        <input type="checkbox" id="cr-email" onchange="updateChangeRequestBtn()" style="width:18px;height:18px;accent-color:#8b83e8;flex-shrink:0;"/>
+        <span style="font-size:13px;color:var(--color-text-primary);" id="cr-lbl-email">Change email</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px 4px;cursor:pointer;">
+        <input type="checkbox" id="cr-country" onchange="updateChangeRequestBtn()" style="width:18px;height:18px;accent-color:#8b83e8;flex-shrink:0;"/>
+        <span style="font-size:13px;color:var(--color-text-primary);" id="cr-lbl-country">Change country</span>
+      </label>
+    </div>
+    <button type="button" id="cr-send-btn" onclick="sendChangeRequest()" disabled style="width:100%;background:#8b83e8;color:#fff;border:none;border-radius:12px;padding:13px;font-size:13px;font-weight:500;cursor:pointer;opacity:.5;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+      <span id="cr-send-txt">Send to admin for change</span>
+    </button>
   </div>
 </div>
 
