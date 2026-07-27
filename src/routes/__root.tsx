@@ -75,15 +75,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lateen — Performance Marketing" },
-      { name: "description", content: "Lateen connects Libyan businesses with marketers to sell products and track verified payouts." },
-      { name: "author", content: "Lateen" },
-      { property: "og:title", content: "Lateen — Performance Marketing" },
+      { title: "Wasla — Your smartest link to modern commerce" },
+      { name: "description", content: "Wasla connects businesses with marketers to sell products and track verified payouts." },
+      { name: "author", content: "Wasla" },
+      { property: "og:title", content: "Wasla — Your smartest link to modern commerce" },
       { property: "og:description", content: "Connect businesses and marketers with verified orders, wallets, and payouts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "theme-color", content: "#2dbd8f" },
+      { name: "theme-color", content: "#0D0D0D" },
     ],
     links: [
       {
@@ -96,12 +96,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "icon",
-        href: "/icon-192.png",
+        href: "/wasla-mark-192.png",
         type: "image/png",
       },
       {
         rel: "apple-touch-icon",
-        href: "/icon-192.png",
+        href: "/wasla-mark-192.png",
       },
     ],
   }),

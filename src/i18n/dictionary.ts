@@ -4,7 +4,8 @@
 export const DICT: Record<string, string> = {
   // ===== Landing =====
   "Performance marketing, zero upfront cost": "تسويق بالأداء، من غير أي تكلفة مسبقة",
-  "Lateen — Performance marketing, zero upfront cost": "Lateen — تسويق بالأداء، من غير أي تكلفة مسبقة",
+  "Wasla — Your smartest link to modern commerce": "وصلة — صِلَتك الأقوى للتجارة الذكية",
+  "Your smartest link to modern commerce": "صِلَتك الأقوى للتجارة الذكية",
   "Who are you?": "من إنت؟",
   "Where can I find it?": "وين نلقى حاجتي؟",
   "Browse products & buy easily": "تصفح المنتجات واشتري بسهولة",
@@ -491,8 +492,8 @@ export const DICT: Record<string, string> = {
   "Fee to collect": "العربون المطلوب",
   "Fee pending": "العربون معلق",
   "Fee/unit": "العربون للقطعة",
-  "per unit · calculated by Lateen": "للقطعة · محسوبة بواسطة لاتين",
-  "Collect this from the customer before shipping. Set by Lateen.": "يتم تجميعه من الزبون قبل الشحن. محدد بواسطة لاتين.",
+  "per unit · calculated by Wasla": "للقطعة · محسوبة بواسطة وصلة",
+  "Collect this from the customer before shipping. Set by Wasla.": "يتم تجميعه من الزبون قبل الشحن. محدد بواسطة وصلة.",
   "Mandatory Upfront Deposit": "العربون المطلوب (إجباري)",
   "An upfront payment is required before this order can be processed.": "لازم تدفع العربون قبل ما يتم إرسال الطلب.",
   
@@ -623,7 +624,7 @@ export const DICT: Record<string, string> = {
   "Admin": "مدير",
   "Admins": "المديرون",
   "Admin Console": "لوحة تحكم المدير",
-  "Lateen platform control": "إدارة منصة Lateen",
+  "Wasla platform control": "إدارة منصة وصلة",
   "Users": "المستخدمون",
   "Total Users": "إجمالي المستخدمين",
   "Active Users": "المستخدمون النشطون",
@@ -837,7 +838,7 @@ export const DICT: Record<string, string> = {
     "لا توجد خيارات. اضغط \"أضف خياراً آخر\" بالأسفل.",
   "Not found.": "غير موجود.",
   "Payday": "يوم الدفع",
-  "per unit calculated by Lateen": "للوحدة — تحسبها Lateen",
+  "per unit calculated by Wasla": "للوحدة — تحسبها وصلة",
   "Platform fee (5%)": "رسوم المنصة (5%)",
   "Platform fee (per unit)": "رسوم المنصة (للوحدة)",
   "Product not found.": "المنتج غير موجود.",

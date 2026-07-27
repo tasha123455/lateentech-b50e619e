@@ -1,4 +1,4 @@
-// Lateen service worker — handles push notifications.
+// Wasla service worker — handles push notifications.
 // Self-hosted (VAPID) — no third-party script imported here anymore.
 
 self.addEventListener("install", () => {
@@ -14,10 +14,10 @@ self.addEventListener("push", (event) => {
   try {
     payload = event.data ? event.data.json() : {};
   } catch {
-    payload = { title: "Lateen", body: event.data ? event.data.text() : "" };
+    payload = { title: "Wasla", body: event.data ? event.data.text() : "" };
   }
 
-  const title = payload.title || "Lateen";
+  const title = payload.title || "Wasla";
   const options = {
     body: payload.body || "",
     data: { url: payload.url || "/dashboard" },

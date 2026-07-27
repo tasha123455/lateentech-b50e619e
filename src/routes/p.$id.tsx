@@ -7,10 +7,10 @@ import { useLanguage } from "@/i18n/LanguageContext";
 export const Route = createFileRoute("/p/$id")({
   head: () => ({
     meta: [
-      { title: "Product · Lateen" },
-      { name: "description", content: "View this product on Lateen." },
-      { property: "og:title", content: "Product · Lateen" },
-      { property: "og:description", content: "View this product on Lateen." },
+      { title: "Product · Wasla" },
+      { name: "description", content: "View this product on Wasla." },
+      { property: "og:title", content: "Product · Wasla" },
+      { property: "og:description", content: "View this product on Wasla." },
       { property: "og:type", content: "product" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
