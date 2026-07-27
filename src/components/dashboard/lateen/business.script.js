@@ -1062,7 +1062,9 @@ recomputeAnalytics=function(){
     }
   }catch(e){console.error('[Lateen] biz wallet',e);}
 };
-(async()=>{try{await loadProducts();await loadOrders();await refreshProfile();await refreshBizReviews();}catch(e){console.error('[Lateen] business boot',e);}})();
+/* Parallelize boot fetches — products/orders/profile/reviews are all
+   independent, so run them concurrently instead of awaiting in series. */
+(async()=>{try{await Promise.all([loadProducts(),loadOrders(),refreshProfile(),refreshBizReviews()]);}catch(e){console.error('[Lateen] business boot',e);}})();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
   /* Coalesce bursts of realtime events into a single refresh so the list
      doesn't rebuild multiple times back-to-back (which caused visible
