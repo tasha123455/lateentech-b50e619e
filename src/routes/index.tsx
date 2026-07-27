@@ -32,7 +32,7 @@ function Landing() {
   if (loading || (user && role)) {
     return (
       <main className="flex min-h-[100dvh] items-center justify-center bg-background px-6">
-        <LateenLogo variant="wordmark" lang={lang === "ar" ? "ar" : "en"} size={160} glow showTagline={false} />
+        <LateenLogo variant="mark" size={180} glow />
       </main>
     );
   }

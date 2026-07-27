@@ -76,12 +76,36 @@ export function LateenLogo({
     );
   }
   return (
-    <img
-      src="/wasla-mark.png"
-      width={size}
-      height={size}
-      alt="Wasla"
-      style={{ display: "block", height: size, width: "auto" }}
-    />
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        isolation: "isolate",
+      }}
+    >
+      {glow && (
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: `-${Math.round(size * 0.9)}px`,
+            zIndex: -1,
+            pointerEvents: "none",
+            background:
+              "radial-gradient(closest-side at 22% 45%, rgba(232,32,86,0.35), transparent 70%), radial-gradient(closest-side at 50% 30%, rgba(180,45,220,0.32), transparent 70%), radial-gradient(closest-side at 80% 55%, rgba(46,196,120,0.30), transparent 70%)",
+            filter: "blur(28px)",
+          }}
+        />
+      )}
+      <img
+        src="/wasla-mark.png"
+        width={size}
+        height={size}
+        alt="Wasla"
+        style={{ display: "block", height: size, width: "auto" }}
+      />
+    </div>
   );
 }
