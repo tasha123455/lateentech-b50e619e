@@ -18,8 +18,8 @@ export function LateenLogo({
     const wordSrc = lang === "ar" ? "/wasla-wordmark-ar.png" : "/wasla-wordmark-en.png";
     const tagSrc = lang === "ar" ? "/wasla-tagline-ar.png" : "/wasla-tagline-en.png";
     const markH = size;
-    const wordH = Math.round(size * 0.78);
-    const tagH = Math.round(size * 0.11);
+    const wordH = lang === "ar" ? Math.round(size * 0.78) : Math.round(size * 1.05);
+    const tagH = lang === "ar" ? Math.round(size * 0.11) : Math.round(size * 0.09);
     return (
       <div
         style={{
