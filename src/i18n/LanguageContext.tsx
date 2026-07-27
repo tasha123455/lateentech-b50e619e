@@ -243,8 +243,16 @@ export function LanguageProvider({ lang, children }: { lang: Lang; children: Rea
 
 export function useLanguage() {
   const v = useContext(Ctx);
-  if (!v) throw new Error("useLanguage must be used within LanguageProvider");
-  return v;
+  if (v) return v;
+  // Fallback for components rendered outside a language layout (e.g. root-shell
+  // widgets like <InstallPrompt />). Derive from the current URL if possible.
+  const path = typeof window !== "undefined" ? window.location.pathname : "";
+  const lang: Lang = /^\/ar(\/|$)/.test(path) ? "ar" : "en";
+  const dir: Dir = lang === "ar" ? "rtl" : "ltr";
+  const withLangFn = (p: string) => (p.startsWith("/") ? `/${lang}${p}` : p);
+  const otherLang: Lang = lang === "ar" ? "en" : "ar";
+  const otherLangPath = `/${otherLang}`;
+  return { lang, dir, withLang: withLangFn, otherLangPath, otherLang } as LanguageState;
 }
 
 /** Convenience — return a lang-prefixed path for the current tree. */
