@@ -510,11 +510,12 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadAvatar(file: File): Promise<string> {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-      const path = `${userId}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
+      const compressed = await compressImage(file, IMAGE_PRESETS.avatar);
+      const path = `${userId}/avatar-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, compressed, {
         upsert: true,
-        contentType: file.type || "image/jpeg",
+        contentType: compressed.type || "image/jpeg",
+        cacheControl: "31536000",
       });
       if (upErr) throw upErr;
       const { error: updErr } = await supabase
