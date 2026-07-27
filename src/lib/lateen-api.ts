@@ -2,6 +2,7 @@
 // Installed onto window.LateenAPI by LateenShell so the scripts can call
 // real backend operations instead of mutating in-memory arrays.
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage, IMAGE_PRESETS } from "@/lib/image-utils";
 
 // Same charset as product codes (no ambiguous 0/O or 1/I), but with no
 // prefix -- product codes are shown as "LT-XXXXXX" while order numbers are
@@ -145,11 +146,11 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadPhoto(file: File): Promise<string> {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const compressed = await compressImage(file, IMAGE_PRESETS.productPhoto);
+      const path = `${userId}/${crypto.randomUUID()}.jpg`;
       const { error } = await supabase.storage
         .from("product-photos")
-        .upload(path, file, { upsert: false, contentType: file.type });
+        .upload(path, compressed, { upsert: false, contentType: compressed.type, cacheControl: "31536000" });
       if (error) throw error;
       const { data } = supabase.storage.from("product-photos").getPublicUrl(path);
       return data.publicUrl;
@@ -226,11 +227,11 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadReviewPhoto(file: File): Promise<string> {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const compressed = await compressImage(file, IMAGE_PRESETS.reviewPhoto);
+      const path = `${userId}/${crypto.randomUUID()}.jpg`;
       const { error } = await supabase.storage
         .from("review-photos")
-        .upload(path, file, { upsert: false, contentType: file.type });
+        .upload(path, compressed, { upsert: false, contentType: compressed.type, cacheControl: "31536000" });
       if (error) throw error;
       const { data: s } = await supabase.storage
         .from("review-photos")
@@ -372,11 +373,11 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadReceipt(file: File): Promise<string> {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const compressed = await compressImage(file, IMAGE_PRESETS.receipt);
+      const path = `${userId}/${crypto.randomUUID()}.jpg`;
       const { error } = await supabase.storage
         .from("receipts")
-        .upload(path, file, { upsert: false, contentType: file.type });
+        .upload(path, compressed, { upsert: false, contentType: compressed.type, cacheControl: "31536000" });
       if (error) throw error;
       // Store an opaque marker; consumers resolve to a short-lived signed URL at read time.
       return `receipts:${path}`;
@@ -509,11 +510,12 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadAvatar(file: File): Promise<string> {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-      const path = `${userId}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
+      const compressed = await compressImage(file, IMAGE_PRESETS.avatar);
+      const path = `${userId}/avatar-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, compressed, {
         upsert: true,
-        contentType: file.type || "image/jpeg",
+        contentType: compressed.type || "image/jpeg",
+        cacheControl: "31536000",
       });
       if (upErr) throw upErr;
       const { error: updErr } = await supabase

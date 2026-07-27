@@ -249,7 +249,10 @@ export function PublicProduct({ id }: { id: string }) {
                 key={i}
                 src={src}
                 alt={p.name}
-                className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in"
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={i === 0 ? "high" : "auto"}
+                className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in bg-surface-2"
                 onClick={() => setLightbox(photos[i])}
               />
             ))}
@@ -315,7 +318,7 @@ export function PublicProduct({ id }: { id: string }) {
                             className={`relative w-[74px] rounded-lg border border-border bg-surface p-1 text-left transition ${oos ? "opacity-40 cursor-not-allowed" : "cursor-pointer hover:border-primary/60"}`}
                           >
                             {it.photo ? (
-                              <img src={it.photo} alt="" className="h-16 w-full rounded object-cover" />
+                              <img src={it.photo} alt="" loading="lazy" decoding="async" className="h-16 w-full rounded object-cover bg-surface-2" />
                             ) : (
                               <div className="flex h-16 w-full items-center justify-center rounded bg-surface-2 text-2xl">·</div>
                             )}
@@ -436,7 +439,7 @@ export function PublicProduct({ id }: { id: string }) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {avatarUrl ? (
-                          <img src={avatarUrl} alt="" className="h-6 w-6 flex-shrink-0 rounded-full object-cover" />
+                          <img src={avatarUrl} alt="" loading="lazy" decoding="async" className="h-6 w-6 flex-shrink-0 rounded-full object-cover bg-surface-2" />
                         ) : (
                           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 text-[11px] font-semibold text-text-2">{initials}</span>
                         )}
@@ -455,7 +458,7 @@ export function PublicProduct({ id }: { id: string }) {
                         className="mt-2 h-14 w-14 cursor-pointer overflow-hidden rounded-lg border border-border"
                         onClick={() => setLightbox(r.photo_url)}
                       >
-                        <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                        <img src={r.photo_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover bg-surface-2" />
                       </div>
                     )}
                   </div>
