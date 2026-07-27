@@ -248,7 +248,7 @@ export function useLanguage() {
   // widgets like <InstallPrompt />). Derive from the current URL if possible.
   const path = typeof window !== "undefined" ? window.location.pathname : "";
   const lang: Lang = /^\/ar(\/|$)/.test(path) ? "ar" : "en";
-  const dir: Dir = lang === "ar" ? "rtl" : "ltr";
+  const dir: "rtl" | "ltr" = lang === "ar" ? "rtl" : "ltr";
   const withLangFn = (p: string) => (p.startsWith("/") ? `/${lang}${p}` : p);
   const otherLang: Lang = lang === "ar" ? "en" : "ar";
   const otherLangPath = `/${otherLang}`;
