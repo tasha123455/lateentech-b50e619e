@@ -373,11 +373,11 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadReceipt(file: File): Promise<string> {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const compressed = await compressImage(file, IMAGE_PRESETS.receipt);
+      const path = `${userId}/${crypto.randomUUID()}.jpg`;
       const { error } = await supabase.storage
         .from("receipts")
-        .upload(path, file, { upsert: false, contentType: file.type });
+        .upload(path, compressed, { upsert: false, contentType: compressed.type, cacheControl: "31536000" });
       if (error) throw error;
       // Store an opaque marker; consumers resolve to a short-lived signed URL at read time.
       return `receipts:${path}`;
