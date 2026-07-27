@@ -96,12 +96,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "icon",
-        href: "/wasla-mark-192.png",
+        href: "/wasla-icon-192.png",
         type: "image/png",
       },
       {
         rel: "apple-touch-icon",
-        href: "/wasla-mark-192.png",
+        href: "/wasla-icon-192.png",
       },
     ],
   }),
