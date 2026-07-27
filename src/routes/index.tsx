@@ -41,7 +41,7 @@ function Landing() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
-      <LateenLogo variant="wordmark" lang={isAr ? "ar" : "en"} size={200} />
+      <LateenLogo variant="wordmark" lang={isAr ? "ar" : "en"} size={140} />
       <div className="my-8 h-px w-7 bg-border" />
       <p className="mb-4 text-[13px] tracking-wide text-text-2">Who are you?</p>
       <div className="flex w-full max-w-[320px] flex-col gap-3">
