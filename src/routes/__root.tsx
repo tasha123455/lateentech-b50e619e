@@ -89,6 +89,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.json" },
       { rel: "icon", href: "/wasla-icon-192.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/wasla-icon-192.png" },
+      // Preload brand assets so the logo/wordmark/tagline appear instantly
+      // on first paint everywhere (splash, auth, landing, headers).
+      { rel: "preload", as: "image", href: "/wasla-mark.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-wordmark-en.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-wordmark-ar.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-tagline-en.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-tagline-ar.png", fetchpriority: "high" } as any,
     ],
   }),
   shellComponent: RootShell,
