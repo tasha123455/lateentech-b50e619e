@@ -52,7 +52,7 @@ function loadViaImg(file: File) {
     img.onload = () => resolve({
       w: img.naturalWidth,
       h: img.naturalHeight,
-      draw: (ctx, dw, dh) => ctx.drawImage(img, 0, 0, dw, dh),
+      draw: (ctx: CanvasRenderingContext2D, dw: number, dh: number) => ctx.drawImage(img, 0, 0, dw, dh),
       close: () => URL.revokeObjectURL(url),
     });
     img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
