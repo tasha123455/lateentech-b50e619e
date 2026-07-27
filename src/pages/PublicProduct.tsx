@@ -458,7 +458,7 @@ export function PublicProduct({ id }: { id: string }) {
                         className="mt-2 h-14 w-14 cursor-pointer overflow-hidden rounded-lg border border-border"
                         onClick={() => setLightbox(r.photo_url)}
                       >
-                        <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                        <img src={r.photo_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover bg-surface-2" />
                       </div>
                     )}
                   </div>
