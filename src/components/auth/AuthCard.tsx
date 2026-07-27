@@ -45,10 +45,7 @@ export function AuthCard({ role, children, backTo = "/" }: Props) {
           </button>
         </div>
         <div className="mb-5 flex items-center gap-2">
-          <LateenLogo size={34} />
-          <span data-no-i18n className="font-serif text-lg text-text-1">
-            {lang === "ar" ? "وصلة" : "Wasla"}
-          </span>
+          <LateenLogo variant="wordmark" lang={lang === "ar" ? "ar" : "en"} size={44} />
           <span className={`ms-auto rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider ${tint}`}>{label}</span>
         </div>
         {children}
