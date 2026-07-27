@@ -97,7 +97,7 @@ export function RegisterForm({ role }: { role: Role }) {
   const s = styles(role);
   const nav = useNavigate();
   const { refreshRole } = useAuth();
-  const { lang } = useLanguage();
+  const { lang, withLang } = useLanguage();
   const ar = lang === "ar";
   const importantNotesAr =
     role === "marketer"
@@ -167,7 +167,7 @@ export function RegisterForm({ role }: { role: Role }) {
     } catch { /* ignore */ }
     try { localStorage.setItem("active_role", role); } catch { /* ignore */ }
     await refreshRole();
-    nav({ to: "/dashboard" });
+    nav({ to: withLang("/dashboard") });
   };
 
   const submit = async (e: FormEvent) => {
@@ -306,7 +306,7 @@ export function RegisterForm({ role }: { role: Role }) {
 
       <p className="text-center text-xs text-text-2">
         Have an account?{" "}
-        <Link to={role === "marketer" ? "/marketer/signin" : "/business/signin"} className={`font-medium ${s.link}`}>
+        <Link to={withLang(role === "marketer" ? "/marketer/signin" : "/business/signin")} className={`font-medium ${s.link}`}>
           Sign in
         </Link>
       </p>

@@ -10,7 +10,6 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
-import { LanguageProvider, FloatingLanguageToggle, LanguageGate } from "@/i18n/LanguageContext";
 import { InstallPrompt } from "@/components/InstallPrompt";
 
 function NotFoundComponent() {
@@ -86,23 +85,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#0D0D0D" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      {
-        rel: "manifest",
-        href: "/manifest.json",
-      },
-      {
-        rel: "icon",
-        href: "/wasla-icon-192.png",
-        type: "image/png",
-      },
-      {
-        rel: "apple-touch-icon",
-        href: "/wasla-icon-192.png",
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "icon", href: "/wasla-icon-192.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/wasla-icon-192.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -118,25 +104,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body suppressHydrationWarning>
-        {/* Runs synchronously before any other body content parses/paints.
-            Sets dir/lang from the saved preference immediately, so a
-            returning Arabic user's page never visibly flips from LTR to
-            RTL after load — it's already correct in the first frame. The
-            actual text translation still happens in React (see
-            LanguageContext) once it hydrates, just after this. */}
+        {/* Sets html[lang]/[dir] synchronously BEFORE anything paints, based
+            on the /en or /ar URL prefix. Fallback: stored preference, then
+            navigator.language, then English. Language layout routes then
+            re-assert the same values via LanguageProvider once React
+            hydrates — this inline script only prevents a first-paint flash
+            for Arabic. */}
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var k='lateen_lang';var v=localStorage.getItem(k);if(v==='ar'){var h=document.documentElement;h.setAttribute('lang','ar');h.setAttribute('dir','rtl');}}catch(e){}})();",
+              "(function(){try{var p=location.pathname||'';var lang=/^\\/ar(\\/|$)/.test(p)?'ar':/^\\/en(\\/|$)/.test(p)?'en':null;if(!lang){try{var s=localStorage.getItem('lateen_lang');if(s==='ar'||s==='en')lang=s;}catch(e){}}if(!lang){try{var n=(navigator.language||'').toLowerCase();lang=n.indexOf('ar')===0?'ar':'en';}catch(e){lang='en';}}var h=document.documentElement;h.setAttribute('lang',lang);h.setAttribute('dir',lang==='ar'?'rtl':'ltr');}catch(e){}})();",
           }}
         />
-        <LanguageProvider>
-          <AuthProvider>{children}</AuthProvider>
-          <FloatingLanguageToggle />
-          <InstallPrompt />
-          <LanguageGate />
-        </LanguageProvider>
+        <AuthProvider>{children}</AuthProvider>
+        <InstallPrompt />
         <Scripts />
       </body>
     </html>

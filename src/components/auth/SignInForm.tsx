@@ -16,7 +16,7 @@ export function SignInForm({ role }: { role: Role }) {
   const s = styles(role);
   const nav = useNavigate();
   const { loadRoleForUser } = useAuth();
-  const { lang } = useLanguage();
+  const { lang, withLang } = useLanguage();
   const ar = lang === "ar";
   const [error, setError] = useState<string | null>(null);
 
@@ -87,7 +87,7 @@ export function SignInForm({ role }: { role: Role }) {
       <GoogleButton onClick={signInGoogle}>Sign in with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
         New here?{" "}
-        <Link to={role === "marketer" ? "/marketer/register" : "/business/register"} className={`font-medium ${s.link}`}>
+        <Link to={withLang(role === "marketer" ? "/marketer/register" : "/business/register")} className={`font-medium ${s.link}`}>
           Create an account
         </Link>
       </p>
