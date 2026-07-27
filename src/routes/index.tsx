@@ -31,8 +31,8 @@ function Landing() {
   // the dashboard. Only signed-out visitors ever see the real landing UI.
   if (loading || (user && role)) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <LateenLogo size={96} />
+      <main className="flex min-h-[100dvh] items-center justify-center bg-background px-6">
+        <LateenLogo variant="wordmark" lang={lang === "ar" ? "ar" : "en"} size={160} glow showTagline={false} />
       </main>
     );
   }
@@ -40,8 +40,8 @@ function Landing() {
   const isAr = lang === "ar";
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
-      <LateenLogo variant="wordmark" lang={isAr ? "ar" : "en"} size={110} glow />
+    <main className="relative mx-auto flex min-h-[100dvh] w-full max-w-[420px] flex-col items-center justify-center bg-background px-6 py-8">
+      <LateenLogo variant="wordmark" lang={isAr ? "ar" : "en"} size={120} glow />
       <div className="my-8 h-px w-7 bg-border" />
       <p className="mb-4 text-[13px] tracking-wide text-text-2">Who are you?</p>
       <div className="flex w-full max-w-[320px] flex-col gap-3">
