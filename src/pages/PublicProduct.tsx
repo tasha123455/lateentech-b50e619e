@@ -318,7 +318,7 @@ export function PublicProduct({ id }: { id: string }) {
                             className={`relative w-[74px] rounded-lg border border-border bg-surface p-1 text-left transition ${oos ? "opacity-40 cursor-not-allowed" : "cursor-pointer hover:border-primary/60"}`}
                           >
                             {it.photo ? (
-                              <img src={it.photo} alt="" className="h-16 w-full rounded object-cover" />
+                              <img src={it.photo} alt="" loading="lazy" decoding="async" className="h-16 w-full rounded object-cover bg-surface-2" />
                             ) : (
                               <div className="flex h-16 w-full items-center justify-center rounded bg-surface-2 text-2xl">·</div>
                             )}
