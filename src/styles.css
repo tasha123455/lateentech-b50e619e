@@ -146,8 +146,3 @@ body.lang-ar .app { direction: rtl; }
 /* Unified language-toggle label swap (driven by <body class="lang-en|lang-ar">) */
 body.lang-en .lang-label-ar { display: none !important; }
 body.lang-ar .lang-label-en { display: none !important; }
-
-@keyframes lateenSkeleton {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}

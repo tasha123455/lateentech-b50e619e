@@ -89,11 +89,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.json" },
       { rel: "icon", href: "/wasla-icon-192.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/wasla-icon-192.png" },
-      // Preconnect + load Cairo (Arabic-friendly) with font-display: swap so
-      // text paints immediately in the fallback stack, then swaps once loaded.
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" } as any,
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" },
       // Preload brand assets so the logo/wordmark/tagline appear instantly
       // on first paint everywhere (splash, auth, landing, headers).
       { rel: "preload", as: "image", href: "/wasla-mark.png", fetchpriority: "high" } as any,
