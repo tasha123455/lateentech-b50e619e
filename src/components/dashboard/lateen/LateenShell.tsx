@@ -86,6 +86,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
   useEffect(() => { signOutRef.current = signOut; }, [signOut]);
 
   const mountedKeyRef = useRef<string | null>(null);
+  const [body, setBody] = useState<string | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -108,16 +109,21 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     };
     el.addEventListener("click", onClick);
 
-    loadChartJs()
-      .catch((err) => console.error("[Lateen] chart library unavailable", err))
-      .then(() => {
+    Promise.all([roleLoaders[role](), loadChartJs().catch((err) => {
+      console.error("[Lateen] chart library unavailable", err);
+    })])
+      .then(([[bodyMod, scriptMod, cssMod]]) => {
         if (cancelled) return;
-        const script = document.createElement("script");
-        script.textContent = buildScript(
-          role === "business" ? businessScript : role === "admin" ? adminScript : marketerScript,
-        );
-        document.body.appendChild(script);
-        injected = script;
+        injectRoleCss(role, (cssMod as { default: string }).default);
+        setBody((bodyMod as { default: string }).default);
+        // Wait one microtask for React to attach the body markup, then run script.
+        queueMicrotask(() => {
+          if (cancelled) return;
+          const script = document.createElement("script");
+          script.textContent = buildScript((scriptMod as { default: string }).default);
+          document.body.appendChild(script);
+          injected = script;
+        });
       })
       .catch((err) => console.error("[Lateen] failed", err));
 
@@ -134,17 +140,60 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
       mountedKeyRef.current = null;
+      setBody(null);
     };
   }, [role, userId]);
 
-  const body = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
-
   return (
     <div className={`lateen-${role} relative`}>
-      <div
-        ref={containerRef}
-        dangerouslySetInnerHTML={{ __html: body }}
-      />
+      {body === null ? <DashboardSkeleton /> : (
+        <div
+          ref={containerRef}
+          dangerouslySetInnerHTML={{ __html: body }}
+        />
+      )}
     </div>
   );
 }
+
+function DashboardSkeleton() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        maxWidth: 420,
+        margin: "0 auto",
+        padding: "1.25rem 1.25rem 5rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={sk(160, 26)} />
+        <div style={sk(38, 38, 999)} />
+      </div>
+      <div style={sk("100%", 110, 16)} />
+      <div style={sk("100%", 160, 16)} />
+      <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ ...sk(0, 80, 14), flex: 1 }} />
+        <div style={{ ...sk(0, 80, 14), flex: 1 }} />
+      </div>
+      <div style={sk("100%", 210, 16)} />
+      <div style={sk("100%", 140, 16)} />
+    </div>
+  );
+}
+
+function sk(w: number | string, h: number, r: number | string = 8): React.CSSProperties {
+  return {
+    width: typeof w === "number" ? (w === 0 ? undefined : w) : w,
+    height: h,
+    borderRadius: r,
+    background:
+      "linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%)",
+    backgroundSize: "200% 100%",
+    animation: "lateenSkeleton 1.4s ease-in-out infinite",
+  };
+}
+
