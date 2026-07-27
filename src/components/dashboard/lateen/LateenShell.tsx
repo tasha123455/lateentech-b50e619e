@@ -1,16 +1,39 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { createLateenApi } from "@/lib/lateen-api";
-import businessBody from "./business.body.html?raw";
-import marketerBody from "./marketer.body.html?raw";
-import adminBody from "./admin.body.html?raw";
-import businessScript from "./business.script.js?raw";
-import marketerScript from "./marketer.script.js?raw";
-import adminScript from "./admin.script.js?raw";
-import "@/styles/lateen-business.css";
-import "@/styles/lateen-marketer.css";
-import "@/styles/lateen-admin.css";
+
+// Role-scoped dynamic loaders. Vite splits each `?raw` import into its own
+// chunk, so a marketer never downloads the business or admin bundles (~800KB
+// of legacy script+HTML combined). The CSS files are also dynamic so their
+// stylesheets are attached only when the matching role mounts.
+const roleLoaders = {
+  business: () => Promise.all([
+    import("./business.body.html?raw"),
+    import("./business.script.js?raw"),
+    import("@/styles/lateen-business.css?inline"),
+  ]),
+  marketer: () => Promise.all([
+    import("./marketer.body.html?raw"),
+    import("./marketer.script.js?raw"),
+    import("@/styles/lateen-marketer.css?inline"),
+  ]),
+  admin: () => Promise.all([
+    import("./admin.body.html?raw"),
+    import("./admin.script.js?raw"),
+    import("@/styles/lateen-admin.css?inline"),
+  ]),
+} as const;
+
+const injectedRoleCss = new Set<string>();
+function injectRoleCss(role: string, css: string) {
+  if (injectedRoleCss.has(role)) return;
+  injectedRoleCss.add(role);
+  const style = document.createElement("style");
+  style.setAttribute("data-lateen-role", role);
+  style.textContent = css;
+  document.head.appendChild(style);
+}
 
 const CHART_SRC = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
 const ZOOM_SRC = "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js";
