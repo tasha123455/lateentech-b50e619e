@@ -16,7 +16,7 @@ export function AuthCard({ role, children, backTo = "/" }: Props) {
   const langLabel = lang === "en" ? "العربية" : "English";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-[400px] rounded-2xl border border-border bg-surface p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between gap-2">
           <Link to={backTo} className="inline-block text-xs text-text-2 hover:text-text-1">‹ Back</Link>
