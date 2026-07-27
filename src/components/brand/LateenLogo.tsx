@@ -50,11 +50,17 @@ export function LateenLogo({
           src="/wasla-mark.png"
           alt=""
           aria-hidden
+          loading="eager"
+          decoding="sync"
+          fetchPriority="high"
           style={{ height: markH, width: "auto", display: "block" }}
         />
         <img
           src={wordSrc}
           alt="Wasla"
+          loading="eager"
+          decoding="sync"
+          fetchPriority="high"
           style={{ height: wordH, width: "auto", display: "block", maxWidth: "100%", marginTop: -Math.round(size * 0.05) }}
         />
         {showTagline && (
@@ -62,6 +68,9 @@ export function LateenLogo({
             src={tagSrc}
             alt=""
             aria-hidden
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
             style={{
               height: tagH,
               width: "auto",
