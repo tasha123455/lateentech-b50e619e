@@ -60,7 +60,18 @@ export function Dashboard({ prod }: { prod?: string }) {
   }, [prod, role]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center text-text-2">Loading…</div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <div style={{ maxWidth: 420, margin: "0 auto", padding: "1.25rem 1.25rem 5rem", display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ width: 160, height: 26, borderRadius: 8, background: "rgba(255,255,255,0.06)" }} />
+            <div style={{ width: 38, height: 38, borderRadius: 999, background: "rgba(255,255,255,0.06)" }} />
+          </div>
+          <div style={{ width: "100%", height: 110, borderRadius: 16, background: "rgba(255,255,255,0.06)" }} />
+          <div style={{ width: "100%", height: 160, borderRadius: 16, background: "rgba(255,255,255,0.06)" }} />
+        </div>
+      </div>
+    );
   }
   if (!user) return <Navigate to={withLang("/")} />;
 
