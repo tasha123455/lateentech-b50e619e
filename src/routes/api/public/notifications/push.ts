@@ -5,7 +5,6 @@ export const Route = createFileRoute("/api/public/notifications/push")({
     handlers: {
       POST: async ({ request }) => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { sendWebPush, readVapidKeysFromEnv } = await import("@/lib/web-push.server");
 
         // Verify shared secret from vault (matches the DB trigger's header).
         const auth = request.headers.get("authorization") ?? "";
@@ -23,7 +22,7 @@ export const Route = createFileRoute("/api/public/notifications/push")({
           const row = data as { decrypted_secret?: string } | null;
           expected = row?.decrypted_secret ?? "";
         } catch {
-          // Fallback: query via RPC-less path failed; try admin.rpc unavailable — accept only when nothing configured.
+          // Fallback: query via RPC-less path failed; accept only when nothing configured.
         }
 
         if (!expected || bearer !== expected) {
@@ -47,21 +46,54 @@ export const Route = createFileRoute("/api/public/notifications/push")({
           return new Response("Missing fields", { status: 400 });
         }
 
+        // Prefer Zapier → Progressier when configured.
+        const zapierWebhookUrl = process.env.ZAPIER_WEBHOOK_URL;
+        if (zapierWebhookUrl) {
+          const notifData = (payload.data ?? {}) as { photo?: string; product_photo?: string };
+          const image = notifData.product_photo || notifData.photo || undefined;
+
+          try {
+            await fetch(zapierWebhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              mode: "no-cors",
+              body: JSON.stringify({
+                timestamp: new Date().toISOString(),
+                triggered_from: "wasla_push_webhook",
+                user_id: payload.user_id,
+                notification_id: payload.id,
+                kind: payload.kind,
+                title: (payload.title ?? "").slice(0, 120),
+                body: (payload.body ?? "").slice(0, 300),
+                image,
+                url: "/dashboard",
+                data: payload.data,
+              }),
+            });
+          } catch (e) {
+            console.error("[push] Zapier forward failed", e);
+          }
+
+          // no-cors hides the response status, so we assume accepted and tell the caller to
+          // check the Zap's run history in Zapier.
+          return new Response(
+            JSON.stringify({ ok: true, forwarded_to: "zapier", note: "verify in Zap run history" }),
+            { headers: { "content-type": "application/json" } },
+          );
+        }
+
+        // Fallback: self-hosted VAPID push (legacy).
+        const { sendWebPush, readVapidKeysFromEnv } = await import("@/lib/web-push.server");
         const vapid = readVapidKeysFromEnv();
         if (!vapid) {
-          // Gracefully no-op if keys aren't configured — the in-app notification still saved.
-          console.warn("[push] VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY_JWK not set; skipping push");
-          return new Response(JSON.stringify({ ok: true, skipped: "no_vapid_keys" }), {
+          console.warn("[push] ZAPIER_WEBHOOK_URL not set and VAPID keys missing; skipping push");
+          return new Response(JSON.stringify({ ok: true, skipped: "no_push_provider" }), {
             headers: { "content-type": "application/json" },
           });
         }
 
-        // Keep payload comfortably under the ~4KB push message size limit.
         const pushTitle = (payload.title ?? "").slice(0, 120);
         const pushBody = (payload.body ?? "").slice(0, 300);
-
-        // The photo lives inside `data`, under different keys depending on notification
-        // kind: admin-composed messages use `photo`, order notifications use `product_photo`.
         const notifData = (payload.data ?? {}) as { photo?: string; product_photo?: string };
         const image = notifData.product_photo || notifData.photo || undefined;
 
@@ -78,7 +110,6 @@ export const Route = createFileRoute("/api/public/notifications/push")({
           });
         }
         if (!subs || subs.length === 0) {
-          // Nobody has push enabled for this user yet — not an error.
           return new Response(JSON.stringify({ ok: true, sent: 0 }), {
             headers: { "content-type": "application/json" },
           });
