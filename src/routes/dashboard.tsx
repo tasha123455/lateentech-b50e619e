@@ -4,7 +4,7 @@ import { useAuth } from "@/auth/AuthContext";
 import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard · Lateen" }] }),
+  head: () => ({ meta: [{ title: "Dashboard · Wasla" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     prod: typeof s.prod === "string" ? s.prod : undefined,
     order: typeof s.order === "string" ? s.order : undefined,

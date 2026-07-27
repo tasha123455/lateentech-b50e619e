@@ -96,7 +96,7 @@ export function InstallPrompt() {
     setVisible(false);
   };
 
-  const title = lang === "ar" ? "ثبّت تطبيق لاتين" : "Install Lateen";
+  const title = lang === "ar" ? "ثبّت تطبيق وصلة" : "Install Wasla";
   const body = showIosHint
     ? lang === "ar"
       ? 'اضغط زر المشاركة، ثم "إضافة إلى الشاشة الرئيسية".'

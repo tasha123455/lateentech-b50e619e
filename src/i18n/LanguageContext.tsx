@@ -414,7 +414,7 @@ export function LanguageGate() {
         <div style={{ marginBottom: 44, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
           <LateenLogo size={50} />
           <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 19, color: "#f0eeeb", letterSpacing: 0.2 }}>
-            Lateen
+            Wasla · وصلة
           </span>
         </div>
 

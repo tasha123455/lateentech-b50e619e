@@ -2,12 +2,13 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LateenLogo } from "@/components/brand/LateenLogo";
 import { useAuth } from "@/auth/AuthContext";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lateen — Performance marketing, zero upfront cost" },
-      { name: "description", content: "Lateen connects businesses with marketers. Pay only when you sell." },
+      { title: "Wasla — Your smartest link to modern commerce" },
+      { name: "description", content: "Wasla connects businesses with marketers. Pay only when you sell." },
     ],
   }),
   component: Landing,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const { user, role, loading } = useAuth();
+  const { lang } = useLanguage();
   const nav = useNavigate();
   const [shopperSoonOpen, setShopperSoonOpen] = useState(false);
 
@@ -35,11 +37,19 @@ function Landing() {
     );
   }
 
+  const isAr = lang === "ar";
+  const tagline = isAr ? "صِلَتك الأقوى للتجارة الذكية" : "Your smartest link to modern commerce";
+
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
       <LateenLogo size={68} />
-      <h1 className="mt-5 font-serif text-3xl font-medium tracking-tight text-text-1">Lateen</h1>
-      <div className="my-9 h-px w-7 bg-border" />
+      <h1 data-no-i18n className="mt-5 font-serif text-3xl font-medium tracking-tight text-text-1" dir={isAr ? "rtl" : "ltr"}>
+        {isAr ? "وصلة" : "Wasla"}
+      </h1>
+      <p data-no-i18n className="mt-2 max-w-[280px] text-center text-[12px] text-text-2" dir={isAr ? "rtl" : "ltr"}>
+        {tagline}
+      </p>
+      <div className="my-8 h-px w-7 bg-border" />
       <p className="mb-4 text-[13px] tracking-wide text-text-2">Who are you?</p>
       <div className="flex w-full max-w-[320px] flex-col gap-3">
         <RoleButton
