@@ -113,6 +113,9 @@ export function LateenLogo({
         width={size}
         height={size}
         alt="Wasla"
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
         style={{ display: "block", height: size, width: "auto" }}
       />
     </div>
