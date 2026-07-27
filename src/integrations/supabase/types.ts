@@ -1590,6 +1590,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_business_reviews: {
+        Args: never
+        Returns: {
+          author_name: string
+          avatar_path: string
+          comment: string
+          created_at: string
+          id: string
+          marketer_id: string
+          photo_url: string
+          product_id: string
+          rating: number
+          updated_at: string
+        }[]
+      }
       list_product_reviews: {
         Args: { _product_id: string }
         Returns: {
@@ -1833,6 +1848,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      verify_account_deletion_cron_secret: {
+        Args: { _secret: string }
+        Returns: boolean
       }
     }
     Enums: {
