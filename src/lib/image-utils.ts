@@ -37,7 +37,7 @@ function loadBitmap(file: File): Promise<{ w: number; h: number; draw: (ctx: Can
       .then((bmp) => ({
         w: bmp.width,
         h: bmp.height,
-        draw: (ctx, dw, dh) => ctx.drawImage(bmp, 0, 0, dw, dh),
+        draw: (ctx: CanvasRenderingContext2D, dw: number, dh: number) => ctx.drawImage(bmp, 0, 0, dw, dh),
         close: () => bmp.close(),
       }))
       .catch(() => loadViaImg(file));
