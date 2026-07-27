@@ -1,12 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AuthCard } from "@/components/auth/AuthCard";
-import { SignInForm } from "@/components/auth/SignInForm";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { detectLang } from "@/i18n/langPath";
 
 export const Route = createFileRoute("/marketer/signin")({
-  head: () => ({ meta: [{ title: "Sign in — Marketer · Wasla" }] }),
-  component: () => (
-    <AuthCard role="marketer">
-      <SignInForm role="marketer" />
-    </AuthCard>
-  ),
+  beforeLoad: () => {
+    const lang = typeof window === "undefined" ? "en" : detectLang();
+    throw redirect({ to: `/${lang}/marketer/signin`, replace: true });
+  },
 });

@@ -9,29 +9,65 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ArRouteImport } from './routes/ar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EnIndexRouteImport } from './routes/en.index'
+import { Route as ArIndexRouteImport } from './routes/ar.index'
 import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as MarketerSigninRouteImport } from './routes/marketer.signin'
 import { Route as MarketerRegisterRouteImport } from './routes/marketer.register'
+import { Route as EnDashboardRouteImport } from './routes/en.dashboard'
 import { Route as BusinessSigninRouteImport } from './routes/business.signin'
 import { Route as BusinessRegisterRouteImport } from './routes/business.register'
+import { Route as ArDashboardRouteImport } from './routes/ar.dashboard'
 import { Route as LovableAccountDeletionsProcessRouteImport } from './routes/lovable/account-deletions/process'
+import { Route as EnPIdRouteImport } from './routes/en.p.$id'
+import { Route as EnMarketerSigninRouteImport } from './routes/en.marketer.signin'
+import { Route as EnMarketerRegisterRouteImport } from './routes/en.marketer.register'
+import { Route as EnBusinessSigninRouteImport } from './routes/en.business.signin'
+import { Route as EnBusinessRegisterRouteImport } from './routes/en.business.register'
+import { Route as ArPIdRouteImport } from './routes/ar.p.$id'
+import { Route as ArMarketerSigninRouteImport } from './routes/ar.marketer.signin'
+import { Route as ArMarketerRegisterRouteImport } from './routes/ar.marketer.register'
+import { Route as ArBusinessSigninRouteImport } from './routes/ar.business.signin'
+import { Route as ArBusinessRegisterRouteImport } from './routes/ar.business.register'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicNotificationsVapidPublicKeyRouteImport } from './routes/api/public/notifications/vapid-public-key'
 import { Route as ApiPublicNotificationsPushRouteImport } from './routes/api/public/notifications/push'
 
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArRoute = ArRouteImport.update({
+  id: '/ar',
+  path: '/ar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const EnIndexRoute = EnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EnRoute,
+} as any)
+const ArIndexRoute = ArIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ArRoute,
 } as any)
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
@@ -48,6 +84,11 @@ const MarketerRegisterRoute = MarketerRegisterRouteImport.update({
   path: '/marketer/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnDashboardRoute = EnDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => EnRoute,
+} as any)
 const BusinessSigninRoute = BusinessSigninRouteImport.update({
   id: '/business/signin',
   path: '/business/signin',
@@ -58,12 +99,67 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   path: '/business/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArDashboardRoute = ArDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => ArRoute,
+} as any)
 const LovableAccountDeletionsProcessRoute =
   LovableAccountDeletionsProcessRouteImport.update({
     id: '/lovable/account-deletions/process',
     path: '/lovable/account-deletions/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EnPIdRoute = EnPIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnMarketerSigninRoute = EnMarketerSigninRouteImport.update({
+  id: '/marketer/signin',
+  path: '/marketer/signin',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnMarketerRegisterRoute = EnMarketerRegisterRouteImport.update({
+  id: '/marketer/register',
+  path: '/marketer/register',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnBusinessSigninRoute = EnBusinessSigninRouteImport.update({
+  id: '/business/signin',
+  path: '/business/signin',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnBusinessRegisterRoute = EnBusinessRegisterRouteImport.update({
+  id: '/business/register',
+  path: '/business/register',
+  getParentRoute: () => EnRoute,
+} as any)
+const ArPIdRoute = ArPIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
+  getParentRoute: () => ArRoute,
+} as any)
+const ArMarketerSigninRoute = ArMarketerSigninRouteImport.update({
+  id: '/marketer/signin',
+  path: '/marketer/signin',
+  getParentRoute: () => ArRoute,
+} as any)
+const ArMarketerRegisterRoute = ArMarketerRegisterRouteImport.update({
+  id: '/marketer/register',
+  path: '/marketer/register',
+  getParentRoute: () => ArRoute,
+} as any)
+const ArBusinessSigninRoute = ArBusinessSigninRouteImport.update({
+  id: '/business/signin',
+  path: '/business/signin',
+  getParentRoute: () => ArRoute,
+} as any)
+const ArBusinessRegisterRoute = ArBusinessRegisterRouteImport.update({
+  id: '/business/register',
+  path: '/business/register',
+  getParentRoute: () => ArRoute,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -95,12 +191,28 @@ const ApiPublicNotificationsPushRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ar': typeof ArRouteWithChildren
   '/dashboard': typeof DashboardRoute
+  '/en': typeof EnRouteWithChildren
+  '/ar/dashboard': typeof ArDashboardRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
+  '/en/dashboard': typeof EnDashboardRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
+  '/ar/': typeof ArIndexRoute
+  '/en/': typeof EnIndexRoute
+  '/ar/business/register': typeof ArBusinessRegisterRoute
+  '/ar/business/signin': typeof ArBusinessSigninRoute
+  '/ar/marketer/register': typeof ArMarketerRegisterRoute
+  '/ar/marketer/signin': typeof ArMarketerSigninRoute
+  '/ar/p/$id': typeof ArPIdRoute
+  '/en/business/register': typeof EnBusinessRegisterRoute
+  '/en/business/signin': typeof EnBusinessSigninRoute
+  '/en/marketer/register': typeof EnMarketerRegisterRoute
+  '/en/marketer/signin': typeof EnMarketerSigninRoute
+  '/en/p/$id': typeof EnPIdRoute
   '/lovable/account-deletions/process': typeof LovableAccountDeletionsProcessRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
@@ -111,11 +223,25 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/ar/dashboard': typeof ArDashboardRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
+  '/en/dashboard': typeof EnDashboardRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
+  '/ar': typeof ArIndexRoute
+  '/en': typeof EnIndexRoute
+  '/ar/business/register': typeof ArBusinessRegisterRoute
+  '/ar/business/signin': typeof ArBusinessSigninRoute
+  '/ar/marketer/register': typeof ArMarketerRegisterRoute
+  '/ar/marketer/signin': typeof ArMarketerSigninRoute
+  '/ar/p/$id': typeof ArPIdRoute
+  '/en/business/register': typeof EnBusinessRegisterRoute
+  '/en/business/signin': typeof EnBusinessSigninRoute
+  '/en/marketer/register': typeof EnMarketerRegisterRoute
+  '/en/marketer/signin': typeof EnMarketerSigninRoute
+  '/en/p/$id': typeof EnPIdRoute
   '/lovable/account-deletions/process': typeof LovableAccountDeletionsProcessRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
@@ -126,12 +252,28 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ar': typeof ArRouteWithChildren
   '/dashboard': typeof DashboardRoute
+  '/en': typeof EnRouteWithChildren
+  '/ar/dashboard': typeof ArDashboardRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/signin': typeof BusinessSigninRoute
+  '/en/dashboard': typeof EnDashboardRoute
   '/marketer/register': typeof MarketerRegisterRoute
   '/marketer/signin': typeof MarketerSigninRoute
   '/p/$id': typeof PIdRoute
+  '/ar/': typeof ArIndexRoute
+  '/en/': typeof EnIndexRoute
+  '/ar/business/register': typeof ArBusinessRegisterRoute
+  '/ar/business/signin': typeof ArBusinessSigninRoute
+  '/ar/marketer/register': typeof ArMarketerRegisterRoute
+  '/ar/marketer/signin': typeof ArMarketerSigninRoute
+  '/ar/p/$id': typeof ArPIdRoute
+  '/en/business/register': typeof EnBusinessRegisterRoute
+  '/en/business/signin': typeof EnBusinessSigninRoute
+  '/en/marketer/register': typeof EnMarketerRegisterRoute
+  '/en/marketer/signin': typeof EnMarketerSigninRoute
+  '/en/p/$id': typeof EnPIdRoute
   '/lovable/account-deletions/process': typeof LovableAccountDeletionsProcessRoute
   '/api/public/notifications/push': typeof ApiPublicNotificationsPushRoute
   '/api/public/notifications/vapid-public-key': typeof ApiPublicNotificationsVapidPublicKeyRoute
@@ -143,12 +285,28 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ar'
     | '/dashboard'
+    | '/en'
+    | '/ar/dashboard'
     | '/business/register'
     | '/business/signin'
+    | '/en/dashboard'
     | '/marketer/register'
     | '/marketer/signin'
     | '/p/$id'
+    | '/ar/'
+    | '/en/'
+    | '/ar/business/register'
+    | '/ar/business/signin'
+    | '/ar/marketer/register'
+    | '/ar/marketer/signin'
+    | '/ar/p/$id'
+    | '/en/business/register'
+    | '/en/business/signin'
+    | '/en/marketer/register'
+    | '/en/marketer/signin'
+    | '/en/p/$id'
     | '/lovable/account-deletions/process'
     | '/api/public/notifications/push'
     | '/api/public/notifications/vapid-public-key'
@@ -159,11 +317,25 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/ar/dashboard'
     | '/business/register'
     | '/business/signin'
+    | '/en/dashboard'
     | '/marketer/register'
     | '/marketer/signin'
     | '/p/$id'
+    | '/ar'
+    | '/en'
+    | '/ar/business/register'
+    | '/ar/business/signin'
+    | '/ar/marketer/register'
+    | '/ar/marketer/signin'
+    | '/ar/p/$id'
+    | '/en/business/register'
+    | '/en/business/signin'
+    | '/en/marketer/register'
+    | '/en/marketer/signin'
+    | '/en/p/$id'
     | '/lovable/account-deletions/process'
     | '/api/public/notifications/push'
     | '/api/public/notifications/vapid-public-key'
@@ -173,12 +345,28 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ar'
     | '/dashboard'
+    | '/en'
+    | '/ar/dashboard'
     | '/business/register'
     | '/business/signin'
+    | '/en/dashboard'
     | '/marketer/register'
     | '/marketer/signin'
     | '/p/$id'
+    | '/ar/'
+    | '/en/'
+    | '/ar/business/register'
+    | '/ar/business/signin'
+    | '/ar/marketer/register'
+    | '/ar/marketer/signin'
+    | '/ar/p/$id'
+    | '/en/business/register'
+    | '/en/business/signin'
+    | '/en/marketer/register'
+    | '/en/marketer/signin'
+    | '/en/p/$id'
     | '/lovable/account-deletions/process'
     | '/api/public/notifications/push'
     | '/api/public/notifications/vapid-public-key'
@@ -189,7 +377,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArRoute: typeof ArRouteWithChildren
   DashboardRoute: typeof DashboardRoute
+  EnRoute: typeof EnRouteWithChildren
   BusinessRegisterRoute: typeof BusinessRegisterRoute
   BusinessSigninRoute: typeof BusinessSigninRoute
   MarketerRegisterRoute: typeof MarketerRegisterRoute
@@ -205,11 +395,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ar': {
+      id: '/ar'
+      path: '/ar'
+      fullPath: '/ar'
+      preLoaderRoute: typeof ArRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -218,6 +422,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/en/': {
+      id: '/en/'
+      path: '/'
+      fullPath: '/en/'
+      preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/ar/': {
+      id: '/ar/'
+      path: '/'
+      fullPath: '/ar/'
+      preLoaderRoute: typeof ArIndexRouteImport
+      parentRoute: typeof ArRoute
     }
     '/p/$id': {
       id: '/p/$id'
@@ -240,6 +458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketerRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/dashboard': {
+      id: '/en/dashboard'
+      path: '/dashboard'
+      fullPath: '/en/dashboard'
+      preLoaderRoute: typeof EnDashboardRouteImport
+      parentRoute: typeof EnRoute
+    }
     '/business/signin': {
       id: '/business/signin'
       path: '/business/signin'
@@ -254,12 +479,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ar/dashboard': {
+      id: '/ar/dashboard'
+      path: '/dashboard'
+      fullPath: '/ar/dashboard'
+      preLoaderRoute: typeof ArDashboardRouteImport
+      parentRoute: typeof ArRoute
+    }
     '/lovable/account-deletions/process': {
       id: '/lovable/account-deletions/process'
       path: '/lovable/account-deletions/process'
       fullPath: '/lovable/account-deletions/process'
       preLoaderRoute: typeof LovableAccountDeletionsProcessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/en/p/$id': {
+      id: '/en/p/$id'
+      path: '/p/$id'
+      fullPath: '/en/p/$id'
+      preLoaderRoute: typeof EnPIdRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/marketer/signin': {
+      id: '/en/marketer/signin'
+      path: '/marketer/signin'
+      fullPath: '/en/marketer/signin'
+      preLoaderRoute: typeof EnMarketerSigninRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/marketer/register': {
+      id: '/en/marketer/register'
+      path: '/marketer/register'
+      fullPath: '/en/marketer/register'
+      preLoaderRoute: typeof EnMarketerRegisterRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/business/signin': {
+      id: '/en/business/signin'
+      path: '/business/signin'
+      fullPath: '/en/business/signin'
+      preLoaderRoute: typeof EnBusinessSigninRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/business/register': {
+      id: '/en/business/register'
+      path: '/business/register'
+      fullPath: '/en/business/register'
+      preLoaderRoute: typeof EnBusinessRegisterRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/ar/p/$id': {
+      id: '/ar/p/$id'
+      path: '/p/$id'
+      fullPath: '/ar/p/$id'
+      preLoaderRoute: typeof ArPIdRouteImport
+      parentRoute: typeof ArRoute
+    }
+    '/ar/marketer/signin': {
+      id: '/ar/marketer/signin'
+      path: '/marketer/signin'
+      fullPath: '/ar/marketer/signin'
+      preLoaderRoute: typeof ArMarketerSigninRouteImport
+      parentRoute: typeof ArRoute
+    }
+    '/ar/marketer/register': {
+      id: '/ar/marketer/register'
+      path: '/marketer/register'
+      fullPath: '/ar/marketer/register'
+      preLoaderRoute: typeof ArMarketerRegisterRouteImport
+      parentRoute: typeof ArRoute
+    }
+    '/ar/business/signin': {
+      id: '/ar/business/signin'
+      path: '/business/signin'
+      fullPath: '/ar/business/signin'
+      preLoaderRoute: typeof ArBusinessSigninRouteImport
+      parentRoute: typeof ArRoute
+    }
+    '/ar/business/register': {
+      id: '/ar/business/register'
+      path: '/business/register'
+      fullPath: '/ar/business/register'
+      preLoaderRoute: typeof ArBusinessRegisterRouteImport
+      parentRoute: typeof ArRoute
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -299,9 +601,55 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ArRouteChildren {
+  ArDashboardRoute: typeof ArDashboardRoute
+  ArIndexRoute: typeof ArIndexRoute
+  ArBusinessRegisterRoute: typeof ArBusinessRegisterRoute
+  ArBusinessSigninRoute: typeof ArBusinessSigninRoute
+  ArMarketerRegisterRoute: typeof ArMarketerRegisterRoute
+  ArMarketerSigninRoute: typeof ArMarketerSigninRoute
+  ArPIdRoute: typeof ArPIdRoute
+}
+
+const ArRouteChildren: ArRouteChildren = {
+  ArDashboardRoute: ArDashboardRoute,
+  ArIndexRoute: ArIndexRoute,
+  ArBusinessRegisterRoute: ArBusinessRegisterRoute,
+  ArBusinessSigninRoute: ArBusinessSigninRoute,
+  ArMarketerRegisterRoute: ArMarketerRegisterRoute,
+  ArMarketerSigninRoute: ArMarketerSigninRoute,
+  ArPIdRoute: ArPIdRoute,
+}
+
+const ArRouteWithChildren = ArRoute._addFileChildren(ArRouteChildren)
+
+interface EnRouteChildren {
+  EnDashboardRoute: typeof EnDashboardRoute
+  EnIndexRoute: typeof EnIndexRoute
+  EnBusinessRegisterRoute: typeof EnBusinessRegisterRoute
+  EnBusinessSigninRoute: typeof EnBusinessSigninRoute
+  EnMarketerRegisterRoute: typeof EnMarketerRegisterRoute
+  EnMarketerSigninRoute: typeof EnMarketerSigninRoute
+  EnPIdRoute: typeof EnPIdRoute
+}
+
+const EnRouteChildren: EnRouteChildren = {
+  EnDashboardRoute: EnDashboardRoute,
+  EnIndexRoute: EnIndexRoute,
+  EnBusinessRegisterRoute: EnBusinessRegisterRoute,
+  EnBusinessSigninRoute: EnBusinessSigninRoute,
+  EnMarketerRegisterRoute: EnMarketerRegisterRoute,
+  EnMarketerSigninRoute: EnMarketerSigninRoute,
+  EnPIdRoute: EnPIdRoute,
+}
+
+const EnRouteWithChildren = EnRoute._addFileChildren(EnRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArRoute: ArRouteWithChildren,
   DashboardRoute: DashboardRoute,
+  EnRoute: EnRouteWithChildren,
   BusinessRegisterRoute: BusinessRegisterRoute,
   BusinessSigninRoute: BusinessSigninRoute,
   MarketerRegisterRoute: MarketerRegisterRoute,

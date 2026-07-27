@@ -13,6 +13,18 @@ import { subscribeToPush, unsubscribeFromPush } from "@/lib/push-client";
 
 export type Role = "marketer" | "business" | "admin";
 
+// Current language prefix for redirects — read from <html lang> which is
+// set by the root shell's inline script based on the URL's /en /ar prefix.
+function langPrefix(): string {
+  try {
+    const l = document.documentElement.getAttribute("lang");
+    return l === "ar" ? "/ar" : "/en";
+  } catch { return "/en"; }
+}
+function lp(path: string): string {
+  return `${langPrefix()}${path}`;
+}
+
 type AuthState = {
   user: User | null;
   session: Session | null;
@@ -116,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   `This account is registered as a ${actualRole}. Please use the ${actualRole} sign-in page, or create a separate ${p.role} account.`,
                 );
                 if (typeof window !== "undefined") {
-                  window.location.replace(p.role === "business" ? "/business/register" : "/marketer/register");
+                  window.location.replace(lp(p.role === "business" ? "/business/register" : "/marketer/register"));
                 }
                 return;
               }
@@ -125,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 "An account with this email already exists. Please sign in instead.",
               );
               if (typeof window !== "undefined") {
-                const target = p.role === "business" ? "/business/signin" : "/marketer/signin";
+                const target = lp(p.role === "business" ? "/business/signin" : "/marketer/signin");
                 window.location.replace(target);
               }
               return;
@@ -171,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               try { await supabase.rpc("delete_self_if_just_created"); } catch (e) { console.warn("[auth] delete_self failed", e); }
               await supabase.auth.signOut();
               if (typeof window !== "undefined") {
-                const target = intent === "business" ? "/business/register" : "/marketer/register";
+                const target = lp(intent === "business" ? "/business/register" : "/marketer/register");
                 window.location.replace(target);
               }
               return;
@@ -190,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
               await supabase.auth.signOut();
               if (typeof window !== "undefined") {
-                const target = intent === "business" ? "/business/signin" : "/marketer/signin";
+                const target = lp(intent === "business" ? "/business/signin" : "/marketer/signin");
                 window.location.replace(target);
               }
               return;
@@ -218,7 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               } catch { /* ignore */ }
               await supabase.auth.signOut();
               if (typeof window !== "undefined") {
-                window.location.replace(picked === "business" ? "/business/signin" : "/marketer/signin");
+                window.location.replace(lp(picked === "business" ? "/business/signin" : "/marketer/signin"));
               }
               return;
             }

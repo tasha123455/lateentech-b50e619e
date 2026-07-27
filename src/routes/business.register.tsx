@@ -1,12 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AuthCard } from "@/components/auth/AuthCard";
-import { RegisterForm } from "@/components/auth/RegisterForm";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { detectLang } from "@/i18n/langPath";
 
 export const Route = createFileRoute("/business/register")({
-  head: () => ({ meta: [{ title: "Create account — Business · Wasla" }] }),
-  component: () => (
-    <AuthCard role="business" backTo="/business/signin">
-      <RegisterForm role="business" />
-    </AuthCard>
-  ),
+  beforeLoad: () => {
+    const lang = typeof window === "undefined" ? "en" : detectLang();
+    throw redirect({ to: `/${lang}/business/register`, replace: true });
+  },
 });
