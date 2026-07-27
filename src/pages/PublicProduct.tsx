@@ -439,7 +439,7 @@ export function PublicProduct({ id }: { id: string }) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {avatarUrl ? (
-                          <img src={avatarUrl} alt="" className="h-6 w-6 flex-shrink-0 rounded-full object-cover" />
+                          <img src={avatarUrl} alt="" loading="lazy" decoding="async" className="h-6 w-6 flex-shrink-0 rounded-full object-cover bg-surface-2" />
                         ) : (
                           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 text-[11px] font-semibold text-text-2">{initials}</span>
                         )}
