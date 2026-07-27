@@ -96,11 +96,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" },
       // Preload brand assets so the logo/wordmark/tagline appear instantly
       // on first paint everywhere (splash, auth, landing, headers).
-      { rel: "preload", as: "image", href: "/wasla-mark.png", fetchPriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-wordmark-en.png", fetchPriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-wordmark-ar.png", fetchPriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-tagline-en.png", fetchPriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-tagline-ar.png", fetchPriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-mark.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-wordmark-en.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-wordmark-ar.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-tagline-en.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-tagline-ar.png", fetchpriority: "high" } as any,
     ],
   }),
   shellComponent: RootShell,

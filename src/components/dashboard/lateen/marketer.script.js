@@ -867,10 +867,7 @@ renderTransactions();
 __lateenRefreshWalletAndPayout();refreshNotifications();
 setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
-/* Parallelize independent boot fetches: products, orders, wallet, and
-   profile don't depend on each other, so kick them off simultaneously
-   instead of waterfalling loadBrowse -> loadOrders. */
-Promise.all([loadBrowse(),loadOrders()]).then(()=>{try{__lateenApplyReceiptResume();}catch(e){console.warn('[Lateen] receipt resume check',e);}});refreshWallet();refreshProfile();
+loadBrowse().then(()=>loadOrders()).then(()=>{try{__lateenApplyReceiptResume();}catch(e){console.warn('[Lateen] receipt resume check',e);}});refreshWallet();refreshProfile();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
   /* Coalesce realtime bursts so lists don't re-render multiple times in a
      row (which caused visible flicker when a mutation lands). */
