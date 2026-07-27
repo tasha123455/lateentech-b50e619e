@@ -1,35 +1,66 @@
-// Wasla brand mark / wordmark. Component name kept as `LateenLogo` to avoid
-// churning many import sites — the visual is the Wasla brand.
+// Wasla brand mark / wordmark / full lockup.
 type Props = {
   size?: number;
   variant?: "mark" | "wordmark";
   lang?: "en" | "ar";
+  showTagline?: boolean;
 };
 
-export function LateenLogo({ size = 68, variant = "mark", lang = "en" }: Props) {
+export function LateenLogo({ size = 68, variant = "mark", lang = "en", showTagline = true }: Props) {
   if (variant === "wordmark") {
-    // Wordmark PNGs already contain the arrow mark + typeset name + tagline
-    // in the exact brand font. `size` here means the rendered height.
-    const src = lang === "ar" ? "/wasla-wordmark-ar.png" : "/wasla-wordmark-en.png";
-    // Preserve aspect ratio from source assets (EN 1787x880, AR 1535x1024).
-    const ratio = lang === "ar" ? 1535 / 1024 : 1787 / 880;
+    // Full lockup: mark on top, wordmark below, tagline under it — matches the
+    // brand reference. `size` = height of the mark; wordmark/tagline scale
+    // proportionally so it reads like one composed piece.
+    const wordSrc = lang === "ar" ? "/wasla-wordmark-ar.png" : "/wasla-wordmark-en.png";
+    const tagSrc = lang === "ar" ? "/wasla-tagline-ar.png" : "/wasla-tagline-en.png";
+    const markH = size;
+    const wordH = Math.round(size * 0.72);
+    const tagH = Math.round(size * 0.13);
     return (
-      <img
-        src={src}
-        height={size}
-        width={Math.round(size * ratio)}
-        alt="Wasla"
-        style={{ display: "block", height: size, width: "auto", maxWidth: "100%" }}
-      />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: Math.round(size * 0.08),
+          maxWidth: "100%",
+        }}
+      >
+        <img
+          src="/wasla-mark.png"
+          alt=""
+          aria-hidden
+          style={{ height: markH, width: "auto", display: "block" }}
+        />
+        <img
+          src={wordSrc}
+          alt="Wasla"
+          style={{ height: wordH, width: "auto", display: "block", maxWidth: "100%" }}
+        />
+        {showTagline && (
+          <img
+            src={tagSrc}
+            alt=""
+            aria-hidden
+            style={{
+              height: tagH,
+              width: "auto",
+              display: "block",
+              maxWidth: "100%",
+              marginTop: Math.round(size * 0.06),
+            }}
+          />
+        )}
+      </div>
     );
   }
   return (
     <img
-      src="/wasla-mark-192.png"
+      src="/wasla-mark.png"
       width={size}
       height={size}
       alt="Wasla"
-      style={{ display: "block", borderRadius: size >= 40 ? 14 : 8 }}
+      style={{ display: "block", height: size, width: "auto" }}
     />
   );
 }
