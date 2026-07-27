@@ -227,11 +227,11 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadReviewPhoto(file: File): Promise<string> {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const compressed = await compressImage(file, IMAGE_PRESETS.reviewPhoto);
+      const path = `${userId}/${crypto.randomUUID()}.jpg`;
       const { error } = await supabase.storage
         .from("review-photos")
-        .upload(path, file, { upsert: false, contentType: file.type });
+        .upload(path, compressed, { upsert: false, contentType: compressed.type, cacheControl: "31536000" });
       if (error) throw error;
       const { data: s } = await supabase.storage
         .from("review-photos")
