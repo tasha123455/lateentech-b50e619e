@@ -249,7 +249,10 @@ export function PublicProduct({ id }: { id: string }) {
                 key={i}
                 src={src}
                 alt={p.name}
-                className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in"
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={i === 0 ? "high" : "auto"}
+                className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in bg-surface-2"
                 onClick={() => setLightbox(photos[i])}
               />
             ))}
