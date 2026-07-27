@@ -302,10 +302,10 @@ export function FloatingLanguageToggle() {
       aria-label="Toggle language"
        style={{
         position: "fixed",
-        bottom: "calc(14px + env(safe-area-inset-bottom, 0px))",
-        [dir === "rtl" ? "right" : "left"]: "calc(14px + env(safe-area-inset-left, 0px))",
+        top: "calc(18px + env(safe-area-inset-top, 0px))",
+        [dir === "rtl" ? "right" : "left"]: "calc(18px + env(safe-area-inset-left, 0px))",
         zIndex: 60,
-        maxWidth: "calc(100vw - 28px)",
+        maxWidth: "calc(100dvw - 36px)",
         height: 32,
         padding: "0 12px",
         borderRadius: 6,
