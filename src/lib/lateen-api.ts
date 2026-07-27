@@ -2,6 +2,7 @@
 // Installed onto window.LateenAPI by LateenShell so the scripts can call
 // real backend operations instead of mutating in-memory arrays.
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage, IMAGE_PRESETS } from "@/lib/image-utils";
 
 // Same charset as product codes (no ambiguous 0/O or 1/I), but with no
 // prefix -- product codes are shown as "LT-XXXXXX" while order numbers are
