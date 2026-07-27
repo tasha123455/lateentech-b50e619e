@@ -300,11 +300,12 @@ export function FloatingLanguageToggle() {
       type="button"
       onClick={toggle}
       aria-label="Toggle language"
-      style={{
+       style={{
         position: "fixed",
-        top: 14,
-        [dir === "rtl" ? "left" : "right"]: 14,
+        bottom: "calc(14px + env(safe-area-inset-bottom, 0px))",
+        [dir === "rtl" ? "right" : "left"]: "calc(14px + env(safe-area-inset-left, 0px))",
         zIndex: 60,
+        maxWidth: "calc(100vw - 28px)",
         height: 32,
         padding: "0 12px",
         borderRadius: 6,
