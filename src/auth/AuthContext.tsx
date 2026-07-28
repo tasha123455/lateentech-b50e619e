@@ -289,7 +289,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [session, role, loading, loadRole, signOut, refreshRole],
   );
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={value}>
+      {children}
+      <NotificationConsentModal />
+    </Ctx.Provider>
+  );
 }
 
 export function useAuth() {
