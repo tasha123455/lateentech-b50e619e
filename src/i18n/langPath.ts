@@ -38,7 +38,18 @@ export function swapLang(pathname: string, lang: Lang): string {
   return `/${lang}${suffix}`;
 }
 
+/** The stored language preference, or null when the visitor hasn't chosen yet. */
+export function storedLang(): Lang | null {
+  try {
+    const stored = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+    return isLang(stored) ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Best-effort language detection for a first-time visitor. */
+
 export function detectLang(): Lang {
   try {
     const stored = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
