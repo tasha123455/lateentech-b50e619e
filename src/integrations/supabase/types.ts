@@ -1072,6 +1072,10 @@ export type Database = {
         Args: { _delta: number; _match: string; _product_id: string }
         Returns: undefined
       }
+      _adjust_variant_rsv: {
+        Args: { _delta: number; _match: string; _product_id: string }
+        Returns: undefined
+      }
       _reserve_variant_qty_check: {
         Args: { _match: string; _product_id: string; _qty: number }
         Returns: undefined
