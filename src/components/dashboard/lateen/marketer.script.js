@@ -832,7 +832,7 @@ async function renderTransactions(){
     }
     const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
     const detailsHtml=`<div class="notif-detail-body"><div class="notif-details-box">${detailRows}</div></div>`;
-    return `<div class="notif-item expandable" data-id="${n.id}">
+    return `<div class="notif-item expandable expanded" data-id="${n.id}">
       <div class="notif-top" onclick="__notifToggle(this)">
         ${photoWrapHtml}
         <div class="notif-row-text">
