@@ -10,6 +10,8 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("push", (event) => {
+  event.stopImmediatePropagation();
+
   let payload = {};
   try {
     payload = event.data ? event.data.json() : {};
@@ -20,11 +22,12 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "Wasla";
   const options = {
     body: payload.body || "",
-    data: { url: payload.url || "/dashboard" },
+    data: { url: payload.url || payload.data?.url || "/dashboard" },
     tag: payload.id || undefined,
+    renotify: false,
     image: payload.image || undefined,
-    icon: "/wasla-notification-icon.png",
-    badge: "/wasla-badge-monochrome.png",
+    icon: payload.icon || "/wasla-notification-icon.png",
+    badge: payload.badge || "/wasla-badge-monochrome.png",
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
