@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { LanguageChooser } from "@/i18n/LanguageChooser";
+import { storedLang } from "@/i18n/langPath";
 
 type VariantItem = { val?: string; photo?: string; qty?: number | string | null } | string;
 type VariantGroup = { name?: string; items?: VariantItem[] };
@@ -99,8 +101,11 @@ function normVariantGroups(p: PublicProduct): { name: string; items: { val: stri
 
 export function PublicProduct({ id }: { id: string }) {
   const { user, role, loading: authLoading } = useAuth();
-  const { lang, withLang, otherLangPath } = useLanguage();
+  const { lang, withLang } = useLanguage();
   const nav = useNavigate();
+  // Show the one-time language chooser before the product when the visitor
+  // hasn't picked a language yet (same experience as the root "/" chooser).
+  const [needsLang, setNeedsLang] = useState<boolean | null>(null);
   const [p, setP] = useState<PublicProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -111,6 +116,11 @@ export function PublicProduct({ id }: { id: string }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewAvatars, setReviewAvatars] = useState<Record<string, string>>({});
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    setNeedsLang(storedLang() == null);
+  }, []);
+
 
   useEffect(() => {
     if (authLoading) return;
