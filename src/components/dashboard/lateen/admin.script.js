@@ -81,7 +81,7 @@ function admGo(pageId){
   if(pageId==='adm-home') admLoadMetrics();
   if(pageId==='adm-verify') admLoadVerify();
   if(pageId==='adm-payouts') admLoadPayouts();
-  if(pageId==='adm-users') admLoadUsers('');
+  if(pageId==='adm-users'){if(!window.__admUDateReady){window.__admUDateReady=true;try{__admUDateInit();}catch(e){console.error('[admin] user date filter',e);}}admLoadUsers();}
   if(pageId==='adm-products'){admLoadProducts();admLoadReports();}
   if(pageId==='adm-employees') admLoadEmployees();
 }
