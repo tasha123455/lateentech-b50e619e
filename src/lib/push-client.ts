@@ -102,6 +102,15 @@ async function persistSubscription(userId: string, registration: ServiceWorkerRe
   };
   if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return;
 
+  // Reinstalling the PWA or re-subscribing always yields a brand-new endpoint
+  // token, so upsert-by-endpoint alone can't dedupe it — remove this user's
+  // other subscription rows first so we don't accumulate dead ones forever.
+  await supabase
+    .from("push_subscriptions")
+    .delete()
+    .eq("user_id", userId)
+    .neq("endpoint", json.endpoint);
+
   const { error } = await supabase.from("push_subscriptions").upsert(
     {
       user_id: userId,
