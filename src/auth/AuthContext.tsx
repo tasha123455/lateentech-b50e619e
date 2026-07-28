@@ -268,7 +268,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
-    try { await unsubscribeFromPush(); } catch { /* ignore */ }
+    // Never let a slow/unresponsive push endpoint block sign-out.
+    try {
+      await Promise.race([
+        unsubscribeFromPush(),
+        new Promise((resolve) => setTimeout(resolve, 3500)),
+      ]);
+    } catch { /* ignore */ }
     await supabase.auth.signOut();
   }, []);
 
