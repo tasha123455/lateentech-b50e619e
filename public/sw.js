@@ -23,6 +23,8 @@ self.addEventListener("push", (event) => {
     data: { url: payload.url || "/dashboard" },
     tag: payload.id || undefined,
     image: payload.image || undefined,
+    icon: "/wasla-notification-icon.png",
+    badge: "/wasla-badge-monochrome.png",
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
