@@ -165,6 +165,10 @@ export async function sendWebPush(
       "Content-Type": "application/octet-stream",
       "Content-Encoding": "aes128gcm",
       TTL: "86400",
+      // "high" tells FCM/APNs/Mozilla autopush to deliver immediately instead of
+      // batching for battery — without this, notifications can be delayed by
+      // many minutes on Android/Chrome and subsequent pushes get coalesced.
+      Urgency: "high",
       Authorization: authHeader,
     },
     body: body as BodyInit,
