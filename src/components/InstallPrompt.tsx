@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
-const DISMISS_KEY = "lateen_install_dismissed_at";
-const DISMISS_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000; // don't re-prompt for 14 days after "Not now"
+const DISMISS_KEY = "lateen_install_dismissed_session";
+
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -21,12 +21,11 @@ function isIosSafari(): boolean {
   return isIos && isSafari;
 }
 
+// "Not now" only silences the prompt for the current browsing session — on the
+// next visit we ask again, until the app is actually installed.
 function wasDismissedRecently(): boolean {
   try {
-    const raw = localStorage.getItem(DISMISS_KEY);
-    if (!raw) return false;
-    const at = Number(raw);
-    return !Number.isNaN(at) && Date.now() - at < DISMISS_COOLDOWN_MS;
+    return sessionStorage.getItem(DISMISS_KEY) === "1";
   } catch {
     return false;
   }
@@ -34,11 +33,12 @@ function wasDismissedRecently(): boolean {
 
 function markDismissed() {
   try {
-    localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    sessionStorage.setItem(DISMISS_KEY, "1");
   } catch {
     /* ignore */
   }
 }
+
 
 export function InstallPrompt() {
   const { lang, dir } = useLanguage();

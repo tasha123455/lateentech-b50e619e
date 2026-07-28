@@ -54,4 +54,9 @@ export function detectLang(): Lang {
 /** Persist the user's language choice for the next visit. */
 export function rememberLang(lang: Lang): void {
   try { window.localStorage.setItem(STORAGE_KEY, lang); } catch { /* ignore */ }
+  // Also store it in a cookie so server-side rendering can read the preference.
+  try {
+    document.cookie = `${STORAGE_KEY}=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+  } catch { /* ignore */ }
 }
+
