@@ -46,47 +46,12 @@ export const Route = createFileRoute("/api/public/notifications/push")({
           return new Response("Missing fields", { status: 400 });
         }
 
-        // Prefer Zapier → Progressier when configured.
-        const zapierWebhookUrl = process.env.ZAPIER_WEBHOOK_URL;
-        if (zapierWebhookUrl) {
-          const notifData = (payload.data ?? {}) as { photo?: string; product_photo?: string };
-          const image = notifData.product_photo || notifData.photo || undefined;
-
-          try {
-            await fetch(zapierWebhookUrl, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              mode: "no-cors",
-              body: JSON.stringify({
-                timestamp: new Date().toISOString(),
-                triggered_from: "wasla_push_webhook",
-                user_id: payload.user_id,
-                notification_id: payload.id,
-                kind: payload.kind,
-                title: (payload.title ?? "").slice(0, 120),
-                body: (payload.body ?? "").slice(0, 300),
-                image,
-                url: "/dashboard",
-                data: payload.data,
-              }),
-            });
-          } catch (e) {
-            console.error("[push] Zapier forward failed", e);
-          }
-
-          // no-cors hides the response status, so we assume accepted and tell the caller to
-          // check the Zap's run history in Zapier.
-          return new Response(
-            JSON.stringify({ ok: true, forwarded_to: "zapier", note: "verify in Zap run history" }),
-            { headers: { "content-type": "application/json" } },
-          );
-        }
-
-        // Fallback: self-hosted VAPID push (legacy).
+        // Self-hosted VAPID Web Push (works on Android/desktop always; iOS only
+        // after the user installs the PWA to their home screen).
         const { sendWebPush, readVapidKeysFromEnv } = await import("@/lib/web-push.server");
         const vapid = readVapidKeysFromEnv();
         if (!vapid) {
-          console.warn("[push] ZAPIER_WEBHOOK_URL not set and VAPID keys missing; skipping push");
+          console.warn("[push] VAPID keys missing; skipping push");
           return new Response(JSON.stringify({ ok: true, skipped: "no_push_provider" }), {
             headers: { "content-type": "application/json" },
           });
