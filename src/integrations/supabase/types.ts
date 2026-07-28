@@ -740,6 +740,7 @@ export type Database = {
         Row: {
           auth: string
           created_at: string
+          device_id: string
           endpoint: string
           id: string
           p256dh: string
@@ -750,6 +751,7 @@ export type Database = {
         Insert: {
           auth: string
           created_at?: string
+          device_id: string
           endpoint: string
           id?: string
           p256dh: string
@@ -760,6 +762,7 @@ export type Database = {
         Update: {
           auth?: string
           created_at?: string
+          device_id?: string
           endpoint?: string
           id?: string
           p256dh?: string

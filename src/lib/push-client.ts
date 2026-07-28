@@ -2,6 +2,20 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const SW_PATH = "/sw.js";
+const DEVICE_ID_KEY = "wasla_push_device_id";
+
+function getOrCreateDeviceId(): string {
+  try {
+    const existing = localStorage.getItem(DEVICE_ID_KEY);
+    if (existing) return existing;
+  } catch { /* ignore */ }
+  const id =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  try { localStorage.setItem(DEVICE_ID_KEY, id); } catch { /* ignore */ }
+  return id;
+}
 
 function urlBase64ToUint8Array(base64Url: string): Uint8Array {
   const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
@@ -102,24 +116,16 @@ async function persistSubscription(userId: string, registration: ServiceWorkerRe
   };
   if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return;
 
-  // Reinstalling the PWA or re-subscribing always yields a brand-new endpoint
-  // token, so upsert-by-endpoint alone can't dedupe it — remove this user's
-  // other subscription rows first so we don't accumulate dead ones forever.
-  await supabase
-    .from("push_subscriptions")
-    .delete()
-    .eq("user_id", userId)
-    .neq("endpoint", json.endpoint);
-
   const { error } = await supabase.from("push_subscriptions").upsert(
     {
       user_id: userId,
+      device_id: getOrCreateDeviceId(),
       endpoint: json.endpoint,
       p256dh: json.keys.p256dh,
       auth: json.keys.auth,
       user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
     },
-    { onConflict: "endpoint" },
+    { onConflict: "device_id" },
   );
   if (error) console.warn("[push] failed to save subscription", error);
 }
