@@ -744,8 +744,7 @@ async function refreshNotifications(){
           ${row(__t('City','المدينة'),d.customer_city)}
           ${row(__t('Country','الدولة'),d.customer_country)}
           ${row(__t('Address','العنوان'),d.customer_address,true)}
-          ${row(__t('Size','المقاس'),d.size,true)}
-          ${row(__t('Colour','اللون'),d.color,true)}
+          ${__variantRowsFrom(d,row)}
           ${d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> <span data-no-i18n>${esc(d.customer_notes)}</span></div>`:''}
           ${adminNote}
           ${bizNotes}
@@ -783,6 +782,9 @@ window.refreshPayoutState=refreshPayoutState;window.refreshNotifications=refresh
    pattern as the Notifications page. Purely additive — refreshNotifications()
    and loadOrders() are only wrapped, never edited. */
 function txnToggleOpen(){const toggle=document.getElementById('txnToggle');const wrap=document.getElementById('txnWrap');if(!toggle||!wrap)return;const isOpen=wrap.classList.toggle('open');toggle.classList.toggle('open',isOpen);}
+/* Variant rows use the actual group names from selected_variants; legacy
+   size/color are only a fallback for old orders. */
+function __variantRowsFrom(d,rowFn){const sv=Array.isArray(d&&d.selected_variants)?d.selected_variants:null;if(sv&&sv.length)return sv.map(v=>rowFn((v&&v.name)||'',(v&&v.value)||'',true)).join('');return rowFn(__t('Size','المقاس'),d&&d.size,true)+rowFn(__t('Colour','اللون'),d&&d.color,true);}
 function __txnEsc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function __txnRow(k,v,noTranslate){return v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px"><span style="color:var(--color-text-secondary)">${__txnEsc(k)}</span><span ${noTranslate?'data-no-i18n ':''}style="color:var(--color-text-primary);text-align:right">${__txnEsc(v)}</span></div>`:'';}
 async function renderTransactions(){
@@ -845,8 +847,7 @@ async function renderTransactions(){
         __txnRow(__t('City','المدينة'),d.customer_city)+
         __txnRow(__t('Country','الدولة'),d.customer_country)+
         __txnRow(__t('Address','العنوان'),d.customer_address,true)+
-        __txnRow(__t('Size','المقاس'),d.size,true)+
-        __txnRow(__t('Colour','اللون'),d.color,true)+
+        __variantRowsFrom(d,__txnRow)+
         (d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> <span data-no-i18n>${__txnEsc(d.customer_notes)}</span></div>`:'')+
         ((d.admin_notes||d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_notes||d.admin_comment||d.admin_note)}</span></div>`:'');
     }
