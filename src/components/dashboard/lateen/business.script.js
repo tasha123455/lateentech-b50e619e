@@ -994,7 +994,11 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
           ${buildOrdActions(o)}
         </div>
       </div>`;}catch(err){console.error('[Lateen] renderOrders item',err,o);return '';}}).join('');el.querySelectorAll('.hero-scroll').forEach(scroller=>{let t;scroller.addEventListener('scroll',()=>{clearTimeout(t);t=setTimeout(()=>{const idx=Math.round(scroller.scrollLeft/(scroller.clientWidth||1));const dots=scroller.parentElement.querySelectorAll('.hero-dots .d');dots.forEach((d,i)=>d.classList.toggle('active',i===idx));},60);});});}
-function toggle(id){expandedId=expandedId===id?null:id;const card=document.querySelector(`.order-card[data-id="${id}"]`);if(card)card.classList.toggle('expanded');}
+/* Deterministic expand/collapse: derive every card's class from expandedId
+   instead of blind-toggling the tapped card. Blind toggling desynced whenever
+   a re-render or a second card left a stale `expanded` class behind, which
+   made some cards refuse to open on the next tap. */
+function toggle(id){expandedId=(expandedId===id)?null:id;document.querySelectorAll('#orders-list .order-card').forEach(c=>{c.classList.toggle('expanded',c.dataset.id===expandedId);});}
 document.addEventListener('click',function(e){const t=e.target.closest('[data-action="toggle"]');if(t){const card=t.closest('.order-card');if(card)toggle(card.dataset.id);}});
 
 recomputeAnalytics();
@@ -1354,3 +1358,39 @@ window.openDeleteAccount=openDeleteAccount;
 window.closeDeleteAccount=closeDeleteAccount;
 window.confirmRequestDeletion=confirmRequestDeletion;
 window.confirmCancelDeletion=confirmCancelDeletion;
+
+/* ── Compliance & Security Policy notice (Breakdown page ⓘ icon) ── */
+function __cmplContent(){
+  const ar=(typeof __ar==='function'&&__ar());
+  if(ar)return{
+    title:'تنبيه هام لجميع التجار',
+    intro:'السلام عليكم، حرصاً على أمان المنصة وثقة الجميع، نود التنويه بأننا نطبق بروتوكولات حماية وسياسة صارمة جداً. سيتم تجميد الحساب فوراً والحظر النهائي بدون إمكانية رجوع في الحالات التالية:',
+    items:['رصد أي عمليات إحتيال أو نشاط مشبوه.','وصول شكاوى من المسوقين أو الزبائن بسبب عدم تسليم البضاعة.','تكرار التقييمات السيئة لجودة المنتج.'],
+    outro:'يرجى الالتزام بالجودة والتسليم في الموعد المحدّد لضمان استمرار حسابكم.',
+    ok:'فهمت'
+  };
+  return{
+    title:'Important Notice: Compliance & Security Policy',
+    intro:'To All Merchants: We enforce a strict zero-tolerance policy to protect our platform. Your account will be immediately frozen and faces a permanent, irreversible ban if we identify:',
+    items:['Any fraudulent or scam activity.','Reports from marketers/customers regarding non-delivered orders.','Repeated negative reviews about product quality.'],
+    outro:'Our automated protection protocols actively monitor all accounts. Please maintain quality standards and fulfill orders on time.',
+    ok:'Got it'
+  };
+}
+const __CMPL_ICONS=[
+  {bg:'rgba(239,68,68,0.14)',fg:'#ef4444',svg:'<path d="M12 3l8 4v5c0 4.4-3.2 7.9-8 9-4.8-1.1-8-4.6-8-9V7l8-4z"/><path d="M12 8.5v3.5"/><path d="M12 15.5v.01"/>'},
+  {bg:'rgba(245,158,11,0.14)',fg:'#f59e0b',svg:'<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/>'},
+  {bg:'rgba(96,165,250,0.14)',fg:'#60a5fa',svg:'<path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1-4.6-2.4-4.6 2.4.9-5.1L4.5 9.5l5.2-.8L12 4z"/>'}
+];
+function __cmplRender(){
+  const c=__cmplContent();
+  const t=document.getElementById('cmpl-title');if(t)t.textContent=c.title;
+  const i=document.getElementById('cmpl-intro');if(i)i.textContent=c.intro;
+  const o=document.getElementById('cmpl-outro');if(o)o.textContent=c.outro;
+  const b=document.getElementById('cmpl-ok');if(b)b.textContent=c.ok;
+  const host=document.getElementById('cmpl-items');
+  if(host)host.innerHTML=c.items.map((tx,ix)=>{const ic=__CMPL_ICONS[ix]||__CMPL_ICONS[0];return `<div class="cmpl-item"><div class="ic" style="background:${ic.bg};color:${ic.fg}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ic.svg}</svg></div><div class="tx">${__escH(tx)}</div></div>`;}).join('');
+}
+function openCompliance(){__cmplRender();const el=document.getElementById('cmpl-overlay');if(el)el.classList.add('open');}
+function closeCompliance(){const el=document.getElementById('cmpl-overlay');if(el)el.classList.remove('open');}
+window.openCompliance=openCompliance;window.closeCompliance=closeCompliance;
