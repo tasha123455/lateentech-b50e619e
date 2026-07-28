@@ -86,9 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      // Existing manifest commented out in favor of Progressier manifest below.
-      // { rel: "manifest", href: "/manifest.json" },
-      { rel: "manifest", href: "https://progressier.app/fZvGishgQChy4P6SAMHR/progressier.json" },
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "icon", href: "/wasla-icon-192.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/wasla-icon-192.png" },
       // Preload brand assets so the logo/wordmark/tagline appear instantly
@@ -98,9 +96,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preload", as: "image", href: "/wasla-wordmark-ar.png", fetchpriority: "high" } as any,
       { rel: "preload", as: "image", href: "/wasla-tagline-en.png", fetchpriority: "high" } as any,
       { rel: "preload", as: "image", href: "/wasla-tagline-ar.png", fetchpriority: "high" } as any,
-    ],
-    scripts: [
-      { src: "https://progressier.app/fZvGishgQChy4P6SAMHR/script.js", defer: true } as any,
     ],
 
   }),
