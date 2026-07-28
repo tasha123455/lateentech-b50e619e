@@ -238,14 +238,6 @@ export function PublicProduct({ id }: { id: string }) {
           <img src="/wasla-mark-64.png" alt="Wasla" width={28} height={28} className="h-7 w-auto" />
           <img src={lang === "ar" ? "/wasla-wordmark-ar.png" : "/wasla-wordmark-en.png"} alt="" aria-hidden className="h-4 w-auto" />
         </Link>
-        <Link
-          data-no-i18n
-          to={otherLangPath}
-          aria-label="Toggle language"
-          className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-1"
-        >
-          {lang === "en" ? "العربية" : "English"}
-        </Link>
       </header>
       <div
         className="relative aspect-square w-full overflow-hidden bg-surface-2"
