@@ -917,9 +917,11 @@ function admGoToAccount(userId,role,name){
 
 let admUserSearchTimer=null;
 function admUserSearch(v){
+  admUserSearchQ=v||'';
   clearTimeout(admUserSearchTimer);
-  admUserSearchTimer=setTimeout(()=>admLoadUsers(v),250);
+  admUserSearchTimer=setTimeout(()=>admRenderUsers(admApplyUserFilter(admUsersCache)),150);
 }
+
 
 let admProductSearchQ='';
 let admProductSearchTimer=null;
