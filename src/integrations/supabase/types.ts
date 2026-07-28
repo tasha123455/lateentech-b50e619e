@@ -1180,6 +1180,49 @@ export type Database = {
         Args: { _body: string; _photo?: string; _title: string }
         Returns: number
       }
+      admin_delete_product: {
+        Args: { _product_id: string }
+        Returns: {
+          biz_name: string | null
+          business_id: string
+          category: string | null
+          code: string
+          colors: Json
+          comm_fixed: number
+          comm_mode: string
+          comm_pct: number
+          cost_price: number
+          cover_focus_x: number
+          cover_focus_y: number
+          created_at: string
+          currency: Json | null
+          deleted_at: string | null
+          delivery: Json
+          description: string | null
+          id: string
+          name: string
+          pause_requested: boolean
+          photos: string[]
+          platform_fee: number
+          price: number
+          qty: number
+          require_additional_phone: boolean
+          reserved_qty: number
+          revenue: number
+          sizes: Json
+          sold: number
+          status: string
+          total_fee_per_unit: number
+          updated_at: string
+          variant_groups: Json
+        }
+        SetofOptions: {
+          from: "*"
+          to: "products"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_get_user_email: { Args: { _user_id: string }; Returns: string }
       admin_list_user_emails: {
@@ -1489,6 +1532,10 @@ export type Database = {
         Returns: undefined
       }
       admin_unban_email: { Args: { _email: string }; Returns: undefined }
+      business_active_marketers_total: {
+        Args: { _business_id: string }
+        Returns: number
+      }
       cancel_account_deletion: {
         Args: { _id: string }
         Returns: {
@@ -1598,6 +1645,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_business_frozen: { Args: { _business_id: string }; Returns: boolean }
       list_business_reviews: {
         Args: never
         Returns: {
