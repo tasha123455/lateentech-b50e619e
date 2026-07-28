@@ -398,7 +398,7 @@ function renderOrders(){
     const codLbl=codParts.label;
     const codSuffix=codParts.suffix;
     const codVal=__moneyH(codAmt,o._sym,o._curCode);
-    const commTag=isApproved&&commAmount>0?`<span class="commission-tag">+${fmtO(o,commAmount)}</span>`:'';
+    const commTag=isApproved&&commAmount>0?`<span class="commission-tag">+${fmtO(o,commAmount)}</span>`:(isFailed&&commAmount>0?`<span class="commission-tag" style="color:#e07070;border-color:#e07070;background:transparent;">${fmtO(o,commAmount)}</span>`:'');
     const photoWrap=`<div class="photo-wrap"><div class="hero-scroll" id="photo-track-${o.id}" onscroll="__ocSyncDots('${o.id}')">${photos.length?photos.map(u=>`<div class="photo-slide"><img src="${__escH(u)}" alt="" loading="lazy"/></div>`).join(''):`<div class="photo-slide">${emo}</div>`}</div>${photos.length>1?`<div class="photo-dots" id="photo-dots-${o.id}">${photos.map((_,i)=>`<span class="photo-dot${i===0?' active':''}"></span>`).join('')}</div>`:''}</div>`;
     const variantBlock=variants.length?`<div class="variant-row">${variants.map(v=>{const sw=v.photo?`<div class="variant-swatch" style="background-image:url('${(v.photo+'').replace(/'/g,"\\'")}')"></div>`:'';return `<div class="variant-item"><div class="variant-chip">${CHECK}<span class="variant-label" data-no-i18n>${__escH(v.group||'')}:</span><span class="variant-value" data-no-i18n>${__escH(v.val)}</span></div>${sw}</div>`;}).join('')}</div>`:'';
     const phoneChip=o.phone?`<div class="contact-chip">${PHONE_ICO}${__escH(__dispPhone(o.phone))}</div>`:'';
