@@ -304,8 +304,12 @@ function admMktDetailCard(o){
     ?'<span class="adm-recpt-status adm-status-refunded">↺ Refunded</span>'
     :o.status==='pending'
     ?'<span class="adm-recpt-status adm-status-pending">⏳ Pending verification</span>'
-    :o.status==='approved'
+    :(o.status==='approved'||o.status==='confirmed')
     ?'<span class="adm-recpt-status adm-status-approved">✓ Approved</span>'
+    :o.status==='delivered'
+    ?'<span class="adm-recpt-status adm-status-approved">✓ Delivered</span>'
+    :o.status==='cancelled'
+    ?'<span class="adm-recpt-status adm-status-rejected">✕ Failed</span>'
     :'<span class="adm-recpt-status adm-status-rejected">✕ Rejected</span>';
 
   const created='Created: '+admWhenFull(o.created_at);
@@ -334,7 +338,7 @@ function admMktDetailCard(o){
   // Refunding only ever makes sense for a receipt the admin already approved
   // (that's the only point real platform-fee revenue was counted), and only
   // once — the button disappears the moment refunded_at is set.
-  const refundBtn=(o.status==='approved'&&!isRefunded)
+  const refundBtn=((o.status==='approved'||o.status==='confirmed'||o.status==='delivered')&&!isRefunded)
     ?`<button class="adm-btn-refund" onclick="admRefundOrder('${o.id}')">Refund customer</button>`
     :'';
 
@@ -1504,7 +1508,11 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       // totaled across every order on the platform.
       return raw.orders.reduce((s,o) => {
         if(!o.delivered_at) return s;
-        return new Date(o.delivered_at).getTime() <= ts ? s + Number(o.qty||0) : s;
+        if(new Date(o.delivered_at).getTime() > ts) return s;
+        // A post-delivery refund removes those pieces back out of the count
+        // from the moment the refund happened.
+        if(o.refunded_at && new Date(o.refunded_at).getTime() <= ts) return s;
+        return s + Number(o.qty||0);
       }, 0);
     }
     if(key === 'activeUsers'){
