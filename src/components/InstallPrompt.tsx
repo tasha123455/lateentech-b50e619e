@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
-const DISMISS_KEY = "lateen_install_dismissed_at";
-const DISMISS_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000; // don't re-prompt for 14 days after "Not now"
+const DISMISS_KEY = "lateen_install_dismissed_session";
+
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
