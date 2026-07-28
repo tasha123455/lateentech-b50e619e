@@ -1100,13 +1100,21 @@ async function refreshBizReviews(){
   let rows=[];try{rows=await window.LateenAPI.listBusinessReviews();}catch(e){console.warn('[Lateen] refreshBizReviews',e);return;}
   const avUrl=async(p)=>{try{return window.LateenAPI&&window.LateenAPI.avatarPublicUrl?(await window.LateenAPI.avatarPublicUrl(p||'')):'';}catch(e){return '';}};
   const rmap={};
+  const amap={};
   await Promise.all((rows||[]).map(async r=>{
-    const entry={author:r.author_name||'Marketer',rating:Number(r.rating)||0,text:r.comment||'',photo:r.photo_url||'',avatar:r.avatar_path?(await avUrl(r.avatar_path)):'',ts:new Date(r.created_at).getTime()};
+    const av=r.avatar_path?(await avUrl(r.avatar_path)):'';
+    /* Keep a marketer_id -> current avatar map so notification rows can show
+       the marketer's live profile picture instead of the URL snapshot that
+       was stored on the notification when the review was written. */
+    if(r.marketer_id)amap[r.marketer_id]=av;
+    const entry={author:r.author_name||'Marketer',rating:Number(r.rating)||0,text:r.comment||'',photo:r.photo_url||'',avatar:av,ts:new Date(r.created_at).getTime()};
     (rmap[r.product_id]=rmap[r.product_id]||[]).push(entry);
   }));
+  window.__bizAvatarByMarketer=amap;
   for(const k in rmap){rmap[k].sort((a,b)=>b.ts-a.ts);}
   window.__bizReviewsByProduct=rmap;
   try{if(typeof renderProducts==='function'&&document.getElementById('pg-products')?.classList.contains('active'))renderProducts();}catch(e){}
+  try{if(typeof refreshBizNotifications==='function')refreshBizNotifications();}catch(e){}
 }
 window.refreshBizReviews=refreshBizReviews;
 function __arStarsPhrase(n){
@@ -1160,7 +1168,8 @@ async function refreshBizNotifications(){
     const expandable=n.kind==='new_order'||isAdminMsg;
     const color=n.kind==='new_order'?'#34c77b':(n.kind==='product_review'?'#e9b949':'#7f77dd');
     let __iconD=n.data;if(typeof __iconD==='string'){try{__iconD=JSON.parse(__iconD);}catch(e){__iconD=null;}}if(!__iconD)__iconD={};
-    const __iconRaw=n.kind==='product_review'?__iconD.avatar:(__iconD.product_photo||__iconD.photo);
+    const __liveAv=(n.kind==='product_review'&&__iconD.marketer_id&&window.__bizAvatarByMarketer)?window.__bizAvatarByMarketer[__iconD.marketer_id]:'';
+    const __iconRaw=n.kind==='product_review'?(__liveAv||__iconD.avatar):(__iconD.product_photo||__iconD.photo);
     const iconPhotoUrl=__iconRaw&&/^(https?:|data:|\/)/.test(String(__iconRaw))?__iconRaw:'';
     const hasPhoto=!!iconPhotoUrl;
     const __reviewInitial=n.kind==='product_review'?((__iconD.author||'M').trim().charAt(0).toUpperCase()||'M'):'';
