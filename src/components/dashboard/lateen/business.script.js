@@ -1214,6 +1214,16 @@ async function refreshBizNotifications(){
   }).join('');
 }
 window.refreshBizNotifications=refreshBizNotifications;
+async function __clearOsNotifBadge(){
+  try{
+    if('serviceWorker' in navigator){
+      const reg=await navigator.serviceWorker.ready;
+      const list=await reg.getNotifications();
+      list.forEach(n=>n.close());
+    }
+  }catch(e){}
+  try{if('clearAppBadge' in navigator)await navigator.clearAppBadge();}catch(e){}
+}
 (function(){
   const _g=goTo;
   let __lastPage=null;
@@ -1221,7 +1231,7 @@ window.refreshBizNotifications=refreshBizNotifications;
     /* When leaving notifications page, immediately hide all red dots in the list, then sync to DB */
     if(__lastPage==='pg-notif'&&id!=='pg-notif'){
       try{const root=document.getElementById('notif-list');if(root){root.querySelectorAll('div').forEach(el=>{const bg=el.style&&el.style.background;if(bg&&bg.indexOf('#E24B4A')!==-1)el.style.display='none';});}}catch(e){}
-      (async()=>{try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}refreshBizNotifications();})();
+      (async()=>{try{if(window.LateenAPI&&window.LateenAPI.markNotificationsRead)await window.LateenAPI.markNotificationsRead();}catch(e){}__clearOsNotifBadge();refreshBizNotifications();})();
     }
     __lastPage=id;
     _g.apply(this,arguments);
