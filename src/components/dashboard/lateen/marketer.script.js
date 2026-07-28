@@ -782,10 +782,12 @@ async function renderTransactions(){
   if(!list||!window.LateenAPI||!window.LateenAPI.listNotifications)return;
   let notifs=[];
   try{notifs=await window.LateenAPI.listNotifications();}catch(e){console.error('[Lateen] transactions',e);return;}
-  const kinds={receipt_verified:'add',order_refunded:'subtract',payout_paid:'withdraw'};
+  const kinds={receipt_verified:'add',order_refunded:'subtract',payout_paid:'withdraw',receipt_rejected:'reject',payout_note:'failed'};
   const rows=(notifs||[]).filter(n=>kinds[n.kind]).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   if(!rows.length){list.innerHTML='<div class="empty-center" style="padding:40px 20px"><div class="empty-text" style="text-align:center;color:var(--color-text-secondary);font-size:13px">'+__t('No transactions yet.','لا توجد تحركات بعد.')+'</div></div>';return;}
-  const sym=(typeof window.__lateenSelSym==='function')?window.__lateenSelSym():'د.ل';
+  const rawSym=(typeof window.__lateenSelSym==='function')?window.__lateenSelSym():'د.ل';
+  const curCode=window.__lateenWalletCur||'LYD';
+  const sym=__ar()?rawSym:(curCode||rawSym);
   list.innerHTML=rows.map(n=>{
     let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}if(!d)d={};
     const type=kinds[n.kind];
@@ -797,22 +799,32 @@ async function renderTransactions(){
     }else if(type==='subtract'){
       amount=d.amount!=null?Number(d.amount):null;
       title=__t('Order refunded','استرجاع طلب');
+    }else if(type==='reject'){
+      amount=null;
+      title=__t('Receipt rejected by admin','تم رفض الإيصال من الأدمن');
+    }else if(type==='failed'){
+      amount=d.amount!=null?Number(d.amount):null;
+      title=__t('Withdrawal failed','فشل إيداع المبلغ');
     }else{
       amount=d.amount!=null?Number(d.amount):null;
       title=__t('Withdrawal completed','تم سحب المبلغ');
     }
+    const isX=(type==='reject'||type==='failed');
     const color=type==='add'?'#35c98f':(type==='withdraw'?'#7f77dd':'#e2685f');
-    const sign=type==='add'?'+':'-';
+    const sign=type==='add'?'+':(isX?'':'-');
     const amtStr=amount!=null?amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):null;
     const amtLine=amtStr?`<div class="notif-body" style="color:${color};font-weight:600;font-size:13px">${sign}${__txnEsc(amtStr)} ${__txnEsc(sym)}</div>`:'';
     const dt=(typeof __fmtDT==='function')?__fmtDT(n.created_at):new Date(n.created_at).toLocaleString();
     const photoUrl=d.product_photo||d.photo;
     const photoUrlValid=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl));
-    const hasIconPhoto=(type==='withdraw'&&photoUrlValid);
+    const hasIconPhoto=(!isX&&type==='withdraw'&&photoUrlValid);
     const photo=(!hasIconPhoto&&photoUrlValid)?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
-    const iconHtml=hasIconPhoto?`<div class="notif-icon notif-icon-photo" style="background-image:url('${__txnEsc(photoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${sign}</div>`;
+    const iconHtml=hasIconPhoto?`<div class="notif-icon notif-icon-photo" style="background-image:url('${__txnEsc(photoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${isX?'✕':sign}</div>`;
     let detailRows;
-    if(type==='withdraw'){
+    if(type==='failed'){
+      detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Failed','فشل'))+
+        ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
+    }else if(type==='withdraw'){
       detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
     }else{
       detailRows=photo+
@@ -828,7 +840,7 @@ async function renderTransactions(){
         __txnRow(__t('Size','المقاس'),d.size,true)+
         __txnRow(__t('Colour','اللون'),d.color,true)+
         (d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> <span data-no-i18n>${__txnEsc(d.customer_notes)}</span></div>`:'')+
-        ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
+        ((d.admin_notes||d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_notes||d.admin_comment||d.admin_note)}</span></div>`:'');
     }
     const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
     const detailsHtml=`<div class="notif-detail-body"><div class="notif-details-box">${detailRows}</div></div>`;
