@@ -932,18 +932,24 @@ export function createLateenApi(userId: string) {
         const { error } = await supabase.rpc("admin_set_product_status", { _product_id: id, _status: status });
         if (error) throw error;
       },
+      // How many marketers currently have an in-progress order on this product.
+      // Used to warn the admin before hiding/deleting: those marketers keep
+      // seeing the product until their orders complete (RLS exception), while
+      // everyone else loses access immediately.
+      async activeMarketersCount(id: string): Promise<number> {
+        const { data, error } = await supabase.rpc("active_marketers_count", { _product_id: id });
+        if (error) throw error;
+        return Number(data ?? 0);
+      },
       async deleteProduct(id: string) {
-        // Soft delete, same as a business owner deleting their own product —
-        // keeps historical orders/favorites intact, just removes it from
-        // every listing (admin's Product Review list already filters on
-        // deleted_at IS NULL). Relies on the "Admins update all products"
-        // RLS policy.
-        const { error } = await supabase
-          .from("products")
-          .update({ deleted_at: new Date().toISOString(), status: "paused" })
-          .eq("id", id);
+        // Soft delete through an admin RPC so it also works while the product
+        // still has active marketers (the product lock trigger is bypassed).
+        // Marketers with in-progress orders keep read access via RLS until
+        // those orders finish; everyone else loses it right away.
+        const { error } = await supabase.rpc("admin_delete_product", { _product_id: id });
         if (error) throw error;
       },
+
       async getProductDetail(id: string) {
         const { data: product, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
         if (error) throw error;
