@@ -632,12 +632,34 @@ function admToggleUserCard(uid){
   const isOpen=exp.classList.toggle('open');
   if(chev)chev.classList.toggle('open',isOpen);
 }
+/* Verify the browser can actually decode the picked file before we upload it.
+   Phone cameras hand us HEIC/HEIF through accept="image/*", which no browser
+   can render — those used to upload "successfully" and then show up as a
+   broken image in the notification. */
+async function admDecodableImage(file){
+  if(!file||!file.type||!/^image\//i.test(file.type))return false;
+  try{
+    if(typeof createImageBitmap==='function'){
+      const bmp=await createImageBitmap(file);
+      if(bmp&&bmp.close)bmp.close();
+      return true;
+    }
+  }catch(e){/* fall through to the <img> probe */}
+  return await new Promise(res=>{
+    const url=URL.createObjectURL(file);
+    const im=new Image();
+    im.onload=()=>{URL.revokeObjectURL(url);res(true);};
+    im.onerror=()=>{URL.revokeObjectURL(url);res(false);};
+    im.src=url;
+  });
+}
 async function admPickUserNotifPhoto(uid,inp){
   const file=inp&&inp.files&&inp.files[0];if(!file)return;
   const hint=document.getElementById('un-photo-hint-'+uid);
   if(hint)hint.textContent='Uploading…';
   try{
-    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('uploader unavailable, reload the page');
+    if(!(await admDecodableImage(file)))throw new Error('unsupported image format — pick a JPG or PNG');
     const url=await window.LateenAPI.uploadPhoto(file);
     admUserNotifPhoto[uid]=url;
     const prev=document.getElementById('un-photo-preview-'+uid);
@@ -647,9 +669,10 @@ async function admPickUserNotifPhoto(uid,inp){
     if(prev)prev.style.display='block';
     if(add)add.style.display='none';
     if(hint)hint.textContent='';
-  }catch(e){console.error('[admin] notif photo upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  }catch(e){console.error('[admin] notif photo upload',e);if(hint)hint.textContent='Upload failed: '+((e&&e.message)||'try again');}
   if(inp)inp.value='';
 }
+
 function admRemoveUserNotifPhoto(uid){
   delete admUserNotifPhoto[uid];
   const prev=document.getElementById('un-photo-preview-'+uid);
