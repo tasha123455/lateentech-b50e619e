@@ -711,7 +711,8 @@ async function admPickBroadcastPhoto(inp){
   const hint=document.getElementById('bn-photo-hint');
   if(hint)hint.textContent='Uploading…';
   try{
-    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('uploader unavailable, reload the page');
+    if(!(await admDecodableImage(file)))throw new Error('unsupported image format — pick a JPG or PNG');
     const url=await window.LateenAPI.uploadPhoto(file);
     admBroadcastPhotoUrl=url;
     const prev=document.getElementById('bn-photo-preview');
@@ -721,7 +722,8 @@ async function admPickBroadcastPhoto(inp){
     if(prev)prev.style.display='block';
     if(add)add.style.display='none';
     if(hint)hint.textContent='';
-  }catch(e){console.error('[admin] broadcast photo upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  }catch(e){console.error('[admin] broadcast photo upload',e);if(hint)hint.textContent='Upload failed: '+((e&&e.message)||'try again');}
+
   if(inp)inp.value='';
 }
 function admRemoveBroadcastPhoto(){
