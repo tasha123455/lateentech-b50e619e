@@ -74,11 +74,26 @@ async function persistSubscription(userId: string, registration: ServiceWorkerRe
   const { publicKey } = (await res.json()) as { publicKey?: string };
   if (!publicKey) return;
 
+  const desiredKey = urlBase64ToUint8Array(publicKey);
+
   let subscription = await registration.pushManager.getSubscription();
+  // If an existing subscription was created with a different applicationServerKey
+  // (e.g. a stale Progressier subscription on the same SW scope), our VAPID
+  // sends will silently fail. Detect the mismatch and re-subscribe.
+  if (subscription) {
+    const existingKey = subscription.options?.applicationServerKey;
+    const mismatch =
+      !existingKey ||
+      new Uint8Array(existingKey).toString() !== desiredKey.toString();
+    if (mismatch) {
+      try { await subscription.unsubscribe(); } catch { /* ignore */ }
+      subscription = null;
+    }
+  }
   if (!subscription) {
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
+      applicationServerKey: desiredKey as BufferSource,
     });
   }
   const json = subscription.toJSON() as {
