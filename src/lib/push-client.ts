@@ -2,6 +2,20 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const SW_PATH = "/sw.js";
+const DEVICE_ID_KEY = "wasla_push_device_id";
+
+function getOrCreateDeviceId(): string {
+  try {
+    const existing = localStorage.getItem(DEVICE_ID_KEY);
+    if (existing) return existing;
+  } catch { /* ignore */ }
+  const id =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  try { localStorage.setItem(DEVICE_ID_KEY, id); } catch { /* ignore */ }
+  return id;
+}
 
 function urlBase64ToUint8Array(base64Url: string): Uint8Array {
   const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
