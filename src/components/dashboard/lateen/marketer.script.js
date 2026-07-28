@@ -942,7 +942,30 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   if(typeof _rg2==='function'){window.rg2=function(l){try{const s=JSON.stringify((l||[]).map(p=>[p.id,p.sv?1:0,p.pr,p.pct,p.n]));if(s===__sigBrw)return;__sigBrw=s;}catch(e){}return _rg2.apply(this,arguments);};}
 })();
 /* persist page + scroll across refresh */
-(function(){const K='lateen_mk_page',S='lateen_mk_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
+(function(){
+  const K='lateen_mk_page',S='lateen_mk_scroll';
+  let restoring=false;
+  const _g=goTo;
+  goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};
+  try{
+    const sv=sessionStorage.getItem(K);
+    if(sv&&document.getElementById(sv))_g(sv);
+    const target=parseInt(sessionStorage.getItem(S)||'0',10);
+    if(target>0){
+      restoring=true;
+      const t0=Date.now();
+      const tick=()=>{
+        const max=Math.max(0,(document.documentElement.scrollHeight||0)-window.innerHeight);
+        window.scrollTo(0,Math.min(target,max));
+        if(max>=target-2&&Math.abs((window.scrollY||0)-target)<3){restoring=false;return;}
+        if(Date.now()-t0<2500)requestAnimationFrame(tick);
+        else restoring=false;
+      };
+      requestAnimationFrame(tick);
+    }
+  }catch(e){restoring=false;}
+  window.addEventListener('scroll',()=>{if(restoring)return;try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});
+})();
 
 /* auto-hide bottom nav on scroll down, show on scroll up */
 (function(){const nav=document.querySelector('.lateen-marketer .bottom-nav');if(!nav)return;let lastY=window.scrollY||0,ticking=false;const TH=6;function upd(){const y=window.scrollY||0,d=y-lastY;if(Math.abs(d)>TH){if(d>0&&y>60)nav.classList.add('nav-hidden');else nav.classList.remove('nav-hidden');lastY=y;}ticking=false;}window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(upd);ticking=true;}},{passive:true});})();
