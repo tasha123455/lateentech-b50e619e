@@ -823,18 +823,38 @@ async function admLoadProducts(){
   }catch(e){console.error('[admin] products',e);if(first)root.innerHTML='<div class="adm-empty" style="grid-column:1/-1;">Failed to load.</div>';}
 }
 
+// Returns the number of marketers with an in-progress (pending/approved/
+// confirmed) order on this product, 0 if it can't be determined.
+async function __admActiveMarketers(id){
+  try{return await window.LateenAPI.admin.activeMarketersCount(id);}catch(e){console.error('[admin] active marketers',e);return 0;}
+}
+function __admActiveMarketerWarning(n,action){
+  const label=n+' active marketer'+(n===1?'':'s');
+  return 'Heads-up: this product currently has '+label+' with an in-progress order.\n\n'
+    +'It will be '+action+' immediately for every other marketer, but those '+label.replace(/^\d+\s/,'')+' keep seeing it until their orders complete — then it disappears for them automatically.\n\nContinue?';
+}
+
 async function admToggleProduct(id,newStatus){
-  try{await window.LateenAPI.admin.setProductStatus(id,newStatus);admLoadProducts();}catch(e){alert('Failed: '+e.message);}
+  try{
+    if(newStatus==='hidden'){
+      const n=await __admActiveMarketers(id);
+      if(n>0&&!confirm(__admActiveMarketerWarning(n,'hidden')))return;
+    }
+    await window.LateenAPI.admin.setProductStatus(id,newStatus);admLoadProducts();
+  }catch(e){alert('Failed: '+e.message);}
 }
 
 async function admDeleteProduct(id,name){
   if(!confirm('Permanently delete "'+name+'"?\n\nIt will disappear from marketer browsing and saved products right away. This cannot be undone.'))return;
   try{
+    const n=await __admActiveMarketers(id);
+    if(n>0&&!confirm(__admActiveMarketerWarning(n,'deleted')))return;
     await window.LateenAPI.admin.deleteProduct(id);
     admClosePDetail();
     admLoadProducts();
   }catch(e){alert('Failed: '+e.message);}
 }
+
 
 function admClosePDetail(){document.getElementById('adm-pdetail').classList.remove('open');}
 
