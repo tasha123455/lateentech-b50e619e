@@ -1092,7 +1092,76 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   if(typeof _ro==='function'){window.renderOrders=function(list){try{const s=JSON.stringify((list||[]).map(o=>[o.id,o.status,o.qty,o.receiptUrl,o.marketerConfirmed]));if(s===__sigO)return;__sigO=s;}catch(e){}return _ro.apply(this,arguments);};}
 })();
 /* persist page + scroll across refresh */
-(function(){const K='lateen_bz_page',S='lateen_bz_scroll';const _g=goTo;goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};try{const sv=sessionStorage.getItem(K);if(sv&&document.getElementById(sv))_g(sv);const sc=parseInt(sessionStorage.getItem(S)||'0',10);if(sc>0)requestAnimationFrame(()=>window.scrollTo(0,sc));}catch(e){}window.addEventListener('scroll',()=>{try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});})();
+(function(){
+  const K='lateen_bz_page',S='lateen_bz_scroll';
+  let restoring=false;
+  const _g=goTo;
+  goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};
+  try{
+    const sv=sessionStorage.getItem(K);
+    if(sv&&document.getElementById(sv))_g(sv);
+    const target=parseInt(sessionStorage.getItem(S)||'0',10);
+    if(target>0){
+      restoring=true;
+      const t0=Date.now();
+      const tick=()=>{
+        const max=Math.max(0,(document.documentElement.scrollHeight||0)-window.innerHeight);
+        window.scrollTo(0,Math.min(target,max));
+        if(max>=target-2&&Math.abs((window.scrollY||0)-target)<3){restoring=false;return;}
+        if(Date.now()-t0<2500)requestAnimationFrame(tick);
+        else restoring=false;
+      };
+      requestAnimationFrame(tick);
+    }
+  }catch(e){restoring=false;}
+  window.addEventListener('scroll',()=>{if(restoring)return;try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});
+})();
+
+/* generic "restore what was typed" layer for any open form/modal */
+(function(){
+  const FK='lateen_bz_forms';
+  const sel='input,textarea,select';
+  const skip=el=>!el||el.type==='password'||el.type==='file'||el.type==='hidden'||el.type==='checkbox'||el.type==='radio'||el.dataset.noDraft==='1';
+  const visible=el=>!!(el.offsetParent||el.getClientRects().length);
+  const keyOf=el=>{
+    const id=el.id||el.getAttribute('name');
+    if(id)return id;
+    const all=Array.prototype.slice.call(document.querySelectorAll(sel));
+    return 'idx:'+all.indexOf(el);
+  };
+  const load=()=>{try{return JSON.parse(sessionStorage.getItem(FK)||'{}');}catch(e){return{};}};
+  const save=o=>{try{sessionStorage.setItem(FK,JSON.stringify(o));}catch(e){}};
+  document.addEventListener('input',e=>{
+    const el=e.target;
+    if(!el||!el.matches||!el.matches(sel)||skip(el))return;
+    const o=load();const k=keyOf(el);
+    if(el.value)o[k]=el.value;else delete o[k];
+    save(o);
+  },true);
+  const clearScope=root=>{
+    if(!root)return;const o=load();
+    root.querySelectorAll(sel).forEach(el=>{delete o[keyOf(el)];});
+    save(o);
+  };
+  document.addEventListener('click',e=>{
+    const btn=e.target&&e.target.closest?e.target.closest('button,a,[role="button"]'):null;
+    if(!btn)return;
+    const txt=((btn.textContent||'')+' '+(btn.className||'')+' '+(btn.id||'')).toLowerCase();
+    if(!/close|cancel|save|submit|confirm|إلغاء|إغلاق|حفظ|إرسال|تأكيد|×/.test(txt))return;
+    const scope=btn.closest('form,.modal,.sheet,.overlay,.dialog')||document;
+    setTimeout(()=>clearScope(scope),400);
+  },true);
+  const restore=()=>{
+    const o=load();if(!Object.keys(o).length)return;
+    document.querySelectorAll(sel).forEach(el=>{
+      if(skip(el)||el.value||!visible(el))return;
+      const v=o[keyOf(el)];
+      if(v!=null&&v!==''){el.value=v;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+    });
+  };
+  let n=0;const iv=setInterval(()=>{restore();if(++n>12)clearInterval(iv);},250);
+  restore();
+})();
 
 /* auto-hide bottom nav on scroll down, show on scroll up */
 (function(){const nav=document.querySelector('.lateen-business .bottom-nav');if(!nav)return;let lastY=window.scrollY||0,ticking=false;const TH=6;function upd(){const y=window.scrollY||0,d=y-lastY;if(Math.abs(d)>TH){if(d>0&&y>60)nav.classList.add('nav-hidden');else nav.classList.remove('nav-hidden');lastY=y;}ticking=false;}window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(upd);ticking=true;}},{passive:true});})();
