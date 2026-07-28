@@ -1,4 +1,4 @@
-// Browser-side push notification helpers. Replaces the old Progressier script tag.
+// Browser-side push notification helpers (self-hosted VAPID).
 import { supabase } from "@/integrations/supabase/client";
 
 const SW_PATH = "/sw.js";
@@ -21,59 +21,83 @@ function isPushSupported(): boolean {
   );
 }
 
+/** True when the app is running as an installed PWA (home-screen launch). */
+export function isInstalledPWA(): boolean {
+  if (typeof window === "undefined") return false;
+  const standalone = window.matchMedia?.("(display-mode: standalone)").matches;
+  // iOS Safari exposes navigator.standalone
+  const iosStandalone = (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+  return !!(standalone || iosStandalone);
+}
+
 /**
- * Registers the service worker, asks for notification permission (if not already
- * answered), subscribes this browser/device to push, and stores the subscription
- * against `userId`. Safe to call on every sign-in — it no-ops quickly if a working
- * subscription already exists.
+ * Silent bootstrap: registers the SW and (only if permission was already granted
+ * previously) refreshes the push subscription row. NEVER shows a permission prompt.
+ * Safe to call on every sign-in.
  */
 export async function subscribeToPush(userId: string): Promise<void> {
   if (!isPushSupported()) return;
   try {
-    // Respect a prior "block" — don't re-prompt every login.
-    if (Notification.permission === "denied") return;
-
     const registration = await navigator.serviceWorker.register(SW_PATH);
     await navigator.serviceWorker.ready;
-
-    if (Notification.permission === "default") {
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") return;
-    }
-    if (Notification.permission !== "granted") return;
-
-    const res = await fetch("/api/public/notifications/vapid-public-key");
-    const { publicKey } = (await res.json()) as { publicKey?: string };
-    if (!publicKey) return; // server hasn't been configured with VAPID keys yet
-
-    let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
-      });
-    }
-
-    const json = subscription.toJSON() as {
-      endpoint?: string;
-      keys?: { p256dh?: string; auth?: string };
-    };
-    if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return;
-
-    const { error } = await supabase.from("push_subscriptions").upsert(
-      {
-        user_id: userId,
-        endpoint: json.endpoint,
-        p256dh: json.keys.p256dh,
-        auth: json.keys.auth,
-        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-      },
-      { onConflict: "endpoint" },
-    );
-    if (error) console.warn("[push] failed to save subscription", error);
+    if (Notification.permission !== "granted") return; // never auto-prompt
+    await persistSubscription(userId, registration);
   } catch (e) {
-    console.warn("[push] subscribe failed", e);
+    console.warn("[push] bootstrap failed", e);
   }
+}
+
+/**
+ * Explicit opt-in from a custom in-app prompt. Requests permission, subscribes,
+ * and stores the subscription. Returns final permission state.
+ */
+export async function requestPushPermissionAndSubscribe(
+  userId: string,
+): Promise<NotificationPermission | "unsupported"> {
+  if (!isPushSupported()) return "unsupported";
+  try {
+    const registration = await navigator.serviceWorker.register(SW_PATH);
+    await navigator.serviceWorker.ready;
+    let perm = Notification.permission;
+    if (perm === "default") perm = await Notification.requestPermission();
+    if (perm !== "granted") return perm;
+    await persistSubscription(userId, registration);
+    return "granted";
+  } catch (e) {
+    console.warn("[push] opt-in failed", e);
+    return Notification.permission;
+  }
+}
+
+async function persistSubscription(userId: string, registration: ServiceWorkerRegistration) {
+  const res = await fetch("/api/public/notifications/vapid-public-key");
+  const { publicKey } = (await res.json()) as { publicKey?: string };
+  if (!publicKey) return;
+
+  let subscription = await registration.pushManager.getSubscription();
+  if (!subscription) {
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
+    });
+  }
+  const json = subscription.toJSON() as {
+    endpoint?: string;
+    keys?: { p256dh?: string; auth?: string };
+  };
+  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return;
+
+  const { error } = await supabase.from("push_subscriptions").upsert(
+    {
+      user_id: userId,
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+    },
+    { onConflict: "endpoint" },
+  );
+  if (error) console.warn("[push] failed to save subscription", error);
 }
 
 /**

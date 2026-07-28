@@ -20,11 +20,14 @@ self.addEventListener("push", (event) => {
   }
 
   const title = payload.title || "Wasla";
+  // Unique tag per notification so a new one never silently replaces a previous
+  // one (previous bug: same/undefined tag caused "only the first shows").
+  const uniqueTag = `wasla-${payload.id || Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const options = {
     body: payload.body || "",
     data: { url: payload.url || payload.data?.url || "/dashboard" },
-    tag: payload.id || undefined,
-    renotify: false,
+    tag: uniqueTag,
+    renotify: true,
     image: payload.image || undefined,
     icon: payload.icon || "/wasla-notification-icon.png",
     badge: payload.badge || "/wasla-badge-monochrome.png",

@@ -10,6 +10,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/push-client";
+import { NotificationConsentModal } from "@/components/NotificationConsentModal";
 
 export type Role = "marketer" | "business" | "admin";
 
@@ -289,7 +290,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [session, role, loading, loadRole, signOut, refreshRole],
   );
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={value}>
+      {children}
+      <NotificationConsentModal />
+    </Ctx.Provider>
+  );
 }
 
 export function useAuth() {
