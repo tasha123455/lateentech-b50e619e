@@ -747,7 +747,7 @@ export function createLateenApi(userId: string) {
         const { data: orders, error } = await supabase
           .from("orders")
           .select("*")
-          .in("status", ["approved", "rejected"])
+          .in("status", ["approved", "rejected", "confirmed", "delivered", "cancelled"])
           .not("receipt_url", "is", null)
           .order("reviewed_at", { ascending: false });
         if (error) throw error;

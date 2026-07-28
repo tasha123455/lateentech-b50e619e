@@ -304,8 +304,12 @@ function admMktDetailCard(o){
     ?'<span class="adm-recpt-status adm-status-refunded">↺ Refunded</span>'
     :o.status==='pending'
     ?'<span class="adm-recpt-status adm-status-pending">⏳ Pending verification</span>'
-    :o.status==='approved'
+    :(o.status==='approved'||o.status==='confirmed')
     ?'<span class="adm-recpt-status adm-status-approved">✓ Approved</span>'
+    :o.status==='delivered'
+    ?'<span class="adm-recpt-status adm-status-approved">✓ Delivered</span>'
+    :o.status==='cancelled'
+    ?'<span class="adm-recpt-status adm-status-rejected">✕ Failed</span>'
     :'<span class="adm-recpt-status adm-status-rejected">✕ Rejected</span>';
 
   const created='Created: '+admWhenFull(o.created_at);
@@ -334,7 +338,7 @@ function admMktDetailCard(o){
   // Refunding only ever makes sense for a receipt the admin already approved
   // (that's the only point real platform-fee revenue was counted), and only
   // once — the button disappears the moment refunded_at is set.
-  const refundBtn=(o.status==='approved'&&!isRefunded)
+  const refundBtn=((o.status==='approved'||o.status==='confirmed'||o.status==='delivered')&&!isRefunded)
     ?`<button class="adm-btn-refund" onclick="admRefundOrder('${o.id}')">Refund customer</button>`
     :'';
 
@@ -380,12 +384,47 @@ async function admReject(id){
   if(notes===null)return;
   try{await window.LateenAPI.admin.rejectOrder(id,notes||'Receipt rejected');admLoadVerify();}catch(e){alert('Reject failed: '+e.message);}
 }
+/* Refund dialog: a real note box (not a bare prompt) so the admin can write a
+   message that is delivered to BOTH the marketer and the business owner along
+   with the refund. Post-delivery refunds also reverse stock, sales and every
+   analytics counter server-side. */
+function admRefundModal(order){
+  return new Promise(resolve=>{
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;';
+    const delivered=order&&(order.status==='delivered'||order.status==='confirmed');
+    wrap.innerHTML=`
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,.72)"></div>
+      <div style="position:relative;width:100%;max-width:420px;background:#101010;border:0.5px solid #262626;border-radius:16px;padding:18px 16px;">
+        <div style="font-size:15px;font-weight:600;color:#f4f2ef;margin-bottom:8px;">Refund this order</div>
+        <div style="font-size:12.5px;line-height:1.7;color:#9e9b97;margin-bottom:12px;">
+          ${delivered?'This order was already delivered. Refunding it will mark it as <b>failed</b>, restore the product stock, remove its pieces sold and revenue from the business owner\'s analytics, and remove its platform fee from your totals.':'This removes the order\'s platform fee from your totals and deducts the marketer\'s fee from their wallet.'}
+        </div>
+        <div style="font-size:12px;color:#9e9b97;margin-bottom:6px;">Note to the marketer &amp; business owner (optional)</div>
+        <textarea id="adm-refund-note" rows="4" placeholder="Explain why this order is being refunded…" style="width:100%;box-sizing:border-box;background:#161616;border:0.5px solid #262626;border-radius:10px;color:#f4f2ef;font-size:13px;padding:10px;font-family:inherit;resize:vertical;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button id="adm-refund-cancel" style="flex:1;height:38px;border-radius:19px;background:transparent;border:0.5px solid #333;color:#c9c8c4;font-size:13px;cursor:pointer;">Cancel</button>
+          <button id="adm-refund-go" style="flex:1;height:38px;border-radius:19px;background:#7c9cf0;border:none;color:#0b0b0b;font-size:13px;font-weight:600;cursor:pointer;">Refund</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+    const done=(v)=>{wrap.remove();resolve(v);};
+    wrap.firstElementChild.onclick=()=>done(null);
+    wrap.querySelector('#adm-refund-cancel').onclick=()=>done(null);
+    wrap.querySelector('#adm-refund-go').onclick=()=>done((wrap.querySelector('#adm-refund-note').value||'').trim());
+    setTimeout(()=>{const ta=wrap.querySelector('#adm-refund-note');if(ta)ta.focus();},30);
+  });
+}
 async function admRefundOrder(id){
-  if(!confirm("Refund this order?\n\nThis removes its platform fee from your total platform fee metrics on the Home page, and deducts the marketer's fee for this order from their wallet balance. It does not change the order's status elsewhere in the app. This can't be undone."))return;
-  const comment=prompt('Add a note for the marketer? (optional — leave blank to skip)');
+  let order=null;
+  for(const m of (__admVerifyMarketers||[])){
+    order=(m.pending||[]).find(o=>o.id===id)||(m.history||[]).find(o=>o.id===id)||order;
+    if(order&&order.id===id)break;
+  }
+  const comment=await admRefundModal(order);
   if(comment===null)return;
   try{
-    await window.LateenAPI.admin.refundOrder(id,comment.trim());
+    await window.LateenAPI.admin.refundOrder(id,comment);
     admLoadVerify();
     admLoadMetrics();
   }catch(e){alert('Refund failed: '+e.message);}
@@ -1504,7 +1543,11 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
       // totaled across every order on the platform.
       return raw.orders.reduce((s,o) => {
         if(!o.delivered_at) return s;
-        return new Date(o.delivered_at).getTime() <= ts ? s + Number(o.qty||0) : s;
+        if(new Date(o.delivered_at).getTime() > ts) return s;
+        // A post-delivery refund removes those pieces back out of the count
+        // from the moment the refund happened.
+        if(o.refunded_at && new Date(o.refunded_at).getTime() <= ts) return s;
+        return s + Number(o.qty||0);
       }, 0);
     }
     if(key === 'activeUsers'){
