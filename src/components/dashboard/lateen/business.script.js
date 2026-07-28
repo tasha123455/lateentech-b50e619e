@@ -829,7 +829,7 @@ function renderProducts(){
     });
   }
   if(!products.length){el.innerHTML='<div class="mp-empty-state">No products yet.</div>';return;}
-  if(!list.length){el.innerHTML='<div class="mp-empty-state">No products match your search.</div>';return;}
+  if(!list.length){el.innerHTML='<div class="mp-empty-state" data-no-i18n>'+(__ar()?'لا توجد منتجات مطابقة لبحثك':'No products match your search.')+'</div>';return;}
   el.innerHTML=list.map(mpRenderCard).join('');
   list.forEach(p=>mpInitSwipe(p.id));
 }
