@@ -506,8 +506,13 @@ function mpVariantBoxes(p,sel,list){
         const low=qty===0?'mp-empty':(qty<=LOW_STOCK_THRESHOLD?'mp-low':'');
         const swatch=x.photo?`<img class="mp-vg-swatch" src="${mpEsc(x.photo)}" alt="" onclick="event.stopPropagation();mpOpenLightbox(['${mpEsc(x.photo)}'],0)"/>`:'';
         // Attribute sold/revenue only to the variant value that was actually
-        // ordered — never split a sale proportionally across sibling values.
-        const vList=list.filter(o=>o.size===x.val||o.color===x.val);
+        // ordered — match on the real variant group name from selected_variants,
+        // never on positional legacy size/color fields.
+        const vList=list.filter(o=>{
+          const sv=Array.isArray(o.selectedVariants)?o.selectedVariants:(Array.isArray(o.selected_variants)?o.selected_variants:null);
+          if(sv&&sv.length)return sv.some(s=>String(s&&s.name||'').trim().toLowerCase()===String(g.name||'').trim().toLowerCase()&&String(s&&s.value||'')===String(x.val));
+          return o.size===x.val||o.color===x.val;
+        });
         const vSold=vList.reduce((s,o)=>s+(Number(o.qty)||0),0);
         const vRevenue=vList.reduce((s,o)=>s+mpOrderNet(o),0);
         return `<div class="mp-vg-value-row">
