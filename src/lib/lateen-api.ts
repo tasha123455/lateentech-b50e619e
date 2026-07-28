@@ -147,14 +147,21 @@ export function createLateenApi(userId: string) {
 
     async uploadPhoto(file: File): Promise<string> {
       const compressed = await compressImage(file, IMAGE_PRESETS.productPhoto);
-      const path = `${userId}/${crypto.randomUUID()}.jpg`;
+      // Keep the stored extension in sync with what we actually uploaded.
+      // Compression falls back to the original file for formats the browser
+      // can't decode (iPhone HEIC, for example), and storing that under a
+      // ".jpg" name produced a URL that never rendered anywhere.
+      const type = compressed.type || "image/jpeg";
+      const ext = /jpe?g/i.test(type) ? "jpg" : (type.split("/")[1] || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
         .from("product-photos")
-        .upload(path, compressed, { upsert: false, contentType: compressed.type, cacheControl: "31536000" });
+        .upload(path, compressed, { upsert: false, contentType: type, cacheControl: "31536000" });
       if (error) throw error;
       const { data } = supabase.storage.from("product-photos").getPublicUrl(path);
       return data.publicUrl;
     },
+
 
     async listBrowse(): Promise<LateenProduct[]> {
       const { data, error } = await supabase
