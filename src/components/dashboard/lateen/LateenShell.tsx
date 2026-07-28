@@ -76,11 +76,33 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     let cancelled = false;
     let injected: HTMLScriptElement | null = null;
 
+    let signingOut = false;
     const onClick = (e: Event) => {
-      const target = (e.target as HTMLElement | null)?.closest('[data-action="sign-out"]');
+      const target = (e.target as HTMLElement | null)?.closest('[data-action="sign-out"]') as HTMLElement | null;
       if (target) {
         e.preventDefault();
-        void signOutRef.current();
+        if (signingOut) return;
+        signingOut = true;
+        const isAr = document.documentElement.lang === "ar";
+        const prevHtml = target.innerHTML;
+        const prevPointer = target.style.pointerEvents;
+        const prevOpacity = target.style.opacity;
+        target.setAttribute("aria-busy", "true");
+        target.style.pointerEvents = "none";
+        target.style.opacity = "0.6";
+        target.innerHTML = isAr ? "جارٍ تسجيل الخروج…" : "Signing out…";
+        void signOutRef.current()
+          .catch((err) => {
+            console.error("[Lateen] sign-out failed", err);
+            signingOut = false;
+            target.removeAttribute("aria-busy");
+            target.style.pointerEvents = prevPointer;
+            target.style.opacity = prevOpacity;
+            target.innerHTML = prevHtml;
+            try {
+              alert(isAr ? "تعذّر تسجيل الخروج. حاول مرة أخرى." : "Sign out failed. Please try again.");
+            } catch { /* ignore */ }
+          });
       }
     };
     el.addEventListener("click", onClick);
