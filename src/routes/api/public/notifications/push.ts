@@ -13,17 +13,18 @@ export const Route = createFileRoute("/api/public/notifications/push")({
 
         let expected = "";
         try {
-          const { data } = await supabaseAdmin
-            .schema("vault" as never)
-            .from("decrypted_secrets" as never)
-            .select("decrypted_secret")
-            .eq("name", "notifications_push_webhook_secret")
-            .maybeSingle();
-          const row = data as { decrypted_secret?: string } | null;
-          expected = row?.decrypted_secret ?? "";
-        } catch {
-          // Fallback: query via RPC-less path failed; accept only when nothing configured.
+          const { data, error } = await supabaseAdmin.rpc(
+            "get_notifications_push_webhook_secret" as never,
+          );
+          if (error) {
+            console.error("[push] failed to read webhook secret", error);
+          } else if (typeof data === "string") {
+            expected = data;
+          }
+        } catch (e) {
+          console.error("[push] webhook secret RPC threw", e);
         }
+
 
         if (!expected || bearer !== expected) {
           return new Response("Unauthorized", { status: 401 });
