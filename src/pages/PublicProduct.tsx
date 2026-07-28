@@ -99,7 +99,7 @@ function normVariantGroups(p: PublicProduct): { name: string; items: { val: stri
 
 export function PublicProduct({ id }: { id: string }) {
   const { user, role, loading: authLoading } = useAuth();
-  const { lang, withLang } = useLanguage();
+  const { lang, withLang, otherLangPath } = useLanguage();
   const nav = useNavigate();
   const [p, setP] = useState<PublicProduct | null>(null);
   const [loading, setLoading] = useState(true);
@@ -233,6 +233,20 @@ export function PublicProduct({ id }: { id: string }) {
 
   return (
     <div className={`mx-auto min-h-screen max-w-[520px] bg-background ${isMarketer || user ? "pb-28" : "pb-40"}`}>
+      <header className="flex items-center justify-between px-4 py-3">
+        <Link to={withLang("/")} aria-label="Wasla" className="flex items-center gap-2">
+          <img src="/wasla-mark-64.png" alt="Wasla" width={28} height={28} className="h-7 w-auto" />
+          <img src={lang === "ar" ? "/wasla-wordmark-ar.png" : "/wasla-wordmark-en.png"} alt="" aria-hidden className="h-4 w-auto" />
+        </Link>
+        <Link
+          data-no-i18n
+          to={otherLangPath}
+          aria-label="Toggle language"
+          className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-1"
+        >
+          {lang === "en" ? "العربية" : "English"}
+        </Link>
+      </header>
       <div
         className="relative aspect-square w-full overflow-hidden bg-surface-2"
         dir="ltr"
@@ -495,6 +509,15 @@ export function PublicProduct({ id }: { id: string }) {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
           onClick={() => setLightbox(null)}
         >
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={(e) => { e.stopPropagation(); setLightbox(null); }}
+            className="absolute right-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border-[1.5px] border-white/55 bg-black/60 text-3xl leading-none text-white shadow-lg backdrop-blur"
+            style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))" }}
+          >
+            &times;
+          </button>
           <img src={lightbox} alt="" className="max-h-full max-w-full object-contain" />
         </div>
       )}
