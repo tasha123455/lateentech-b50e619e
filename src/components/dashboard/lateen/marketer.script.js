@@ -831,16 +831,14 @@ async function renderTransactions(){
         ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
     }
     const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
-    const detailsHtml=`<div class="notif-detail-body"><div class="notif-details-box">${detailRows}</div></div>`;
-    return `<div class="notif-item expandable" data-id="${n.id}">
-      <div class="notif-top" onclick="__notifToggle(this)">
+    const detailsHtml=`<div style="padding:0 14px 14px 14px"><div class="notif-details-box">${detailRows}</div></div>`;
+    return `<div class="notif-item" data-id="${n.id}" style="flex-direction:column;align-items:stretch;padding:0">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px">
         ${photoWrapHtml}
-        <div class="notif-row-text">
-          <div style="flex:1;min-width:0">
-            <div class="notif-title">${__txnEsc(title)}</div>
-            ${amtLine}
-            <div class="notif-time">${__txnEsc(dt)}</div>
-          </div>
+        <div style="flex:1;min-width:0">
+          <div class="notif-title">${__txnEsc(title)}</div>
+          ${amtLine}
+          <div class="notif-time">${__txnEsc(dt)}</div>
         </div>
       </div>
       ${detailsHtml}
