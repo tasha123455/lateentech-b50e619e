@@ -1568,6 +1568,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_notifications_push_webhook_secret: { Args: never; Returns: string }
       get_payout_state: {
         Args: never
         Returns: {
