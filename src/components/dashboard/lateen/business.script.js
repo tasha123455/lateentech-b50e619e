@@ -994,7 +994,11 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
           ${buildOrdActions(o)}
         </div>
       </div>`;}catch(err){console.error('[Lateen] renderOrders item',err,o);return '';}}).join('');el.querySelectorAll('.hero-scroll').forEach(scroller=>{let t;scroller.addEventListener('scroll',()=>{clearTimeout(t);t=setTimeout(()=>{const idx=Math.round(scroller.scrollLeft/(scroller.clientWidth||1));const dots=scroller.parentElement.querySelectorAll('.hero-dots .d');dots.forEach((d,i)=>d.classList.toggle('active',i===idx));},60);});});}
-function toggle(id){expandedId=expandedId===id?null:id;const card=document.querySelector(`.order-card[data-id="${id}"]`);if(card)card.classList.toggle('expanded');}
+/* Deterministic expand/collapse: derive every card's class from expandedId
+   instead of blind-toggling the tapped card. Blind toggling desynced whenever
+   a re-render or a second card left a stale `expanded` class behind, which
+   made some cards refuse to open on the next tap. */
+function toggle(id){expandedId=(expandedId===id)?null:id;document.querySelectorAll('#orders-list .order-card').forEach(c=>{c.classList.toggle('expanded',c.dataset.id===expandedId);});}
 document.addEventListener('click',function(e){const t=e.target.closest('[data-action="toggle"]');if(t){const card=t.closest('.order-card');if(card)toggle(card.dataset.id);}});
 
 recomputeAnalytics();
