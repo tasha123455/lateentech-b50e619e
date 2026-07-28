@@ -580,7 +580,17 @@
       <button class="adm-filter-chip" data-role="business" onclick="admSetUserFilter('business',this)">Businesses</button>
       <button class="adm-filter-chip" data-role="admin" onclick="admSetUserFilter('admin',this)">Admins</button>
     </div>
-    <input class="adm-search" id="user-search" placeholder="Search by name, phone, business…" oninput="admUserSearch(this.value)" />
+    <div class="adm-date-tabs" id="user-date-tabs">
+      <div class="adm-date-tab active" data-udate="all">All time</div>
+      <div class="adm-date-tab" data-udate="daily">Day <span class="chev">▾</span></div>
+      <div class="adm-date-tab" data-udate="monthly">Month <span class="chev">▾</span></div>
+      <div class="adm-date-tab" data-udate="yearly">Year <span class="chev">▾</span></div>
+    </div>
+    <div class="adm-date-list" id="userDailyList"></div>
+    <div class="adm-date-list" id="userMonthlyList"></div>
+    <div class="adm-date-list" id="userYearlyList"></div>
+    <input class="adm-search" id="user-search" placeholder="Search by name, email, phone, business…" oninput="admUserSearch(this.value)" />
+
     <div class="adm-section" id="users-list">
       <div class="adm-empty">Loading…</div>
     </div>
