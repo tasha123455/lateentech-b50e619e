@@ -81,7 +81,7 @@ function admGo(pageId){
   if(pageId==='adm-home') admLoadMetrics();
   if(pageId==='adm-verify') admLoadVerify();
   if(pageId==='adm-payouts') admLoadPayouts();
-  if(pageId==='adm-users') admLoadUsers('');
+  if(pageId==='adm-users'){if(!window.__admUDateReady){window.__admUDateReady=true;try{__admUDateInit();}catch(e){console.error('[admin] user date filter',e);}}admLoadUsers();}
   if(pageId==='adm-products'){admLoadProducts();admLoadReports();}
   if(pageId==='adm-employees') admLoadEmployees();
 }
@@ -541,23 +541,49 @@ async function admSendPayoutNote(id){
 }
 
 let admUserRoleFilter='';
+let admUserSearchQ='';
+/* Day/month/year filter for the Users page — mirrors the Analytics page
+   pattern, scoped to its own class names so the analytics tab wiring
+   (.range-tab) never picks these up. */
+const admUserDate={day:null,month:null,year:null};
 async function admLoadUsers(search){
+  if(typeof search==='string')admUserSearchQ=search;
   const root=document.getElementById('users-list');
   const first=__admFirstLoad(root);
   if(first) root.innerHTML='<div class="adm-empty">Loading…</div>';
   try{
-    const list=await window.LateenAPI.admin.listAllUsers(search);
+    // Emails are resolved after the profile query, so searching happens
+    // client-side over the full list (that's what makes email search work).
+    const list=await window.LateenAPI.admin.listAllUsers('');
     admUsersCache=list;
     const sig=JSON.stringify(list.map(u=>[u.id,u.role,u.banned_at,u.frozen_at,u.full_name,u.business_name,u.email,u.phone]));
-    if(__admUnchanged('users:'+search,sig,first))return;
+    if(__admUnchanged('users:'+admUserSearchQ+':'+JSON.stringify(admUserDate),sig,first))return;
     __admMarkLoaded(root);
     admRenderUsers(admApplyUserFilter(list));
   }catch(e){console.error('[admin] users',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
 }
 
+function admUserInDateRange(iso){
+  if(!admUserDate.day&&!admUserDate.month&&!admUserDate.year)return true;
+  if(!iso)return false;
+  const d=new Date(iso);
+  if(isNaN(d.getTime()))return false;
+  const p=n=>String(n).padStart(2,'0');
+  const dayKey=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  const monthKey=d.getFullYear()+'-'+p(d.getMonth()+1);
+  const yearKey=String(d.getFullYear());
+  if(admUserDate.day)return dayKey===admUserDate.day;
+  if(admUserDate.month)return monthKey===admUserDate.month;
+  return yearKey===admUserDate.year;
+}
+
 function admApplyUserFilter(list){
-  if(!admUserRoleFilter)return list;
-  return list.filter(u=>(u.role||'marketer')===admUserRoleFilter);
+  let out=list||[];
+  if(admUserRoleFilter)out=out.filter(u=>(u.role||'marketer')===admUserRoleFilter);
+  const q=(admUserSearchQ||'').trim().toLowerCase();
+  if(q)out=out.filter(u=>[u.full_name,u.business_name,u.email,u.phone].some(v=>String(v||'').toLowerCase().includes(q)));
+  out=out.filter(u=>admUserInDateRange(u.created_at));
+  return out;
 }
 
 function admSetUserFilter(role,el){
@@ -566,6 +592,104 @@ function admSetUserFilter(role,el){
   if(el)el.classList.add('on');
   admRenderUsers(admApplyUserFilter(admUsersCache));
 }
+
+const __admUDateMeta={
+  daily:{key:'day',label:'Day',listId:'userDailyList'},
+  monthly:{key:'month',label:'Month',listId:'userMonthlyList'},
+  yearly:{key:'year',label:'Year',listId:'userYearlyList'}
+};
+function __admUDateItems(kind){
+  const p=n=>String(n).padStart(2,'0');
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now=new Date();
+  if(kind==='day'){
+    const out=[];
+    for(let i=0;i<30;i++){const d=new Date(now);d.setDate(d.getDate()-i);out.push({key:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),label:d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()});}
+    return out;
+  }
+  if(kind==='month'){
+    const out=[];
+    for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);out.push({key:d.getFullYear()+'-'+p(d.getMonth()+1),label:months[d.getMonth()]+' '+d.getFullYear()});}
+    return out;
+  }
+  const y=now.getFullYear();
+  return [y,y-1,y-2].map(v=>({key:String(v),label:String(v)}));
+}
+function __admUDateCloseAll(){
+  Object.keys(__admUDateMeta).forEach(r=>{
+    const l=document.getElementById(__admUDateMeta[r].listId);
+    if(l)l.classList.remove('open');
+    const t=document.querySelector(`.adm-date-tab[data-udate="${r}"]`);
+    if(t)t.classList.remove('open');
+  });
+}
+function __admUDateSyncTabs(){
+  Object.keys(__admUDateMeta).forEach(r=>{
+    const m=__admUDateMeta[r];
+    const t=document.querySelector(`.adm-date-tab[data-udate="${r}"]`);
+    if(!t)return;
+    const val=admUserDate[m.key];
+    let label=m.label;
+    if(val){
+      const it=__admUDateItems(m.key).find(x=>x.key===val);
+      label=it?it.label:val;
+    }
+    t.innerHTML=admEsc(label)+' <span class="chev">▾</span>';
+    t.classList.toggle('active',!!val);
+  });
+  const all=document.querySelector('.adm-date-tab[data-udate="all"]');
+  if(all)all.classList.toggle('active',!admUserDate.day&&!admUserDate.month&&!admUserDate.year);
+}
+function __admUDateInit(){
+  const tabs=document.querySelectorAll('.adm-date-tab');
+  if(!tabs.length)return;
+  Object.keys(__admUDateMeta).forEach(r=>{
+    const m=__admUDateMeta[r];
+    const list=document.getElementById(m.listId);
+    if(!list)return;
+    list.innerHTML='';
+    const clear=document.createElement('div');
+    clear.className='adm-date-item clear';
+    clear.textContent='Clear selection';
+    clear.addEventListener('click',e=>{e.stopPropagation();admUserDate[m.key]=null;__admUDateCloseAll();__admUDateSyncTabs();admRenderUsers(admApplyUserFilter(admUsersCache));});
+    list.appendChild(clear);
+    __admUDateItems(m.key).forEach(item=>{
+      const el=document.createElement('div');
+      el.className='adm-date-item';
+      el.textContent=item.label;
+      el.addEventListener('click',e=>{
+        e.stopPropagation();
+        admUserDate.day=null;admUserDate.month=null;admUserDate.year=null;
+        admUserDate[m.key]=item.key;
+        __admUDateCloseAll();__admUDateSyncTabs();
+        admRenderUsers(admApplyUserFilter(admUsersCache));
+      });
+      list.appendChild(el);
+    });
+  });
+  tabs.forEach(tab=>{
+    tab.addEventListener('click',e=>{
+      e.stopPropagation();
+      const r=tab.dataset.udate;
+      if(r==='all'){
+        __admUDateCloseAll();
+        admUserDate.day=null;admUserDate.month=null;admUserDate.year=null;
+        __admUDateSyncTabs();
+        admRenderUsers(admApplyUserFilter(admUsersCache));
+        return;
+      }
+      const list=document.getElementById(__admUDateMeta[r].listId);
+      const isOpen=list&&list.classList.contains('open');
+      __admUDateCloseAll();
+      if(list&&!isOpen){list.classList.add('open');tab.classList.add('open');}
+    });
+  });
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.adm-date-tab')&&!e.target.closest('.adm-date-list'))__admUDateCloseAll();
+  });
+  __admUDateSyncTabs();
+}
+
 
 function admRenderUsers(list){
   const root=document.getElementById('users-list');
@@ -632,12 +756,34 @@ function admToggleUserCard(uid){
   const isOpen=exp.classList.toggle('open');
   if(chev)chev.classList.toggle('open',isOpen);
 }
+/* Verify the browser can actually decode the picked file before we upload it.
+   Phone cameras hand us HEIC/HEIF through accept="image/*", which no browser
+   can render — those used to upload "successfully" and then show up as a
+   broken image in the notification. */
+async function admDecodableImage(file){
+  if(!file||!file.type||!/^image\//i.test(file.type))return false;
+  try{
+    if(typeof createImageBitmap==='function'){
+      const bmp=await createImageBitmap(file);
+      if(bmp&&bmp.close)bmp.close();
+      return true;
+    }
+  }catch(e){/* fall through to the <img> probe */}
+  return await new Promise(res=>{
+    const url=URL.createObjectURL(file);
+    const im=new Image();
+    im.onload=()=>{URL.revokeObjectURL(url);res(true);};
+    im.onerror=()=>{URL.revokeObjectURL(url);res(false);};
+    im.src=url;
+  });
+}
 async function admPickUserNotifPhoto(uid,inp){
   const file=inp&&inp.files&&inp.files[0];if(!file)return;
   const hint=document.getElementById('un-photo-hint-'+uid);
   if(hint)hint.textContent='Uploading…';
   try{
-    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('uploader unavailable, reload the page');
+    if(!(await admDecodableImage(file)))throw new Error('unsupported image format — pick a JPG or PNG');
     const url=await window.LateenAPI.uploadPhoto(file);
     admUserNotifPhoto[uid]=url;
     const prev=document.getElementById('un-photo-preview-'+uid);
@@ -647,9 +793,10 @@ async function admPickUserNotifPhoto(uid,inp){
     if(prev)prev.style.display='block';
     if(add)add.style.display='none';
     if(hint)hint.textContent='';
-  }catch(e){console.error('[admin] notif photo upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  }catch(e){console.error('[admin] notif photo upload',e);if(hint)hint.textContent='Upload failed: '+((e&&e.message)||'try again');}
   if(inp)inp.value='';
 }
+
 function admRemoveUserNotifPhoto(uid){
   delete admUserNotifPhoto[uid];
   const prev=document.getElementById('un-photo-preview-'+uid);
@@ -688,7 +835,8 @@ async function admPickBroadcastPhoto(inp){
   const hint=document.getElementById('bn-photo-hint');
   if(hint)hint.textContent='Uploading…';
   try{
-    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('no uploader');
+    if(!window.LateenAPI||!window.LateenAPI.uploadPhoto)throw new Error('uploader unavailable, reload the page');
+    if(!(await admDecodableImage(file)))throw new Error('unsupported image format — pick a JPG or PNG');
     const url=await window.LateenAPI.uploadPhoto(file);
     admBroadcastPhotoUrl=url;
     const prev=document.getElementById('bn-photo-preview');
@@ -698,7 +846,8 @@ async function admPickBroadcastPhoto(inp){
     if(prev)prev.style.display='block';
     if(add)add.style.display='none';
     if(hint)hint.textContent='';
-  }catch(e){console.error('[admin] broadcast photo upload',e);if(hint)hint.textContent='Upload failed, try again.';}
+  }catch(e){console.error('[admin] broadcast photo upload',e);if(hint)hint.textContent='Upload failed: '+((e&&e.message)||'try again');}
+
   if(inp)inp.value='';
 }
 function admRemoveBroadcastPhoto(){
@@ -768,9 +917,11 @@ function admGoToAccount(userId,role,name){
 
 let admUserSearchTimer=null;
 function admUserSearch(v){
+  admUserSearchQ=v||'';
   clearTimeout(admUserSearchTimer);
-  admUserSearchTimer=setTimeout(()=>admLoadUsers(v),250);
+  admUserSearchTimer=setTimeout(()=>admRenderUsers(admApplyUserFilter(admUsersCache)),150);
 }
+
 
 let admProductSearchQ='';
 let admProductSearchTimer=null;
