@@ -116,6 +116,7 @@
 .adm-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
 .adm-lightbox.open { display: flex; }
 .adm-lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.adm-lightbox-close { position: absolute; top: calc(16px + env(safe-area-inset-top,0px)); right: 16px; width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); border: 1.5px solid rgba(255,255,255,0.55); color: #fff; font-size: 28px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2147483000; box-shadow: 0 4px 16px rgba(0,0,0,0.6); }
 
 .adm-filter-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
 .adm-filter-chip { font-size: 11px; padding: 6px 12px; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); color: var(--txt-2); cursor: pointer; font-family: var(--font); font-weight: 500; }
@@ -724,6 +725,7 @@
   </nav>
 
   <div class="adm-lightbox" id="adm-lightbox" onclick="this.classList.remove('open')">
+    <button type="button" class="adm-lightbox-close" aria-label="Close" onclick="event.stopPropagation();document.getElementById('adm-lightbox').classList.remove('open')">&times;</button>
     <img id="adm-lightbox-img" alt="Receipt" />
   </div>
 </div>

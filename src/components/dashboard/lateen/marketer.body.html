@@ -1119,7 +1119,7 @@ body.lang-ar .pd-iban-row{display:none !important;}
 </div>
 <!-- Fullscreen photo lightbox -->
 <div id="photoLB" style="display:none;position:fixed;inset:0;z-index:1100;background:#000;flex-direction:column;align-items:center;justify-content:center;">
-  <button onclick="closePhoto()" style="position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:22px;cursor:pointer;z-index:2;">×</button>
+  <button onclick="closePhoto()" aria-label="Close" style="position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:48px;height:48px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);background:rgba(0,0,0,.62);backdrop-filter:blur(6px);color:#fff;font-size:28px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2147483000;box-shadow:0 4px 16px rgba(0,0,0,.6);">×</button>
   <div id="photoLBTrack" style="position:relative;width:100%;height:100%;overflow:hidden;touch-action:pan-y;"></div>
   <div id="photoLBDots" style="position:absolute;bottom:24px;left:0;right:0;display:flex;gap:6px;justify-content:center;z-index:2;"></div>
 </div>
