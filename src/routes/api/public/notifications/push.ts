@@ -85,7 +85,11 @@ export const Route = createFileRoute("/api/public/notifications/push")({
           title: pushTitle,
           body: pushBody,
           url: "/dashboard",
+          data: { url: "/dashboard" },
           id: payload.id,
+          tag: payload.id,
+          icon: "/wasla-notification-icon.png",
+          badge: "/wasla-badge-monochrome.png",
           ...(image ? { image } : {}),
         };
 
