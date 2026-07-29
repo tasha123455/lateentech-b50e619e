@@ -837,7 +837,12 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
       },
       async listAllUsers(search?: string) {
-        let q = supabase.from("profiles").select("id, full_name, phone, business_name, created_at, banned_at, frozen_at");
+        let q = supabase
+          .from("profiles")
+          .select("id, full_name, phone, business_name, created_at, banned_at, frozen_at")
+          // Deleted accounts keep their profile row so historical analytics stay
+          // intact, but they must not show up as live users.
+          .is("account_deleted_at", null);
         if (search && search.trim()) {
           const s = `%${search.trim()}%`;
           q = q.or(`full_name.ilike.${s},phone.ilike.${s},business_name.ilike.${s}`);
@@ -874,6 +879,15 @@ export function createLateenApi(userId: string) {
           /* ignore — email column just won't be shown */
         }
         return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer", email: emap.get(p.id) ?? null }));
+      },
+      // Wipes operational data across every admin page (orders, products,
+      // payouts, reports, notifications, employees, reviews, favourites,
+      // deletion requests, email log) and resets wallet balances. User
+      // accounts, roles and email bans are kept.
+      async wipeAllData() {
+        const { data, error } = await supabase.rpc("admin_wipe_all_data" as never);
+        if (error) throw error;
+        return (data ?? {}) as Record<string, number>;
       },
       async deleteUser(userId: string) {
         const { adminDeleteUserFn } = await import("./admin-users.functions");

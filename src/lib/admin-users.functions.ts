@@ -15,6 +15,9 @@ export const adminDeleteUserFn = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Error("Admin only");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Keep the account's historical rows (orders, products, payouts, profile)
+    // so admin analytics stay intact after the auth user is removed.
+    await supabaseAdmin.rpc("mark_user_account_deleted" as never, { _user_id: data.userId } as never);
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
     if (error) throw error;
     return { ok: true };
@@ -44,6 +47,8 @@ export const adminBanUserFn = createServerFn({ method: "POST" })
       .upsert({ email, reason: data.reason ?? null, banned_by: userId }, { onConflict: "email" });
     if (banErr) throw banErr;
 
+    // Preserve historical rows for admin analytics before removing the auth user.
+    await supabaseAdmin.rpc("mark_user_account_deleted" as never, { _user_id: data.userId } as never);
     const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
     if (delErr) throw delErr;
     return { ok: true };
