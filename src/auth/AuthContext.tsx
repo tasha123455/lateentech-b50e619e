@@ -251,19 +251,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // and the initial getSession(). Background refreshes (TOKEN_REFRESHED,
     // INITIAL_SESSION firing on tab return) must NOT flip loading back to
     // true — that was the "loading screen on return" bug.
-    // GoTrue also re-emits SIGNED_IN on visibility recovery, so that event is
-    // only treated as an identity transition when the user actually changed.
     const IDENTITY_EVENTS = new Set(["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"]);
-    let lastUserId: string | null = null;
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
-      const nextUserId = s?.user?.id ?? null;
-      const sameUser = nextUserId !== null && nextUserId === lastUserId;
-      const silent = !IDENTITY_EVENTS.has(event) || (event === "SIGNED_IN" && sameUser);
-      lastUserId = nextUserId;
+      const silent = !IDENTITY_EVENTS.has(event);
       setTimeout(() => { void applySession(s, { silent }); }, 0);
     });
     supabase.auth.getSession().then(({ data }) => {
-      lastUserId = data.session?.user?.id ?? null;
       void applySession(data.session);
     });
 

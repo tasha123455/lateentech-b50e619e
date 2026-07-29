@@ -7,9 +7,6 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 5, // Keep data fresh for 5 minutes
       gcTime: 1000 * 60 * 30, // Cache stays in memory for 30 minutes
-      // Returning to the tab must never trigger a refetch/loading flash.
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
     },
   },
 });
