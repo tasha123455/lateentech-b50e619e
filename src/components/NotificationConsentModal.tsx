@@ -9,6 +9,14 @@ const DISMISS_KEY = "wasla_push_prompt_dismissed_at";
 const DISMISS_VISITS_KEY = "wasla_push_prompt_visits_since_dismiss";
 // After dismissing, the prompt comes back once the user has visited 20 more times.
 const VISITS_BEFORE_REASK = 20;
+function isIosLike(): boolean {
+  try {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  } catch {
+    return false;
+  }
+}
+
 
 /**
  * Custom in-app modal that offers to enable push notifications.
