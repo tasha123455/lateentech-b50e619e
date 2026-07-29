@@ -87,7 +87,20 @@ export function InstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
+
+    // Fallback: some browsers (iOS Chrome/Firefox, Android browsers without the
+    // install API) never fire beforeinstallprompt. After a short delay, still
+    // nudge the visitor with the manual "Add to Home Screen" hint.
+    const fallback = window.setTimeout(() => {
+      setVisible((v) => {
+        if (v) return v;
+        setShowIosHint(true);
+        return true;
+      });
+    }, 4000);
+
     return () => {
+      window.clearTimeout(fallback);
       window.removeEventListener("wasla-bip", onStashed);
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
       window.removeEventListener("appinstalled", onInstalled);
