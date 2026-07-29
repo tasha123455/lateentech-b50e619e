@@ -71,27 +71,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    // Identity of the user we already fully processed. Used so that returning
-    // to the tab (which can re-emit SIGNED_IN / INITIAL_SESSION / a token
-    // refresh) never re-runs the sign-in guards, never flips `loading`, and
-    // therefore never unmounts the dashboard the user was looking at.
-    let processedUserId: string | null = null;
 
     const applySession = async (nextSession: Session | null, opts?: { silent?: boolean }) => {
       if (!active) return;
-      const sameUser = !!nextSession?.user && nextSession.user.id === processedUserId;
-      const silent = !!opts?.silent || sameUser;
+      const silent = !!opts?.silent;
       if (!silent) setLoading(true);
       setSession(nextSession);
-      // Same user as before: just keep the refreshed tokens. No refetching,
-      // no role reload, no loading screen — the UI stays exactly as it is.
-      if (sameUser) {
-        setLoading(false);
-        return;
-      }
-      processedUserId = nextSession?.user?.id ?? null;
       if (!nextSession?.user) {
-
         setRole(null);
         setLoading(false);
         return;
