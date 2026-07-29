@@ -665,7 +665,7 @@ function __admUserCardHtml(u){
         </div>
       </div>
     </div>`;
-  }).join('');
+  })(u);
 }
 
 let admUserNotifPhoto={};
