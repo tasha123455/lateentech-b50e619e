@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { createLateenApi } from "@/lib/lateen-api";
@@ -45,49 +45,6 @@ async function loadChartJs(): Promise<void> {
 }
 
 type Role = "business" | "marketer" | "admin";
-
-const DASHBOARD_FORM_KEYS: Record<Role, string> = {
-  business: "lateen_bz_forms",
-  marketer: "lateen_mk_forms",
-  admin: "lateen_adm_forms",
-};
-
-function storageValue(key: string): string | null {
-  if (typeof window === "undefined") return null;
-  try { return localStorage.getItem(key) ?? sessionStorage.getItem(key); } catch { return null; }
-}
-
-function primeSavedFormValues(root: DocumentFragment, role: Role) {
-  const raw = storageValue(DASHBOARD_FORM_KEYS[role]);
-  if (!raw) return;
-  let values: Record<string, string> = {};
-  try { values = JSON.parse(raw) as Record<string, string>; } catch { return; }
-  Object.entries(values).forEach(([key, value]) => {
-    if (!key || key.startsWith("idx:") || value == null || value === "") return;
-    const field = root.getElementById(key) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
-    if (!field) return;
-    const type = "type" in field ? field.type : "";
-    if (["password", "file", "hidden", "checkbox", "radio"].includes(type)) return;
-    if (field instanceof HTMLTextAreaElement) {
-      field.textContent = value;
-      return;
-    }
-    if (field instanceof HTMLSelectElement) {
-      Array.from(field.options).forEach((option) => { option.selected = option.value === value; });
-      return;
-    }
-    field.setAttribute("value", value);
-  });
-}
-
-function primeDashboardBody(html: string, role: Role): string {
-  if (typeof document === "undefined") return html;
-  const template = document.createElement("template");
-  template.innerHTML = html;
-  primeSavedFormValues(template.content, role);
-
-  return template.innerHTML;
-}
 
 function buildScript(src: string): string {
   const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(
@@ -179,14 +136,12 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     };
   }, [role, userId]);
 
-  const sourceBody = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
-  const body = useMemo(() => primeDashboardBody(sourceBody, role), [sourceBody, role]);
+  const body = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
 
   return (
     <div className={`lateen-${role} relative`}>
       <div
         ref={containerRef}
-        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: body }}
       />
     </div>
