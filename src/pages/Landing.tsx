@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LateenLogo } from "@/components/brand/LateenLogo";
 import { useAuth } from "@/auth/AuthContext";
@@ -14,7 +14,11 @@ export function Landing() {
     if (!loading && user && role) nav({ to: withLang("/dashboard") });
   }, [loading, user, role, nav, withLang]);
 
-  if (loading || (user && role)) {
+  // Signed in already (including the synchronous cached-session boot): go
+  // straight to the dashboard with no landing flash.
+  if (user && role) return <Navigate to={withLang("/dashboard")} replace />;
+
+  if (loading) {
     return (
       <main className="flex min-h-[100dvh] items-center justify-center overflow-x-hidden bg-background px-6">
         <LateenLogo variant="mark" size={180} glow />
