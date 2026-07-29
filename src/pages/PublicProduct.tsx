@@ -522,6 +522,50 @@ export function PublicProduct({ id }: { id: string }) {
         )}
       </div>
 
+      {lightboxIdx !== null && photos.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          dir="ltr"
+          onClick={() => setLightboxIdx(null)}
+          onTouchStart={onLightboxTouchStart}
+          onTouchEnd={onLightboxTouchEnd}
+        >
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={(e) => { e.stopPropagation(); setLightboxIdx(null); }}
+            className="absolute right-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border-[1.5px] border-white/55 bg-black/60 text-3xl leading-none text-white shadow-lg backdrop-blur"
+            style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))" }}
+          >
+            &times;
+          </button>
+          <div className="relative h-full w-full overflow-hidden">
+            <div
+              className="flex h-full w-full transition-transform duration-300 ease-out"
+              style={{ transform: `translateX(-${lightboxIdx * 100}%)` }}
+            >
+              {photos.map((src, i) => (
+                <div key={i} className="flex h-full w-full flex-shrink-0 items-center justify-center">
+                  <img src={src} alt="" className="max-h-full max-w-full object-contain" />
+                </div>
+              ))}
+            </div>
+          </div>
+          {photos.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {photos.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); setLightboxIdx(i); }}
+                  aria-label={`Photo ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${i === lightboxIdx ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {lightbox && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
