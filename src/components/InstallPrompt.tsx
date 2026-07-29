@@ -59,11 +59,27 @@ export function InstallPrompt() {
       return;
     }
 
+    // The event may have already fired before React hydrated — the inline
+    // script in the document shell stashes it on window.__waslaBIP.
+    const stashed = (window as unknown as { __waslaBIP?: BeforeInstallPromptEvent | null }).__waslaBIP;
+    if (stashed) {
+      setDeferredEvent(stashed);
+      setVisible(true);
+    }
+
     const onBeforeInstall: EventListener = (e) => {
       e.preventDefault();
       setDeferredEvent(e as BeforeInstallPromptEvent);
       setVisible(true);
     };
+    const onStashed: EventListener = () => {
+      const ev = (window as unknown as { __waslaBIP?: BeforeInstallPromptEvent | null }).__waslaBIP;
+      if (ev) {
+        setDeferredEvent(ev);
+        setVisible(true);
+      }
+    };
+    window.addEventListener("wasla-bip", onStashed);
     const onInstalled: EventListener = () => {
       markDismissed();
       setVisible(false);
@@ -72,6 +88,7 @@ export function InstallPrompt() {
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
     return () => {
+      window.removeEventListener("wasla-bip", onStashed);
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
       window.removeEventListener("appinstalled", onInstalled);
     };
