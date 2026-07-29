@@ -784,21 +784,32 @@ function mpCloseLightbox(){
 }
 
 function mpLightboxGo(delta){
-  __mpLightboxIdx=Math.min(Math.max(__mpLightboxIdx+delta,0),__mpLightboxPhotos.length-1);
-  mpRenderLightbox();
+  mpSetLightboxIdx(__mpLightboxIdx+delta);
+}
+
+function mpSetLightboxIdx(i){
+  const n=__mpLightboxPhotos.length;
+  i=Math.min(Math.max(i,0),n-1);
+  if(!isFinite(i))return;
+  __mpLightboxIdx=i;
+  const track=document.getElementById('mp-lightbox-track');
+  if(track)[...track.children].forEach((el,k)=>{el.style.transform=`translateX(${(k-i)*100}%)`;});
+  mpRenderLightboxDots();
+}
+
+function mpRenderLightboxDots(){
+  const dots=document.getElementById('mp-lightbox-dots');
+  if(!dots)return;
+  dots.innerHTML=__mpLightboxPhotos.length>1?__mpLightboxPhotos.map((_,i)=>`<span class="mp-lightbox-dot${i===__mpLightboxIdx?' active':''}" onclick="event.stopPropagation();mpSetLightboxIdx(${i});"></span>`).join(''):'';
 }
 
 function mpRenderLightbox(){
   const track=document.getElementById('mp-lightbox-track');
-  const dots=document.getElementById('mp-lightbox-dots');
   const nav=document.getElementById('mp-lightbox-nav');
   if(!track)return;
-  track.innerHTML=__mpLightboxPhotos.map(u=>`<div class="mp-lightbox-slide"><img src="${mpEsc(u)}" alt=""/></div>`).join('');
-  track.style.transform=`translateX(-${__mpLightboxIdx*(100/__mpLightboxPhotos.length)}%)`;
-  track.style.width=`${__mpLightboxPhotos.length*100}%`;
-  track.querySelectorAll('.mp-lightbox-slide').forEach(s=>{s.style.width=`${100/__mpLightboxPhotos.length}%`;});
-  if(dots)dots.innerHTML=__mpLightboxPhotos.length>1?__mpLightboxPhotos.map((_,i)=>`<span class="mp-lightbox-dot${i===__mpLightboxIdx?' active':''}" onclick="event.stopPropagation();__mpLightboxIdx=${i};mpRenderLightbox();"></span>`).join(''):'';
+  track.innerHTML=__mpLightboxPhotos.map((u,i)=>`<div class="mp-lightbox-slide" style="transform:translateX(${(i-__mpLightboxIdx)*100}%)"><img src="${mpEsc(u)}" alt=""/></div>`).join('');
   if(nav)nav.style.display=__mpLightboxPhotos.length>1?'flex':'none';
+  mpRenderLightboxDots();
   mpBindLightboxSwipe();
 }
 
