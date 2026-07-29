@@ -1201,7 +1201,11 @@ export function createLateenApi(userId: string) {
         // the Pieces sold box in the business breakdown and the marketer analytics
         // page — just totaled across every order on the platform instead of one
         // business/marketer's own orders.
-        const succeededPiecesSold = orders.reduce((sum, o) => (o.status === "delivered" ? sum + Number(o.qty || 0) : sum), 0);
+        // Refunded orders are excluded so this matches the chart's succeededPieces metric exactly.
+        const succeededPiecesSold = orders.reduce(
+          (sum, o) => (o.status === "delivered" && !o.refunded_at ? sum + Number(o.qty || 0) : sum),
+          0,
+        );
         // "Succeeded Upfronts" = orders whose payment receipt was approved by an admin
         // (reviewed_at is only ever set by admin_approve_order), minus any that were
         // later refunded — a refunded receipt no longer counts as a successful upfront.
