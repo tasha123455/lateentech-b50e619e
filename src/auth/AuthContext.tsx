@@ -280,6 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         new Promise((resolve) => setTimeout(resolve, 3500)),
       ]);
     } catch { /* ignore */ }
+    clearUserScopedState();
     await supabase.auth.signOut();
   }, []);
 
