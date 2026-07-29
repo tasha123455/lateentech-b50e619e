@@ -583,6 +583,7 @@ export type Database = {
           deleted_at: string | null
           delivery: Json
           description: string | null
+          frozen_paused: boolean
           id: string
           name: string
           pause_requested: boolean
@@ -617,6 +618,7 @@ export type Database = {
           deleted_at?: string | null
           delivery?: Json
           description?: string | null
+          frozen_paused?: boolean
           id?: string
           name: string
           pause_requested?: boolean
@@ -651,6 +653,7 @@ export type Database = {
           deleted_at?: string | null
           delivery?: Json
           description?: string | null
+          frozen_paused?: boolean
           id?: string
           name?: string
           pause_requested?: boolean
@@ -1199,6 +1202,7 @@ export type Database = {
           deleted_at: string | null
           delivery: Json
           description: string | null
+          frozen_paused: boolean
           id: string
           name: string
           pause_requested: boolean
@@ -1499,6 +1503,7 @@ export type Database = {
           deleted_at: string | null
           delivery: Json
           description: string | null
+          frozen_paused: boolean
           id: string
           name: string
           pause_requested: boolean
