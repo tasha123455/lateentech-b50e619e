@@ -1,26 +1,13 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { LateenLogo } from "@/components/brand/LateenLogo";
-import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 export function Landing() {
-  const { user, role, loading } = useAuth();
   const { lang, withLang } = useLanguage();
-  const nav = useNavigate();
+
   const [shopperSoonOpen, setShopperSoonOpen] = useState(false);
 
-  useEffect(() => {
-    if (!loading && user && role) nav({ to: withLang("/dashboard") });
-  }, [loading, user, role, nav, withLang]);
-
-  if (loading || (user && role)) {
-    return (
-      <main className="flex min-h-[100dvh] items-center justify-center overflow-x-hidden bg-background px-6">
-        <LateenLogo variant="mark" size={180} glow />
-      </main>
-    );
-  }
 
   const isAr = lang === "ar";
 
