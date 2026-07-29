@@ -72,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ? "marketer"
             : null;
     setRole(picked);
+    writeCachedRole(picked);
     return picked;
   }, []);
 
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(nextSession);
       if (!nextSession?.user) {
         setRole(null);
+        writeCachedRole(null);
         setLoading(false);
         return;
       }
@@ -264,13 +266,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTimeout(() => { void applySession(s, { silent }); }, 0);
     });
     supabase.auth.getSession().then(({ data }) => {
-      void applySession(data.session);
+      // When we already painted from the cached session, the confirming
+      // check must stay silent — otherwise it re-shows the loading screen.
+      void applySession(data.session, { silent: !!boot });
     });
 
     return () => {
       active = false;
       sub.subscription.unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadRole]);
 
   const signOut = useCallback(async () => {
