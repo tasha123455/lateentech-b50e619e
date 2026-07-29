@@ -1234,13 +1234,13 @@ async function refreshBizNotifications(){
   if(!list.length){root.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--color-text-secondary);font-size:13px;">'+tr('No notifications yet.','لا توجد إشعارات بعد.')+'</div>';return;}
   const ago=(t)=>{const s=Math.max(1,Math.floor((Date.now()-new Date(t).getTime())/1000));const ar=__ar();if(s<60)return ar?s+'ث':s+'s';if(s<3600)return ar?Math.floor(s/60)+'د':Math.floor(s/60)+'m';if(s<86400)return ar?Math.floor(s/3600)+'س':Math.floor(s/3600)+'h';return ar?Math.floor(s/86400)+'يوم':Math.floor(s/86400)+'d';};
   const esc=(s)=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  root.innerHTML=list.map(n=>{
+  const __renderNotif=(n)=>{
     let t=n.title,b=n.body||'';
     if(n.kind==='new_order'||t==='New order'){t=tr('New order','طلب جديد');b=tr('A new order has been received. Check the Orders page.','وصلك طلب جديد. راجع صفحة الطلبات.');}
     if(n.kind==='account_deletion_scheduled'||t==='Account deletion scheduled'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const sched=d&&d.scheduled_for?new Date(d.scheduled_for):null;const dateStr=sched?sched.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'';t=tr('Account deletion scheduled','سوف يتم حذف حسابك');b=tr('Your account will be permanently deleted on '+dateStr+'. You can cancel anytime from your profile info page.','سيتم حذف حسابك نهائياً بتاريخ '+dateStr+'. يمكنك إلغاء الطلب في أي وقت من صفحه معلوماتك الشخصيه.');}
     if(n.kind==='account_deletion_rejected'||t==='Account deletion request declined'){t=tr('Account deletion request declined','تم رفض طلب حذف حسابك');}
     if(n.kind==='admin_message'||n.kind==='admin_broadcast')b='';
-    if(n.kind==='order_refunded'){t=tr('Order refunded','تم استرجاع الطلب');b=tr('This order was refunded by the admin and no longer counts toward your earnings.','تم استرجاع هذا الطلب من قبل الأدمن ولم يعد محتسباً ضمن أرباحك.');}
+    if(n.kind==='order_refunded'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const __pn=(d&&d.product_name)||'';const __cn=(d&&d.customer_name)||'';t=tr('Order refunded','تم استرجاع الطلب');b=__ar()?('تم استرجاع طلبية '+__pn+' للزبون '+__cn):('Order '+__pn+' refunded for customer '+__cn);}
     let reviewDetails='';
     if(n.kind==='product_review'){
       let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
@@ -1317,7 +1317,14 @@ async function refreshBizNotifications(){
       </div>`;
     }
     return `<div class="notif-item">${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
-  }).join('');
+  };
+  // Admin-to-business notices (refunds + direct admin messages) live in their
+  // own separate box, apart from the regular activity feed.
+  const __ADMIN_KINDS=new Set(['order_refunded','admin_message','admin_broadcast']);
+  const adminList=list.filter(n=>__ADMIN_KINDS.has(n.kind));
+  const restList=list.filter(n=>!__ADMIN_KINDS.has(n.kind));
+  const section=(title,items)=>items.length?`<div class="notif-group"><div class="notif-group-title">${title}</div>${items.map(__renderNotif).join('')}</div>`:'';
+  root.innerHTML=section(tr('From the admin','من الإدارة'),adminList)+section(tr('Activity','النشاط'),restList);
 }
 window.refreshBizNotifications=refreshBizNotifications;
 async function __clearOsNotifBadge(){
