@@ -675,6 +675,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_deleted_at: string | null
           avatar_url: string | null
           banned_at: string | null
           business_name: string | null
@@ -696,6 +697,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          account_deleted_at?: string | null
           avatar_url?: string | null
           banned_at?: string | null
           business_name?: string | null
@@ -717,6 +719,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          account_deleted_at?: string | null
           avatar_url?: string | null
           banned_at?: string | null
           business_name?: string | null
@@ -1537,6 +1540,7 @@ export type Database = {
         Returns: undefined
       }
       admin_unban_email: { Args: { _email: string }; Returns: undefined }
+      admin_wipe_all_data: { Args: never; Returns: Json }
       business_active_marketers_total: {
         Args: { _business_id: string }
         Returns: number
@@ -1828,6 +1832,10 @@ export type Database = {
               isSetofReturn: false
             }
           }
+      mark_user_account_deleted: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       marketer_reupload_receipt: {
         Args: { _order_id: string; _receipt_url: string }
         Returns: undefined
