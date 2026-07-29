@@ -851,8 +851,9 @@ async function renderTransactions(){
     const photoUrlValid=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl));
     const hasIconPhoto=(!isX&&type==='withdraw'&&photoUrlValid);
     const photoJs=photoUrlValid?String(photoUrl).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'):'';
-    const photoTap=photoUrlValid?` onclick="event.stopPropagation();openFullPhoto('${photoJs}')" style="cursor:zoom-in"`:'';
-    const photo=(!hasIconPhoto&&photoUrlValid)?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" onclick="event.stopPropagation();openFullPhoto('${photoJs}')" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block;cursor:zoom-in"/></div>`:'';
+    const photoTap=photoUrlValid?` onclick="event.stopPropagation();openFullPhoto('${photoJs}')"`:'';
+    const bigPhoto=photoUrlValid?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" onclick="event.stopPropagation();openFullPhoto('${photoJs}')" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block;cursor:zoom-in"/></div>`:'';
+    const photo=(!hasIconPhoto&&photoUrlValid)?bigPhoto:'';
     const iconHtml=hasIconPhoto?`<div class="notif-icon notif-icon-photo"${photoTap} style="background-image:url('${__txnEsc(photoUrl)}');cursor:zoom-in"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${isX?'✕':sign}</div>`;
     let detailRows;
     if(type==='failed'){
