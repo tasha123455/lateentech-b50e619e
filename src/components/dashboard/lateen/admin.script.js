@@ -542,10 +542,10 @@ async function admSendPayoutNote(id){
 
 let admUserRoleFilter='';
 let admUserSearchQ='';
-/* Day/month/year filter for the Users page — mirrors the Analytics page
-   pattern, scoped to its own class names so the analytics tab wiring
-   (.range-tab) never picks these up. */
-const admUserDate={day:null,month:null,year:null};
+/* Day/month/year GRANULARITY toggle for the Users page — mirrors the marketer
+   analytics .ptab pattern: it changes how the list is bucketed by join date
+   (day / month / year groups), it does not filter to one specific date. */
+let admUserPeriod='D';
 async function admLoadUsers(search){
   if(typeof search==='string')admUserSearchQ=search;
   const root=document.getElementById('users-list');
