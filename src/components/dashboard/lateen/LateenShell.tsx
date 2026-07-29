@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { createLateenApi } from "@/lib/lateen-api";
@@ -45,6 +45,103 @@ async function loadChartJs(): Promise<void> {
 }
 
 type Role = "business" | "marketer" | "admin";
+
+const DASHBOARD_PAGE_KEYS: Record<Role, string> = {
+  business: "lateen_bz_page",
+  marketer: "lateen_mk_page",
+  admin: "lateen_adm_page",
+};
+
+const DASHBOARD_ACCENTS: Record<Exclude<Role, "admin">, string> = {
+  business: "#34c77b",
+  marketer: "#7f77dd",
+};
+
+const DASHBOARD_FORM_KEYS: Record<Role, string> = {
+  business: "lateen_bz_forms",
+  marketer: "lateen_mk_forms",
+  admin: "lateen_adm_forms",
+};
+
+function storageValue(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  try { return localStorage.getItem(key) ?? sessionStorage.getItem(key); } catch { return null; }
+}
+
+function navIdForPage(role: Role, pageId: string): string | null {
+  if (role === "admin") return `nav-${pageId}`;
+  const suffix = pageId.replace(/^pg-/, "");
+  return ["home", "browse", "products", "orders"].includes(suffix) ? `nav-${suffix}` : null;
+}
+
+function primeSavedFormValues(root: DocumentFragment, role: Role) {
+  const raw = storageValue(DASHBOARD_FORM_KEYS[role]);
+  if (!raw) return;
+  let values: Record<string, string> = {};
+  try { values = JSON.parse(raw) as Record<string, string>; } catch { return; }
+  Object.entries(values).forEach(([key, value]) => {
+    if (!key || key.startsWith("idx:") || value == null || value === "") return;
+    const field = root.getElementById(key) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+    if (!field) return;
+    const type = "type" in field ? field.type : "";
+    if (["password", "file", "hidden", "checkbox", "radio"].includes(type)) return;
+    if (field instanceof HTMLTextAreaElement) {
+      field.textContent = value;
+      return;
+    }
+    if (field instanceof HTMLSelectElement) {
+      Array.from(field.options).forEach((option) => { option.selected = option.value === value; });
+      return;
+    }
+    field.setAttribute("value", value);
+  });
+}
+
+function primeDashboardBody(html: string, role: Role): string {
+  if (typeof document === "undefined") return html;
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  const pageSelector = role === "admin" ? ".adm-page" : ".page";
+  const navSelector = role === "admin" ? ".adm-nav-item" : ".nav-item";
+  const savedPage = storageValue(DASHBOARD_PAGE_KEYS[role]);
+  const activePage = savedPage && template.content.getElementById(savedPage) ? savedPage : null;
+
+  if (activePage) {
+    template.content.querySelectorAll(pageSelector).forEach((page) => page.classList.remove("active"));
+    template.content.getElementById(activePage)?.classList.add("active");
+
+    template.content.querySelectorAll(navSelector).forEach((nav) => {
+      nav.classList.remove("active");
+      if (role !== "admin") {
+        nav.querySelectorAll("svg").forEach((svg) => svg.setAttribute("stroke", "var(--color-text-secondary)"));
+        const label = nav.querySelector<HTMLElement>(".nav-label");
+        if (label) label.style.color = "";
+      }
+    });
+    const activeNavId = navIdForPage(role, activePage);
+    const activeNav = activeNavId ? template.content.getElementById(activeNavId) : null;
+    if (activeNav) {
+      activeNav.classList.add("active");
+      if (role !== "admin") {
+        const accent = DASHBOARD_ACCENTS[role];
+        activeNav.querySelectorAll("svg").forEach((svg) => svg.setAttribute("stroke", accent));
+        const label = activeNav.querySelector<HTMLElement>(".nav-label");
+        if (label) label.style.color = accent;
+      }
+    }
+  }
+
+  if (role === "business" && storageValue("lateen_bz_addform") === "1") {
+    template.content.getElementById("form-overlay")?.classList.add("open");
+  }
+  if (role === "marketer" && storageValue("lateen_mk_orderform")) {
+    template.content.getElementById("form-overlay")?.classList.add("open");
+  }
+
+  primeSavedFormValues(template.content, role);
+
+  return template.innerHTML;
+}
 
 function buildScript(src: string): string {
   const names = [...src.matchAll(/^(?:async\s+)?function ([A-Za-z_$][\w$]*)\s*\(/gm)].map(
@@ -136,12 +233,14 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     };
   }, [role, userId]);
 
-  const body = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
+  const sourceBody = role === "business" ? businessBody : role === "admin" ? adminBody : marketerBody;
+  const body = useMemo(() => primeDashboardBody(sourceBody, role), [sourceBody, role]);
 
   return (
     <div className={`lateen-${role} relative`}>
       <div
         ref={containerRef}
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: body }}
       />
     </div>

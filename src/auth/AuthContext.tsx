@@ -39,16 +39,54 @@ type AuthState = {
 
 const Ctx = createContext<AuthState | null>(null);
 
+function isRole(value: string | null): value is Role {
+  return value === "marketer" || value === "business" || value === "admin";
+}
+
+function readCachedRole(): Role | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = localStorage.getItem("active_role");
+    return isRole(stored) ? stored : null;
+  } catch { return null; }
+}
+
+function readCachedSession(): Session | null {
+  if (typeof window === "undefined") return null;
+  try {
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith("sb-") || !key.endsWith("-auth-token")) continue;
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw) as Partial<Session>;
+      if (!parsed.user?.id || !parsed.access_token) continue;
+      const expiresAt = Number(parsed.expires_at ?? 0);
+      if (expiresAt && expiresAt * 1000 < Date.now()) continue;
+      return parsed as Session;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<Role | null>(null);
-  const [loading, setLoading] = useState(true);
+  const initialAuthRef = useRef<{ session: Session | null; role: Role | null } | null>(null);
+  if (initialAuthRef.current === null) {
+    const cachedSession = readCachedSession();
+    initialAuthRef.current = { session: cachedSession, role: cachedSession ? readCachedRole() : null };
+  }
+  const initialSession = initialAuthRef.current.session;
+  const initialRole = initialAuthRef.current.role;
+  const hasInstantDashboardSession = !!initialSession?.user && !!initialRole;
+  const [session, setSession] = useState<Session | null>(initialSession);
+  const [role, setRole] = useState<Role | null>(initialRole);
+  const [loading, setLoading] = useState(!hasInstantDashboardSession);
 
   // Once the very first session check has resolved, we never show the
   // full-screen "Loading…" again. Flipping loading back to true unmounts the
   // dashboard shell, which wipes the DOM (typed input, open forms, scroll) —
   // that was the "returns to tab and everything reloads/redirects" bug.
-  const settledRef = useRef(false);
+  const settledRef = useRef(hasInstantDashboardSession);
 
   const loadRole = useCallback(async (userId: string) => {
     const { data, error } = await supabase
@@ -71,6 +109,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           : roles.includes("marketer")
             ? "marketer"
             : null;
+    try {
+      if (picked) localStorage.setItem("active_role", picked);
+      else localStorage.removeItem("active_role");
+    } catch { /* ignore */ }
     setRole(picked);
     return picked;
   }, []);
