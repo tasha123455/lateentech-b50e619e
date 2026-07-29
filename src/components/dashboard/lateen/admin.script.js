@@ -81,7 +81,7 @@ function admGo(pageId){
   if(pageId==='adm-home') admLoadMetrics();
   if(pageId==='adm-verify') admLoadVerify();
   if(pageId==='adm-payouts') admLoadPayouts();
-  if(pageId==='adm-users'){if(!window.__admUDateReady){window.__admUDateReady=true;try{__admUDateInit();}catch(e){console.error('[admin] user date filter',e);}}admLoadUsers();}
+  if(pageId==='adm-users'){admLoadUsers();}
   if(pageId==='adm-products'){admLoadProducts();admLoadReports();}
   if(pageId==='adm-employees') admLoadEmployees();
 }
@@ -542,10 +542,10 @@ async function admSendPayoutNote(id){
 
 let admUserRoleFilter='';
 let admUserSearchQ='';
-/* Day/month/year filter for the Users page — mirrors the Analytics page
-   pattern, scoped to its own class names so the analytics tab wiring
-   (.range-tab) never picks these up. */
-const admUserDate={day:null,month:null,year:null};
+/* Day/month/year GRANULARITY toggle for the Users page — mirrors the marketer
+   analytics .ptab pattern: it changes how the list is bucketed by join date
+   (day / month / year groups), it does not filter to one specific date. */
+let admUserPeriod='D';
 async function admLoadUsers(search){
   if(typeof search==='string')admUserSearchQ=search;
   const root=document.getElementById('users-list');
@@ -557,24 +557,10 @@ async function admLoadUsers(search){
     const list=await window.LateenAPI.admin.listAllUsers('');
     admUsersCache=list;
     const sig=JSON.stringify(list.map(u=>[u.id,u.role,u.banned_at,u.frozen_at,u.full_name,u.business_name,u.email,u.phone]));
-    if(__admUnchanged('users:'+admUserSearchQ+':'+JSON.stringify(admUserDate),sig,first))return;
+    if(__admUnchanged('users:'+admUserSearchQ+':'+admUserPeriod,sig,first))return;
     __admMarkLoaded(root);
     admRenderUsers(admApplyUserFilter(list));
   }catch(e){console.error('[admin] users',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
-}
-
-function admUserInDateRange(iso){
-  if(!admUserDate.day&&!admUserDate.month&&!admUserDate.year)return true;
-  if(!iso)return false;
-  const d=new Date(iso);
-  if(isNaN(d.getTime()))return false;
-  const p=n=>String(n).padStart(2,'0');
-  const dayKey=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
-  const monthKey=d.getFullYear()+'-'+p(d.getMonth()+1);
-  const yearKey=String(d.getFullYear());
-  if(admUserDate.day)return dayKey===admUserDate.day;
-  if(admUserDate.month)return monthKey===admUserDate.month;
-  return yearKey===admUserDate.year;
 }
 
 function admApplyUserFilter(list){
@@ -582,7 +568,6 @@ function admApplyUserFilter(list){
   if(admUserRoleFilter)out=out.filter(u=>(u.role||'marketer')===admUserRoleFilter);
   const q=(admUserSearchQ||'').trim().toLowerCase();
   if(q)out=out.filter(u=>[u.full_name,u.business_name,u.email,u.phone].some(v=>String(v||'').toLowerCase().includes(q)));
-  out=out.filter(u=>admUserInDateRange(u.created_at));
   return out;
 }
 
@@ -593,108 +578,43 @@ function admSetUserFilter(role,el){
   admRenderUsers(admApplyUserFilter(admUsersCache));
 }
 
-const __admUDateMeta={
-  daily:{key:'day',label:'Day',listId:'userDailyList'},
-  monthly:{key:'month',label:'Month',listId:'userMonthlyList'},
-  yearly:{key:'year',label:'Year',listId:'userYearlyList'}
-};
-function __admUDateItems(kind){
+/* Bucket key + label for a join date at the active granularity. */
+const __ADM_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function __admUserBucket(iso){
+  const d=iso?new Date(iso):null;
+  if(!d||isNaN(d.getTime()))return {key:'~unknown',label:'Unknown date',sort:-Infinity};
   const p=n=>String(n).padStart(2,'0');
-  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now=new Date();
-  if(kind==='day'){
-    const out=[];
-    for(let i=0;i<30;i++){const d=new Date(now);d.setDate(d.getDate()-i);out.push({key:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),label:d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()});}
-    return out;
-  }
-  if(kind==='month'){
-    const out=[];
-    for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);out.push({key:d.getFullYear()+'-'+p(d.getMonth()+1),label:months[d.getMonth()]+' '+d.getFullYear()});}
-    return out;
-  }
-  const y=now.getFullYear();
-  return [y,y-1,y-2].map(v=>({key:String(v),label:String(v)}));
+  const y=d.getFullYear(),m=d.getMonth();
+  if(admUserPeriod==='Y')return {key:String(y),label:String(y),sort:new Date(y,0,1).getTime()};
+  if(admUserPeriod==='M')return {key:y+'-'+p(m+1),label:__ADM_MONTHS[m]+' '+y,sort:new Date(y,m,1).getTime()};
+  return {key:y+'-'+p(m+1)+'-'+p(d.getDate()),label:d.getDate()+' '+__ADM_MONTHS[m]+' '+y,sort:new Date(y,m,d.getDate()).getTime()};
 }
-function __admUDateCloseAll(){
-  Object.keys(__admUDateMeta).forEach(r=>{
-    const l=document.getElementById(__admUDateMeta[r].listId);
-    if(l)l.classList.remove('open');
-    const t=document.querySelector(`.adm-date-tab[data-udate="${r}"]`);
-    if(t)t.classList.remove('open');
-  });
+function admSetUserPeriod(period,el){
+  admUserPeriod=period;
+  document.querySelectorAll('#user-period-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  admRenderUsers(admApplyUserFilter(admUsersCache));
 }
-function __admUDateSyncTabs(){
-  Object.keys(__admUDateMeta).forEach(r=>{
-    const m=__admUDateMeta[r];
-    const t=document.querySelector(`.adm-date-tab[data-udate="${r}"]`);
-    if(!t)return;
-    const val=admUserDate[m.key];
-    let label=m.label;
-    if(val){
-      const it=__admUDateItems(m.key).find(x=>x.key===val);
-      label=it?it.label:val;
-    }
-    t.innerHTML=admEsc(label)+' <span class="chev">▾</span>';
-    t.classList.toggle('active',!!val);
-  });
-  const all=document.querySelector('.adm-date-tab[data-udate="all"]');
-  if(all)all.classList.toggle('active',!admUserDate.day&&!admUserDate.month&&!admUserDate.year);
-}
-function __admUDateInit(){
-  const tabs=document.querySelectorAll('.adm-date-tab');
-  if(!tabs.length)return;
-  Object.keys(__admUDateMeta).forEach(r=>{
-    const m=__admUDateMeta[r];
-    const list=document.getElementById(m.listId);
-    if(!list)return;
-    list.innerHTML='';
-    const clear=document.createElement('div');
-    clear.className='adm-date-item clear';
-    clear.textContent='Clear selection';
-    clear.addEventListener('click',e=>{e.stopPropagation();admUserDate[m.key]=null;__admUDateCloseAll();__admUDateSyncTabs();admRenderUsers(admApplyUserFilter(admUsersCache));});
-    list.appendChild(clear);
-    __admUDateItems(m.key).forEach(item=>{
-      const el=document.createElement('div');
-      el.className='adm-date-item';
-      el.textContent=item.label;
-      el.addEventListener('click',e=>{
-        e.stopPropagation();
-        admUserDate.day=null;admUserDate.month=null;admUserDate.year=null;
-        admUserDate[m.key]=item.key;
-        __admUDateCloseAll();__admUDateSyncTabs();
-        admRenderUsers(admApplyUserFilter(admUsersCache));
-      });
-      list.appendChild(el);
-    });
-  });
-  tabs.forEach(tab=>{
-    tab.addEventListener('click',e=>{
-      e.stopPropagation();
-      const r=tab.dataset.udate;
-      if(r==='all'){
-        __admUDateCloseAll();
-        admUserDate.day=null;admUserDate.month=null;admUserDate.year=null;
-        __admUDateSyncTabs();
-        admRenderUsers(admApplyUserFilter(admUsersCache));
-        return;
-      }
-      const list=document.getElementById(__admUDateMeta[r].listId);
-      const isOpen=list&&list.classList.contains('open');
-      __admUDateCloseAll();
-      if(list&&!isOpen){list.classList.add('open');tab.classList.add('open');}
-    });
-  });
-  document.addEventListener('click',e=>{
-    if(!e.target.closest('.adm-date-tab')&&!e.target.closest('.adm-date-list'))__admUDateCloseAll();
-  });
-  __admUDateSyncTabs();
-}
+window.admSetUserPeriod=admSetUserPeriod;
+
 
 
 function admRenderUsers(list){
   const root=document.getElementById('users-list');
   if(!list.length){root.innerHTML='<div class="adm-empty">No users found.</div>';return;}
-  root.innerHTML=list.map(u=>{
+  // Group by join-date bucket at the active D/M/Y granularity, newest first.
+  const groups=new Map();
+  list.forEach(u=>{
+    const b=__admUserBucket(u.created_at);
+    if(!groups.has(b.key))groups.set(b.key,{label:b.label,sort:b.sort,items:[]});
+    groups.get(b.key).items.push(u);
+  });
+  const ordered=[...groups.values()].sort((a,b)=>b.sort-a.sort);
+  root.innerHTML=ordered.map(g=>`<div class="adm-date-group"><div class="adm-date-group-title" data-no-i18n>${admEsc(g.label)} <span>${g.items.length}</span></div>${g.items.map(__admUserCardHtml).join('')}</div>`).join('');
+}
+
+function __admUserCardHtml(u){
+  return (u=>{
     const uid=u.id;
     const name=u.business_name||u.full_name||'Unnamed';
     const nameSafe=admEsc(name).replace(/'/g,"&#39;");
@@ -745,7 +665,7 @@ function admRenderUsers(list){
         </div>
       </div>
     </div>`;
-  }).join('');
+  })(u);
 }
 
 let admUserNotifPhoto={};
