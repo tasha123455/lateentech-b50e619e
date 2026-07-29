@@ -1995,7 +1995,7 @@ function admToggleProfitCard(){
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const K='lateen_adm_page',S='lateen_adm_scroll';
+const __u=(function(){try{return '_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return '_anon';}})();const K='lateen_adm_page'+__u,S='lateen_adm_scroll'+__u;
   let restoring=false;
   const _g=admGo;
   admGo=function(id){try{PS.set(K,id);}catch(e){}return _g.apply(this,arguments);};
@@ -2029,7 +2029,7 @@ const K='lateen_adm_page',S='lateen_adm_scroll';
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const FK='lateen_adm_forms';
+const FK='lateen_adm_forms'+(function(){try{return '_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return '_anon';}})();
   const sel='input,textarea,select';
   const skip=el=>!el||el.type==='password'||el.type==='file'||el.type==='hidden'||el.type==='checkbox'||el.type==='radio'||el.dataset.noDraft==='1';
   const visible=el=>!!(el.offsetParent||el.getClientRects().length);
