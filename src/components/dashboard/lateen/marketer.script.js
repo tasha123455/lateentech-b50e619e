@@ -850,14 +850,17 @@ async function renderTransactions(){
     const photoUrl=d.product_photo||d.photo;
     const photoUrlValid=photoUrl&&/^(https?:|data:|\/)/.test(String(photoUrl));
     const hasIconPhoto=(!isX&&type==='withdraw'&&photoUrlValid);
-    const photo=(!hasIconPhoto&&photoUrlValid)?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block"/></div>`:'';
-    const iconHtml=hasIconPhoto?`<div class="notif-icon notif-icon-photo" style="background-image:url('${__txnEsc(photoUrl)}')"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${isX?'✕':sign}</div>`;
+    const photoJs=photoUrlValid?String(photoUrl).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'):'';
+    const photoTap=photoUrlValid?` onclick="event.stopPropagation();openFullPhoto('${photoJs}')"`:'';
+    const bigPhoto=photoUrlValid?`<div style="margin:-2px 0 10px 0"><img src="${__txnEsc(photoUrl)}" alt="" onclick="event.stopPropagation();openFullPhoto('${photoJs}')" style="width:100%;max-height:220px;object-fit:contain;background:#0d0d0d;border-radius:10px;display:block;cursor:zoom-in"/></div>`:'';
+    const photo=(!hasIconPhoto&&photoUrlValid)?bigPhoto:'';
+    const iconHtml=hasIconPhoto?`<div class="notif-icon notif-icon-photo"${photoTap} style="background-image:url('${__txnEsc(photoUrl)}');cursor:zoom-in"></div>`:`<div class="notif-icon" style="background:${color}22;color:${color};font-weight:700">${isX?'✕':sign}</div>`;
     let detailRows;
     if(type==='failed'){
       detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Failed','فشل'))+
         ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
     }else if(type==='withdraw'){
-      detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
+      detailRows=bigPhoto+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
     }else{
       detailRows=photo+
         __txnRow(__t('Order Code','كود الطلبيه'),d.order_code)+
@@ -873,7 +876,7 @@ async function renderTransactions(){
         (d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> <span data-no-i18n>${__txnEsc(d.customer_notes)}</span></div>`:'')+
         ((d.admin_notes||d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_notes||d.admin_comment||d.admin_note)}</span></div>`:'');
     }
-    const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
+    const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"${photoTap} style="cursor:zoom-in"/></div>`:iconHtml;
     const detailsHtml=`<div class="notif-detail-body"><div class="notif-details-box">${detailRows}</div></div>`;
     return `<div class="notif-item expandable" data-id="${n.id}">
       <div class="notif-top" onclick="__notifToggle(this)">
