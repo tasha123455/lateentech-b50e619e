@@ -557,7 +557,7 @@ async function admLoadUsers(search){
     const list=await window.LateenAPI.admin.listAllUsers('');
     admUsersCache=list;
     const sig=JSON.stringify(list.map(u=>[u.id,u.role,u.banned_at,u.frozen_at,u.full_name,u.business_name,u.email,u.phone]));
-    if(__admUnchanged('users:'+admUserSearchQ+':'+JSON.stringify(admUserDate),sig,first))return;
+    if(__admUnchanged('users:'+admUserSearchQ+':'+admUserPeriod,sig,first))return;
     __admMarkLoaded(root);
     admRenderUsers(admApplyUserFilter(list));
   }catch(e){console.error('[admin] users',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
