@@ -20,7 +20,7 @@ function purgeUserData() {
       const keys: string[] = [];
       for (let i = 0; i < store.length; i++) {
         const k = store.key(i);
-        if (k && USER_DATA_PREFIXES.some((p) => k.startsWith(p))) keys.push(k);
+        if (k && !KEEP_KEYS.has(k) && USER_DATA_PREFIXES.some((p) => k.startsWith(p))) keys.push(k);
       }
       keys.forEach((k) => store.removeItem(k));
     } catch {
