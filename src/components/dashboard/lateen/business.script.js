@@ -581,7 +581,7 @@ function mpActiveMarketerCount(p){
 
 function mpMarketerFold(p){
   const fmtP=mpFmt(p);
-  const feeLabel=p.commMode==='fixed'?fmtP(p.commFixed||0):`${p.commPct||0}%`;
+  const feeLabel=`${p.commPct||0}%`;
   const activeMarketers=mpActiveMarketerCount(p);
   return `<div class="mp-fold-section mp-marketer-fold">
     <div class="mp-fold-head" onclick="event.stopPropagation();mpToggleFold('marketer-${p.id}')">
