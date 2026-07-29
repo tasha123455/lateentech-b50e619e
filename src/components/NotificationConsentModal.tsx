@@ -69,6 +69,12 @@ export function NotificationConsentModal() {
     setBusy(true);
     try {
       await requestPushPermissionAndSubscribe(user.id);
+      try {
+        localStorage.removeItem(DISMISS_KEY);
+        localStorage.removeItem(DISMISS_VISITS_KEY);
+      } catch {
+        /* ignore */
+      }
     } finally {
       setBusy(false);
       setOpen(false);
