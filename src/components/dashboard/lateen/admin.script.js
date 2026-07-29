@@ -865,7 +865,7 @@ function admGoToAccount(userId,role,name){
   if(!confirm('Open '+name+'\u2019s account?\n\nYou\u2019ll see their dashboard for support purposes. You can exit anytime via the banner at the top.'))return;
   try{
     sessionStorage.setItem('lateen_impersonate',JSON.stringify({userId:userId,role:role,name:name}));
-    window.location.reload();
+    window.dispatchEvent(new Event('lateen-impersonation-change'));
   }catch(e){alert('Failed: '+e.message);}
 }
 

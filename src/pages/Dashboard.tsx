@@ -35,6 +35,12 @@ export function Dashboard({ prod }: { prod?: string }) {
   }, [impersonation, role]);
 
   useEffect(() => {
+    const syncImpersonation = () => setImpersonation(readImpersonation());
+    window.addEventListener("lateen-impersonation-change", syncImpersonation);
+    return () => window.removeEventListener("lateen-impersonation-change", syncImpersonation);
+  }, []);
+
+  useEffect(() => {
     if (!prod || role !== "marketer") return;
     let cancelled = false;
     const start = Date.now();
