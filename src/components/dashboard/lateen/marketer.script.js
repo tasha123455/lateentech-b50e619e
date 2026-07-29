@@ -972,6 +972,55 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   window.addEventListener('scroll',()=>{if(restoring)return;try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});
 })();
 
+/* generic "restore what was typed" layer for forms/modals that don't already
+   have a dedicated draft system (the order form `f-*` and the payout form
+   `pd*` keep their own drafts and are skipped here). */
+(function(){
+  const FK='lateen_mk_forms';
+  const sel='input,textarea,select';
+  const owned=el=>{const id=(el.id||'')+'';return /^f-/.test(id)||/^pd/i.test(id)||!!(el.closest&&el.closest('#order-form,#pg-new,#pd-modal'));};
+  const skip=el=>!el||el.type==='password'||el.type==='file'||el.type==='hidden'||el.type==='checkbox'||el.type==='radio'||el.dataset.noDraft==='1'||owned(el);
+  const visible=el=>!!(el.offsetParent||el.getClientRects().length);
+  const keyOf=el=>{
+    const id=el.id||el.getAttribute('name');
+    if(id)return id;
+    const all=Array.prototype.slice.call(document.querySelectorAll(sel));
+    return 'idx:'+all.indexOf(el);
+  };
+  const load=()=>{try{return JSON.parse(sessionStorage.getItem(FK)||'{}');}catch(e){return{};}};
+  const save=o=>{try{sessionStorage.setItem(FK,JSON.stringify(o));}catch(e){}};
+  document.addEventListener('input',e=>{
+    const el=e.target;
+    if(!el||!el.matches||!el.matches(sel)||skip(el))return;
+    const o=load();const k=keyOf(el);
+    if(el.value)o[k]=el.value;else delete o[k];
+    save(o);
+  },true);
+  const clearScope=root=>{
+    if(!root)return;const o=load();
+    root.querySelectorAll(sel).forEach(el=>{delete o[keyOf(el)];});
+    save(o);
+  };
+  document.addEventListener('click',e=>{
+    const btn=e.target&&e.target.closest?e.target.closest('button,a,[role="button"]'):null;
+    if(!btn)return;
+    const txt=((btn.textContent||'')+' '+(btn.className||'')+' '+(btn.id||'')).toLowerCase();
+    if(!/close|cancel|save|submit|confirm|إلغاء|إغلاق|حفظ|إرسال|تأكيد|×/.test(txt))return;
+    const scope=btn.closest('form,.modal,.sheet,.overlay,.dialog')||document;
+    setTimeout(()=>clearScope(scope),400);
+  },true);
+  const restore=()=>{
+    const o=load();if(!Object.keys(o).length)return;
+    document.querySelectorAll(sel).forEach(el=>{
+      if(skip(el)||el.value||!visible(el))return;
+      const v=o[keyOf(el)];
+      if(v!=null&&v!==''){el.value=v;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+    });
+  };
+  let n=0;const iv=setInterval(()=>{restore();if(++n>12)clearInterval(iv);},250);
+  restore();
+})();
+
 /* auto-hide bottom nav on scroll down, show on scroll up */
 (function(){const nav=document.querySelector('.lateen-marketer .bottom-nav');if(!nav)return;let lastY=window.scrollY||0,ticking=false;const TH=6;function upd(){const y=window.scrollY||0,d=y-lastY;if(Math.abs(d)>TH){if(d>0&&y>60)nav.classList.add('nav-hidden');else nav.classList.remove('nav-hidden');lastY=y;}ticking=false;}window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(upd);ticking=true;}},{passive:true});})();
 
