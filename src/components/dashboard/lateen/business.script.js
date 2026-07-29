@@ -795,7 +795,7 @@ function mpSetLightboxIdx(i){
   if(!isFinite(i))return;
   __mpLightboxIdx=i;
   const track=document.getElementById('mp-lightbox-track');
-  if(track)[...track.children].forEach((el,k)=>{el.style.transform=`translateX(${(k-i)*100}%)`;});
+  if(track)[...track.children].forEach((el,k)=>{el.style.transform=`translateX(${(k-i)*100}%)`;el.classList.toggle('active',k===i);});
   mpRenderLightboxDots();
 }
 
@@ -809,7 +809,7 @@ function mpRenderLightbox(){
   const track=document.getElementById('mp-lightbox-track');
   const nav=document.getElementById('mp-lightbox-nav');
   if(!track)return;
-  track.innerHTML=__mpLightboxPhotos.map((u,i)=>`<div class="mp-lightbox-slide" style="transform:translateX(${(i-__mpLightboxIdx)*100}%)"><img src="${mpEsc(u)}" alt=""/></div>`).join('');
+  track.innerHTML=__mpLightboxPhotos.map((u,i)=>`<div class="mp-lightbox-slide${i===__mpLightboxIdx?' active':''}" style="transform:translateX(${(i-__mpLightboxIdx)*100}%)"><img src="${mpEsc(u)}" alt=""/></div>`).join('');
   if(nav)nav.style.display=__mpLightboxPhotos.length>1?'flex':'none';
   mpRenderLightboxDots();
   mpBindLightboxSwipe();
