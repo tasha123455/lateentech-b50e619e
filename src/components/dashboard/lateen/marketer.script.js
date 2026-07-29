@@ -919,7 +919,6 @@ async function __clearOsNotifBadge(){
 __lateenRefreshWalletAndPayout();refreshNotifications();
 setInterval(__lateenRefreshWalletAndPayout,60000);
 orders=loadDrafts();renderOrders();recomputeAnalytics();
-try{const __openOrderForm=localStorage.getItem('lateen_mk_orderform')||sessionStorage.getItem('lateen_mk_orderform');if(__openOrderForm){const __draft=(orders||[]).find(o=>o.id===__openOrderForm)||(orders||[])[0];if(__draft)openForm(__draft);else openForm();}}catch(e){}
 loadBrowse().then(()=>loadOrders()).then(()=>{try{__lateenApplyReceiptResume();}catch(e){console.warn('[Lateen] receipt resume check',e);}});refreshWallet();refreshProfile();
 window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.LateenAPI.subscribe){
   /* Coalesce realtime bursts so lists don't re-render multiple times in a
@@ -951,37 +950,18 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
   const _rg2=window.rg2;let __sigBrw='';
   if(typeof _rg2==='function'){window.rg2=function(l){try{const s=JSON.stringify((l||[]).map(p=>[p.id,p.sv?1:0,p.pr,p.pct,p.n]));if(s===__sigBrw)return;__sigBrw=s;}catch(e){}return _rg2.apply(this,arguments);};}
 })();
-/* persist page + scroll across refresh */
+/* remember scroll only; never force old dashboard pages back on reload/tab return */
 (function(){
     /* durable store: localStorage so state survives a FULL page reload or an
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const K='lateen_mk_page',S='lateen_mk_scroll';
-  let restoring=false;
+const S='lateen_mk_scroll';
   const _g=goTo;
-  goTo=function(id){try{PS.set(K,id);}catch(e){}return _g.apply(this,arguments);};
-  try{
-    const sv=PS.get(K);
-    if(sv&&document.getElementById(sv))_g(sv);
-    const target=parseInt(PS.get(S)||'0',10);
-    if(target>0){
-      restoring=true;
-      const t0=Date.now();
-      const tick=()=>{
-        const max=Math.max(0,(document.documentElement.scrollHeight||0)-window.innerHeight);
-        window.scrollTo(0,Math.min(target,max));
-        if(max>=target-2&&Math.abs((window.scrollY||0)-target)<3){restoring=false;return;}
-        if(Date.now()-t0<2500)requestAnimationFrame(tick);
-        else restoring=false;
-      };
-      requestAnimationFrame(tick);
-    }
-  }catch(e){restoring=false;}
-  window.addEventListener('scroll',()=>{if(restoring)return;try{PS.set(S,String(window.scrollY||0));}catch(e){}},{passive:true});
-  const flush=()=>{if(restoring)return;PS.set(S,String(window.scrollY||0));};
+  goTo=function(){return _g.apply(this,arguments);};
+  window.addEventListener('scroll',()=>{try{PS.set(S,String(window.scrollY||0));}catch(e){}},{passive:true});
+  const flush=()=>{PS.set(S,String(window.scrollY||0));};
   window.addEventListener('pagehide',flush);
-  window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush();});
 })();
 
 /* generic "restore what was typed" layer for forms/modals that don't already
@@ -1046,7 +1026,6 @@ const FK='lateen_mk_forms';
   /* Only restore for a genuine page load or a bfcache resume — never on a
      plain tab switch back, which used to re-write inputs (and fire synthetic
      input events) and caused the "typing lost / page jumps away" bug. */
-  window.addEventListener('pageshow',e=>{if(e&&e.persisted)restore();});
 })();
 
 /* auto-hide bottom nav on scroll down, show on scroll up */
