@@ -2020,6 +2020,8 @@ const K='lateen_adm_page',S='lateen_adm_scroll';
   window.addEventListener('scroll',()=>{if(restoring)return;try{PS.set(S,String(window.scrollY||0));}catch(e){}},{passive:true});
   const flush=()=>{if(restoring)return;PS.set(S,String(window.scrollY||0));};
   window.addEventListener('pagehide',flush);
+  window.addEventListener('freeze',flush);
+  window.addEventListener('blur',flush);
   window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush();});
 })();
 
