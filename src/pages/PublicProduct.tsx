@@ -233,6 +233,7 @@ export function PublicProduct({ id }: { id: string }) {
     const dx = t.clientX - start.x;
     const dy = t.clientY - start.y;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    setIdx((i) => (dx < 0 ? Math.min(photos.length - 1, i + 1) : Math.max(0, i - 1)));
   };
 
   const onLightboxTouchStart = (e: TouchEvent) => {
