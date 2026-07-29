@@ -149,6 +149,9 @@ function __normSearch(s){if(s==null)return'';let t=String(s);try{t=t.normalize('
 function __catSearchText(cat){if(!cat)return'';const sec=CATEGORY_DATA.find(s=>s.items.includes(cat));const parts=[cat,CATEGORY_ITEM_AR[cat]||''];if(sec){parts.push(sec.group,CATEGORY_GROUP_AR[sec.group]||'');}return __normSearch(parts.filter(Boolean).join(' '));}
 const COUNTRY_NAMES_AR={NG:'نيجيريا',GH:'غانا',EG:'مصر',KE:'كينيا',ZA:'جنوب أفريقيا',LY:'ليبيا'};
 function __zoneSearchText(p){if(!p||!p.d||typeof p.d!=='object')return'';const parts=[];Object.keys(p.d).forEach(code=>{parts.push(code);if(typeof COUNTRY_NAMES!=='undefined'&&COUNTRY_NAMES[code])parts.push(COUNTRY_NAMES[code]);if(COUNTRY_NAMES_AR[code])parts.push(COUNTRY_NAMES_AR[code]);const z=p.d[code]||{};const cities=[];if(z.c&&typeof z.c==='object')cities.push(...Object.keys(z.c));if(Array.isArray(z.cities))cities.push(...z.cities);cities.forEach(cn=>{if(!cn)return;parts.push(cn);const m=LIBYA_CITIES.find(x=>x.en===cn||x.ar===cn);if(m){parts.push(m.en,m.ar);}});});return __normSearch(parts.filter(Boolean).join(' '));}
+// Bilingual haystack for an order's city/country (stored in English) so an
+// Arabic query matches too, and vice-versa.
+function __locSearchText(city,country,countryCode){const parts=[];[city,country,countryCode].forEach(v=>{if(v)parts.push(String(v));});if(city){const m=LIBYA_CITIES.find(x=>x.en===city||x.ar===city);if(m)parts.push(m.en,m.ar);}const codes=new Set();if(countryCode)codes.add(String(countryCode).toUpperCase());if(country){if(typeof COUNTRY_NAMES!=='undefined'){Object.keys(COUNTRY_NAMES).forEach(c=>{if(String(COUNTRY_NAMES[c]).toLowerCase()===String(country).toLowerCase())codes.add(c);});}Object.keys(COUNTRY_NAMES_AR).forEach(c=>{if(COUNTRY_NAMES_AR[c]===country)codes.add(c);});}codes.forEach(c=>{if(typeof COUNTRY_NAMES!=='undefined'&&COUNTRY_NAMES[c])parts.push(COUNTRY_NAMES[c]);if(COUNTRY_NAMES_AR[c])parts.push(COUNTRY_NAMES_AR[c]);});return parts.filter(Boolean).join(' ');}
 function go(){renderCatFilters();const si=document.getElementById('si');const q=__normSearch(si?si.value||'':'');const fctArr=Array.isArray(fct)?fct:(fct?[fct]:[]);let l=P.filter(p=>{if(!__productHasStock(p))return false;const mq=!q||__normSearch(p.n).includes(q)||__normSearch(p.code||'').includes(q)||__catSearchText(p.cat).includes(q)||__normSearch(p.desc||'').includes(q)||__zoneSearchText(p).includes(q);const mc=!fc||!!p.d[fc];const mct=!fctArr.length||(fc&&p.d[fc]&&fctArr.some(ct=>!!p.d[fc].c[ct]));const mcat=!activeCatGroup||(activeCatSub?p.cat===activeCatSub:(CATEGORY_DATA.find(s=>s.group===activeCatGroup)||{items:[]}).items.includes(p.cat));return mq&&mc&&mct&&mcat;});if(fs==='ch')l.sort((a,b)=>b.pct-a.pct);else if(fs==='cl')l.sort((a,b)=>a.pct-b.pct);else if(fs==='ph')l.sort((a,b)=>b.pr-a.pr);else if(fs==='pl')l.sort((a,b)=>a.pr-b.pr);rg2(l);if(fs){const rw=document.getElementById('rw');if(rw)rw.style.display='none';}else{rr();}ub();}
 function cd(p){return`<div class="c" onclick="openD('${__escH(p.id)}')"><div class="ci2">${p.e}<div style="position:absolute;bottom:0;right:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 8px 7px;cursor:pointer;z-index:2;" onclick="event.stopPropagation();sv('${__escH(p.id)}')"><div style="width:32px;height:32px;border-radius:50%;background:${p.sv?'#E24B4A':'rgba(0,0,0,0.55)'};border:1.5px solid ${p.sv?'#E24B4A':'rgba(255,255,255,0.3)'};display:flex;align-items:center;justify-content:center;transition:all .2s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="${p.sv?'#fff':'none'}" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><span style="font-size:9px;color:rgba(255,255,255,.8);font-weight:500;font-family:var(--font-sans);">${p.sv?'Saved':'Save'}</span></div></div><div class="cb2"><div class="cn" data-no-i18n>${__escH(p.n)}</div><div class="cr"><div class="cpr">${__moneyH(p.pr,p.cur.s,p.cur.code)}</div><div class="cco">${p.pct}%</div></div></div></div>`;}
 function rg2(l){const g=document.getElementById('mg');if(g)g.innerHTML=l.length?l.map(cd).join(''):'<div class="em" data-no-i18n>'+(__ar()?'لا توجد منتجات مطابقة لبحثك':'No products match your search.')+'</div>';}
@@ -369,8 +372,8 @@ function __renderOrderFilterChips(){const row=document.querySelector('#pg-orders
 function renderOrders(){
   __renderOrderFilterChips();
   const list=document.getElementById('orders-list');const empty=document.getElementById('empty-state');
-  const si=document.getElementById('orders-search');const q=(si&&si.value||'').trim().toLowerCase();
-  const shown=orders.filter(o=>{const matchesStatus=__ordMatchesFilter(o,marketerOrderFilter);if(!matchesStatus)return false;if(!q)return true;const hay=[o.id,o.customerName,o.phone,o.whatsapp,o.city,o.country,o.countryCode,o.address,o.productName,o.size,o.color,o.notes].filter(Boolean).join(' ').toLowerCase();return hay.includes(q);});
+  const si=document.getElementById('orders-search');const q=__normSearch((si&&si.value||'').trim());
+  const shown=orders.filter(o=>{const matchesStatus=__ordMatchesFilter(o,marketerOrderFilter);if(!matchesStatus)return false;if(!q)return true;const hay=__normSearch([o.id,o.customerName,o.phone,o.whatsapp,o.address,o.productName,o.size,o.color,o.notes,__locSearchText(o.city,o.country,o.countryCode)].filter(Boolean).join(' '));return hay.includes(q);});
   if(!orders.length){if(list)list.style.display='none';if(empty)empty.style.display='flex';return;}
   if(empty)empty.style.display='none';if(!list)return;list.style.display='flex';
   if(!shown.length){list.innerHTML=`<div class="empty-text" data-no-i18n style="padding:2rem 1rem;text-align:center">${__ar()?'لا توجد طلبات مطابقة لبحثك':'No orders match your search.'}</div>`;return;}
@@ -967,6 +970,55 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
     }
   }catch(e){restoring=false;}
   window.addEventListener('scroll',()=>{if(restoring)return;try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});
+})();
+
+/* generic "restore what was typed" layer for forms/modals that don't already
+   have a dedicated draft system (the order form `f-*` and the payout form
+   `pd*` keep their own drafts and are skipped here). */
+(function(){
+  const FK='lateen_mk_forms';
+  const sel='input,textarea,select';
+  const owned=el=>{const id=(el.id||'')+'';return /^f-/.test(id)||/^pd/i.test(id)||!!(el.closest&&el.closest('#order-form,#pg-new,#pd-modal'));};
+  const skip=el=>!el||el.type==='password'||el.type==='file'||el.type==='hidden'||el.type==='checkbox'||el.type==='radio'||el.dataset.noDraft==='1'||owned(el);
+  const visible=el=>!!(el.offsetParent||el.getClientRects().length);
+  const keyOf=el=>{
+    const id=el.id||el.getAttribute('name');
+    if(id)return id;
+    const all=Array.prototype.slice.call(document.querySelectorAll(sel));
+    return 'idx:'+all.indexOf(el);
+  };
+  const load=()=>{try{return JSON.parse(sessionStorage.getItem(FK)||'{}');}catch(e){return{};}};
+  const save=o=>{try{sessionStorage.setItem(FK,JSON.stringify(o));}catch(e){}};
+  document.addEventListener('input',e=>{
+    const el=e.target;
+    if(!el||!el.matches||!el.matches(sel)||skip(el))return;
+    const o=load();const k=keyOf(el);
+    if(el.value)o[k]=el.value;else delete o[k];
+    save(o);
+  },true);
+  const clearScope=root=>{
+    if(!root)return;const o=load();
+    root.querySelectorAll(sel).forEach(el=>{delete o[keyOf(el)];});
+    save(o);
+  };
+  document.addEventListener('click',e=>{
+    const btn=e.target&&e.target.closest?e.target.closest('button,a,[role="button"]'):null;
+    if(!btn)return;
+    const txt=((btn.textContent||'')+' '+(btn.className||'')+' '+(btn.id||'')).toLowerCase();
+    if(!/close|cancel|save|submit|confirm|إلغاء|إغلاق|حفظ|إرسال|تأكيد|×/.test(txt))return;
+    const scope=btn.closest('form,.modal,.sheet,.overlay,.dialog')||document;
+    setTimeout(()=>clearScope(scope),400);
+  },true);
+  const restore=()=>{
+    const o=load();if(!Object.keys(o).length)return;
+    document.querySelectorAll(sel).forEach(el=>{
+      if(skip(el)||el.value||!visible(el))return;
+      const v=o[keyOf(el)];
+      if(v!=null&&v!==''){el.value=v;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+    });
+  };
+  let n=0;const iv=setInterval(()=>{restore();if(++n>12)clearInterval(iv);},250);
+  restore();
 })();
 
 /* auto-hide bottom nav on scroll down, show on scroll up */
