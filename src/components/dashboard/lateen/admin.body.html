@@ -591,6 +591,10 @@
       <div class="bd-dropdown-list" id="adm-u-yearly-list"></div>
     </div>
     <input class="adm-search" id="user-search" placeholder="Search by name, email, phone, business…" oninput="admUserSearch(this.value)" />
+    <div style="margin:10px 0 4px;">
+      <button class="adm-go-btn" style="width:100%;background:#c0392b;padding:10px 12px;font-size:13px;" onclick="admWipeAllData()">Wipe all admin data</button>
+      <div style="font-size:11px;color:#9e9b97;margin-top:4px;">Clears orders, products, payouts, reports, notifications, employees and reviews across all admin pages. User accounts and bans are kept.</div>
+    </div>
 
     <div class="adm-section" id="users-list">
       <div class="adm-empty">Loading…</div>
