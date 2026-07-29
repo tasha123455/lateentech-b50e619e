@@ -283,7 +283,7 @@ export function PublicProduct({ id }: { id: string }) {
                 decoding="async"
                 fetchPriority={i === 0 ? "high" : "auto"}
                 className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in bg-surface-2"
-                onClick={() => setLightbox(photos[i])}
+                onClick={() => setLightboxIdx(i)}
               />
             ))}
           </div>
