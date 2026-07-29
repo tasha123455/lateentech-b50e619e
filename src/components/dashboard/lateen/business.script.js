@@ -1113,13 +1113,22 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const K='lateen_bz_page',S='lateen_bz_scroll';
+const K='lateen_bz_page',S='lateen_bz_scroll',OV='lateen_bz_addform';
   let restoring=false;
   const _g=goTo;
   goTo=function(id){try{PS.set(K,id);}catch(e){}return _g.apply(this,arguments);};
+  /* Remember that the "Add a product" sheet was open (new product only, never
+     an edit) so a full reload / OS tab-discard brings it back with the draft
+     values the generic form layer already restores. */
+  try{
+    const _oaf=window.openAddForm||openAddForm,_cf=window.closeForm||closeForm;
+    if(typeof _oaf==='function'){const w=function(p){try{PS.set(OV,p?'':'1');}catch(e){}return _oaf.apply(this,arguments);};openAddForm=w;window.openAddForm=w;}
+    if(typeof _cf==='function'){const w=function(){try{PS.set(OV,'');}catch(e){}return _cf.apply(this,arguments);};closeForm=w;window.closeForm=w;}
+  }catch(e){}
   try{
     const sv=PS.get(K);
     if(sv&&document.getElementById(sv))_g(sv);
+    if(PS.get(OV)==='1'){try{openAddForm();}catch(e){}}
     const target=parseInt(PS.get(S)||'0',10);
     if(target>0){
       restoring=true;
