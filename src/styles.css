@@ -146,3 +146,9 @@ body.lang-ar .app { direction: rtl; }
 /* Unified language-toggle label swap (driven by <body class="lang-en|lang-ar">) */
 body.lang-en .lang-label-ar { display: none !important; }
 body.lang-ar .lang-label-en { display: none !important; }
+
+/* First-visit language gate: hide the whole app until a language is chosen.
+   `lang-pending` is added by the inline shell script before first paint and
+   removed once the visitor picks (or if a choice is already stored). */
+html.lang-pending body { visibility: hidden; overflow: hidden; }
+html.lang-pending .lang-gate { visibility: visible; }
