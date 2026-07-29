@@ -158,6 +158,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <LanguageGate />
     </QueryClientProvider>
   );
 }
+
