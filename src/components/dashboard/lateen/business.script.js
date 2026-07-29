@@ -684,11 +684,13 @@ function mpRenderCard(p){
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="mp-p-info-expanded">
-        <div class="mp-p-name-price-row">
-          <p class="mp-p-name-exp" data-no-i18n>${mpEsc(p.name)}</p>
-          <span class="mp-p-price-exp">${fmtP(p.price)}</span>
+        <div class="mp-p-info-exp-inner">
+          <div class="mp-p-name-price-row">
+            <p class="mp-p-name-exp" data-no-i18n>${mpEsc(p.name)}</p>
+            <span class="mp-p-price-exp">${fmtP(p.price)}</span>
+          </div>
+          ${p.desc?`<p class="mp-p-desc-exp" data-no-i18n>${mpEsc(p.desc)}</p>`:''}
         </div>
-        ${p.desc?`<p class="mp-p-desc-exp" data-no-i18n>${mpEsc(p.desc)}</p>`:''}
       </div>
     </div>
     ${eq===0?`<div class="mp-oos-banner">${__ar()?'أكتب الكميه لعرض منتجك للمسوّقين':'Enter the quantity to show your product to marketers'}</div>`:''}
