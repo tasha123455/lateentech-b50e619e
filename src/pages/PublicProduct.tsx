@@ -108,9 +108,11 @@ export function PublicProduct({ id }: { id: string }) {
   const [shipsOpen, setShipsOpen] = useState(false);
   const [zoneOpen, setZoneOpen] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewAvatars, setReviewAvatars] = useState<Record<string, string>>({});
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const lightboxTouchRef = useRef<{ x: number; y: number } | null>(null);
 
 
 
