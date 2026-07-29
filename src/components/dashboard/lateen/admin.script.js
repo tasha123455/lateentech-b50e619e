@@ -542,10 +542,11 @@ async function admSendPayoutNote(id){
 
 let admUserRoleFilter='';
 let admUserSearchQ='';
-/* Day/month/year GRANULARITY toggle for the Users page — mirrors the marketer
-   analytics .ptab pattern: it changes how the list is bucketed by join date
-   (day / month / year groups), it does not filter to one specific date. */
-let admUserPeriod='D';
+/* Users page date filter — exact copy of the marketer/business Breakdown
+   page pattern: three dropdown tabs (Day / Month / Year) whose selected
+   values combine with AND logic, plus an "All time" reset tab. */
+const __ADM_UDAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const __admUSelected={day:null,month:null,year:null};
 async function admLoadUsers(search){
   if(typeof search==='string')admUserSearchQ=search;
   const root=document.getElementById('users-list');
