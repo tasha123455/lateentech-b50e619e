@@ -103,9 +103,6 @@ export function PublicProduct({ id }: { id: string }) {
   const { user, role, loading: authLoading } = useAuth();
   const { lang, withLang } = useLanguage();
   const nav = useNavigate();
-  // Show the one-time language chooser before the product when the visitor
-  // hasn't picked a language yet (same experience as the root "/" chooser).
-  const [needsLang, setNeedsLang] = useState<boolean | null>(null);
   const [p, setP] = useState<PublicProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
