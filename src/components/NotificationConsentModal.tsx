@@ -7,8 +7,8 @@ import {
 
 const DISMISS_KEY = "wasla_push_prompt_dismissed_at";
 const DISMISS_VISITS_KEY = "wasla_push_prompt_visits_since_dismiss";
-// After dismissing, the prompt comes back once the user has visited 30 more times.
-const VISITS_BEFORE_REASK = 30;
+// After dismissing, the prompt comes back once the user has visited 20 more times.
+const VISITS_BEFORE_REASK = 20;
 
 /**
  * Custom in-app modal that offers to enable push notifications.
@@ -32,7 +32,8 @@ export function NotificationConsentModal() {
     if (typeof window === "undefined") return;
     if (!("Notification" in window)) return;
     if (Notification.permission !== "default") return;
-    if (!isInstalledPWA()) return;
+    // iOS only allows push from an installed (home-screen) app; elsewhere we can ask in-browser.
+    if (isIosLike() && !isInstalledPWA()) return;
     try {
       const dismissed = localStorage.getItem(DISMISS_KEY);
       if (dismissed) {
