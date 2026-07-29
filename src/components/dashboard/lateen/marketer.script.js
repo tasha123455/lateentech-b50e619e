@@ -372,8 +372,8 @@ function __renderOrderFilterChips(){const row=document.querySelector('#pg-orders
 function renderOrders(){
   __renderOrderFilterChips();
   const list=document.getElementById('orders-list');const empty=document.getElementById('empty-state');
-  const si=document.getElementById('orders-search');const q=(si&&si.value||'').trim().toLowerCase();
-  const shown=orders.filter(o=>{const matchesStatus=__ordMatchesFilter(o,marketerOrderFilter);if(!matchesStatus)return false;if(!q)return true;const hay=[o.id,o.customerName,o.phone,o.whatsapp,o.city,o.country,o.countryCode,o.address,o.productName,o.size,o.color,o.notes].filter(Boolean).join(' ').toLowerCase();return hay.includes(q);});
+  const si=document.getElementById('orders-search');const q=__normSearch((si&&si.value||'').trim());
+  const shown=orders.filter(o=>{const matchesStatus=__ordMatchesFilter(o,marketerOrderFilter);if(!matchesStatus)return false;if(!q)return true;const hay=__normSearch([o.id,o.customerName,o.phone,o.whatsapp,o.address,o.productName,o.size,o.color,o.notes,__locSearchText(o.city,o.country,o.countryCode)].filter(Boolean).join(' '));return hay.includes(q);});
   if(!orders.length){if(list)list.style.display='none';if(empty)empty.style.display='flex';return;}
   if(empty)empty.style.display='none';if(!list)return;list.style.display='flex';
   if(!shown.length){list.innerHTML=`<div class="empty-text" data-no-i18n style="padding:2rem 1rem;text-align:center">${__ar()?'لا توجد طلبات مطابقة لبحثك':'No orders match your search.'}</div>`;return;}
