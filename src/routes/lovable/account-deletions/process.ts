@@ -63,6 +63,11 @@ export const Route = createFileRoute("/lovable/account-deletions/process")({
 
         for (const row of rows) {
           try {
+            // Keep the account's history (orders/products/payouts/profile) so
+            // admin analytics survive the deletion.
+            await supabaseAdmin.rpc("mark_user_account_deleted" as never, {
+              _user_id: row.user_id,
+            } as never);
             const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(row.user_id);
             if (delErr) throw delErr;
             processed++;
