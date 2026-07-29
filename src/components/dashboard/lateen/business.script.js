@@ -1030,7 +1030,7 @@ recomputeAnalytics();
 let __unsubOrders=null,__unsubWallet=null;
 async function refreshWallet(){/* business net earnings come from delivered orders via recomputeAnalytics; nothing to fetch here */}
 window.__profileData=null;
-function __avKey(){try{return 'lateen_avatar_url_b';}catch(e){return null;}}
+function __avKey(){try{return 'lateen_avatar_url_b_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return null;}}
 function __avCache(url){try{if(url)localStorage.setItem(__avKey(),url);else localStorage.removeItem(__avKey());}catch(e){}}
 function __avRead(){try{return localStorage.getItem(__avKey())||'';}catch(e){return '';}}
 function __applyAvatarTo(el,url){if(!el)return;el.style.backgroundImage='';if(url){el.textContent='';el.style.background='#0A3C2A';const img=document.createElement('img');img.decoding='async';img.loading='eager';img.alt='';img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit;';img.onerror=function(){el.innerHTML='';el.style.background='#0A3C2A';};img.src=url;el.appendChild(img);}else{el.textContent='';el.style.background='#0A3C2A';}}
@@ -1113,7 +1113,7 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const K='lateen_bz_page',S='lateen_bz_scroll';
+const __u=(function(){try{return '_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return '_anon';}})();const K='lateen_bz_page'+__u,S='lateen_bz_scroll'+__u;
   let restoring=false;
   const _g=goTo;
   goTo=function(id){try{PS.set(K,id);}catch(e){}return _g.apply(this,arguments);};
@@ -1146,7 +1146,7 @@ const K='lateen_bz_page',S='lateen_bz_scroll';
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const FK='lateen_bz_forms';
+const FK='lateen_bz_forms'+(function(){try{return '_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return '_anon';}})();
   const sel='input,textarea,select';
   const skip=el=>!el||el.type==='password'||el.type==='file'||el.type==='hidden'||el.type==='checkbox'||el.type==='radio'||el.dataset.noDraft==='1';
   const visible=el=>!!(el.offsetParent||el.getClientRects().length);

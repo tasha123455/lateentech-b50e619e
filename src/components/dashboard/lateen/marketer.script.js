@@ -354,15 +354,15 @@ async function onOrderReceiptFile(input){if(!input.files.length)return;const fil
    new-order form's upload box, and the Orders list re-upload button)
    open this same sheet via openReceiptPicker('form'|orderId). */
 let __receiptPickerTarget=null;
-const __RECEIPT_RESUME_KEY='lateen_mk_receipt_resume';
+const __RECEIPT_RESUME_KEY_BASE='lateen_mk_receipt_resume';
 function openReceiptPicker(target){if(!target)return;if(target!=='form')__pendingReceiptOrderId=target;__receiptPickerTarget=target;const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.add('open');}
 function closeReceiptPicker(){const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.remove('open');}
-function __receiptCheckpoint(){try{let ordId=null;if(__receiptPickerTarget==='form'){persistOpenDraft();ordId=editingId;}else{ordId=__receiptPickerTarget;}if(!ordId)return;localStorage.setItem(__RECEIPT_RESUME_KEY,JSON.stringify({id:ordId,source:__receiptPickerTarget==='form'?'form':'order',ts:Date.now()}));}catch(e){}}
-function __receiptClearResume(){try{localStorage.removeItem(__RECEIPT_RESUME_KEY);}catch(e){}}
+function __receiptCheckpoint(){try{let ordId=null;if(__receiptPickerTarget==='form'){persistOpenDraft();ordId=editingId;}else{ordId=__receiptPickerTarget;}if(!ordId)return;localStorage.setItem(__RECEIPT_RESUME_KEY_BASE+__uidSfx(),JSON.stringify({id:ordId,source:__receiptPickerTarget==='form'?'form':'order',ts:Date.now()}));}catch(e){}}
+function __receiptClearResume(){try{localStorage.removeItem(__RECEIPT_RESUME_KEY_BASE+__uidSfx());}catch(e){}}
 function __receiptPickerPick(kind){const inputId=kind==='camera'?'receipt-cam-input':(kind==='gallery'?'receipt-gallery-input':'receipt-files-input');const el=document.getElementById(inputId);if(!el)return;__receiptCheckpoint();closeReceiptPicker();el.value='';el.click();}
 function __receiptFileChosen(input){__receiptClearResume();const target=__receiptPickerTarget;__receiptPickerTarget=null;if(!input||!input.files||!input.files.length)return;if(target==='form'){onFileUpload(input);}else{__pendingReceiptOrderId=target||__pendingReceiptOrderId;onOrderReceiptFile(input);}}
 function __lateenShowResumeToast(msg){try{let t=document.getElementById('receipt-resume-toast');if(t)t.remove();t=document.createElement('div');t.id='receipt-resume-toast';t.setAttribute('data-no-i18n','');t.textContent=msg;t.style.cssText='position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);max-width:360px;width:calc(100% - 32px);background:#1e1e1e;border:0.5px solid rgba(234,179,8,.4);color:#eab308;font-size:12.5px;font-weight:600;line-height:1.4;padding:11px 14px;border-radius:12px;z-index:2000;box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center;';document.body.appendChild(t);setTimeout(()=>{if(t&&t.parentNode)t.remove();},6000);}catch(e){}}
-function __lateenApplyReceiptResume(){let marker=null;try{marker=JSON.parse(localStorage.getItem(__RECEIPT_RESUME_KEY)||'null');}catch(e){}if(!marker||!marker.id)return;if(!marker.ts||Date.now()-marker.ts>30*60*1000){__receiptClearResume();return;}const o=(orders||[]).find(x=>x.id===marker.id);if(!o){__receiptClearResume();return;}const ar=(typeof __ar==='function'&&__ar());const msg=ar?'لم يكتمل الرفع آخر مرة — يرجى إرفاق الإيصال مرة أخرى.':"Upload didn't finish last time — please try attaching the receipt again.";if(marker.source==='form'){editingId=o.id;openForm(o);const banner=document.getElementById('receipt-resume-banner');if(banner){banner.textContent=msg;banner.style.display='block';}}else{try{if(typeof goTo==='function')goTo('pg-orders');setTimeout(()=>{const card=document.querySelector('.order[data-oid="'+o.id+'"]');if(card){card.classList.add('open');try{card.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}__lateenShowResumeToast(msg);},120);}catch(e){__lateenShowResumeToast(msg);}}__receiptClearResume();}
+function __lateenApplyReceiptResume(){let marker=null;try{marker=JSON.parse(localStorage.getItem(__RECEIPT_RESUME_KEY_BASE+__uidSfx())||'null');}catch(e){}if(!marker||!marker.id)return;if(!marker.ts||Date.now()-marker.ts>30*60*1000){__receiptClearResume();return;}const o=(orders||[]).find(x=>x.id===marker.id);if(!o){__receiptClearResume();return;}const ar=(typeof __ar==='function'&&__ar());const msg=ar?'لم يكتمل الرفع آخر مرة — يرجى إرفاق الإيصال مرة أخرى.':"Upload didn't finish last time — please try attaching the receipt again.";if(marker.source==='form'){editingId=o.id;openForm(o);const banner=document.getElementById('receipt-resume-banner');if(banner){banner.textContent=msg;banner.style.display='block';}}else{try{if(typeof goTo==='function')goTo('pg-orders');setTimeout(()=>{const card=document.querySelector('.order[data-oid="'+o.id+'"]');if(card){card.classList.add('open');try{card.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}__lateenShowResumeToast(msg);},120);}catch(e){__lateenShowResumeToast(msg);}}__receiptClearResume();}
 
 let marketerOrderFilter='all';
 function setOrderFilter(f,el){marketerOrderFilter=f;document.querySelectorAll('#pg-orders .ord-fchip').forEach(c=>c.classList.remove('active'));if(el)el.classList.add('active');renderOrders();}
@@ -550,10 +550,11 @@ function closeMenu(){document.getElementById('menu-overlay').classList.remove('o
 function __syncLangRow(){const p=document.getElementById('lang-row-primary');const s=document.getElementById('lang-row-secondary');if(!p||!s)return;const ar=(typeof __ar==='function'&&__ar());if(ar){p.textContent='اللغة';s.textContent='Language';}else{p.textContent='Language';s.textContent='اللغة';}}
 function openSupport(){const ov=document.getElementById('support-overlay');if(ov)ov.classList.add('open');}
 function closeSupport(){const ov=document.getElementById('support-overlay');if(ov)ov.classList.remove('open');}
-const __PD_KEY='lateen_payout_draft';
+function __uidSfx(){try{return '_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return '_anon';}}
+function __pdKey(){return 'lateen_payout_draft'+__uidSfx();}
 function __pdLabel(v){const arMap={'Libya':'ليبيا','One pay':'وان باي','Bank of Unity':'مصرف الوحده','Libyana Credit':'رصيد ليبيانا','Madar Credit':'رصيد مدار','Select…':'اختر…'};const enMap={'Bank of Unity':'Wahda bank'};if(__ar())return arMap[v]||v;return enMap[v]||v;}
-function __pdLoadDraft(){try{return JSON.parse(localStorage.getItem(__PD_KEY)||'{}')||{};}catch(e){return {};}}
-function __pdSaveDraft(){try{const ids=['pd-country','pd-method','pd-bank','pd-holder','pd-acct','pd-phone','pd-iban','pd-swift','pd-notes'];const o={};ids.forEach(id=>{const el=document.getElementById(id);if(el)o[id]=el.value;});localStorage.setItem(__PD_KEY,JSON.stringify(o));}catch(e){}}
+function __pdLoadDraft(){try{return JSON.parse(localStorage.getItem(__pdKey())||'{}')||{};}catch(e){return {};}}
+function __pdSaveDraft(){try{const ids=['pd-country','pd-method','pd-bank','pd-holder','pd-acct','pd-phone','pd-iban','pd-swift','pd-notes'];const o={};ids.forEach(id=>{const el=document.getElementById(id);if(el)o[id]=el.value;});localStorage.setItem(__pdKey(),JSON.stringify(o));}catch(e){}}
 function __pdPhoneMeta(method){if(method==='Libyana Credit')return{prefixes:['092','094'],hintEn:'Number starts with 092 or 094',hintAr:'الرقم يبدا من 092 او 094'};if(method==='Madar Credit')return{prefixes:['091','093'],hintEn:'Number starts with 091 or 093',hintAr:'الرقم يبدا من 091 او 093'};return null;}
 function __pdSanitizePhone(scope){const el=document.getElementById(scope+'-phone');if(!el)return;const m=document.getElementById(scope+'-method');const meta=__pdPhoneMeta(m?m.value:'');const allowed=meta?meta.prefixes:['092','094','091','093'];const digits=(el.value||'').replace(/\D/g,'');let result='';for(let i=0;i<digits.length&&result.length<10;i++){const next=result+digits[i];if(next.length<=3){if(allowed.some(p=>p.indexOf(next)===0))result=next;}else{result=next;}}if(el.value!==result)el.value=result;}
 function __pdWireInputs(){__PD_SCOPES.forEach(scope=>{['country','method','bank','holder','acct','phone','iban','swift','notes'].forEach(k=>{const el=document.getElementById(scope+'-'+k);if(!el||el.__pdWired)return;el.__pdWired=true;if(k==='phone'){el.addEventListener('input',()=>{__pdSanitizePhone(scope);__pdSync(scope);});}else{el.addEventListener('input',()=>__pdSync(scope));}el.addEventListener('change',()=>__pdSync(scope));});});}
@@ -597,7 +598,7 @@ async function refreshWallet(){
   if(typeof refreshPayoutState==='function')refreshPayoutState();
 }
 window.__profileData=null;
-function __avKey(){try{return 'lateen_avatar_url_m';}catch(e){return null;}}
+function __avKey(){try{return 'lateen_avatar_url_m'+__uidSfx();}catch(e){return null;}}
 function __avCache(url){try{if(url)localStorage.setItem(__avKey(),url);else localStorage.removeItem(__avKey());}catch(e){}}
 function __avRead(){try{return localStorage.getItem(__avKey())||'';}catch(e){return '';}}
 function __firstChar(s){s=(s||'').trim();if(!s)return'';return[...s][0]||'';}
@@ -956,7 +957,7 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const K='lateen_mk_page',S='lateen_mk_scroll';
+const __u=(function(){try{return '_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return '_anon';}})();const K='lateen_mk_page'+__u,S='lateen_mk_scroll'+__u;
   let restoring=false;
   const _g=goTo;
   goTo=function(id){try{PS.set(K,id);}catch(e){}return _g.apply(this,arguments);};
@@ -991,7 +992,7 @@ const K='lateen_mk_page',S='lateen_mk_scroll';
      OS tab-discard/restore, not just in-app redirects. Falls back to (and
      migrates) the previous sessionStorage values once. */
   const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
-const FK='lateen_mk_forms';
+const FK='lateen_mk_forms'+(function(){try{return '_'+((window.LateenAPI&&window.LateenAPI.userId)||'anon');}catch(e){return '_anon';}})();
   const sel='input,textarea,select';
   const owned=el=>{const id=(el.id||'')+'';return /^f-/.test(id)||/^pd/i.test(id)||!!(el.closest&&el.closest('#form-overlay,#pay-details-overlay,#receipt-picker-overlay,#prod-picker-overlay,#withdraw-overlay'));};
   const skip=el=>!el||el.type==='password'||el.type==='file'||el.type==='hidden'||el.type==='checkbox'||el.type==='radio'||el.dataset.noDraft==='1'||owned(el);
