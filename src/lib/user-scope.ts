@@ -11,13 +11,16 @@ const LAST_UID_KEY = "wasla_last_uid";
 // Keys owned by the app that hold user-specific data.
 const USER_DATA_PREFIXES = ["lateen_", "wasla_user_"];
 
+// Device-level preferences that must survive account switches / sign-out.
+const KEEP_KEYS = new Set(["lateen_lang"]);
+
 function purgeUserData() {
   const wipe = (store: Storage) => {
     try {
       const keys: string[] = [];
       for (let i = 0; i < store.length; i++) {
         const k = store.key(i);
-        if (k && USER_DATA_PREFIXES.some((p) => k.startsWith(p))) keys.push(k);
+        if (k && !KEEP_KEYS.has(k) && USER_DATA_PREFIXES.some((p) => k.startsWith(p))) keys.push(k);
       }
       keys.forEach((k) => store.removeItem(k));
     } catch {

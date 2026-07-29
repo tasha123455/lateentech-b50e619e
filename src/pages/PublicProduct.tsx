@@ -3,8 +3,6 @@ import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { LanguageChooser } from "@/i18n/LanguageChooser";
-import { storedLang } from "@/i18n/langPath";
 
 type VariantItem = { val?: string; photo?: string; qty?: number | string | null } | string;
 type VariantGroup = { name?: string; items?: VariantItem[] };
@@ -103,9 +101,6 @@ export function PublicProduct({ id }: { id: string }) {
   const { user, role, loading: authLoading } = useAuth();
   const { lang, withLang } = useLanguage();
   const nav = useNavigate();
-  // Show the one-time language chooser before the product when the visitor
-  // hasn't picked a language yet (same experience as the root "/" chooser).
-  const [needsLang, setNeedsLang] = useState<boolean | null>(null);
   const [p, setP] = useState<PublicProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -117,9 +112,6 @@ export function PublicProduct({ id }: { id: string }) {
   const [reviewAvatars, setReviewAvatars] = useState<Record<string, string>>({});
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    setNeedsLang(storedLang() == null);
-  }, []);
 
 
   useEffect(() => {
@@ -182,18 +174,6 @@ export function PublicProduct({ id }: { id: string }) {
 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / reviews.length : 0;
 
-  if (needsLang === null) {
-    return <div className="flex min-h-dvh items-center justify-center bg-background" />;
-  }
-  if (needsLang) {
-    return (
-      <LanguageChooser
-        suffix={`/p/${id}`}
-        redirectWhenStored={false}
-        onPicked={() => setNeedsLang(false)}
-      />
-    );
-  }
   if (loading || (user && role === "marketer")) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-text-2">
