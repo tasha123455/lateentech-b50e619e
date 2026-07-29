@@ -182,18 +182,6 @@ export function PublicProduct({ id }: { id: string }) {
 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / reviews.length : 0;
 
-  if (needsLang === null) {
-    return <div className="flex min-h-dvh items-center justify-center bg-background" />;
-  }
-  if (needsLang) {
-    return (
-      <LanguageChooser
-        suffix={`/p/${id}`}
-        redirectWhenStored={false}
-        onPicked={() => setNeedsLang(false)}
-      />
-    );
-  }
   if (loading || (user && role === "marketer")) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-text-2">
