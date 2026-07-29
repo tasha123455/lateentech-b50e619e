@@ -1535,58 +1535,39 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
   const arMonths = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
   function pad(n){ return String(n).padStart(2,'0'); }
 
-  function buildDays(n){
-    const list = [];
-    const today = new Date();
-    for(let i=0;i<n;i++){
-      const d = new Date(today);
-      d.setDate(d.getDate()-i);
-      const key = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-      const label = d.getDate()+' '+arMonths[d.getMonth()];
-      list.push({key,label});
-    }
-    return list;
-  }
-  function buildMonths(){
-    const list = [];
-    const today = new Date();
-    const year = today.getFullYear();
-    for(let m=today.getMonth(); m>=0; m--){
-      list.push({ key: year+'-'+pad(m+1), label: arMonths[m]+' '+year });
-    }
-    return list;
-  }
+  /* Date filter — same dropdown-tab pattern as the marketer/business
+     Breakdown pages and the admin Users page: weekday / month-abbr / year
+     values that combine with AND logic, plus an "All time" reset tab. */
+  const ADM_WDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const ADM_WDAYS_AR = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const ADM_MON_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function buildYears(){
     const y = new Date().getFullYear();
-    return [y,y-1,y-2].map(v => ({ key:String(v), label:String(v) }));
+    return [y-2,y-1,y].map(v => ({ key:String(v), label:String(v) }));
   }
 
-  const dayItems = buildDays(14);
-  const monthItems = buildMonths();
+  const dayItems = ADM_WDAYS.map(k => ({ key:k, label:k }));
+  const monthItems = ADM_MON_ABBR.map(k => ({ key:k, label:k }));
   const yearItems = buildYears();
-  const dayMap = Object.fromEntries(dayItems.map(i=>[i.key,i.label]));
-  const monthMap = Object.fromEntries(monthItems.map(i=>[i.key,i.label]));
+  const dayMap = Object.fromEntries(ADM_WDAYS.map((k,i)=>[k, ADM_WDAYS_AR[i]]));
+  const monthMap = Object.fromEntries(ADM_MON_ABBR.map((k,i)=>[k, arMonths[i]]));
 
   const selected = { day:null, month:null, year:null };
 
-  // Real platform-fee sum for whichever day/month/year is selected (or all-time
-  // if none is). Reads from admHomeRaw.orders, populated by admLoadMetrics().
-  // A refund is its own dated event: the fee an order earned still counts on
-  // the day it was created, and the refund subtracts that same amount back
-  // out on the day the refund actually happened — so refunding an order from
-  // an earlier period shows up as a negative entry on today's date instead of
-  // silently erasing that earlier period's history.
+  // Real platform-fee sum for whichever weekday/month/year combination is
+  // selected (or all-time if none is). Reads from admHomeRaw.orders,
+  // populated by admLoadMetrics(). A refund is its own dated event: the fee
+  // an order earned still counts on the day it was created, and the refund
+  // subtracts that same amount back out on the day the refund actually
+  // happened.
   function inSelectedRange(iso){
     if(!iso) return false;
+    if(!selected.day && !selected.month && !selected.year) return true;
     const d = new Date(iso);
-    if(selected.year) return d.getFullYear() === Number(selected.year);
-    if(selected.month){
-      const [y,m] = selected.month.split('-').map(Number);
-      return d.getFullYear()===y && (d.getMonth()+1)===m;
-    }
-    if(selected.day){
-      return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === selected.day;
-    }
+    if(isNaN(d.getTime())) return false;
+    if(selected.day && ADM_WDAYS[d.getDay()] !== selected.day) return false;
+    if(selected.month && ADM_MON_ABBR[d.getMonth()] !== selected.month) return false;
+    if(selected.year && String(d.getFullYear()) !== selected.year) return false;
     return true;
   }
   function getFees(){
@@ -1608,22 +1589,7 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
   function getEmployeeSalaryPaid(){
     const raw = admHomeRaw;
     if(!raw || !raw.employeePayments) return 0;
-    let rows = raw.employeePayments;
-    if(selected.year){
-      const y = Number(selected.year);
-      rows = rows.filter(p => new Date(p.paid_at).getFullYear() === y);
-    } else if(selected.month){
-      const [y,m] = selected.month.split('-').map(Number);
-      rows = rows.filter(p => {
-        const d = new Date(p.paid_at);
-        return d.getFullYear()===y && (d.getMonth()+1)===m;
-      });
-    } else if(selected.day){
-      rows = rows.filter(p => {
-        const d = new Date(p.paid_at);
-        return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === selected.day;
-      });
-    }
+    const rows = raw.employeePayments.filter(p => inSelectedRange(p.paid_at));
     const sum = rows.reduce((s,p) => s + Number(p.amount||0), 0);
     return Math.round(sum*100)/100;
   }
@@ -1691,9 +1657,11 @@ function admCloseEmpHist(){document.getElementById('adm-emp-hist').classList.rem
     const fees = getFees();
     document.getElementById('heroValue').innerHTML = '<span class="cur-sym">د.ل</span>' + fees.toFixed(2);
     let sub = 'إجمالي الأرباح من الطلبيات المؤكدة والمسلّمة';
-    if(selected.year) sub = 'إجمالي أرباح عام ' + selected.year;
-    else if(selected.month) sub = 'إجمالي أرباح شهر ' + monthMap[selected.month];
-    else if(selected.day) sub = 'إجمالي أرباح يوم ' + dayMap[selected.day];
+    const parts = [];
+    if(selected.day) parts.push('أيام ' + dayMap[selected.day]);
+    if(selected.month) parts.push('شهر ' + monthMap[selected.month]);
+    if(selected.year) parts.push('عام ' + selected.year);
+    if(parts.length) sub = 'إجمالي أرباح ' + parts.join(' · ');
     document.getElementById('heroSub').textContent = sub;
     renderProfitCard();
   }
@@ -1743,9 +1711,7 @@ function admToggleProfitCard(){
       el.textContent = item.label;
       el.addEventListener('click', (e) => {
         e.stopPropagation();
-        selected.day = null; selected.month = null; selected.year = null;
         selected[filterKey] = item.key;
-        resetOtherTabs(filterKey);
         updateTabLabel(filterKey);
         closeDropdown(rangeName);
         renderHero();
@@ -1767,26 +1733,12 @@ function admToggleProfitCard(){
 
   const rangeTabs = document.querySelectorAll('.range-tab');
 
-  function resetOtherTabs(exceptKey){
-    Object.keys(rangeMeta).forEach(r => {
-      if(rangeMeta[r].key !== exceptKey){
-        const tab = document.querySelector(`.range-tab[data-range="${r}"]`);
-        tab.innerHTML = rangeMeta[r].defaultLabel + ' <span class="chev">▾</span>';
-        tab.classList.remove('active');
-      }
-    });
-  }
 
   function updateTabLabel(filterKey){
     const rangeName = Object.keys(rangeMeta).find(r => rangeMeta[r].key === filterKey);
     const tab = document.querySelector(`.range-tab[data-range="${rangeName}"]`);
     const val = selected[filterKey];
-    let labelText = rangeMeta[rangeName].defaultLabel;
-    if(val){
-      if(filterKey === 'day') labelText = dayMap[val];
-      else if(filterKey === 'month') labelText = monthMap[val];
-      else labelText = val;
-    }
+    const labelText = val ? val : rangeMeta[rangeName].defaultLabel;
     tab.innerHTML = labelText + ' <span class="chev">▾</span>';
     tab.classList.toggle('active', !!val);
     updateAllTabState();
@@ -1863,53 +1815,50 @@ function admToggleProfitCard(){
 
   function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
 
-  // Mirrors the same day/month/year selection used by the hero card (getFees),
-  // and returns the real end-of-bucket timestamp for each chart point so
-  // metricValueAsOf() can compute a true snapshot at each one.
+  // Mirrors the same weekday/month/year selection used by the hero card
+  // (getFees) and returns the real end-of-bucket timestamp for each chart
+  // point so metricValueAsOf() can compute a true snapshot at each one.
   function getChartConfig(){
-    if(selected.year){
+    const anySel = selected.day || selected.month || selected.year;
+    const today = new Date();
+    if(!anySel){
+      // Default: last 14 days, one point per day. "Today" uses the current
+      // instant rather than end-of-day so the last point is truly live.
+      const ends = [];
+      for(let i=CHART_LEN-1; i>=0; i--){
+        if(i===0){ ends.push(Date.now()); continue; }
+        const d = new Date(today);
+        d.setDate(d.getDate()-i);
+        ends.push(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999).getTime());
+      }
+      return { labels: buildChartDates(CHART_LEN), len: CHART_LEN, ends };
+    }
+    // Year-only selection keeps the monthly view.
+    if(selected.year && !selected.month && !selected.day){
       const year = parseInt(selected.year, 10);
-      const isCurrentYear = year === new Date().getFullYear();
-      const monthCount = isCurrentYear ? (new Date().getMonth()+1) : 12;
+      const isCurrentYear = year === today.getFullYear();
+      const monthCount = isCurrentYear ? (today.getMonth()+1) : 12;
       const labels = arMonths.slice(0, monthCount);
       const ends = [];
       for(let m=1; m<=monthCount; m++){ ends.push(new Date(year, m, 0, 23,59,59,999).getTime()); }
       return { labels, len: monthCount, ends };
     }
-    if(selected.month){
-      const [y, m] = selected.month.split('-').map(Number);
-      const today = new Date();
-      const isCurrentMonth = (y === today.getFullYear() && m === today.getMonth()+1);
-      const dayCount = isCurrentMonth ? today.getDate() : daysInMonth(y, m);
-      const labels = [];
-      const ends = [];
-      for(let d=1; d<=dayCount; d++){
-        labels.push(String(d));
-        ends.push(new Date(y, m-1, d, 23,59,59,999).getTime());
+    // Otherwise: every calendar day matching the selected weekday/month/year,
+    // most recent 30 points, scanning back from today.
+    const years = selected.year ? [parseInt(selected.year,10)] : [today.getFullYear(), today.getFullYear()-1, today.getFullYear()-2];
+    const labels = [], ends = [];
+    const start = new Date(Math.max(...years), 11, 31);
+    const cursor = new Date(Math.min(start.getTime(), today.getTime()));
+    const stop = new Date(Math.min(...years), 0, 1).getTime();
+    while(cursor.getTime() >= stop && labels.length < 30){
+      if(inSelectedRange(cursor.toISOString())){
+        labels.unshift(cursor.getDate()+'/'+(cursor.getMonth()+1));
+        ends.unshift(new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate(), 23,59,59,999).getTime());
       }
-      return { labels, len: dayCount, ends };
+      cursor.setDate(cursor.getDate()-1);
     }
-    if(selected.day){
-      const [y,m,d] = selected.day.split('-').map(Number);
-      const labels = [];
-      const ends = [];
-      for(let h=0; h<24; h+=2){
-        labels.push(pad(h)+':00');
-        ends.push(new Date(y, m-1, d, h+2, 0, 0, 0).getTime()-1);
-      }
-      return { labels, len: labels.length, ends };
-    }
-    // Default: last 14 days, one point per day. "Today" uses the current
-    // instant rather than end-of-day so the last point is truly live.
-    const today = new Date();
-    const ends = [];
-    for(let i=CHART_LEN-1; i>=0; i--){
-      if(i===0){ ends.push(Date.now()); continue; }
-      const d = new Date(today);
-      d.setDate(d.getDate()-i);
-      ends.push(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999).getTime());
-    }
-    return { labels: buildChartDates(CHART_LEN), len: CHART_LEN, ends };
+    if(!labels.length) return { labels:['—'], len:1, ends:[Date.now()] };
+    return { labels, len: labels.length, ends };
   }
 
   function buildMetricSeries(key, ends){
@@ -1919,9 +1868,15 @@ function admToggleProfitCard(){
   function updateChartTitle(){
     const titleEl = document.querySelector('.chart-title');
     let text = 'الأداء عبر آخر 14 يوماً';
-    if(selected.year) text = 'الأداء الشهري لعام ' + selected.year;
-    else if(selected.month) text = 'الأداء اليومي لشهر ' + monthMap[selected.month];
-    else if(selected.day) text = 'الأداء بالساعة ليوم ' + dayMap[selected.day];
+    if(selected.year && !selected.month && !selected.day){
+      text = 'الأداء الشهري لعام ' + selected.year;
+    } else if(selected.day || selected.month || selected.year){
+      const parts = [];
+      if(selected.day) parts.push('أيام ' + dayMap[selected.day]);
+      if(selected.month) parts.push('شهر ' + monthMap[selected.month]);
+      if(selected.year) parts.push('عام ' + selected.year);
+      text = 'الأداء اليومي · ' + parts.join(' · ');
+    }
     titleEl.textContent = text;
   }
 
