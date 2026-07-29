@@ -233,8 +233,26 @@ export function PublicProduct({ id }: { id: string }) {
     const dx = t.clientX - start.x;
     const dy = t.clientY - start.y;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
-    setIdx((i) => (dx < 0 ? Math.min(photos.length - 1, i + 1) : Math.max(0, i - 1)));
   };
+
+  const onLightboxTouchStart = (e: TouchEvent) => {
+    const t = e.touches[0];
+    lightboxTouchRef.current = { x: t.clientX, y: t.clientY };
+  };
+  const onLightboxTouchEnd = (e: TouchEvent) => {
+    const start = lightboxTouchRef.current;
+    lightboxTouchRef.current = null;
+    if (!start || photos.length < 2) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    setLightboxIdx((i) => {
+      const cur = i ?? 0;
+      return dx < 0 ? Math.min(photos.length - 1, cur + 1) : Math.max(0, cur - 1);
+    });
+  };
+
 
   return (
     <div className={`mx-auto min-h-screen max-w-[520px] bg-background ${isMarketer || user ? "pb-28" : "pb-40"}`}>
