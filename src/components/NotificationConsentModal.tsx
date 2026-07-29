@@ -34,17 +34,18 @@ export function NotificationConsentModal() {
     if (Notification.permission !== "default") return;
     if (!isInstalledPWA()) return;
     try {
-      const dismissedAt = localStorage.getItem(DISMISS_KEY);
-      if (dismissedAt) {
+      const dismissed = localStorage.getItem(DISMISS_KEY);
+      if (dismissed) {
+        // Dismissed before: count this visit and only re-ask every 30 visits.
         const visits = Number(localStorage.getItem(DISMISS_VISITS_KEY) || "0") + 1;
         if (visits < VISITS_BEFORE_REASK) {
           localStorage.setItem(DISMISS_VISITS_KEY, String(visits));
           return;
         }
-        // Threshold reached — clear the dismissal and ask again.
-        localStorage.removeItem(DISMISS_KEY);
-        localStorage.removeItem(DISMISS_VISITS_KEY);
+        // Threshold reached — show again and restart the 30-visit countdown.
+        localStorage.setItem(DISMISS_VISITS_KEY, "0");
       }
+      // Never dismissed → show on the very first visit.
     } catch {
       /* ignore */
     }
@@ -68,6 +69,12 @@ export function NotificationConsentModal() {
     setBusy(true);
     try {
       await requestPushPermissionAndSubscribe(user.id);
+      try {
+        localStorage.removeItem(DISMISS_KEY);
+        localStorage.removeItem(DISMISS_VISITS_KEY);
+      } catch {
+        /* ignore */
+      }
     } finally {
       setBusy(false);
       setOpen(false);
