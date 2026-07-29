@@ -602,7 +602,19 @@ window.admSetUserPeriod=admSetUserPeriod;
 function admRenderUsers(list){
   const root=document.getElementById('users-list');
   if(!list.length){root.innerHTML='<div class="adm-empty">No users found.</div>';return;}
-  root.innerHTML=list.map(u=>{
+  // Group by join-date bucket at the active D/M/Y granularity, newest first.
+  const groups=new Map();
+  list.forEach(u=>{
+    const b=__admUserBucket(u.created_at);
+    if(!groups.has(b.key))groups.set(b.key,{label:b.label,sort:b.sort,items:[]});
+    groups.get(b.key).items.push(u);
+  });
+  const ordered=[...groups.values()].sort((a,b)=>b.sort-a.sort);
+  root.innerHTML=ordered.map(g=>`<div class="adm-date-group"><div class="adm-date-group-title" data-no-i18n>${admEsc(g.label)} <span>${g.items.length}</span></div>${g.items.map(__admUserCardHtml).join('')}</div>`).join('');
+}
+
+function __admUserCardHtml(u){
+  return (u=>{
     const uid=u.id;
     const name=u.business_name||u.full_name||'Unnamed';
     const nameSafe=admEsc(name).replace(/'/g,"&#39;");
