@@ -405,7 +405,9 @@ export function PublicProduct({ id }: { id: string }) {
                                 <div key={city} className="flex items-center justify-between rounded bg-surface-2 px-2 py-1.5 text-xs">
                                   <span className="text-text-1">{city}</span>
                                   <span className="text-text-2">
-                                    Delivery: {Number(v.delivery) || 0} {currencyLabel}
+                                    Delivery: {Number(v.delivery) === 0 || !Number(v.delivery)
+                                      ? <span data-no-i18n>{lang === "ar" ? "مجاني" : "Free"}</span>
+                                      : <>{Number(v.delivery)} {currencyLabel}</>}
                                   </span>
                                 </div>
                               ))}
