@@ -114,9 +114,6 @@ export function PublicProduct({ id }: { id: string }) {
   const [reviewAvatars, setReviewAvatars] = useState<Record<string, string>>({});
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    setNeedsLang(storedLang() == null);
-  }, []);
 
 
   useEffect(() => {
