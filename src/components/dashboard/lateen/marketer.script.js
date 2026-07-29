@@ -876,7 +876,7 @@ async function renderTransactions(){
         (d.customer_notes?`<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#0f0f0f;color:var(--color-text-secondary);font-size:11px"><b>${__t('Notes','ملاحظات')}:</b> <span data-no-i18n>${__txnEsc(d.customer_notes)}</span></div>`:'')+
         ((d.admin_notes||d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_notes||d.admin_comment||d.admin_note)}</span></div>`:'');
     }
-    const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"/></div>`:iconHtml;
+    const photoWrapHtml=hasIconPhoto?`<div class="notif-photo-wrap"><img src="${__txnEsc(photoUrl)}" alt="" loading="lazy"${photoTap} style="cursor:zoom-in"/></div>`:iconHtml;
     const detailsHtml=`<div class="notif-detail-body"><div class="notif-details-box">${detailRows}</div></div>`;
     return `<div class="notif-item expandable" data-id="${n.id}">
       <div class="notif-top" onclick="__notifToggle(this)">
