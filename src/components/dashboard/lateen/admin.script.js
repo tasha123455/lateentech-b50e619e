@@ -2063,8 +2063,9 @@ const FK='lateen_adm_forms';
   },true);
   const restore=()=>{
     const o=load();if(!Object.keys(o).length)return;
+    const focused=document.activeElement;
     document.querySelectorAll(sel).forEach(el=>{
-      if(skip(el)||el.value||!visible(el))return;
+      if(el===focused||skip(el)||el.value||!visible(el))return;
       const v=o[keyOf(el)];
       if(v!=null&&v!==''){el.value=v;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
     });
@@ -2078,6 +2079,8 @@ const FK='lateen_adm_forms';
   },true);
   let n=0;const iv=setInterval(()=>{restore();if(++n>40)clearInterval(iv);},250);
   restore();
-  window.addEventListener('pageshow',restore);
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')restore();});
+  /* Only restore for a genuine page load or a bfcache resume — never on a
+     plain tab switch back, which used to re-write inputs (and fire synthetic
+     input events) and caused the "typing lost / page jumps away" bug. */
+  window.addEventListener('pageshow',e=>{if(e&&e.persisted)restore();});
 })();
