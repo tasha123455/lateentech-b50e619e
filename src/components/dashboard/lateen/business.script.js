@@ -1318,13 +1318,7 @@ async function refreshBizNotifications(){
     }
     return `<div class="notif-item">${iconHtml}<div style="flex:1;min-width:0"><div class="notif-title"${isAdminMsg?' data-no-i18n':''}>${esc(t)}</div>${b?`<div class="notif-body">${esc(b)}</div>`:''}${reviewDetails}<div class="notif-time">${ago(n.created_at)}</div></div><div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">${rightDot}</div></div>`;
   };
-  // Admin-to-business notices (refunds + direct admin messages) live in their
-  // own separate box, apart from the regular activity feed.
-  const __ADMIN_KINDS=new Set(['order_refunded','admin_message','admin_broadcast']);
-  const adminList=list.filter(n=>__ADMIN_KINDS.has(n.kind));
-  const restList=list.filter(n=>!__ADMIN_KINDS.has(n.kind));
-  const section=(title,items)=>items.length?`<div class="notif-group"><div class="notif-group-title">${title}</div>${items.map(__renderNotif).join('')}</div>`:'';
-  root.innerHTML=section(tr('From the admin','من الإدارة'),adminList)+section(tr('Activity','النشاط'),restList);
+  root.innerHTML=list.map(__renderNotif).join('');
 }
 window.refreshBizNotifications=refreshBizNotifications;
 async function __clearOsNotifBadge(){
