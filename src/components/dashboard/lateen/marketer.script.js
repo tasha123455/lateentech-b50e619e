@@ -430,7 +430,11 @@ function renderOrders(){
     if(o.reviewedAt)metaBits.push(`${T.reviewedAt}: ${__fmtDT(o.reviewedAt)}`);
     const metaLine=metaBits.length?`<div class="meta-line">${metaBits.map(__escH).join('<br>')}</div>`:'';
     const adminNote=(isRejected||isFailed)&&o.adminNotes?`<div class="admin-note">${ALERT_ICO}<div><b>${T.adminNoteLbl}:</b> <span data-no-i18n>${__escH(o.adminNotes)}</span></div></div>`:'';
-    const businessNote=isFailed&&o.businessNotes?`<div class="admin-note">${ALERT_ICO}<div><b>${T.bizNoteLbl}:</b> <span data-no-i18n>${__escH(o.businessNotes)}</span></div></div>`:'';
+    // Merchant note only when the business owner genuinely wrote it — admin
+    // actions (refund/reject) live in their own dedicated note field and show
+    // under the "Admin notes" label above, never as a merchant note.
+    const __bizIsAdminNote=!!o.adminNotes&&String(o.businessNotes||'').trim()===String(o.adminNotes||'').trim();
+    const businessNote=isFailed&&o.businessNotes&&!__bizIsAdminNote?`<div class="admin-note">${ALERT_ICO}<div><b>${T.bizNoteLbl}:</b> <span data-no-i18n>${__escH(o.businessNotes)}</span></div></div>`:'';
     let receiptBtn='';
     if(isDraft)receiptBtn=`<button class="receipt-btn primary" onclick="event.stopPropagation();editOrder('${o.id}')">${T.addSend}</button>`;
     else if(isRejected)receiptBtn=`<button class="receipt-btn urgent" onclick="event.stopPropagation();uploadOrderReceipt('${o.id}')">${UP_ICO}${T.reupload}</button>`;

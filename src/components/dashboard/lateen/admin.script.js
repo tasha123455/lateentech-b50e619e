@@ -1733,15 +1733,6 @@ function admToggleProfitCard(){
 
   const rangeTabs = document.querySelectorAll('.range-tab');
 
-  function resetOtherTabs(exceptKey){
-    Object.keys(rangeMeta).forEach(r => {
-      if(rangeMeta[r].key !== exceptKey){
-        const tab = document.querySelector(`.range-tab[data-range="${r}"]`);
-        tab.innerHTML = rangeMeta[r].defaultLabel + ' <span class="chev">▾</span>';
-        tab.classList.remove('active');
-      }
-    });
-  }
 
   function updateTabLabel(filterKey){
     const rangeName = Object.keys(rangeMeta).find(r => rangeMeta[r].key === filterKey);
