@@ -745,7 +745,9 @@ function mpInitSwipe(pid){
       const p=products.find(x=>x.id===pid);
       if(!p||!p.photos)return;
       const cur=mpPhotoIndex[pid]||0;
-      const next=dx<0?Math.min(cur+1,p.photos.length-1):Math.max(cur-1,0);
+      const rtl=(typeof __ar==='function'&&__ar());
+      const fwd=rtl?dx>0:dx<0;
+      const next=fwd?Math.min(cur+1,p.photos.length-1):Math.max(cur-1,0);
       mpSlidePhoto(pid,next);
     }
   },{passive:true});
