@@ -860,7 +860,7 @@ async function renderTransactions(){
       detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Failed','فشل'))+
         ((d.admin_comment||d.admin_note)?`<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#181818;color:var(--color-text-secondary);font-size:11px"><b>${__t('Note','ملاحظة')}:</b> <span data-no-i18n>${__txnEsc(d.admin_comment||d.admin_note)}</span></div>`:'');
     }else if(type==='withdraw'){
-      detailRows=photo+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
+      detailRows=bigPhoto+__txnRow(__t('Amount','المبلغ'),(amtStr||'0.00')+' '+sym)+__txnRow(__t('Status','الحالة'),__t('Paid','مدفوع'));
     }else{
       detailRows=photo+
         __txnRow(__t('Order Code','كود الطلبيه'),d.order_code)+
