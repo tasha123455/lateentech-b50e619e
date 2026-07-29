@@ -121,14 +121,16 @@
 .adm-filter-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
 .adm-filter-chip { font-size: 11px; padding: 6px 12px; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); color: var(--txt-2); cursor: pointer; font-family: var(--font); font-weight: 500; }
 .adm-filter-chip.on { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
-/* Users page D/M/Y granularity toggle — same three-button pattern as the
-   marketer analytics period tabs; it re-buckets the list, it doesn't filter. */
-.period-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
-.period-tabs .ptab { font-size: 11px; padding: 4px 11px; border-radius: 16px; border: 0.5px solid var(--border); background: transparent; color: var(--txt-2); cursor: pointer; font-family: var(--font); }
-.period-tabs .ptab.active { background: var(--accent-tint); color: var(--accent); font-weight: 600; }
-.adm-date-group { margin-bottom: 14px; }
-.adm-date-group-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--txt-2); padding: 0 2px 6px; display: flex; align-items: center; gap: 6px; }
-.adm-date-group-title span { font-weight: 600; color: var(--txt-2); opacity: 0.65; }
+/* Users page date filter — same dropdown-tab pattern as the Breakdown page. */
+.bd-range-tabs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.bd-range-tab { flex: 1; min-width: 74px; background: var(--surface); border: 0.5px solid var(--border); color: var(--txt-1); padding: 10px 8px; border-radius: 14px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; font-family: var(--font); }
+.bd-range-tab.active { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+.bd-range-tab .bd-chev { font-size: 10px; transition: transform .2s; }
+.bd-range-tab.open .bd-chev { transform: rotate(180deg); }
+.bd-dropdown-list { display: none; flex-direction: column; gap: 6px; margin: 0 0 10px; max-height: 220px; overflow-y: auto; }
+.bd-dropdown-list.open { display: flex; }
+.bd-dd-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 9px 13px; font-size: 12.5px; cursor: pointer; color: var(--txt-2); }
+.bd-dd-item.clear { color: #c0392b; font-weight: 600; }
 
 
 .adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; align-items: flex-end; justify-content: center; }
@@ -577,10 +579,16 @@
       <button class="adm-filter-chip" data-role="business" onclick="admSetUserFilter('business',this)">Businesses</button>
       <button class="adm-filter-chip" data-role="admin" onclick="admSetUserFilter('admin',this)">Admins</button>
     </div>
-    <div class="period-tabs" id="user-period-tabs">
-      <button type="button" class="ptab active" onclick="admSetUserPeriod('D',this)">D</button>
-      <button type="button" class="ptab" onclick="admSetUserPeriod('M',this)">M</button>
-      <button type="button" class="ptab" onclick="admSetUserPeriod('Y',this)">Y</button>
+    <div class="bd-range-tabs" id="user-date-tabs">
+      <div class="bd-range-tab active" data-range="all" onclick="admUserDateTabClick('all',this)">All time</div>
+      <div class="bd-range-tab" data-range="daily" onclick="admUserDateTabClick('daily',this)">Day <span class="bd-chev">▾</span></div>
+      <div class="bd-range-tab" data-range="monthly" onclick="admUserDateTabClick('monthly',this)">Month <span class="bd-chev">▾</span></div>
+      <div class="bd-range-tab" data-range="yearly" onclick="admUserDateTabClick('yearly',this)">Year <span class="bd-chev">▾</span></div>
+    </div>
+    <div id="user-date-dropdowns">
+      <div class="bd-dropdown-list" id="adm-u-daily-list"></div>
+      <div class="bd-dropdown-list" id="adm-u-monthly-list"></div>
+      <div class="bd-dropdown-list" id="adm-u-yearly-list"></div>
     </div>
     <input class="adm-search" id="user-search" placeholder="Search by name, email, phone, business…" oninput="admUserSearch(this.value)" />
 
