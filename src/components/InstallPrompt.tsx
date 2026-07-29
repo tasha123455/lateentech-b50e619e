@@ -137,10 +137,10 @@ export function InstallPrompt() {
       }}
     >
       <img
-        src="/icon-192.png"
+        src="/wasla-mark-192.png"
         alt=""
         aria-hidden
-        style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0 }}
+        style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, objectFit: "contain" }}
       />
       <div style={{ flex: 1, minWidth: 0, textAlign: dir === "rtl" ? "right" : "left" }}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{title}</div>
@@ -152,8 +152,8 @@ export function InstallPrompt() {
             type="button"
             onClick={handleInstall}
             style={{
-              background: "#2dbd8f",
-              color: "#0d0d0d",
+              background: "linear-gradient(90deg, #e82056 0%, #b42ddc 50%, #2ec478 100%)",
+              color: "#ffffff",
               border: "none",
               borderRadius: 8,
               padding: "7px 14px",
