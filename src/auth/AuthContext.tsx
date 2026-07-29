@@ -11,6 +11,8 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/push-client";
 import { NotificationConsentModal } from "@/components/NotificationConsentModal";
+import { readCachedRole, readCachedSession, writeCachedRole } from "@/auth/boot-cache";
+
 
 export type Role = "marketer" | "business" | "admin";
 
