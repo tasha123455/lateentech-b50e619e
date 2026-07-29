@@ -952,14 +952,18 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
 })();
 /* persist page + scroll across refresh */
 (function(){
-  const K='lateen_mk_page',S='lateen_mk_scroll';
+    /* durable store: localStorage so state survives a FULL page reload or an
+     OS tab-discard/restore, not just in-app redirects. Falls back to (and
+     migrates) the previous sessionStorage values once. */
+  const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
+const K='lateen_mk_page',S='lateen_mk_scroll';
   let restoring=false;
   const _g=goTo;
-  goTo=function(id){try{sessionStorage.setItem(K,id);}catch(e){}return _g.apply(this,arguments);};
+  goTo=function(id){try{PS.set(K,id);}catch(e){}return _g.apply(this,arguments);};
   try{
-    const sv=sessionStorage.getItem(K);
+    const sv=PS.get(K);
     if(sv&&document.getElementById(sv))_g(sv);
-    const target=parseInt(sessionStorage.getItem(S)||'0',10);
+    const target=parseInt(PS.get(S)||'0',10);
     if(target>0){
       restoring=true;
       const t0=Date.now();
@@ -973,14 +977,21 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
       requestAnimationFrame(tick);
     }
   }catch(e){restoring=false;}
-  window.addEventListener('scroll',()=>{if(restoring)return;try{sessionStorage.setItem(S,String(window.scrollY||0));}catch(e){}},{passive:true});
+  window.addEventListener('scroll',()=>{if(restoring)return;try{PS.set(S,String(window.scrollY||0));}catch(e){}},{passive:true});
+  const flush=()=>{if(restoring)return;PS.set(S,String(window.scrollY||0));};
+  window.addEventListener('pagehide',flush);
+  window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush();});
 })();
 
 /* generic "restore what was typed" layer for forms/modals that don't already
    have a dedicated draft system (the order form `f-*` and the payout form
    `pd*` keep their own drafts and are skipped here). */
 (function(){
-  const FK='lateen_mk_forms';
+    /* durable store: localStorage so state survives a FULL page reload or an
+     OS tab-discard/restore, not just in-app redirects. Falls back to (and
+     migrates) the previous sessionStorage values once. */
+  const PS={get(k){try{const v=localStorage.getItem(k);if(v!=null)return v;const s=sessionStorage.getItem(k);if(s!=null)localStorage.setItem(k,s);return s;}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}try{sessionStorage.setItem(k,v);}catch(e){}}};
+const FK='lateen_mk_forms';
   const sel='input,textarea,select';
   const owned=el=>{const id=(el.id||'')+'';return /^f-/.test(id)||/^pd/i.test(id)||!!(el.closest&&el.closest('#form-overlay,#pay-details-overlay,#receipt-picker-overlay,#prod-picker-overlay,#withdraw-overlay'));};
   const skip=el=>!el||el.type==='password'||el.type==='file'||el.type==='hidden'||el.type==='checkbox'||el.type==='radio'||el.dataset.noDraft==='1'||owned(el);
@@ -991,8 +1002,8 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
     const all=Array.prototype.slice.call(document.querySelectorAll(sel));
     return 'idx:'+all.indexOf(el);
   };
-  const load=()=>{try{return JSON.parse(sessionStorage.getItem(FK)||'{}');}catch(e){return{};}};
-  const save=o=>{try{sessionStorage.setItem(FK,JSON.stringify(o));}catch(e){}};
+  const load=()=>{try{return JSON.parse(PS.get(FK)||'{}');}catch(e){return{};}};
+  const save=o=>{PS.set(FK,JSON.stringify(o))};
   document.addEventListener('input',e=>{
     const el=e.target;
     if(!el||!el.matches||!el.matches(sel)||skip(el))return;
@@ -1021,8 +1032,17 @@ window.__lateenUnsubs=window.__lateenUnsubs||[];if(window.LateenAPI&&window.Late
       if(v!=null&&v!==''){el.value=v;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
     });
   };
-  let n=0;const iv=setInterval(()=>{restore();if(++n>12)clearInterval(iv);},250);
+  document.addEventListener('change',e=>{
+    const el=e.target;
+    if(!el||!el.matches||!el.matches(sel)||skip(el))return;
+    const o=load();const k=keyOf(el);
+    if(el.value)o[k]=el.value;else delete o[k];
+    save(o);
+  },true);
+  let n=0;const iv=setInterval(()=>{restore();if(++n>40)clearInterval(iv);},250);
   restore();
+  window.addEventListener('pageshow',restore);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')restore();});
 })();
 
 /* auto-hide bottom nav on scroll down, show on scroll up */
