@@ -1240,7 +1240,7 @@ async function refreshBizNotifications(){
     if(n.kind==='account_deletion_scheduled'||t==='Account deletion scheduled'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const sched=d&&d.scheduled_for?new Date(d.scheduled_for):null;const dateStr=sched?sched.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'';t=tr('Account deletion scheduled','سوف يتم حذف حسابك');b=tr('Your account will be permanently deleted on '+dateStr+'. You can cancel anytime from your profile info page.','سيتم حذف حسابك نهائياً بتاريخ '+dateStr+'. يمكنك إلغاء الطلب في أي وقت من صفحه معلوماتك الشخصيه.');}
     if(n.kind==='account_deletion_rejected'||t==='Account deletion request declined'){t=tr('Account deletion request declined','تم رفض طلب حذف حسابك');}
     if(n.kind==='admin_message'||n.kind==='admin_broadcast')b='';
-    if(n.kind==='order_refunded'){t=tr('Order refunded','تم استرجاع الطلب');b=tr('This order was refunded by the admin and no longer counts toward your earnings.','تم استرجاع هذا الطلب من قبل الأدمن ولم يعد محتسباً ضمن أرباحك.');}
+    if(n.kind==='order_refunded'){let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}const __pn=(d&&d.product_name)||'';const __cn=(d&&d.customer_name)||'';t=tr('Order refunded','تم استرجاع الطلب');b=__ar()?('تم استرجاع طلبية '+__pn+' للزبون '+__cn):('Order '+__pn+' refunded for customer '+__cn);}
     let reviewDetails='';
     if(n.kind==='product_review'){
       let d=n.data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
