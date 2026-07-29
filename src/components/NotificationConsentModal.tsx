@@ -6,7 +6,9 @@ import {
 } from "@/lib/push-client";
 
 const DISMISS_KEY = "wasla_push_prompt_dismissed_at";
-const DISMISS_COOLDOWN_MS = 1000 * 60 * 60 * 24 * 3; // 3 days
+const DISMISS_VISITS_KEY = "wasla_push_prompt_visits_since_dismiss";
+// After dismissing, the prompt comes back once the user has visited 30 more times.
+const VISITS_BEFORE_REASK = 30;
 
 /**
  * Custom in-app modal that offers to enable push notifications.
@@ -32,8 +34,17 @@ export function NotificationConsentModal() {
     if (Notification.permission !== "default") return;
     if (!isInstalledPWA()) return;
     try {
-      const raw = localStorage.getItem(DISMISS_KEY);
-      if (raw && Date.now() - Number(raw) < DISMISS_COOLDOWN_MS) return;
+      const dismissedAt = localStorage.getItem(DISMISS_KEY);
+      if (dismissedAt) {
+        const visits = Number(localStorage.getItem(DISMISS_VISITS_KEY) || "0") + 1;
+        if (visits < VISITS_BEFORE_REASK) {
+          localStorage.setItem(DISMISS_VISITS_KEY, String(visits));
+          return;
+        }
+        // Threshold reached — clear the dismissal and ask again.
+        localStorage.removeItem(DISMISS_KEY);
+        localStorage.removeItem(DISMISS_VISITS_KEY);
+      }
     } catch {
       /* ignore */
     }
@@ -46,6 +57,7 @@ export function NotificationConsentModal() {
   const dismiss = () => {
     try {
       localStorage.setItem(DISMISS_KEY, String(Date.now()));
+      localStorage.setItem(DISMISS_VISITS_KEY, "0");
     } catch {
       /* ignore */
     }
@@ -141,7 +153,7 @@ export function NotificationConsentModal() {
               flex: 1.4,
               padding: "12px 14px",
               borderRadius: 12,
-              background: "#0A3C2A",
+              background: "linear-gradient(90deg, #e82056 0%, #b42ddc 50%, #2ec478 100%)",
               color: "#fff",
               border: "none",
               fontWeight: 700,
