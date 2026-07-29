@@ -39,9 +39,14 @@ type AuthState = {
 const Ctx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<Role | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Paint the signed-in UI straight from the persisted session so a cold
+  // reload (tab discarded while the phone was locked) doesn't flash a
+  // "Loading…" screen before landing back where the user was.
+  const boot = typeof window !== "undefined" ? readCachedSession() : null;
+  const [session, setSession] = useState<Session | null>(boot);
+  const [role, setRole] = useState<Role | null>(boot ? readCachedRole() : null);
+  const [loading, setLoading] = useState(!boot);
+
 
   const loadRole = useCallback(async (userId: string) => {
     const { data, error } = await supabase
