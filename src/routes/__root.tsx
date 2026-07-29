@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { LanguageGate } from "@/i18n/LanguageGate";
 
 function NotFoundComponent() {
   return (
