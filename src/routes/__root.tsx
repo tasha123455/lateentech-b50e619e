@@ -126,6 +126,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
           }}
         />
         <AuthProvider>{children}</AuthProvider>
+        {/* Chrome fires `beforeinstallprompt` very early — often before React
+            hydrates. Stash it on window so <InstallPrompt/> can still use it. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){window.__waslaBIP=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__waslaBIP=e;try{window.dispatchEvent(new Event('wasla-bip'));}catch(x){}});})();",
+          }}
+        />
         <InstallPrompt />
         <Scripts />
       </body>
