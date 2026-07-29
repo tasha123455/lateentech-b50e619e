@@ -108,9 +108,11 @@ export function PublicProduct({ id }: { id: string }) {
   const [shipsOpen, setShipsOpen] = useState(false);
   const [zoneOpen, setZoneOpen] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewAvatars, setReviewAvatars] = useState<Record<string, string>>({});
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const lightboxTouchRef = useRef<{ x: number; y: number } | null>(null);
 
 
 
@@ -234,6 +236,25 @@ export function PublicProduct({ id }: { id: string }) {
     setIdx((i) => (dx < 0 ? Math.min(photos.length - 1, i + 1) : Math.max(0, i - 1)));
   };
 
+  const onLightboxTouchStart = (e: TouchEvent) => {
+    const t = e.touches[0];
+    lightboxTouchRef.current = { x: t.clientX, y: t.clientY };
+  };
+  const onLightboxTouchEnd = (e: TouchEvent) => {
+    const start = lightboxTouchRef.current;
+    lightboxTouchRef.current = null;
+    if (!start || photos.length < 2) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    setLightboxIdx((i) => {
+      const cur = i ?? 0;
+      return dx < 0 ? Math.min(photos.length - 1, cur + 1) : Math.max(0, cur - 1);
+    });
+  };
+
+
   return (
     <div className={`mx-auto min-h-screen max-w-[520px] bg-background ${isMarketer || user ? "pb-28" : "pb-40"}`}>
       <header className="flex items-center justify-between px-4 py-3">
@@ -262,7 +283,7 @@ export function PublicProduct({ id }: { id: string }) {
                 decoding="async"
                 fetchPriority={i === 0 ? "high" : "auto"}
                 className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in bg-surface-2"
-                onClick={() => setLightbox(photos[i])}
+                onClick={() => setLightboxIdx(i)}
               />
             ))}
           </div>
@@ -500,6 +521,50 @@ export function PublicProduct({ id }: { id: string }) {
           </div>
         )}
       </div>
+
+      {lightboxIdx !== null && photos.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          dir="ltr"
+          onClick={() => setLightboxIdx(null)}
+          onTouchStart={onLightboxTouchStart}
+          onTouchEnd={onLightboxTouchEnd}
+        >
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={(e) => { e.stopPropagation(); setLightboxIdx(null); }}
+            className="absolute right-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border-[1.5px] border-white/55 bg-black/60 text-3xl leading-none text-white shadow-lg backdrop-blur"
+            style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))" }}
+          >
+            &times;
+          </button>
+          <div className="relative h-full w-full overflow-hidden">
+            <div
+              className="flex h-full w-full transition-transform duration-300 ease-out"
+              style={{ transform: `translateX(-${lightboxIdx * 100}%)` }}
+            >
+              {photos.map((src, i) => (
+                <div key={i} className="flex h-full w-full flex-shrink-0 items-center justify-center">
+                  <img src={src} alt="" className="max-h-full max-w-full object-contain" />
+                </div>
+              ))}
+            </div>
+          </div>
+          {photos.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {photos.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); setLightboxIdx(i); }}
+                  aria-label={`Photo ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${i === lightboxIdx ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {lightbox && (
         <div
