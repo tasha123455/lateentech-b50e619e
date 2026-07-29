@@ -10,6 +10,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/push-client";
+import { clearUserScopedState, enforceUserScope } from "@/lib/user-scope";
 import { NotificationConsentModal } from "@/components/NotificationConsentModal";
 
 export type Role = "marketer" | "business" | "admin";
