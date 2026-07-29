@@ -188,3 +188,8 @@
 .lateen-business #pg-notif .notif-detail-body{ max-height:0; opacity:0; overflow:hidden; padding:0 14px; transition:max-height .5s cubic-bezier(.4,0,.2,1), opacity .3s ease .12s, padding .45s cubic-bezier(.4,0,.2,1); }
 .lateen-business #pg-notif .notif-item.expanded .notif-detail-body{ max-height:1200px; opacity:1; padding:14px; }
 .lateen-business #pg-notif .notif-details-box{ padding:10px 12px; border-radius:10px; background:#181818; border:0.5px solid #142a20; }
+
+/* Notification groups: admin-to-business notices sit in their own box. */
+.lateen-business .notif-list{ background: transparent; border: none; border-radius: 0; gap: 12px; overflow: visible; }
+.lateen-business .notif-group{ background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 16px; overflow: hidden; }
+.lateen-business .notif-group-title{ font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--color-text-secondary); padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
