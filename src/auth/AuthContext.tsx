@@ -77,12 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!active) return;
       const silent = !!opts?.silent;
       if (!silent) setLoading(true);
+      // Wipe any cached dashboard state belonging to a different account
+      // before this session's UI reads it.
+      enforceUserScope(nextSession?.user?.id ?? null);
       setSession(nextSession);
       if (!nextSession?.user) {
         setRole(null);
         setLoading(false);
         return;
       }
+
 
       // Subscribe this device for push notifications (self-hosted, VAPID-based).
       // Safe to call repeatedly — no-ops if already subscribed or permission was denied.
