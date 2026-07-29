@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { LanguageGate } from "@/i18n/LanguageGate";
 
 function NotFoundComponent() {
   return (
@@ -125,7 +126,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
               "(function(){try{var p=location.pathname||'';var lang=/^\\/ar(\\/|$)/.test(p)?'ar':/^\\/en(\\/|$)/.test(p)?'en':null;if(!lang){try{var s=localStorage.getItem('lateen_lang');if(s==='ar'||s==='en')lang=s;}catch(e){}}if(!lang){try{var n=(navigator.language||'').toLowerCase();lang=n.indexOf('ar')===0?'ar':'en';}catch(e){lang='en';}}var h=document.documentElement;h.setAttribute('lang',lang);h.setAttribute('dir',lang==='ar'?'rtl':'ltr');}catch(e){}})();",
           }}
         />
+        {/* First visit only: hide the whole app until a language is picked. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var s=localStorage.getItem('lateen_lang');if(s!=='ar'&&s!=='en'){document.documentElement.classList.add('lang-pending');}}catch(e){}})();",
+          }}
+        />
         <AuthProvider>{children}</AuthProvider>
+
         {/* Chrome fires `beforeinstallprompt` very early — often before React
             hydrates. Stash it on window so <InstallPrompt/> can still use it. */}
         <script
@@ -148,6 +158,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <LanguageGate />
     </QueryClientProvider>
   );
 }
+
