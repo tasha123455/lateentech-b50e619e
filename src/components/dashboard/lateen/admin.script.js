@@ -558,10 +558,22 @@ async function admLoadUsers(search){
     const list=await window.LateenAPI.admin.listAllUsers('');
     admUsersCache=list;
     const sig=JSON.stringify(list.map(u=>[u.id,u.role,u.banned_at,u.frozen_at,u.full_name,u.business_name,u.email,u.phone]));
-    if(__admUnchanged('users:'+admUserSearchQ+':'+admUserPeriod,sig,first))return;
+    if(__admUnchanged('users:'+admUserSearchQ+':'+JSON.stringify(__admUSelected),sig,first))return;
     __admMarkLoaded(root);
     admRenderUsers(admApplyUserFilter(list));
   }catch(e){console.error('[admin] users',e);if(first)root.innerHTML='<div class="adm-empty">Failed to load.</div>';}
+}
+
+const __ADM_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function __admUDateMatch(iso){
+  const sel=__admUSelected;
+  if(!sel.day&&!sel.month&&!sel.year)return true;
+  const d=iso?new Date(iso):null;
+  if(!d||isNaN(d.getTime()))return false;
+  if(sel.day&&__ADM_UDAYS[d.getDay()]!==sel.day)return false;
+  if(sel.month&&__ADM_MONTHS[d.getMonth()]!==sel.month)return false;
+  if(sel.year&&String(d.getFullYear())!==sel.year)return false;
+  return true;
 }
 
 function admApplyUserFilter(list){
@@ -569,6 +581,7 @@ function admApplyUserFilter(list){
   if(admUserRoleFilter)out=out.filter(u=>(u.role||'marketer')===admUserRoleFilter);
   const q=(admUserSearchQ||'').trim().toLowerCase();
   if(q)out=out.filter(u=>[u.full_name,u.business_name,u.email,u.phone].some(v=>String(v||'').toLowerCase().includes(q)));
+  out=out.filter(u=>__admUDateMatch(u.created_at));
   return out;
 }
 
@@ -579,39 +592,59 @@ function admSetUserFilter(role,el){
   admRenderUsers(admApplyUserFilter(admUsersCache));
 }
 
-/* Bucket key + label for a join date at the active granularity. */
-const __ADM_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function __admUserBucket(iso){
-  const d=iso?new Date(iso):null;
-  if(!d||isNaN(d.getTime()))return {key:'~unknown',label:'Unknown date',sort:-Infinity};
-  const p=n=>String(n).padStart(2,'0');
-  const y=d.getFullYear(),m=d.getMonth();
-  if(admUserPeriod==='Y')return {key:String(y),label:String(y),sort:new Date(y,0,1).getTime()};
-  if(admUserPeriod==='M')return {key:y+'-'+p(m+1),label:__ADM_MONTHS[m]+' '+y,sort:new Date(y,m,1).getTime()};
-  return {key:y+'-'+p(m+1)+'-'+p(d.getDate()),label:d.getDate()+' '+__ADM_MONTHS[m]+' '+y,sort:new Date(y,m,d.getDate()).getTime()};
+/* Dropdown-tab date filter — verbatim port of the Breakdown page pattern. */
+const __admURangeMeta={daily:{key:'day',defaultLabel:'Day',list:null},monthly:{key:'month',defaultLabel:'Month',list:null},yearly:{key:'year',defaultLabel:'Year',list:null}};
+function __admURerender(){admRenderUsers(admApplyUserFilter(admUsersCache));}
+function __admUUpdateAllTabState(){const allTab=document.querySelector('#user-date-tabs .bd-range-tab[data-range="all"]');if(!allTab)return;const any=__admUSelected.day||__admUSelected.month||__admUSelected.year;allTab.classList.toggle('active',!any);}
+function __admUUpdateTabLabel(filterKey){const rangeName=Object.keys(__admURangeMeta).find(r=>__admURangeMeta[r].key===filterKey);const tab=document.querySelector(`#user-date-tabs .bd-range-tab[data-range="${rangeName}"]`);if(!tab)return;const val=__admUSelected[filterKey];tab.innerHTML=(val?val:__admURangeMeta[rangeName].defaultLabel)+' <span class="bd-chev">▾</span>';tab.classList.toggle('active',!!val);__admUUpdateAllTabState();}
+function __admUCloseDropdown(rangeName){const meta=__admURangeMeta[rangeName];if(!meta||!meta.list)return;meta.list.classList.remove('open');const tab=document.querySelector(`#user-date-tabs .bd-range-tab[data-range="${rangeName}"]`);if(tab)tab.classList.remove('open');}
+function __admUCloseAllDropdowns(){Object.keys(__admURangeMeta).forEach(r=>__admUCloseDropdown(r));}
+function __admUBuildDropdown(listEl,keys,filterKey,rangeName){
+  if(!listEl)return;
+  listEl.innerHTML='';
+  const clearItem=document.createElement('div');
+  clearItem.className='bd-dd-item clear';clearItem.textContent='Clear selection';
+  clearItem.addEventListener('click',e=>{e.stopPropagation();__admUSelected[filterKey]=null;__admUUpdateTabLabel(filterKey);__admUCloseDropdown(rangeName);__admURerender();});
+  listEl.appendChild(clearItem);
+  keys.forEach(key=>{
+    const item=document.createElement('div');
+    item.className='bd-dd-item';item.textContent=key;
+    item.addEventListener('click',e=>{e.stopPropagation();__admUSelected[filterKey]=key;__admUUpdateTabLabel(filterKey);__admUCloseDropdown(rangeName);__admURerender();});
+    listEl.appendChild(item);
+  });
 }
-function admSetUserPeriod(period,el){
-  admUserPeriod=period;
-  document.querySelectorAll('#user-period-tabs .ptab').forEach(b=>b.classList.remove('active'));
-  if(el)el.classList.add('active');
-  admRenderUsers(admApplyUserFilter(admUsersCache));
+function admUserDateTabClick(range,tabEl){
+  if(range==='all'){
+    __admUCloseAllDropdowns();
+    __admUSelected.day=null;__admUSelected.month=null;__admUSelected.year=null;
+    Object.keys(__admURangeMeta).forEach(r=>{const t=document.querySelector(`#user-date-tabs .bd-range-tab[data-range="${r}"]`);if(t){t.innerHTML=__admURangeMeta[r].defaultLabel+' <span class="bd-chev">▾</span>';t.classList.remove('active');}});
+    tabEl.classList.add('active');
+    __admURerender();return;
+  }
+  const meta=__admURangeMeta[range];if(!meta||!meta.list)return;
+  const isOpen=meta.list.classList.contains('open');
+  Object.keys(__admURangeMeta).forEach(r=>{if(r!==range)__admUCloseDropdown(r);});
+  if(isOpen){__admUCloseDropdown(range);}else{meta.list.classList.add('open');tabEl.classList.add('open');}
 }
-window.admSetUserPeriod=admSetUserPeriod;
-
-
+window.admUserDateTabClick=admUserDateTabClick;
+function __admUDateInit(){
+  __admURangeMeta.daily.list=document.getElementById('adm-u-daily-list');
+  __admURangeMeta.monthly.list=document.getElementById('adm-u-monthly-list');
+  __admURangeMeta.yearly.list=document.getElementById('adm-u-yearly-list');
+  if(!__admURangeMeta.daily.list)return;
+  const curYear=new Date().getFullYear();
+  const yrs=[curYear-2,curYear-1,curYear].map(String);
+  __admUBuildDropdown(__admURangeMeta.daily.list,__ADM_UDAYS,'day','daily');
+  __admUBuildDropdown(__admURangeMeta.monthly.list,__ADM_MONTHS,'month','monthly');
+  __admUBuildDropdown(__admURangeMeta.yearly.list,yrs,'year','yearly');
+  document.addEventListener('click',e=>{if(!e.target.closest('#user-date-tabs .bd-range-tab')&&!e.target.closest('#user-date-dropdowns .bd-dropdown-list'))__admUCloseAllDropdowns();});
+}
+__admUDateInit();
 
 function admRenderUsers(list){
   const root=document.getElementById('users-list');
   if(!list.length){root.innerHTML='<div class="adm-empty">No users found.</div>';return;}
-  // Group by join-date bucket at the active D/M/Y granularity, newest first.
-  const groups=new Map();
-  list.forEach(u=>{
-    const b=__admUserBucket(u.created_at);
-    if(!groups.has(b.key))groups.set(b.key,{label:b.label,sort:b.sort,items:[]});
-    groups.get(b.key).items.push(u);
-  });
-  const ordered=[...groups.values()].sort((a,b)=>b.sort-a.sort);
-  root.innerHTML=ordered.map(g=>`<div class="adm-date-group"><div class="adm-date-group-title" data-no-i18n>${admEsc(g.label)} <span>${g.items.length}</span></div>${g.items.map(__admUserCardHtml).join('')}</div>`).join('');
+  root.innerHTML=list.map(__admUserCardHtml).join('');
 }
 
 function __admUserCardHtml(u){
