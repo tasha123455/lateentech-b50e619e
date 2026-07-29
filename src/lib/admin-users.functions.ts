@@ -47,6 +47,8 @@ export const adminBanUserFn = createServerFn({ method: "POST" })
       .upsert({ email, reason: data.reason ?? null, banned_by: userId }, { onConflict: "email" });
     if (banErr) throw banErr;
 
+    // Preserve historical rows for admin analytics before removing the auth user.
+    await supabaseAdmin.rpc("mark_user_account_deleted" as never, { _user_id: data.userId } as never);
     const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
     if (delErr) throw delErr;
     return { ok: true };
