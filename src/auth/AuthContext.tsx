@@ -43,6 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Once the very first session check has resolved, we never show the
+  // full-screen "Loading…" again. Flipping loading back to true unmounts the
+  // dashboard shell, which wipes the DOM (typed input, open forms, scroll) —
+  // that was the "returns to tab and everything reloads/redirects" bug.
+  const settledRef = useRef(false);
+
   const loadRole = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from("user_roles")
