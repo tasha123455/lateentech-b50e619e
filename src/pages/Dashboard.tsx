@@ -78,7 +78,6 @@ export function Dashboard({ prod }: { prod?: string }) {
   const exitImpersonation = () => {
     sessionStorage.removeItem("lateen_impersonate");
     setImpersonation(null);
-    window.location.reload();
   };
 
   if (role === "admin" && impersonation) {
