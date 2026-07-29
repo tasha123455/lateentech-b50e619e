@@ -6,14 +6,11 @@ import {
   useRouter,
   HeadContent,
   Scripts,
-  useRouterState,
 } from "@tanstack/react-router";
-import * as React from "react";
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/auth/AuthContext";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { writeLastPath } from "@/auth/boot-cache";
 
 function NotFoundComponent() {
   return (
@@ -128,15 +125,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
               "(function(){try{var p=location.pathname||'';var lang=/^\\/ar(\\/|$)/.test(p)?'ar':/^\\/en(\\/|$)/.test(p)?'en':null;if(!lang){try{var s=localStorage.getItem('lateen_lang');if(s==='ar'||s==='en')lang=s;}catch(e){}}if(!lang){try{var n=(navigator.language||'').toLowerCase();lang=n.indexOf('ar')===0?'ar':'en';}catch(e){lang='en';}}var h=document.documentElement;h.setAttribute('lang',lang);h.setAttribute('dir',lang==='ar'?'rtl':'ltr');}catch(e){}})();",
           }}
         />
-        {/* Cold reload after the phone discarded the tab: jump straight back
-            to the page the user was on, before React paints anything. */}
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{if(location.pathname!=='/')return;var p=localStorage.getItem('wasla_last_path');if(p&&p.charAt(0)==='/'&&p!=='/')location.replace(p);}catch(e){}})();",
-          }}
-        />
         <AuthProvider>{children}</AuthProvider>
         <InstallPrompt />
         <Scripts />
@@ -147,13 +135,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (st) => st.location.pathname });
-
-  // Remember the last real page so a cold reload resumes there.
-  React.useEffect(() => {
-    if (!pathname || pathname === "/") return;
-    writeLastPath(pathname + (typeof window !== "undefined" ? window.location.search : ""));
-  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>

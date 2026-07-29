@@ -11,8 +11,6 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/push-client";
 import { NotificationConsentModal } from "@/components/NotificationConsentModal";
-import { readCachedRole, readCachedSession, writeCachedRole } from "@/auth/boot-cache";
-
 
 export type Role = "marketer" | "business" | "admin";
 
@@ -41,14 +39,9 @@ type AuthState = {
 const Ctx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Paint the signed-in UI straight from the persisted session so a cold
-  // reload (tab discarded while the phone was locked) doesn't flash a
-  // "Loading…" screen before landing back where the user was.
-  const boot = typeof window !== "undefined" ? readCachedSession() : null;
-  const [session, setSession] = useState<Session | null>(boot);
-  const [role, setRole] = useState<Role | null>(boot ? readCachedRole() : null);
-  const [loading, setLoading] = useState(!boot);
-
+  const [session, setSession] = useState<Session | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const loadRole = useCallback(async (userId: string) => {
     const { data, error } = await supabase
@@ -72,7 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ? "marketer"
             : null;
     setRole(picked);
-    writeCachedRole(picked);
     return picked;
   }, []);
 
@@ -87,7 +79,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(nextSession);
       if (!nextSession?.user) {
         setRole(null);
-        writeCachedRole(null);
         setLoading(false);
         return;
       }
@@ -266,22 +257,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTimeout(() => { void applySession(s, { silent }); }, 0);
     });
     supabase.auth.getSession().then(({ data }) => {
-      // When we already painted from the cached session, the confirming
-      // check must stay silent — otherwise it re-shows the loading screen.
-      void applySession(data.session, { silent: !!boot });
+      void applySession(data.session);
     });
 
     return () => {
       active = false;
       sub.subscription.unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadRole]);
 
   const signOut = useCallback(async () => {
     try { localStorage.removeItem("active_role"); } catch { /* ignore */ }
-    writeCachedRole(null);
-    try { localStorage.removeItem("wasla_last_path"); } catch { /* ignore */ }
     // Never let a slow/unresponsive push endpoint block sign-out.
     try {
       await Promise.race([
