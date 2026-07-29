@@ -5,8 +5,8 @@ import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 export function Landing() {
-  const { user, role } = useAuth();
   const { lang, withLang } = useLanguage();
+
   const [shopperSoonOpen, setShopperSoonOpen] = useState(false);
 
 
