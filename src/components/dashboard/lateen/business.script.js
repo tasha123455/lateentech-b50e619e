@@ -357,6 +357,7 @@ function mpOrderNet(o){return(Number(o.price)||0)*(Number(o.qty)||0)-(Number(o.c
 function mpEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 function mpFmt(p){const sym=p.currency?__wrapArSym(p.currency.symbol,p.currency.code):'';return (n)=>__moneyH(n,sym,p.currency&&p.currency.code);}
+function mpFmtCardPrice(p){const sym=p.currency?__wrapArSym(p.currency.symbol,p.currency.code):'';const code=p.currency&&p.currency.code;return (n)=>{if(!__ar())return __moneyH(n,sym,code);const a=parseFloat(n||0).toFixed(2);const cc=(code||__SYM2CODE[__stripDirMarks(sym||'')]||'').toString().toUpperCase();const r=__stripDirMarks(__rawSym(sym||'£',cc));return '<span class="cur-sym">'+__escH(r)+'</span>'+__escH(a);};}
 
 function mpSetFilter(key,el){mpActiveFilter=key;document.querySelectorAll('.mp-filter-chip').forEach(c=>c.classList.toggle('active',c===el));renderProducts();}
 
@@ -661,6 +662,7 @@ function mpActionsRow(p){
 
 function mpRenderCard(p){
   const fmtP=mpFmt(p);
+  const fmtCard=mpFmtCardPrice(p);
   const eq=__mpEffectiveQty(p);
   return `<div class="mp-product-card" data-id="${p.id}">
     <div class="mp-p-head" onclick="mpToggleCard('${p.id}')">
@@ -673,7 +675,7 @@ function mpRenderCard(p){
       </div>
       <div class="mp-p-info">
         <p class="mp-p-name-collapsed" data-no-i18n>${mpEsc(p.name)}</p>
-        <span class="mp-p-price-collapsed">${fmtP(p.price)}</span>
+        <span class="mp-p-price-collapsed">${fmtCard(p.price)}</span>
       </div>
       <div class="mp-p-status-strip">${mpStatusBadges(p)}</div>
       <div class="mp-p-code-corner">
@@ -687,7 +689,7 @@ function mpRenderCard(p){
         <div class="mp-p-info-exp-inner">
           <div class="mp-p-name-price-row">
             <p class="mp-p-name-exp" data-no-i18n>${mpEsc(p.name)}</p>
-            <span class="mp-p-price-exp">${fmtP(p.price)}</span>
+            <span class="mp-p-price-exp">${fmtCard(p.price)}</span>
           </div>
           ${p.desc?`<p class="mp-p-desc-exp" data-no-i18n>${mpEsc(p.desc)}</p>`:''}
         </div>
