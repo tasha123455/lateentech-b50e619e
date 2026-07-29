@@ -2081,3 +2081,17 @@ const FK='lateen_adm_forms'+(function(){try{return '_'+((window.LateenAPI&&windo
   window.addEventListener('pageshow',restore);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')restore();});
 })();
+
+/* Wipe all admin data — clears operational data across every admin page.
+   User accounts, roles and email bans are preserved. */
+async function admWipeAllData(){
+  if(!confirm('Wipe ALL admin data?\n\nThis permanently deletes every order, product, payout, report, notification, review, favourite and employee record, and resets all wallet balances.\n\nUser accounts and email bans are kept. This cannot be undone.'))return;
+  const typed=prompt('Type WIPE to confirm.');
+  if((typed||'').trim().toUpperCase()!=='WIPE')return;
+  try{
+    await window.LateenAPI.admin.wipeAllData();
+    alert('All admin data has been wiped.');
+    location.reload();
+  }catch(e){alert('Failed: '+(e&&e.message?e.message:e));}
+}
+window.admWipeAllData=admWipeAllData;
