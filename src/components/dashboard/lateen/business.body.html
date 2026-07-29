@@ -722,9 +722,9 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 /* ── Fullscreen photo lightbox (product photos + variant swatches) ── */
 .mp-lightbox-overlay{position:fixed;inset:0;background:rgba(6,7,7,0.96);z-index:9999;display:none;align-items:center;justify-content:center;}
 .mp-lightbox-overlay.open{display:flex;}
-.mp-lightbox-stage{position:relative;width:100%;height:100%;overflow:hidden;display:flex;align-items:center;}
-.mp-lightbox-track{display:flex;height:100%;transition:transform .28s cubic-bezier(.4,0,.2,1);}
-.mp-lightbox-slide{flex-shrink:0;height:100%;display:flex;align-items:center;justify-content:center;}
+.mp-lightbox-stage{position:relative;width:100%;height:100%;overflow:hidden;display:flex;align-items:center;direction:ltr;}
+.mp-lightbox-track{display:flex;height:100%;width:100%;direction:ltr;transition:transform .28s cubic-bezier(.4,0,.2,1);}
+.mp-lightbox-slide{flex-shrink:0;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .mp-lightbox-slide img{max-width:100%;max-height:100%;object-fit:contain;}
 .mp-lightbox-close{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:16px;z-index:2147483000;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);border:1.5px solid rgba(255,255,255,0.55);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.6);}
 [dir="rtl"] .mp-lightbox-close{right:auto;left:16px;}
@@ -1300,7 +1300,7 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 </div>
 
 <div class="mp-lightbox-overlay" id="mp-lightbox-overlay" onclick="if(event.target===this)mpCloseLightbox()">
-  <div class="mp-lightbox-stage">
+  <div class="mp-lightbox-stage" dir="ltr">
     <div class="mp-lightbox-track" id="mp-lightbox-track"></div>
     <div class="mp-lightbox-nav" id="mp-lightbox-nav">
       <div class="mp-lightbox-nav-btn" onclick="event.stopPropagation();mpLightboxGo(-1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
