@@ -1127,7 +1127,7 @@ function admPdToggle(id){
 /* ========== Reports ========== */
 let admReportsCache=[];
 let admReportFilter='';
-function admReportTypeLabel(t){return t==='product'?'Product':(t==='merchant'?'Merchant':'Other');}
+function admReportTypeLabel(t){if(t==='product')return 'Product';if(t==='merchant'||t==='business')return 'Merchant';if(!t)return 'Other';return String(t).charAt(0).toUpperCase()+String(t).slice(1);}
 async function admLoadReports(){
   try{
     admReportsCache=await window.LateenAPI.admin.listReports();
@@ -1208,7 +1208,9 @@ function admRenderReports(){
         </div>
         <button class="adm-go-btn" onclick="admGoToAccount('${r.reporter_id}','marketer','${reporterNameSafe}')">Go to marketer account</button>
       </div>
-      <div class="rpt-msg" data-no-i18n>${admEsc(r.message)}</div>
+      <div class="rpt-type-row"><span class="rpt-field-label" style="margin-bottom:0;">Report type</span><span class="rpt-type-pill">${admReportTypeLabel(r.report_type)}</span></div>
+      <div class="rpt-field-label">Marketer's comment</div>
+      <div class="rpt-msg" data-no-i18n>${admEsc(r.message||'')||'<span style="opacity:0.6;">No comment</span>'}</div>
       ${prodBlock}
       ${bizRow}
       ${commentBlock}
