@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useBusinessData } from "../BusinessDataProvider";
 import type { Product } from "../lib/types";
@@ -24,7 +25,7 @@ const EX_PH_AR = "مثال: المقاس او اللون";
 const VAL_PH_EN = "Black or XL";
 const VAL_PH_AR = "مثال: أسود أو XL";
 
-function moneyH(n: number, sym: string, code?: string | null): JSX.Element {
+function moneyH(n: number, sym: string, code?: string | null): ReactElement {
   const p = moneyParts(n, sym, code);
   const symSpan = <span className="cur-sym">{p.symbol}</span>;
   if (p.symbolFirst) return <>{symSpan}{p.amount}</>;
@@ -261,7 +262,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   // ---- category ----
   const renderCategoryList = () => {
     const q = categorySearch.trim().toLowerCase();
-    const rows: JSX.Element[] = [];
+    const rows: ReactElement[] = [];
     let any = false;
     CATEGORY_DATA.forEach((section) => {
       const groupLbl = ar ? (CATEGORY_GROUP_AR[section.group] || section.group) : section.group;
