@@ -58,7 +58,9 @@ export function MenuDrawer({
           </svg>
         </button>
         <div className="menu-user" onClick={onOpenProfile} style={{ cursor: "pointer" }} role="button" tabIndex={0}>
-          <div className="avatar" id="menu-avatar" style={avatarUrl ? { backgroundImage: `url('${avatarUrl}')` } : undefined} />
+          <div className="avatar" id="menu-avatar" style={{ background: "#0A3C2A" }}>
+            {avatarUrl ? <img src={avatarUrl} alt="" loading="eager" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", borderRadius: "inherit" }} /> : null}
+          </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="menu-name" id="menu-name" data-no-i18n="">{name}</div>
             <div className="menu-sub" id="menu-sub" data-no-i18n="">{biz}</div>
