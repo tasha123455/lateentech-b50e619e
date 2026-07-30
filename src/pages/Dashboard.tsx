@@ -4,6 +4,7 @@ import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
 import { BusinessDashboardApp } from "@/components/dashboard/business/BusinessDashboardApp";
+import { MarketerDashboardApp } from "@/components/dashboard/marketer/MarketerDashboardApp";
 
 type Impersonation = { userId: string; role: "marketer" | "business"; name: string };
 
@@ -34,31 +35,6 @@ export function Dashboard({ prod }: { prod?: string }) {
       setImpersonation(null);
     }
   }, [impersonation, role]);
-
-  useEffect(() => {
-    if (!prod || role !== "marketer") return;
-    let cancelled = false;
-    const start = Date.now();
-    const tick = () => {
-      if (cancelled) return;
-      const w = window as unknown as {
-        openD?: (id: string) => void;
-        goTo?: (page: string) => void;
-        __lateenGetProducts?: () => Array<{ id: string }>;
-      };
-      const list = typeof w.__lateenGetProducts === "function" ? w.__lateenGetProducts() : undefined;
-      const ready = typeof w.openD === "function" && typeof w.goTo === "function" && Array.isArray(list) && list.some((p) => p.id === prod);
-      if (ready) {
-        try { w.goTo!("pg-browse"); } catch { /* ignore */ }
-        try { w.openD!(prod); } catch { /* ignore */ }
-        return;
-      }
-      if (Date.now() - start > 15000) return;
-      setTimeout(tick, 150);
-    };
-    tick();
-    return () => { cancelled = true; };
-  }, [prod, role]);
 
   // Never swap an already-mounted dashboard for the loading screen: a
   // background session refresh must not tear down (and re-create) the shell,
@@ -126,13 +102,15 @@ export function Dashboard({ prod }: { prod?: string }) {
         {impersonation.role === "business" ? (
           <BusinessDashboardApp userId={impersonation.userId} />
         ) : (
-          <LateenShell role={impersonation.role} overrideUserId={impersonation.userId} />
+          <MarketerDashboardApp userId={impersonation.userId} />
         )}
       </div>
     );
   }
 
   if (role === "business") return <BusinessDashboardApp userId={user.id} />;
+
+  if (role === "marketer") return <MarketerDashboardApp userId={user.id} prod={prod} />;
 
   return <LateenShell role={role} />;
 }
