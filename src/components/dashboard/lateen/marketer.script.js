@@ -1139,19 +1139,9 @@ const FK='lateen_mk_forms'+(function(){try{return '_'+((window.LateenAPI&&window
   }
 })();
 
-/* Receipt-picker cancel detection.
-   Modern mobile browsers fire a 'cancel' event on the <input type=file>
-   itself when the native picker is dismissed with nothing chosen. Use it
-   to clear the resume checkpoint immediately, so a deliberate cancel
-   doesn't leave a stale "upload didn't finish" prompt behind. On older
-   browsers without this event the checkpoint just expires on its own
-   (see the 30-minute cutoff in __lateenApplyReceiptResume). */
-(function(){
-  ['receipt-cam-input','receipt-gallery-input','receipt-files-input'].forEach(function(id){
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('cancel', function(){ const self = this; setTimeout(function(){ if (self.files && self.files.length) return; __receiptClearResume(); __receiptPickerTarget = null; __receiptPickerLastTarget = null; }, 300); });
-  });
-})();
+/* No cancel handling needed: each tap creates a throw-away <input> and no
+   "resume" state is persisted, so a dismissed picker leaves nothing behind. */
+
 
 /* ========== Delete Account ==========
    Status is fetched once when the profile page opens (refreshDeleteAccountSlot,
