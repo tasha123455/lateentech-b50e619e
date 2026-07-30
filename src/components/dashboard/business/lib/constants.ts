@@ -1,3 +1,5 @@
+import { wrapArSym, normSearch, isAr } from "./format";
+
 /* Constant tables ported verbatim from business.script.js */
 export type Currency = { code: string; name: string; symbol: string; flag: string };
 export type Country = { code: string; name: string; flag: string };
@@ -14,3 +16,84 @@ export const CATEGORY_DATA: { group: string; items: string[] }[]=[
 ];
 export const CATEGORY_GROUP_AR: Record<string,string>={"Fashion & Style":"الأزياء والموضة","Health & Beauty":"الصحة والجمال","Home & Living":"المنزل والمعيشة","Kids & Play":"الأطفال واللعب","Sports & Outdoors":"الرياضة والأنشطة الخارجية","Tech & Electronics":"التقنية والإلكترونيات","Utility & Niche":"المستلزمات العامة والمتنوعة"};
 export const CATEGORY_ITEM_AR: Record<string,string>={"Activewear":"الملابس الرياضية","Bags":"الحقائب","Clothing":"الملابس","Intimates":"الملابس الداخلية","Jewelry":"المجوهرات","Shoes":"الأحذية","Sunglasses":"النظارات الشمسية","Watches":"الساعات","Beauty":"منتجات التجميل","Fragrance":"العطور","Grooming":"العناية الشخصية","Haircare":"العناية بالشعر","Makeup":"المكياج","Skincare":"العناية بالبشرة","Supplements":"المكملات الغذائية","Wellness":"الصحة والعافية","Appliances":"الأجهزة المنزلية","Bath":"مستلزمات الحمام","Bedding":"مستلزمات النوم","Decor":"الديكور","Furniture":"الأثاث","Garden":"مستلزمات الحديقة","Home":"مستلزمات المنزل","Kitchen":"مستلزمات المطبخ","Lighting":"الإضاءة","Baby":"مستلزمات الأطفال الرضع","Crafts":"الأشغال اليدوية","Hobbies":"الهوايات","Kids":"مستلزمات الأطفال","Maternity":"مستلزمات الأمومة","Toys":"الألعاب","Camping":"التخييم","Cycling":"ركوب الدراجات","Fishing":"صيد الأسماك","Fitness":"اللياقة البدنية","Outdoors":"الأنشطة الخارجية","Sports":"الرياضة","Accessories":"الإكسسوارات","Audio":"الأجهزة الصوتية","Cameras":"الكاميرات","Computers":"أجهزة الكمبيوتر","Electronics":"الإلكترونيات","Gaming":"الألعاب الإلكترونية","Phones":"الهواتف","Tablets":"الأجهزة اللوحية","Wearables":"الأجهزة القابلة للارتداء","Automotive":"مستلزمات السيارات","Books":"الكتب","Groceries":"البقالة","Office":"المستلزمات المكتبية","Pets":"مستلزمات الحيوانات الأليفة","Stationery":"القرطاسية","Tools":"الأدوات"};
+
+export const LIBYA_CITIES: { en: string; ar: string }[]=[{en:'Tripoli',ar:'طرابلس'},{en:'Benghazi',ar:'بنغازي'},{en:'Misrata',ar:'مصراته'},{en:'Zawiya',ar:'الزاوية'},{en:'Al Bayda',ar:'البيضاء'},{en:'Sabha',ar:'سبها'},{en:'Sirte',ar:'سرت'},{en:'Tobruk',ar:'طبرق'},{en:'Ajdabiya',ar:'اجدابيا'},{en:'Al Khums',ar:'الخمس'},{en:'Zliten',ar:'زليتن'},{en:'Derna',ar:'درنه'},{en:'Al Marj',ar:'المرج'},{en:'Gharyan',ar:'غريان'},{en:'Sabratha',ar:'صبراته'},{en:'Surman',ar:'صرمان'},{en:'Zuwara',ar:'زواره'},{en:'Bani Walid',ar:'بني وليد'},{en:'Tarhuna',ar:'ترهونه'},{en:'Msallata',ar:'مسلاته'},{en:'Al Aziziyah',ar:'العزيزية'},{en:'Tajura',ar:'تاجوراء'},{en:'Janzur',ar:'جنزور'},{en:'Ain Zara',ar:'عين زارة'},{en:'Qasr Bin Ghashir',ar:'قصر بن غشير'},{en:'Al Swani',ar:'السواني'},{en:'Garabulli',ar:'القرابولي'},{en:'Al Ajelat',ar:'العجيلات'},{en:'Al Jumayl',ar:'الجميل'},{en:'Al Zahra',ar:'الزهراء'},{en:'Shahat',ar:'شحات'},{en:'Susa',ar:'سوسه'},{en:'Al Qubbah',ar:'القبه'},{en:'Umm al Rizam',ar:'ام رزم'},{en:'Brega',ar:'البريقه'},{en:'Ras Lanuf',ar:'راس لانوف'},{en:'Suluq',ar:'سلوق'},{en:'Al Abyar',ar:'لبيار'},{en:'Tocra',ar:'توكره'},{en:'Ghemines',ar:'قمينس'},{en:'Yafran',ar:'يفرن'},{en:'Zintan',ar:'الزنتان'},{en:'Jadu',ar:'جادو'},{en:'Nalut',ar:'نالوت'},{en:'Mizda',ar:'مزدة'},{en:'Ubari',ar:'اوباري'},{en:'Murzuq',ar:'مرزق'},{en:'Al Kufra',ar:'الكفره'},{en:'Jalu',ar:'جالو'},{en:'Awjila',ar:'اوجله'},{en:'Ghat',ar:'غات'},{en:'Ghadames',ar:'غدامس'},{en:'Hun',ar:'هون'},{en:'Waddan',ar:'ودان'},{en:'Sokna',ar:'سوكنة'},{en:'Brak Al Shati',ar:'براك الشاطي'},{en:'Al Jufrah',ar:'الجفرة'},{en:'Idri',ar:'إدري'},{en:'Al Qatrun',ar:'القطرون'},{en:'Tawergha',ar:'تورغاء'},{en:'Emsaed',ar:'امساعد'},{en:'Al Jaghbub',ar:'الجغبوب'},{en:'Al Kuwayfiyah',ar:'الكويفيه'},{en:'Ras Al Minqar',ar:'راس المنقار'},{en:'Sidi Khalifa',ar:'سي خليفه'},{en:'Driana',ar:'دريانه'},{en:'Bersis',ar:'برسس'},{en:'Al Mabni',ar:'المبني'},{en:'Istatah',ar:'اسطاطه'},{en:'Al Aweilia',ar:'لعويله'},{en:'Murad Masud',ar:'مراد مسعود'},{en:'Al Aquriyah',ar:'العقوريه'},{en:'Zueitina',ar:'زويتنه'},{en:'Al Bakkur',ar:'البكور'},{en:'Al Wardiyah',ar:'الورديه'},{en:'Farzughah',ar:'فرزوغه'},{en:'Tacnis',ar:'تاكنس'},{en:'Battah',ar:'بطه'},{en:'Jardas',ar:'جردس'},{en:'Zawiyat al Arqub',ar:'زاوية العرقوب'},{en:'Belhadid',ar:'بلحديد'},{en:'Qasr Libya',ar:'قصر ليبيا'},{en:'Wadi al Kuf',ar:'وادي الكوف'},{en:'Al Bayadah',ar:'البياضه'},{en:'Marawah',ar:'مراوه'},{en:'Massah',ar:'مسه'},{en:'Wardamah',ar:'وردامه'},{en:'Ras Turab',ar:'راس تراب'},{en:'Qarnadah',ar:'قرناده'},{en:'Omar Al Mukhtar',ar:'عمر المختار'},{en:'Qandulah',ar:'قندوله'},{en:'Al Haniyah',ar:'الحنيه'},{en:'Al Wasitah',ar:'الوسيطه'},{en:'Al Faidiyah',ar:'الفايديه'},{en:'Al Abraq',ar:'الابرق'},{en:'Al Mansurah',ar:'المنصوره'},{en:'Belkhather',ar:'بالخاثر'},{en:'Qardabah',ar:'قرضبه'},{en:'Bab al Zaytun',ar:'باب الزيتون'},{en:"Al Qa'rah",ar:'القعره'},{en:'Kamboot',ar:'كمبوت'},{en:'Al Watar',ar:'الوتر'},{en:'Bir al Ashhab',ar:'بئر الاشهب'},{en:'Bardia',ar:'البردي'},{en:'Ain Marah',ar:'عين ماره'},{en:'Martuba',ar:'مرتوبه'},{en:'Gulf of Bomba',ar:'خليج البمبه'},{en:'Ras al Helal',ar:'راس الهلال'},{en:'Kersa',ar:'كرسه'},{en:'Al Mikhili',ar:'المخيلي'},{en:'Al Aziyat',ar:'العزيات'},{en:'Al Tamimi',ar:'التميمي'},{en:'Ain al Ghazalah',ar:'عين الغزاله'},{en:'Al Uqaylah',ar:'العقيله'},{en:'Bin Jawad',ar:'بن جواد'},{en:'Harawa',ar:'اهراوه'},{en:'Wadi Kaam',ar:'وادي كعام'},{en:'Qasr Al Khiyar',ar:'قصر الخيار'},{en:'Al Alous',ar:'العلوص'},{en:'Bishr',ar:'بشر'},{en:'The South',ar:'الجنوب'},{en:'Al Asaba',ar:'الاصابعه'},{en:'Kikla',ar:'ككله'},{en:'Ar Rayaynah',ar:'الريانيه'},{en:'Ar Rajban',ar:'الرجبان'},{en:'Ar Ruhaybat',ar:'الرحيبات'},{en:'Al Josh',ar:'الجوش'},{en:'Samnu',ar:'سمنه'},{en:'Ghudwah',ar:'غدوة'},{en:'Tmassah',ar:'تمسه'},{en:'Al Awaynat',ar:'العوينات'},{en:'Traghen',ar:'تراغن'},{en:'Riqdalin',ar:'راقده لين'},{en:'Zaltan',ar:'زلطن'},{en:'Badr',ar:'بدر'},{en:'Tiji',ar:'تيجي'},{en:'Tamzin',ar:'طمزين'},{en:'Kabo',ar:'كابو'},{en:'Wazzan',ar:'وزان'},{en:"Al Qal'ah",ar:'القلعه'},{en:"Al Sa'diyah",ar:'الساعديه'},{en:'Espiaa',ar:'السبيعة'},{en:'Al Maya',ar:'الماية'},{en:'Al Shwayrif',ar:'الشويرف'},{en:'Derj',ar:'درج'},{en:'Sinawan',ar:'سيناون'},{en:'Zillah',ar:'زلة'},{en:'Al Fuqaha',ar:'الفقهاء'},{en:'Umm al Aranib',ar:'أم الأرانب'},{en:'Zuwaylah',ar:'زويلة'},{en:'Ashkidah',ar:'أشكدة'},{en:'Wadi Utbah',ar:'وادي عتبة'},{en:'Bint Bayya',ar:'بنت بية'}];
+export const COUNTRY_NAMES_AR: Record<string,string>={NG:'نيجيريا',GH:'غانا',EG:'مصر',KE:'كينيا',ZA:'جنوب أفريقيا',LY:'ليبيا'};
+
+export const CURRENCIES: Currency[] = RAW_CURRENCIES.map((c) => ({ ...c, symbol: wrapArSym(c.symbol, c.code) }));
+export const COUNTRY_NAMES: Record<string, string> = Object.fromEntries(COUNTRIES.map((c) => [c.code, c.name]));
+export const COUNTRY_FLAGS: Record<string, string> = Object.fromEntries(COUNTRIES.map((c) => [c.code, c.flag]));
+export const COUNTRY_CUR_MAP: Record<string, string> = (() => {
+  const m: Record<string, string> = {};
+  COUNTRIES.forEach((c) => {
+    const match = CURRENCIES.find((cur) => cur.flag === c.flag);
+    if (match) m[c.code] = match.code;
+  });
+  return m;
+})();
+
+export function cityLbl(en: string): string {
+  if (isAr()) {
+    const m = LIBYA_CITIES.find((c) => c.en === en);
+    if (m) return m.ar;
+  }
+  return en;
+}
+
+export function categoryLabel(cat?: string | null): string {
+  if (!cat) return "";
+  let key = cat;
+  if (!CATEGORY_ITEM_AR[key]) {
+    const found = Object.keys(CATEGORY_ITEM_AR).find((k) => CATEGORY_ITEM_AR[k] === cat);
+    if (found) key = found;
+  }
+  return isAr() ? CATEGORY_ITEM_AR[key] || key : key;
+}
+
+/** Bilingual haystack for a category (matches marketer Browse behaviour). */
+export function catSearchText(cat?: string | null): string {
+  if (!cat) return "";
+  const sec = CATEGORY_DATA.find((s) => s.items.includes(cat));
+  const parts = [cat, CATEGORY_ITEM_AR[cat] || ""];
+  if (sec) parts.push(sec.group, CATEGORY_GROUP_AR[sec.group] || "");
+  return normSearch(parts.filter(Boolean).join(" "));
+}
+
+/** Bilingual haystack for an order location. */
+export function locSearchText(city?: string | null, country?: string | null, countryCode?: string | null): string {
+  const parts: string[] = [];
+  [city, country, countryCode].forEach((v) => { if (v) parts.push(String(v)); });
+  if (city) {
+    const m = LIBYA_CITIES.find((x) => x.en === city || x.ar === city);
+    if (m) parts.push(m.en, m.ar);
+  }
+  const codes = new Set<string>();
+  if (countryCode) codes.add(String(countryCode).toUpperCase());
+  Object.keys(COUNTRY_NAMES).forEach((code) => {
+    if (country && COUNTRY_NAMES[code] === country) codes.add(code);
+  });
+  codes.forEach((code) => {
+    if (COUNTRY_NAMES[code]) parts.push(COUNTRY_NAMES[code]);
+    if (COUNTRY_NAMES_AR[code]) parts.push(COUNTRY_NAMES_AR[code]);
+  });
+  return normSearch(parts.filter(Boolean).join(" "));
+}
+
+/** Bilingual haystack for a product's delivery zones. */
+export function zoneSearchText(delivery?: Record<string, unknown> | null): string {
+  if (!delivery || typeof delivery !== "object") return "";
+  const parts: string[] = [];
+  Object.keys(delivery).forEach((code) => {
+    parts.push(code);
+    if (COUNTRY_NAMES[code]) parts.push(COUNTRY_NAMES[code]);
+    if (COUNTRY_NAMES_AR[code]) parts.push(COUNTRY_NAMES_AR[code]);
+    const z = delivery[code] as { cities?: Record<string, unknown> } | null;
+    const cities = z && z.cities ? Object.keys(z.cities) : [];
+    cities.forEach((cty) => {
+      parts.push(cty);
+      const m = LIBYA_CITIES.find((x) => x.en === cty || x.ar === cty);
+      if (m) parts.push(m.en, m.ar);
+    });
+  });
+  return normSearch(parts.filter(Boolean).join(" "));
+}
