@@ -1033,7 +1033,7 @@ async function admOpenProduct(id){
     const cityText=cityCount?(cityCount===1?'1 city':cityCount+' cities'):'—';
     const zonesInner=deliveryEntries.map(([code,z])=>{
       const cities=z&&z.cities?Object.entries(z.cities):[];
-      return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span data-no-i18n>${admEsc(city)}</span><span>Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliver ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
+      return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span data-no-i18n>${admEsc(city)}</span><span>Ship ${Number(c.shipping||0)===0?`<span data-no-i18n>${admFreeLbl()}</span>`:curH+Number(c.shipping||0).toFixed(2)} · Deliver ${Number(c.delivery||0)===0?`<span data-no-i18n>${admFreeLbl()}</span>`:curH+Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
     }).join('');
     const shipsToRow=deliveryEntries.length?`<div class="pd-row pd-row-tap" onclick="admPdToggle('admPdZones')">
         <div class="pd-row-ic">${icPin}</div>
