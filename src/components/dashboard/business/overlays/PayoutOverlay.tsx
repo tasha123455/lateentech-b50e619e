@@ -55,6 +55,65 @@ function generateData(
   return { earnings, pieces, marketers: mset.size, succeeded, failed };
 }
 
+const CMPL_ICONS = [
+  { bg: "rgba(239,68,68,0.14)", fg: "#ef4444", path: <><path d="M12 3l8 4v5c0 4.4-3.2 7.9-8 9-4.8-1.1-8-4.6-8-9V7l8-4z" /><path d="M12 8.5v3.5" /><path d="M12 15.5v.01" /></> },
+  { bg: "rgba(245,158,11,0.14)", fg: "#f59e0b", path: <><path d="M3 7h11v9H3z" /><path d="M14 10h4l3 3v3h-7z" /><circle cx="7" cy="18" r="1.6" /><circle cx="17" cy="18" r="1.6" /></> },
+  { bg: "rgba(96,165,250,0.14)", fg: "#60a5fa", path: <path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1-4.6-2.4-4.6 2.4.9-5.1L4.5 9.5l5.2-.8L12 4z" /> },
+];
+
+function complianceContent(ar: boolean) {
+  if (ar) {
+    return {
+      title: "تنبيه هام لجميع التجار",
+      intro: "السلام عليكم، حرصاً على أمان المنصة وثقة الجميع، نود التنويه بأننا نطبق بروتوكولات حماية وسياسة صارمة جداً. سيتم تجميد الحساب فوراً والحظر النهائي بدون إمكانية رجوع في الحالات التالية:",
+      items: ["رصد أي عمليات إحتيال أو نشاط مشبوه.", "وصول شكاوى من المسوقين أو الزبائن بسبب عدم تسليم البضاعة.", "تكرار التقييمات السيئة لجودة المنتج."],
+      outro: "يرجى الالتزام بالجودة والتسليم في الموعد المحدّد لضمان استمرار حسابكم.",
+      ok: "فهمت",
+    };
+  }
+  return {
+    title: "Important Notice: Compliance & Security Policy",
+    intro: "To All Merchants: We enforce a strict zero-tolerance policy to protect our platform. Your account will be immediately frozen and faces a permanent, irreversible ban if we identify:",
+    items: ["Any fraudulent or scam activity.", "Reports from marketers/customers regarding non-delivered orders.", "Repeated negative reviews about product quality."],
+    outro: "Our automated protection protocols actively monitor all accounts. Please maintain quality standards and fulfill orders on time.",
+    ok: "Got it",
+  };
+}
+
+function ComplianceOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const ar = isAr();
+  const c = complianceContent(ar);
+  return (
+    <div className={"cmpl-overlay" + (open ? " open" : "")} id="cmpl-overlay">
+      <div className="cmpl-backdrop" onClick={onClose} />
+      <div className="cmpl-sheet" data-no-i18n="">
+        <div className="cmpl-head">
+          <div className="cmpl-head-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v6" /><path d="M12 16.5v.01" /></svg>
+          </div>
+          <div className="cmpl-title">{c.title}</div>
+        </div>
+        <div className="cmpl-intro">{c.intro}</div>
+        <div>
+          {c.items.map((tx, ix) => {
+            const ic = CMPL_ICONS[ix] || CMPL_ICONS[0];
+            return (
+              <div className="cmpl-item" key={ix}>
+                <div className="ic" style={{ background: ic.bg, color: ic.fg }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{ic.path}</svg>
+                </div>
+                <div className="tx">{tx}</div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="cmpl-outro">{c.outro}</div>
+        <button className="cmpl-ok" type="button" onClick={onClose}>{c.ok}</button>
+      </div>
+    </div>
+  );
+}
+
 function MoneyH({ n, sym, code }: { n: number; sym: string; code?: string | null }) {
   const p = moneyParts(n, sym, code);
   if (p.symbolFirst) return <span data-no-i18n="">{p.symbol}{p.amount}</span>;
@@ -68,6 +127,7 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
 
   const [sel, setSel] = useState<Sel>({ day: null, month: null, year: null });
   const [openDropdown, setOpenDropdown] = useState<RangeKey | null>(null);
+  const [complianceOpen, setComplianceOpen] = useState(false);
 
   const allOrders = useMemo(
     () => (orders as Array<Order | PendingActiveStub>).concat(pendingActiveStubs),
@@ -198,7 +258,7 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
         <div className="bd-modal-head">
           <div className="bd-head-left">
             <h2>{ar ? "التفاصيل" : "Breakdown"}</h2>
-            <button className="cmpl-alert-btn" type="button" aria-label="Compliance & Security Policy">!</button>
+            <button className="cmpl-alert-btn" type="button" aria-label="Compliance & Security Policy" onClick={() => setComplianceOpen(true)}>!</button>
           </div>
           <button className="bd-close-btn" onClick={onClose}>✕</button>
         </div>
@@ -261,6 +321,7 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
           </div>
         </div>
       </div>
+      <ComplianceOverlay open={complianceOpen} onClose={() => setComplianceOpen(false)} />
     </div>
   );
 }
