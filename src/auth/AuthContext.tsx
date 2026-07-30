@@ -72,6 +72,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    // Identity currently applied to the UI. Used to tell a genuine account
+    // change apart from Supabase re-emitting SIGNED_IN for the same user
+    // (which it does when the tab/app is brought back to the foreground).
+    let appliedUserId: string | null = null;
 
     const applySession = async (nextSession: Session | null, opts?: { silent?: boolean }) => {
       if (!active) return;
@@ -80,7 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Wipe any cached dashboard state belonging to a different account
       // before this session's UI reads it.
       enforceUserScope(nextSession?.user?.id ?? null);
+      appliedUserId = nextSession?.user?.id ?? null;
       setSession(nextSession);
+
       if (!nextSession?.user) {
         setRole(null);
         setLoading(false);
