@@ -53,7 +53,7 @@ function hydrateVariantGroups(p: Product | null): VGroup[] {
       name: (g.name as string) || "",
       placeholder: isAr() ? EX_PH_AR : EX_PH_EN,
       valPlaceholder: isAr() ? VAL_PH_AR : VAL_PH_EN,
-      items: ((g.options as unknown[]) || []).map(norm),
+      items: ((g.items as unknown[]) || []).map(norm),
     }));
   }
   const out: VGroup[] = [];
