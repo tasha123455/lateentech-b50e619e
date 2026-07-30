@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { createLateenApi } from "@/lib/lateen-api";
@@ -63,6 +63,11 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
   useEffect(() => { signOutRef.current = signOut; }, [signOut]);
 
   const mountedKeyRef = useRef<string | null>(null);
+  // The dashboard markup is injected before its script runs (and before the
+  // chart library resolves), so the raw HTML paints unpopulated and then
+  // visibly rearranges. Keep it laid out but invisible until the script has
+  // executed, then fade in — no jitter on landing or after a resume/reload.
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -117,8 +122,12 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
         );
         document.body.appendChild(script);
         injected = script;
+        requestAnimationFrame(() => { if (!cancelled) setReady(true); });
       })
-      .catch((err) => console.error("[Lateen] failed", err));
+      .catch((err) => {
+        console.error("[Lateen] failed", err);
+        if (!cancelled) setReady(true);
+      });
 
     return () => {
       cancelled = true;
@@ -133,6 +142,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
       if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
       delete (window as unknown as { LateenAPI?: unknown }).LateenAPI;
       mountedKeyRef.current = null;
+      setReady(false);
     };
   }, [role, userId]);
 
@@ -142,6 +152,11 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     <div className={`lateen-${role} relative`}>
       <div
         ref={containerRef}
+        style={{
+          visibility: ready ? "visible" : "hidden",
+          opacity: ready ? 1 : 0,
+          transition: "opacity 120ms ease-out",
+        }}
         dangerouslySetInnerHTML={{ __html: body }}
       />
     </div>
