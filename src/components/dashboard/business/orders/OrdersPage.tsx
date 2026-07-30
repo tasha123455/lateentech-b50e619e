@@ -198,7 +198,7 @@ function OrderCard({
   const vgs = prod?.variantGroups || [];
   const findVariantName = (val: string): string => {
     for (const g of vgs) {
-      for (const it of (g.options || []) as Array<{ val?: unknown; name?: unknown }>) {
+      for (const it of (g.items || []) as Array<{ val?: unknown; name?: unknown }>) {
         if (it && (it as Record<string, unknown>).val === val) return (g.name as string) || "";
       }
     }
@@ -215,7 +215,7 @@ function OrderCard({
   const variantRows = selVariants.map((sv, i) => {
     let thumb = "";
     outer: for (const g of vgs) {
-      for (const it of (g.options || []) as Array<Record<string, unknown>>) {
+      for (const it of (g.items || []) as Array<Record<string, unknown>>) {
         if (it && it.val === sv.value && it.photo) { thumb = String(it.photo); break outer; }
       }
     }
