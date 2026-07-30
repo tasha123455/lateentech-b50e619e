@@ -4,6 +4,7 @@ import { cityLbl, categoryLabel, COUNTRY_FLAGS, COUNTRY_NAMES, COUNTRY_NAMES_AR 
 import type { Order, PendingActiveStub, Product } from "../lib/types";
 import { useLightbox } from "../ui/Lightbox";
 import { activeMarketerCount, effectiveQty, fmtMoney, LOW_STOCK_THRESHOLD, statusBadges } from "./productHelpers";
+import { ProductAnalytics } from "./ProductAnalytics";
 
 type ReviewEntry = { author: string; rating: number; text: string; photo: string; avatar: string };
 
@@ -148,6 +149,7 @@ export function ProductCard({
               <span className="mp-code-label">{ar ? "كود المنتج" : "Product code"}</span>
               <span className="mp-code-val" data-no-i18n="">{p.code}</span>
             </div>
+            <ProductAnalytics p={p} orders={orders} />
           </div>
 
           {/* Marketer info fold */}
