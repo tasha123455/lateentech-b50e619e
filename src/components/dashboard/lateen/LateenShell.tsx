@@ -81,6 +81,9 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
     let cancelled = false;
     let injected: HTMLScriptElement | null = null;
 
+    // Safety net: never leave the dashboard hidden if something stalls.
+    const revealTimer = window.setTimeout(() => { if (!cancelled) setReady(true); }, 4000);
+
     let signingOut = false;
     const onClick = (e: Event) => {
       const target = (e.target as HTMLElement | null)?.closest('[data-action="sign-out"]') as HTMLElement | null;
@@ -131,6 +134,7 @@ export function LateenShell({ role, overrideUserId }: { role: Role; overrideUser
 
     return () => {
       cancelled = true;
+      window.clearTimeout(revealTimer);
       el.removeEventListener("click", onClick);
       const w = window as unknown as { __lateenUnsubs?: Array<() => void> };
       if (w.__lateenUnsubs) {
