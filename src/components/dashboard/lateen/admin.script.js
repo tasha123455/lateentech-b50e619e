@@ -1127,7 +1127,7 @@ function admPdToggle(id){
 /* ========== Reports ========== */
 let admReportsCache=[];
 let admReportFilter='';
-function admReportTypeLabel(t){return t==='product'?'Product':(t==='merchant'?'Merchant':'Other');}
+function admReportTypeLabel(t){if(t==='product')return 'Product';if(t==='merchant'||t==='business')return 'Merchant';if(!t)return 'Other';return String(t).charAt(0).toUpperCase()+String(t).slice(1);}
 async function admLoadReports(){
   try{
     admReportsCache=await window.LateenAPI.admin.listReports();
