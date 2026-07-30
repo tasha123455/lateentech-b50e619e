@@ -1204,7 +1204,19 @@ export function createLateenApi(userId: string) {
           refunded_at?: string | null;
           delivered_at: string | null;
         }>;
-        const profiles = (profilesRes.data ?? []) as Array<{ id: string; created_at: string }>;
+        const allProfiles = (profilesRes.data ?? []) as Array<{
+          id: string;
+          created_at: string;
+          full_name: string | null;
+          business_name: string | null;
+        }>;
+        // Same "completed registration" rule as the Users page: bare auth
+        // stubs (no role, no name) are not real users and must not be counted.
+        const { data: allRoleRows } = await supabase.from("user_roles").select("user_id");
+        const roledIds = new Set(((allRoleRows ?? []) as Array<{ user_id: string }>).map((r) => r.user_id));
+        const profiles = allProfiles.filter(
+          (p) => roledIds.has(p.id) && !!((p.full_name || "").trim() || (p.business_name || "").trim()),
+        );
         const products = (productsRes.data ?? []) as Array<{ id: string; created_at: string }>;
 
         // A refunded order's platform fee is no longer counted as revenue,
