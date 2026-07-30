@@ -171,7 +171,7 @@ function Avatar({ url }: { url?: string | null }) {
   );
 }
 
-export function HomePage({ onOpenNotifications, onOpenPayout }: { onOpenNotifications: () => void; onOpenPayout: () => void }) {
+export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport }: { onOpenNotifications: () => void; onOpenPayout: () => void; onOpenSupport: () => void }) {
   const { profile, orders, pendingActiveStubs, products, notifications, frozen } = useBusinessData();
   const ar = isAr();
 
@@ -381,6 +381,17 @@ export function HomePage({ onOpenNotifications, onOpenPayout }: { onOpenNotifica
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            type="button"
+            onClick={onOpenSupport}
+            aria-label="Support"
+            style={{ height: 36, padding: "0 14px", borderRadius: 10, border: "0.5px solid rgba(224,112,112,0.35)", background: "rgba(58,26,26,0.9)", color: "var(--color-text-primary)", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
+            <span>{ar ? "الدعم" : "Support"}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+            </svg>
+          </button>
           <div className="notif-btn" onClick={onOpenNotifications}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" strokeWidth="1.8" strokeLinecap="round">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
