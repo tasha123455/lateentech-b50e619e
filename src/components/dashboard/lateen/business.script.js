@@ -610,11 +610,12 @@ function mpShippingFold(p){
   const fmtP=mpFmt(p);
   const boxes=codes.map(code=>{
     const z=p.delivery[code]||{};const cities=z.cities||{};
-    const rows=Object.entries(cities).map(([city,c])=>`<div class="mp-city-row"><span><b>${mpEsc(__cityLbl(city))}</b></span><span class="mp-dfee">${__ar()?'التوصيل':'Delivery'} <b>${Number((c&&c.delivery)||0)===0?__freeLbl():fmtP((c&&c.delivery)||0)}</b></span></div>`).join('');
+    const rows=Object.entries(cities).map(([city,c])=>`<div class="mp-city-row"><span><b>${mpEsc(__cityLbl(city))}</b></span><span class="mp-dfee">${__ar()?'التوصيل':'Delivery'} <b>${__isFreeVal(c&&c.delivery)?`<span data-no-i18n>${__freeLbl()}</span>`:fmtP(Number((c&&c.delivery)||0))}</b></span></div>`).join('');
     return `<div class="mp-country-box">
       <div class="mp-country-head">
         <span class="mp-cname">${COUNTRY_FLAGS[code]||'🌐'} ${mpEsc(__countryLbl(code))}</span>
-        <span class="mp-cship">${__ar()?'الشحن':'Shipping'}<br><b>${Number(z.shipping||0)===0?`<span data-no-i18n>${__freeLbl()}</span>`:fmtP(z.shipping||0)}</b></span>
+        <span class="mp-cship">${__ar()?'الشحن':'Shipping'}<br><b>${__isFreeVal(z.shipping)?`<span data-no-i18n>${__freeLbl()}</span>`:fmtP(Number(z.shipping||0))}</b></span>
+
       </div>
       ${rows}
     </div>`;
