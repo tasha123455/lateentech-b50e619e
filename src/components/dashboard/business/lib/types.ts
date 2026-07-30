@@ -16,7 +16,7 @@ export type VariantOption = {
 export type VariantGroup = {
   id?: string | number;
   name?: string;
-  options?: VariantOption[];
+  items?: VariantOption[];
   [k: string]: unknown;
 };
 
