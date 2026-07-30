@@ -11,7 +11,6 @@ import { NotificationsPage } from "./notifications/NotificationsPage";
 import { MenuDrawer } from "./overlays/MenuDrawer";
 import { ProfileOverlay } from "./overlays/ProfileOverlay";
 import { SupportOverlay } from "./overlays/SupportOverlay";
-import { DeleteAccountOverlay } from "./overlays/DeleteAccountOverlay";
 import { PayoutOverlay } from "./overlays/PayoutOverlay";
 import { BottomNav, type BizTab } from "./ui/BottomNav";
 import type { Product } from "./lib/types";
@@ -21,7 +20,6 @@ function Shell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
-  const [delAccOpen, setDelAccOpen] = useState(false);
   const [payoutOpen, setPayoutOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -32,7 +30,7 @@ function Shell() {
     <>
       <div className="app">
         <div className={"page" + (tab === "home" ? " active" : "")} id="pg-home">
-          <HomePage onOpenNotifications={() => setTab("notif")} onOpenPayout={() => setPayoutOpen(true)} />
+          <HomePage onOpenNotifications={() => setTab("notif")} onOpenPayout={() => setPayoutOpen(true)} onOpenSupport={() => setSupportOpen(true)} />
         </div>
         <div className={"page" + (tab === "products" ? " active" : "")} id="pg-products">
           <ProductsPage
@@ -55,12 +53,9 @@ function Shell() {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         onOpenProfile={() => setProfileOpen(true)}
-        onOpenSupport={() => setSupportOpen(true)}
-        onOpenDeleteAccount={() => setDelAccOpen(true)}
       />
       <ProfileOverlay open={profileOpen} onClose={() => setProfileOpen(false)} />
       <SupportOverlay open={supportOpen} onClose={() => setSupportOpen(false)} />
-      <DeleteAccountOverlay open={delAccOpen} onClose={() => setDelAccOpen(false)} />
       <PayoutOverlay open={payoutOpen} onClose={() => setPayoutOpen(false)} />
       <ProductFormOverlay open={formOpen} editing={editing} onClose={() => setFormOpen(false)} />
     </>
