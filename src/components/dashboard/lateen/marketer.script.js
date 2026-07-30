@@ -360,13 +360,43 @@ let __receiptPickerTarget=null;
 const __RECEIPT_RESUME_KEY_BASE='lateen_mk_receipt_resume';
 function openReceiptPicker(target){if(!target)return;if(target!=='form')__pendingReceiptOrderId=target;__receiptPickerTarget=target;const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.add('open');}
 function closeReceiptPicker(){const ov=document.getElementById('receipt-picker-overlay');if(ov)ov.classList.remove('open');}
-function __receiptCheckpoint(){try{let ordId=null;if(__receiptPickerTarget==='form'){persistOpenDraft();ordId=editingId;}else{ordId=__receiptPickerTarget;}if(!ordId)return;localStorage.setItem(__RECEIPT_RESUME_KEY_BASE+__uidSfx(),JSON.stringify({id:ordId,source:__receiptPickerTarget==='form'?'form':'order',ts:Date.now()}));}catch(e){}}
-function __receiptClearResume(){try{localStorage.removeItem(__RECEIPT_RESUME_KEY_BASE+__uidSfx());}catch(e){}}
+/* The receipt target must survive the page being backgrounded (and possibly
+   discarded/reloaded) while the OS camera / file app is in front, so it lives
+   in sessionStorage. No "resume" prompt is shown any more — the old
+   localStorage checkpoint misfired every time the tab was backgrounded. */
+const __RECEIPT_TARGET_KEY_BASE='lateen_mk_receipt_target';
+function __receiptCheckpoint(){try{if(__receiptPickerTarget==='form'&&typeof persistOpenDraft==='function')persistOpenDraft();}catch(e){}try{sessionStorage.setItem(__RECEIPT_TARGET_KEY_BASE+__uidSfx(),String(__receiptPickerTarget||''));}catch(e){}}
+function __receiptClearResume(){try{localStorage.removeItem(__RECEIPT_RESUME_KEY_BASE+__uidSfx());}catch(e){}try{sessionStorage.removeItem(__RECEIPT_TARGET_KEY_BASE+__uidSfx());}catch(e){}}
 let __receiptPickerLastTarget=null;
-function __receiptPickerPick(kind){const inputId=kind==='camera'?'receipt-cam-input':(kind==='gallery'?'receipt-gallery-input':'receipt-files-input');const el=document.getElementById(inputId);if(!el)return;__receiptCheckpoint();__receiptPickerLastTarget=__receiptPickerTarget;closeReceiptPicker();el.value='';el.click();}
-function __receiptFileChosen(input){__receiptClearResume();const target=__receiptPickerTarget||__receiptPickerLastTarget;__receiptPickerTarget=null;if(!input||!input.files||!input.files.length)return;if(target==='form'){onFileUpload(input);}else{__pendingReceiptOrderId=target||__pendingReceiptOrderId;onOrderReceiptFile(input);}}
-function __lateenShowResumeToast(msg){try{let t=document.getElementById('receipt-resume-toast');if(t)t.remove();t=document.createElement('div');t.id='receipt-resume-toast';t.setAttribute('data-no-i18n','');t.textContent=msg;t.style.cssText='position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);max-width:360px;width:calc(100% - 32px);background:#1e1e1e;border:0.5px solid rgba(234,179,8,.4);color:#eab308;font-size:12.5px;font-weight:600;line-height:1.4;padding:11px 14px;border-radius:12px;z-index:2000;box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center;';document.body.appendChild(t);setTimeout(()=>{if(t&&t.parentNode)t.remove();},6000);}catch(e){}}
-function __lateenApplyReceiptResume(){let marker=null;try{marker=JSON.parse(localStorage.getItem(__RECEIPT_RESUME_KEY_BASE+__uidSfx())||'null');}catch(e){}if(!marker||!marker.id)return;if(!marker.ts||Date.now()-marker.ts>30*60*1000){__receiptClearResume();return;}const o=(orders||[]).find(x=>x.id===marker.id);if(!o){__receiptClearResume();return;}const ar=(typeof __ar==='function'&&__ar());const msg=ar?'لم يكتمل الرفع آخر مرة — يرجى إرفاق الإيصال مرة أخرى.':"Upload didn't finish last time — please try attaching the receipt again.";if(marker.source==='form'){editingId=o.id;openForm(o);const banner=document.getElementById('receipt-resume-banner');if(banner){banner.textContent=msg;banner.style.display='block';}}else{try{if(typeof goTo==='function')goTo('pg-orders');setTimeout(()=>{const card=document.querySelector('.order[data-oid="'+o.id+'"]');if(card){card.classList.add('open');try{card.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}__lateenShowResumeToast(msg);},120);}catch(e){__lateenShowResumeToast(msg);}}__receiptClearResume();}
+function __receiptPickerPick(kind){
+  const target=__receiptPickerTarget||__receiptPickerLastTarget;
+  if(!target)return;
+  __receiptCheckpoint();
+  __receiptPickerLastTarget=target;
+  closeReceiptPicker();
+  /* Build a fresh input on every tap: reusing a hidden node left stale state,
+     and display:none / aria-hidden nodes are unreliable targets for .click()
+     on some mobile browsers. Created and clicked synchronously inside the tap
+     so the user activation needed to open the camera/file app is still valid. */
+  let el=null;
+  try{
+    el=document.createElement('input');
+    el.type='file';
+    el.accept='image/*';
+    if(kind==='camera')el.setAttribute('capture','environment');
+    el.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;';
+    el.addEventListener('change',function(){__receiptFileChosen(el);try{el.remove();}catch(e){}});
+    document.body.appendChild(el);
+    el.click();
+  }catch(e){
+    console.warn('[Lateen] receipt picker',e);
+    const fb=document.getElementById(kind==='camera'?'receipt-cam-input':(kind==='gallery'?'receipt-gallery-input':'receipt-files-input'));
+    if(fb){fb.value='';fb.click();}
+  }
+}
+function __receiptFileChosen(input){let stored=null;try{stored=sessionStorage.getItem(__RECEIPT_TARGET_KEY_BASE+__uidSfx());}catch(e){}const target=__receiptPickerTarget||__receiptPickerLastTarget||stored||null;__receiptClearResume();__receiptPickerTarget=null;__receiptPickerLastTarget=null;if(!input||!input.files||!input.files.length)return;if(target==='form'){onFileUpload(input);}else if(target){__pendingReceiptOrderId=target;onOrderReceiptFile(input);}else if(__pendingReceiptOrderId){onOrderReceiptFile(input);}}
+/* Legacy cleanup: wipe any stuck "upload didn't finish" checkpoint. */
+function __lateenApplyReceiptResume(){__receiptClearResume();const b=document.getElementById('receipt-resume-banner');if(b)b.style.display='none';}
 
 let marketerOrderFilter='all';
 function setOrderFilter(f,el){marketerOrderFilter=f;document.querySelectorAll('#pg-orders .ord-fchip').forEach(c=>c.classList.remove('active'));if(el)el.classList.add('active');renderOrders();}
