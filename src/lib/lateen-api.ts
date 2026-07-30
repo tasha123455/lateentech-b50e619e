@@ -1169,7 +1169,7 @@ export function createLateenApi(userId: string) {
         const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at, delivered_at";
         const [ordersAttempt, profilesRes, productsRes, empPaymentsRes] = await Promise.all([
           supabase.from("orders").select(`${orderColumns}, refunded_at`),
-          supabase.from("profiles").select("id, created_at, full_name, business_name, user_roles!inner(role)"),
+          supabase.from("profiles").select("id, created_at, full_name, business_name"),
           supabase.from("products").select("id, created_at").is("deleted_at", null),
           // amount + paid_at only — these rows survive employee deletion (see
           // employee_payments_keep_history_on_delete migration) so historical
