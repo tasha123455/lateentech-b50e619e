@@ -163,15 +163,15 @@ function buildAnalytics(orders: Order[], stubs: PendingActiveStub[]): AnalyticsR
 
 /* ── Marketer avatar helper (inline, DOM-imperative like the original) ── */
 
-function Avatar({ url }: { url?: string | null }) {
+function Avatar({ url, onClick }: { url?: string | null; onClick?: () => void }) {
   return (
-    <div className="avatar" id="user-avatar" style={{ cursor: "default", background: "#0A3C2A" }}>
+    <div className="avatar" id="user-avatar" onClick={onClick} style={{ cursor: onClick ? "pointer" : "default", background: "#0A3C2A" }} role={onClick ? "button" : undefined} tabIndex={onClick ? 0 : undefined}>
       {url ? <img src={url} alt="" loading="eager" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", borderRadius: "inherit" }} /> : null}
     </div>
   );
 }
 
-export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport }: { onOpenNotifications: () => void; onOpenPayout: () => void; onOpenSupport: () => void }) {
+export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onOpenProfile }: { onOpenNotifications: () => void; onOpenPayout: () => void; onOpenSupport: () => void; onOpenProfile: () => void }) {
   const { profile, orders, pendingActiveStubs, products, notifications, frozen } = useBusinessData();
   const ar = isAr();
 
@@ -365,7 +365,7 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport }: {
     <>
       <div className="topbar">
         <div className="topbar-left">
-          <Avatar url={profile?.avatar_signed_url} />
+          <Avatar url={profile?.avatar_signed_url} onClick={onOpenProfile} />
           <div>
             <div className="greet" id="user-greet" data-no-i18n>{(ar ? "هلا، " : "Hey, ") + first}</div>
             <div className="greet-sub" id="user-sub" data-no-i18n>{biz || bizFallback}</div>
