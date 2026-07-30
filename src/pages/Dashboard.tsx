@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
+import { BusinessDashboardApp } from "@/components/dashboard/business/BusinessDashboardApp";
 
 type Impersonation = { userId: string; role: "marketer" | "business"; name: string };
 
@@ -122,10 +123,16 @@ export function Dashboard({ prod }: { prod?: string }) {
             Exit
           </button>
         </div>
-        <LateenShell role={impersonation.role} overrideUserId={impersonation.userId} />
+        {impersonation.role === "business" ? (
+          <BusinessDashboardApp userId={impersonation.userId} />
+        ) : (
+          <LateenShell role={impersonation.role} overrideUserId={impersonation.userId} />
+        )}
       </div>
     );
   }
+
+  if (role === "business") return <BusinessDashboardApp userId={user.id} />;
 
   return <LateenShell role={role} />;
 }
