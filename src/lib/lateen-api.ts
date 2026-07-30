@@ -867,10 +867,19 @@ export function createLateenApi(userId: string) {
             profiles.map((p) => p.id),
           );
         const rmap = new Map((roles ?? []).map((r: { user_id: string; role: string }) => [r.user_id, r.role]));
+        // Only accounts that actually finished registration count as users.
+        // A bare auth stub (someone who tapped "Sign in" with Google, had no
+        // account, and abandoned the register page) still gets a profiles row
+        // from the auth trigger, but never gets a role or a name — those must
+        // not show up here.
+        const completed = profiles.filter(
+          (p) => rmap.has(p.id) && !!((p.full_name || "").trim() || (p.business_name || "").trim()),
+        );
+        if (!completed.length) return [];
         let emap = new Map<string, string | null>();
         try {
           const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
-            _user_ids: profiles.map((p) => p.id),
+            _user_ids: completed.map((p) => p.id),
           });
           emap = new Map(
             ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
@@ -878,7 +887,7 @@ export function createLateenApi(userId: string) {
         } catch {
           /* ignore — email column just won't be shown */
         }
-        return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer", email: emap.get(p.id) ?? null }));
+        return completed.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer", email: emap.get(p.id) ?? null }));
       },
       // Wipes operational data across every admin page (orders, products,
       // payouts, reports, notifications, employees, reviews, favourites,
