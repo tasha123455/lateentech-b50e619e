@@ -867,10 +867,19 @@ export function createLateenApi(userId: string) {
             profiles.map((p) => p.id),
           );
         const rmap = new Map((roles ?? []).map((r: { user_id: string; role: string }) => [r.user_id, r.role]));
+        // Only accounts that actually finished registration count as users.
+        // A bare auth stub (someone who tapped "Sign in" with Google, had no
+        // account, and abandoned the register page) still gets a profiles row
+        // from the auth trigger, but never gets a role or a name — those must
+        // not show up here.
+        const completed = profiles.filter(
+          (p) => rmap.has(p.id) && !!((p.full_name || "").trim() || (p.business_name || "").trim()),
+        );
+        if (!completed.length) return [];
         let emap = new Map<string, string | null>();
         try {
           const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
-            _user_ids: profiles.map((p) => p.id),
+            _user_ids: completed.map((p) => p.id),
           });
           emap = new Map(
             ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
@@ -878,7 +887,7 @@ export function createLateenApi(userId: string) {
         } catch {
           /* ignore — email column just won't be shown */
         }
-        return profiles.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer", email: emap.get(p.id) ?? null }));
+        return completed.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer", email: emap.get(p.id) ?? null }));
       },
       // Wipes operational data across every admin page (orders, products,
       // payouts, reports, notifications, employees, reviews, favourites,
@@ -1160,7 +1169,7 @@ export function createLateenApi(userId: string) {
         const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at, delivered_at";
         const [ordersAttempt, profilesRes, productsRes, empPaymentsRes] = await Promise.all([
           supabase.from("orders").select(`${orderColumns}, refunded_at`),
-          supabase.from("profiles").select("id, created_at"),
+          supabase.from("profiles").select("id, created_at, full_name, business_name"),
           supabase.from("products").select("id, created_at").is("deleted_at", null),
           // amount + paid_at only — these rows survive employee deletion (see
           // employee_payments_keep_history_on_delete migration) so historical
@@ -1195,7 +1204,19 @@ export function createLateenApi(userId: string) {
           refunded_at?: string | null;
           delivered_at: string | null;
         }>;
-        const profiles = (profilesRes.data ?? []) as Array<{ id: string; created_at: string }>;
+        const allProfiles = (profilesRes.data ?? []) as Array<{
+          id: string;
+          created_at: string;
+          full_name: string | null;
+          business_name: string | null;
+        }>;
+        // Same "completed registration" rule as the Users page: bare auth
+        // stubs (no role, no name) are not real users and must not be counted.
+        const { data: allRoleRows } = await supabase.from("user_roles").select("user_id");
+        const roledIds = new Set(((allRoleRows ?? []) as Array<{ user_id: string }>).map((r) => r.user_id));
+        const profiles = allProfiles.filter(
+          (p) => roledIds.has(p.id) && !!((p.full_name || "").trim() || (p.business_name || "").trim()),
+        );
         const products = (productsRes.data ?? []) as Array<{ id: string; created_at: string }>;
 
         // A refunded order's platform fee is no longer counted as revenue,
