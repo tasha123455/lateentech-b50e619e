@@ -8,7 +8,6 @@ import adminBody from "./admin.body.html?raw";
 import businessScript from "./business.script.js?raw";
 import marketerScript from "./marketer.script.js?raw";
 import adminScript from "./admin.script.js?raw";
-import "@/styles/lateen-business.css";
 import "@/styles/lateen-marketer.css";
 import "@/styles/lateen-admin.css";
 
