@@ -848,18 +848,14 @@ function renderProducts(){
   const el=document.getElementById('product-list');
   if(!el)return;
   const si=document.getElementById('products-search');
-  const q=(si&&si.value||'').trim().toLowerCase();
+  const q=__normSearch((si&&si.value)||'');
   let list=products;
   if(mpActiveFilter==='active')list=list.filter(p=>p.status==='active');
   else if(mpActiveFilter==='paused')list=list.filter(p=>p.status!=='active');
   else if(mpActiveFilter==='lowstock')list=list.filter(p=>{const eq=__mpEffectiveQty(p);return eq>0&&eq<=LOW_STOCK_THRESHOLD;});
   else if(mpActiveFilter==='outofstock')list=list.filter(p=>__mpEffectiveQty(p)<=0);
   if(q){
-    list=list.filter(p=>{
-      const cities=Object.keys(p.delivery||{}).flatMap(c=>Object.keys((p.delivery[c]&&p.delivery[c].cities)||{}));
-      const hay=[p.name,p.code,(p.currency&&p.currency.code)||'',(p.currency&&p.currency.name)||'',...cities].filter(Boolean).join(' ').toLowerCase();
-      return hay.includes(q);
-    });
+    list=list.filter(p=>__normSearch(p.name).includes(q)||__normSearch(p.code||'').includes(q)||__catSearchText(p.category).includes(q)||__normSearch(p.desc||'').includes(q)||__zoneSearchText(p).includes(q));
   }
   if(!products.length){el.innerHTML='<div class="mp-empty-state">No products yet.</div>';return;}
   if(!list.length){el.innerHTML='<div class="mp-empty-state" data-no-i18n>'+(__ar()?'لا توجد منتجات مطابقة لبحثك':'No products match your search.')+'</div>';return;}
