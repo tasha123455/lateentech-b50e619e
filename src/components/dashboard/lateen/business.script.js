@@ -614,7 +614,7 @@ function mpShippingFold(p){
     return `<div class="mp-country-box">
       <div class="mp-country-head">
         <span class="mp-cname">${COUNTRY_FLAGS[code]||'🌐'} ${mpEsc(__countryLbl(code))}</span>
-        <span class="mp-cship">${__ar()?'الشحن':'Shipping'}<br><b>${fmtP(z.shipping||0)}</b></span>
+        <span class="mp-cship">${__ar()?'الشحن':'Shipping'}<br><b>${Number(z.shipping||0)===0?`<span data-no-i18n>${__freeLbl()}</span>`:fmtP(z.shipping||0)}</b></span>
       </div>
       ${rows}
     </div>`;
@@ -1000,8 +1000,8 @@ function renderOrders(list){const el=document.getElementById('orders-list');if(!
           <div class="fin-box">
             <div class="fin-row"><span class="k">Product price</span><span class="v">${om(o.price)}</span></div>
             <div class="fin-row"><span class="k">${__ar()?'الكميه':'Quantity'} (${o.qty})</span><span class="v">${om(o.price*o.qty)}</span></div>
-            <div class="fin-row"><span class="k">Shipping</span><span class="v">${om(o.shipping)}</span></div>
-            <div class="fin-row"><span class="k">Delivery fee</span><span class="v">${om(o.delivery)}</span></div>
+            <div class="fin-row"><span class="k">Shipping</span><span class="v">${Number(o.shipping||0)===0?`<span data-no-i18n>${__freeLbl()}</span>`:om(o.shipping)}</span></div>
+            <div class="fin-row"><span class="k">Delivery fee</span><span class="v">${Number(o.delivery||0)===0?`<span data-no-i18n>${__freeLbl()}</span>`:om(o.delivery)}</span></div>
             <div class="fin-row"><span class="k">Marketer commission <span class="pct">(${fin.commissionPct}%)</span></span><span class="v neg">−${om(o.commission)}</span></div>
             <div class="fin-row"><span class="k">Platform fee${fin.platformFixed?'':` <span class="pct">(${fin.platformPct}%)</span>`}</span><span class="v neg">−${om(o.platformFee)}</span></div>
             <div class="fin-total-extra${fin.extra?' open-capable':''}">

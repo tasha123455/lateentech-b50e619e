@@ -2,6 +2,7 @@
 /* i18n: any user-typed value rendered here (product/marketer/business name, notes,
    messages, etc.) must be wrapped in data-no-i18n or it can get auto-translated —
    see the block above SKIP_TAGS in src/i18n/LanguageContext.tsx for why/how. */
+function admFreeLbl(){return document.documentElement.lang==='ar'?'مجاني':'Free';}
 function admEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function admMoney(n){const v=Number(n||0);return '\u2066د.ل\u2069'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 function admMoneyH(n){const v=Number(n||0);return '<span class="cur-sym">\u2066د.ل\u2069</span>'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -1033,7 +1034,7 @@ async function admOpenProduct(id){
     const cityText=cityCount?(cityCount===1?'1 city':cityCount+' cities'):'—';
     const zonesInner=deliveryEntries.map(([code,z])=>{
       const cities=z&&z.cities?Object.entries(z.cities):[];
-      return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span data-no-i18n>${admEsc(city)}</span><span>Ship ${curH}${Number(c.shipping||0).toFixed(2)} · Deliver ${curH}${Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
+      return `<div class="pd-zone-card"><div class="pd-zone-hd">${admEsc(CN[code]||code)}</div>${cities.map(([city,c])=>`<div class="pd-zone-city"><span data-no-i18n>${admEsc(city)}</span><span>Ship ${Number(c.shipping||0)===0?`<span data-no-i18n>${admFreeLbl()}</span>`:curH+Number(c.shipping||0).toFixed(2)} · Deliver ${Number(c.delivery||0)===0?`<span data-no-i18n>${admFreeLbl()}</span>`:curH+Number(c.delivery||0).toFixed(2)}</span></div>`).join('')}</div>`;
     }).join('');
     const shipsToRow=deliveryEntries.length?`<div class="pd-row pd-row-tap" onclick="admPdToggle('admPdZones')">
         <div class="pd-row-ic">${icPin}</div>

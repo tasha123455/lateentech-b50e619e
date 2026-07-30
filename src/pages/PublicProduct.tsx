@@ -410,7 +410,7 @@ export function PublicProduct({ id }: { id: string }) {
                       >
                         <span className="text-sm text-text-1">{COUNTRY_NAMES[code] || code}</span>
                         <span className="flex items-center gap-2 text-xs text-text-2">
-                          <span>Shipping: {maxShip ? `${maxShip} ${currencyLabel}` : "—"}</span>
+                          <span>Shipping: {maxShip ? `${maxShip} ${currencyLabel}` : <span data-no-i18n>{lang === "ar" ? "مجاني" : "Free"}</span>}</span>
                           <svg className={`transition-transform ${open ? "rotate-180" : ""}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="6 9 12 15 18 9" />
                           </svg>
