@@ -9,14 +9,10 @@ export function MenuDrawer({
   open,
   onClose,
   onOpenProfile,
-  onOpenSupport,
-  onOpenDeleteAccount,
 }: {
   open: boolean;
   onClose: () => void;
   onOpenProfile: () => void;
-  onOpenSupport: () => void;
-  onOpenDeleteAccount: () => void;
 }) {
   const { profile } = useBusinessData();
   const { signOut } = useAuth();
@@ -69,17 +65,6 @@ export function MenuDrawer({
           </div>
         </div>
 
-        <div className="menu-item" onClick={onOpenSupport} role="button" tabIndex={0}>
-          <div className="menu-icon-wrap mi-green">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34c77b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-            </svg>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="menu-item-label">{ar ? "الدعم" : "Support"}</div>
-          </div>
-        </div>
-
         <div
           className="menu-item"
           onClick={() => { const w = window as unknown as { __lateenToggleLang?: () => void }; w.__lateenToggleLang?.(); }}
@@ -100,15 +85,6 @@ export function MenuDrawer({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
             <polyline points="9 18 15 12 9 6" />
           </svg>
-        </div>
-
-        <div className="menu-item" onClick={onOpenDeleteAccount} role="button" tabIndex={0}>
-          <div className="menu-icon-wrap mi-red">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" strokeWidth="1.8" strokeLinecap="round">
-              <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-            </svg>
-          </div>
-          <div className="menu-item-label" style={{ color: "#e07070" }}>{ar ? "حذف الحساب" : "Delete account"}</div>
         </div>
 
         <div
