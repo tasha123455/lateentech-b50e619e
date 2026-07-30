@@ -72,6 +72,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    // Identity currently applied to the UI. Used to tell a genuine account
+    // change apart from Supabase re-emitting SIGNED_IN for the same user
+    // (which it does when the tab/app is brought back to the foreground).
+    let appliedUserId: string | null = null;
 
     const applySession = async (nextSession: Session | null, opts?: { silent?: boolean }) => {
       if (!active) return;
@@ -80,7 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Wipe any cached dashboard state belonging to a different account
       // before this session's UI reads it.
       enforceUserScope(nextSession?.user?.id ?? null);
+      appliedUserId = nextSession?.user?.id ?? null;
       setSession(nextSession);
+
       if (!nextSession?.user) {
         setRole(null);
         setLoading(false);
@@ -256,11 +262,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // and the initial getSession(). Background refreshes (TOKEN_REFRESHED,
     // INITIAL_SESSION firing on tab return) must NOT flip loading back to
     // true — that was the "loading screen on return" bug.
+    // Supabase also re-emits SIGNED_IN for the *same* user when the app is
+    // brought back to the foreground (session recovery). Treating that as an
+    // identity change flipped `loading`, which unmounted and re-created the
+    // dashboard — the flicker/reset on resume. Same user id => silent.
     const IDENTITY_EVENTS = new Set(["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"]);
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
-      const silent = !IDENTITY_EVENTS.has(event);
+      const nextId = s?.user?.id ?? null;
+      const sameIdentity = nextId !== null && nextId === appliedUserId;
+      const silent = !IDENTITY_EVENTS.has(event) || (event === "SIGNED_IN" && sameIdentity);
       setTimeout(() => { void applySession(s, { silent }); }, 0);
     });
+
     supabase.auth.getSession().then(({ data }) => {
       void applySession(data.session);
     });
