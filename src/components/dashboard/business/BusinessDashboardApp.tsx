@@ -30,7 +30,7 @@ function Shell() {
     <>
       <div className="app">
         <div className={"page" + (tab === "home" ? " active" : "")} id="pg-home">
-          <HomePage onOpenNotifications={() => setTab("notif")} onOpenPayout={() => setPayoutOpen(true)} onOpenSupport={() => setSupportOpen(true)} />
+          <HomePage onOpenNotifications={() => setTab("notif")} onOpenPayout={() => setPayoutOpen(true)} onOpenSupport={() => setSupportOpen(true)} onOpenProfile={() => setProfileOpen(true)} />
         </div>
         <div className={"page" + (tab === "products" ? " active" : "")} id="pg-products">
           <ProductsPage
