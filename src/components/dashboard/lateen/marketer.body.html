@@ -1267,9 +1267,9 @@ body.lang-ar .pd-iban-row{display:none !important;}
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <div class="upload-icon-label" id="upload-label" data-i18n="Tap to upload receipt">Tap to upload receipt</div>
       </label>
-      <input type="file" id="receipt-cam-input" accept="image/*" capture="environment" style="display:none" onchange="__receiptFileChosen(this)"/>
+      <input type="file" id="receipt-cam-input" accept="image/*" capture="environment" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;" tabindex="-1" aria-hidden="true" onchange="__receiptFileChosen(this)"/>
       <input type="file" id="receipt-gallery-input" accept="image/*" style="display:none" onchange="__receiptFileChosen(this)"/>
-      <input type="file" id="receipt-files-input" accept="image/*,application/pdf" style="display:none" onchange="__receiptFileChosen(this)"/>
+      <input type="file" id="receipt-files-input" accept="image/*" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;" tabindex="-1" aria-hidden="true" onchange="__receiptFileChosen(this)"/>
     </div>
 
 
