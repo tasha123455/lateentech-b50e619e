@@ -59,9 +59,13 @@ export function Dashboard({ prod }: { prod?: string }) {
     return () => { cancelled = true; };
   }, [prod, role]);
 
-  if (loading) {
+  // Never swap an already-mounted dashboard for the loading screen: a
+  // background session refresh must not tear down (and re-create) the shell,
+  // which is what reset the view when returning to the app.
+  if (loading && !user) {
     return <div className="flex min-h-screen items-center justify-center text-text-2">Loading…</div>;
   }
+
   if (!user) return <Navigate to={withLang("/")} />;
 
   if (!role) {
