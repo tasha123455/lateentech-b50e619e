@@ -253,6 +253,10 @@ function __normSearch(s){if(s==null)return'';let t=String(s);try{t=t.normalize('
 // Bilingual haystack for an order's city/country (stored in English) so an
 // Arabic query matches too, and vice-versa.
 function __locSearchText(city,country,countryCode){const parts=[];[city,country,countryCode].forEach(v=>{if(v)parts.push(String(v));});if(city){const m=LIBYA_CITIES.find(x=>x.en===city||x.ar===city);if(m)parts.push(m.en,m.ar);}const codes=new Set();if(countryCode)codes.add(String(countryCode).toUpperCase());if(country){if(typeof COUNTRY_NAMES!=='undefined'){Object.keys(COUNTRY_NAMES).forEach(c=>{if(String(COUNTRY_NAMES[c]).toLowerCase()===String(country).toLowerCase())codes.add(c);});}Object.keys(COUNTRY_NAMES_AR).forEach(c=>{if(COUNTRY_NAMES_AR[c]===country)codes.add(c);});}codes.forEach(c=>{if(typeof COUNTRY_NAMES!=='undefined'&&COUNTRY_NAMES[c])parts.push(COUNTRY_NAMES[c]);if(COUNTRY_NAMES_AR[c])parts.push(COUNTRY_NAMES_AR[c]);});return parts.filter(Boolean).join(' ');}
+// Same product search matching as the marketer Browse page (bilingual category
+// + delivery-zone haystacks), applied to this business's own products.
+function __catSearchText(cat){if(!cat)return'';const sec=CATEGORY_DATA.find(s=>s.items.includes(cat));const parts=[cat,CATEGORY_ITEM_AR[cat]||''];if(sec){parts.push(sec.group,CATEGORY_GROUP_AR[sec.group]||'');}return __normSearch(parts.filter(Boolean).join(' '));}
+function __zoneSearchText(p){const d=p&&p.delivery;if(!d||typeof d!=='object')return'';const parts=[];Object.keys(d).forEach(code=>{parts.push(code);if(typeof COUNTRY_NAMES!=='undefined'&&COUNTRY_NAMES[code])parts.push(COUNTRY_NAMES[code]);if(COUNTRY_NAMES_AR[code])parts.push(COUNTRY_NAMES_AR[code]);const z=d[code]||{};const cities=[];if(z.c&&typeof z.c==='object')cities.push(...Object.keys(z.c));if(Array.isArray(z.cities))cities.push(...z.cities);else if(z.cities&&typeof z.cities==='object')cities.push(...Object.keys(z.cities));cities.forEach(cn=>{if(!cn)return;parts.push(cn);const m=LIBYA_CITIES.find(x=>x.en===cn||x.ar===cn);if(m){parts.push(m.en,m.ar);}});});return __normSearch(parts.filter(Boolean).join(' '));}
 function addCity(code,cityVal){let city=cityVal;if(!city){const id='new-city-'+code;const el=document.getElementById(id);city=el?el.value.trim():'';if(el)el.value='';}if(!city||!zones[code]||zones[code].cities[city])return;zones[code].cities[city]={delivery:''};renderZoneBuilderList();}
 function toggleCityPanel(code){cityPanelOpenFor=(cityPanelOpenFor===code)?null:code;renderZoneBuilderList();}
 function toggleCityCheck(code,cityEn){if(!zones[code])return;const scroller=document.getElementById('city-panel-'+code);const savedScroll=scroller?scroller.scrollTop:0;if(zones[code].cities[cityEn]){delete zones[code].cities[cityEn];}else{zones[code].cities[cityEn]={delivery:''};}renderZoneBuilderList();const restored=document.getElementById('city-panel-'+code);if(restored)restored.scrollTop=savedScroll;}
@@ -848,18 +852,14 @@ function renderProducts(){
   const el=document.getElementById('product-list');
   if(!el)return;
   const si=document.getElementById('products-search');
-  const q=(si&&si.value||'').trim().toLowerCase();
+  const q=__normSearch((si&&si.value)||'');
   let list=products;
   if(mpActiveFilter==='active')list=list.filter(p=>p.status==='active');
   else if(mpActiveFilter==='paused')list=list.filter(p=>p.status!=='active');
   else if(mpActiveFilter==='lowstock')list=list.filter(p=>{const eq=__mpEffectiveQty(p);return eq>0&&eq<=LOW_STOCK_THRESHOLD;});
   else if(mpActiveFilter==='outofstock')list=list.filter(p=>__mpEffectiveQty(p)<=0);
   if(q){
-    list=list.filter(p=>{
-      const cities=Object.keys(p.delivery||{}).flatMap(c=>Object.keys((p.delivery[c]&&p.delivery[c].cities)||{}));
-      const hay=[p.name,p.code,(p.currency&&p.currency.code)||'',(p.currency&&p.currency.name)||'',...cities].filter(Boolean).join(' ').toLowerCase();
-      return hay.includes(q);
-    });
+    list=list.filter(p=>__normSearch(p.name).includes(q)||__normSearch(p.code||'').includes(q)||__catSearchText(p.category).includes(q)||__normSearch(p.desc||'').includes(q)||__zoneSearchText(p).includes(q));
   }
   if(!products.length){el.innerHTML='<div class="mp-empty-state">No products yet.</div>';return;}
   if(!list.length){el.innerHTML='<div class="mp-empty-state" data-no-i18n>'+(__ar()?'لا توجد منتجات مطابقة لبحثك':'No products match your search.')+'</div>';return;}
