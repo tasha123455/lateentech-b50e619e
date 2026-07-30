@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { useMemo, useRef, useState } from "react";
 
 import { useBusinessData } from "../BusinessDataProvider";
@@ -49,7 +50,7 @@ function isImgStr(s: unknown): s is string {
   return typeof s === "string" && /^(data:|https?:|\/)/.test(s);
 }
 
-function buildOrdStepper(status: OrderUiStatus): JSX.Element {
+function buildOrdStepper(status: OrderUiStatus): ReactElement {
   if (status === "failed") return <div className="progress-failed">Order failed</div>;
   if (status === "rejected") return <div className="progress-failed">Receipt rejected</div>;
   const si = ST[status]?.step ?? 0;
@@ -255,7 +256,7 @@ function OrderCard({
   const dis = frozen || busy;
   const disStyle = dis ? { opacity: 0.45, pointerEvents: "none" as const, cursor: "not-allowed" as const } : undefined;
 
-  let actions: JSX.Element;
+  let actions: ReactElement;
   if (o.status === "delivered" || o.status === "failed") {
     actions = (
       <div className="actions">
