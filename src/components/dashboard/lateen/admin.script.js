@@ -1208,7 +1208,9 @@ function admRenderReports(){
         </div>
         <button class="adm-go-btn" onclick="admGoToAccount('${r.reporter_id}','marketer','${reporterNameSafe}')">Go to marketer account</button>
       </div>
-      <div class="rpt-msg" data-no-i18n>${admEsc(r.message)}</div>
+      <div class="rpt-type-row"><span class="rpt-field-label" style="margin-bottom:0;">Report type</span><span class="rpt-type-pill">${admReportTypeLabel(r.report_type)}</span></div>
+      <div class="rpt-field-label">Marketer's comment</div>
+      <div class="rpt-msg" data-no-i18n>${admEsc(r.message||'')||'<span style="opacity:0.6;">No comment</span>'}</div>
       ${prodBlock}
       ${bizRow}
       ${commentBlock}
