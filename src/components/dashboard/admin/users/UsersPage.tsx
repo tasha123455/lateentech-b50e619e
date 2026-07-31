@@ -4,8 +4,6 @@ import { useAdminData } from "../AdminDataProvider";
 import { MON_ABBR, WDAYS } from "../lib/format";
 import type { DateSelection } from "../lib/types";
 import { EN_LABELS, DateFilterTabs, USERS_CLASSES, buildYearItems } from "../ui/DateFilterTabs";
-import { PhotoPicker } from "../ui/PhotoPicker";
-import { DeletionRequestsOverlay } from "./DeletionRequestsOverlay";
 import { UserCard } from "./UserCard";
 
 const dayItems = WDAYS.map((k) => ({ key: k, label: k }));
@@ -19,24 +17,15 @@ const ROLE_FILTERS: Array<{ key: string; label: string }> = [
 ];
 
 export function UsersPage({ active }: { active: boolean }) {
-  const { users, loadUsers, loading, failed, api, deletionRequests } = useAdminData();
+  const { users, loadUsers, loading, failed, api } = useAdminData();
 
   const [roleFilter, setRoleFilter] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<DateSelection>({ day: null, month: null, year: null });
-  const [broadcastOpen, setBroadcastOpen] = useState(false);
-  const [delReqOpen, setDelReqOpen] = useState(false);
-
-  const [bcTitle, setBcTitle] = useState("");
-  const [bcBody, setBcBody] = useState("");
-  const [bcPhoto, setBcPhoto] = useState<string | null>(null);
-  const [bcSending, setBcSending] = useState(false);
 
   useEffect(() => {
     if (active) void loadUsers();
   }, [active, loadUsers]);
-
-  const needsReview = deletionRequests.filter((r) => r.status === "wallet_review").length;
 
   const dateMatches = (iso?: string | null) => {
     if (!selected.day && !selected.month && !selected.year) return true;
@@ -61,26 +50,6 @@ export function UsersPage({ active }: { active: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [users, roleFilter, search, selected]);
 
-  const sendBroadcast = async () => {
-    if (!bcTitle.trim()) {
-      alert("Type the notification title first.");
-      return;
-    }
-    if (!confirm("Send this notification to ALL marketers?")) return;
-    setBcSending(true);
-    try {
-      const count = await api.admin.broadcastNotification(bcTitle.trim(), bcBody.trim(), bcPhoto);
-      setBcTitle("");
-      setBcBody("");
-      setBcPhoto(null);
-      alert("Notification sent to " + count + " marketer(s).");
-      setBroadcastOpen(false);
-    } catch (e) {
-      alert("Failed: " + (e as Error).message);
-    }
-    setBcSending(false);
-  };
-
   const wipeAll = async () => {
     if (!confirm("Wipe ALL admin data?\n\nThis permanently deletes every order, product, payout, report, notification, review, favourite and employee record, and resets all wallet balances.\n\nUser accounts and email bans are kept. This cannot be undone.")) return;
     const typed = prompt("Type WIPE to confirm.");
@@ -104,49 +73,6 @@ export function UsersPage({ active }: { active: boolean }) {
     <>
       <div className="adm-h1-row">
         <div className="adm-h1" style={{ marginBottom: 0 }}>User Directory</div>
-        <button className="adm-broadcast-btn" onClick={() => setBroadcastOpen((v) => !v)}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          Send Notification
-        </button>
-        <button className="adm-reports-btn" onClick={() => setDelReqOpen(true)}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18" />
-            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-            <line x1="10" y1="11" x2="10" y2="17" />
-            <line x1="14" y1="11" x2="14" y2="17" />
-          </svg>
-          Deletion Requests
-          {needsReview > 0 && <span className="adm-reports-count">{needsReview}</span>}
-        </button>
-      </div>
-
-      <div className={"adm-broadcast-panel" + (broadcastOpen ? " open" : "")}>
-        <div className="adm-notif-lbl">Notification title (what marketers see first)</div>
-        <input
-          type="text"
-          className="adm-notif-inp"
-          placeholder="e.g. New update available"
-          value={bcTitle}
-          onChange={(e) => setBcTitle(e.target.value)}
-        />
-        <div className="adm-notif-lbl">Notification content (shown when tapped)</div>
-        <textarea
-          className="adm-notif-textarea"
-          placeholder="Full message…"
-          value={bcBody}
-          onChange={(e) => setBcBody(e.target.value)}
-        />
-        <PhotoPicker url={bcPhoto} onChange={setBcPhoto} />
-        <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-          <button className="adm-btn adm-btn-ghost" onClick={() => setBroadcastOpen(false)}>Cancel</button>
-          <button className="adm-notif-send-btn" style={{ flex: 1 }} disabled={bcSending} onClick={() => void sendBroadcast()}>
-            {bcSending ? "Sending…" : "Send to All Marketers"}
-          </button>
-        </div>
       </div>
 
       <div className="adm-filter-row">
@@ -194,8 +120,6 @@ export function UsersPage({ active }: { active: boolean }) {
       </div>
 
       <div className="adm-section">{body}</div>
-
-      <DeletionRequestsOverlay open={delReqOpen} onClose={() => setDelReqOpen(false)} />
     </>
   );
 }

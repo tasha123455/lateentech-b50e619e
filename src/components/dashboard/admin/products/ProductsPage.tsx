@@ -29,11 +29,10 @@ function activeMarketerWarning(n: number, action: string): string {
   );
 }
 
-export function ProductsPage({ active }: { active: boolean }) {
+export function ProductsPage({ active, reportsOpen, onReportsClose }: { active: boolean; reportsOpen: boolean; onReportsClose: () => void }) {
   const { products, loadProducts, loadReports, reports, loading, failed, api } = useAdminData();
   const [search, setSearch] = useState("");
   const [detailId, setDetailId] = useState<string | null>(null);
-  const [reportsOpen, setReportsOpen] = useState(false);
 
   // Search is debounced server-side, exactly like the original 250ms timer.
   useEffect(() => {
@@ -148,15 +147,6 @@ export function ProductsPage({ active }: { active: boolean }) {
     <>
       <div className="adm-h1-row">
         <div className="adm-h1" style={{ marginBottom: 0 }}>Product Review</div>
-        <button className="adm-reports-btn" onClick={() => setReportsOpen(true)}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-            <line x1="12" y1="9" x2="12" y2="13" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
-          Reports
-          {openCount > 0 && <span className="adm-reports-count">{openCount}</span>}
-        </button>
       </div>
 
       <input
@@ -169,7 +159,7 @@ export function ProductsPage({ active }: { active: boolean }) {
       <div className="adm-prod-grid">{body}</div>
 
       <ProductDetailOverlay productId={detailId} onClose={() => setDetailId(null)} />
-      <ReportsOverlay open={reportsOpen} onClose={() => setReportsOpen(false)} onOpenProduct={setDetailId} />
+      <ReportsOverlay open={reportsOpen} onClose={onReportsClose} onOpenProduct={setDetailId} />
     </>
   );
 }
