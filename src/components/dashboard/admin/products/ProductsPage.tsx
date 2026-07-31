@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { BrowseFilters } from "@/components/dashboard/marketer/browse/BrowseFilters";
 import { ProductCard } from "@/components/dashboard/marketer/browse/ProductCard";
+import {
+  applyBrowseFilters, EMPTY_BROWSE_FILTERS, type BrowseFilterState,
+} from "@/components/dashboard/marketer/browse/browseFilter";
 import { dbToBrowse } from "@/components/dashboard/marketer/lib/mappers";
 
 import { useAdminData } from "../AdminDataProvider";
@@ -21,15 +25,36 @@ function activeMarketerWarning(n: number, action: string): string {
 
 export function ProductsPage({ active }: { active: boolean }) {
   const { products, loadProducts, loading, failed, api } = useAdminData();
-  const [search, setSearch] = useState("");
+  const [state, setState] = useState<BrowseFilterState>(EMPTY_BROWSE_FILTERS);
   const [detailId, setDetailId] = useState<string | null>(null);
+  /* Products the *server* matched for the current term. The client-side filter
+     below cannot see the owner's current profile name — only the biz_name
+     snapshot stored on the row — so searching by a shop that has since renamed
+     itself still needs the server. These ids widen the client result. */
+  const [serverHits, setServerHits] = useState<Set<string> | null>(null);
 
-  // Search is debounced server-side, exactly like the original 250ms timer.
+  const query = state.query;
+
+  // The whole catalogue, newest first, loaded once. Filtering happens in the
+  // browser from here on, the way the marketer's browse page does it.
   useEffect(() => {
-    if (!active) return;
-    const id = setTimeout(() => { void loadProducts(search); }, search ? 250 : 0);
-    return () => clearTimeout(id);
-  }, [active, search, loadProducts]);
+    if (active) void loadProducts("");
+  }, [active, loadProducts]);
+
+  useEffect(() => {
+    if (!active || !query.trim()) { setServerHits(null); return; }
+    let cancelled = false;
+    const id = setTimeout(async () => {
+      try {
+        const rows = (await api.admin.listAllProducts(query)) as Array<{ id: string }>;
+        if (!cancelled) setServerHits(new Set(rows.map((r) => r.id)));
+      } catch (e) {
+        console.error("[admin] product search", e);
+        if (!cancelled) setServerHits(null);
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(id); };
+  }, [active, query, api]);
 
   const activeMarketers = async (id: string): Promise<number> => {
     try {
@@ -47,7 +72,7 @@ export function ProductsPage({ active }: { active: boolean }) {
         if (n > 0 && !confirm(activeMarketerWarning(n, "hidden"))) return;
       }
       await api.admin.setProductStatus(id, newStatus);
-      void loadProducts(search);
+      void loadProducts("");
     } catch (e) {
       alert("Failed: " + (e as Error).message);
     }
@@ -60,7 +85,7 @@ export function ProductsPage({ active }: { active: boolean }) {
       if (n > 0 && !confirm(activeMarketerWarning(n, "deleted"))) return;
       await api.admin.deleteProduct(id);
       setDetailId(null);
-      void loadProducts(search);
+      void loadProducts("");
     } catch (e) {
       alert("Failed: " + (e as Error).message);
     }
@@ -68,30 +93,45 @@ export function ProductsPage({ active }: { active: boolean }) {
 
   const detailProduct = detailId ? products.find((x) => x.id === detailId) : undefined;
 
-  // listAllProducts does a `select("*")`, so the rows are exactly what the
-  // marketer's browse grid maps — running them through the same mapper means
-  // the tiles cannot drift apart from the marketer's.
-  const cards = useMemo(
-    () => products.map((p) => ({
-      hidden: p.status === "hidden",
-      bp: dbToBrowse(p as unknown as Record<string, unknown>, NO_FAVOURITES),
-    })),
-    [products],
-  );
+  /* listAllProducts does a `select("*")`, so the rows are exactly what the
+     marketer's browse grid maps — running them through the same mapper means
+     the tiles cannot drift apart from the marketer's. Newest first, so the
+     oldest products sit at the bottom; a sort picked in the Filters sheet
+     overrides it, same as for marketers. */
+  const all = useMemo(() => {
+    const rows = products.map((p) => p as unknown as Record<string, unknown>);
+    rows.sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+    return rows.map((r) => ({
+      hidden: r.status === "hidden",
+      shop: String(r.biz_name || ""),
+      bp: dbToBrowse(r, NO_FAVOURITES),
+    }));
+  }, [products]);
+
+  const shown = useMemo(() => {
+    const byId = new Map(all.map((c) => [c.bp.id, c]));
+    // requireStock off: an admin has to see out-of-stock and hidden products in
+    // order to act on them.
+    return applyBrowseFilters(all.map((c) => c.bp), state, {
+      requireStock: false,
+      extraText: (p) => byId.get(p.id)?.shop || "",
+      alsoMatchesQuery: (p) => !!serverHits?.has(p.id),
+    }).map((p) => byId.get(p.id)!);
+  }, [all, state, serverHits]);
 
   let body: React.ReactNode;
   if (loading.products) {
     body = <div className="adm-empty" style={{ gridColumn: "1/-1" }}>Loading…</div>;
   } else if (failed.products) {
     body = <div className="adm-empty" style={{ gridColumn: "1/-1" }}>Failed to load.</div>;
-  } else if (!products.length) {
+  } else if (!shown.length) {
     body = (
       <div className="adm-empty" style={{ gridColumn: "1/-1" }}>
-        {search ? "No products match your search." : "No products yet."}
+        {products.length ? "No products match your search." : "No products yet."}
       </div>
     );
   } else {
-    body = cards.map(({ bp, hidden }) => (
+    body = shown.map(({ bp, hidden }) => (
       <ProductCard
         key={bp.id}
         p={bp}
@@ -107,11 +147,11 @@ export function ProductsPage({ active }: { active: boolean }) {
         <div className="adm-h1" style={{ marginBottom: 0 }}>Product Review</div>
       </div>
 
-      <input
-        className="adm-search"
+      <BrowseFilters
+        products={all.map((c) => c.bp)}
+        state={state}
+        onChange={setState}
         placeholder="Search by name, code, shop…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
       />
 
       <div className="adm-prod-grid">{body}</div>
