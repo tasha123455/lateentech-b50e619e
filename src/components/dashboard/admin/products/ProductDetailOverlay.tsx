@@ -1,12 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 
+import { ReviewsList } from "@/components/dashboard/marketer/browse/Reviews";
+import { ZonesSection } from "@/components/dashboard/marketer/browse/ZonesSection";
+import type { ProductReview, Zone } from "@/components/dashboard/marketer/lib/types";
+
 import { useAdminData } from "../AdminDataProvider";
-import { COUNTRY_NAMES, dispPhone, freeLbl, when } from "../lib/format";
+import { dispPhone, when } from "../lib/format";
 import { effectiveQty } from "../lib/employees";
 import type { ProductDetail, VariantGroup } from "../lib/types";
 import { CurMoney } from "../ui/Money";
 import { useLightbox } from "../ui/Lightbox";
 import { goToAccount } from "../users/UserCard";
+
+/** The raw `delivery` column into the shape ZonesSection reads — the same
+ *  reshaping dbToBrowse does for the marketer. */
+function toZones(delivery: ProductDetail["product"] extends null ? never : NonNullable<ProductDetail["product"]>["delivery"]): Record<string, Zone> {
+  const out: Record<string, Zone> = {};
+  Object.entries(delivery || {}).forEach(([code, z]) => {
+    out[code] = { cities: [], c: {}, shipping: 0, delivery: 0 };
+    Object.entries((z && z.cities) || {}).forEach(([city, v]) => {
+      out[code].c[city] = { s: Number(v.shipping) || 0, d: Number(v.delivery) || 0 };
+      out[code].cities.push(city);
+      out[code].shipping = Number(v.shipping) || 0;
+      out[code].delivery = Number(v.delivery) || 0;
+    });
+  });
+  return out;
+}
 
 const hasQty = (v: unknown): boolean => {
   const o = v as { qty?: unknown };
@@ -88,6 +108,7 @@ export function ProductDetailOverlay({
   const [ownerOpen, setOwnerOpen] = useState(false);
   const [variantPick, setVariantPick] = useState<Record<number, string>>({});
   const [activeMarketers, setActiveMarketers] = useState("…");
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
 
   useEffect(() => {
     if (!productId) return;
@@ -99,6 +120,7 @@ export function ProductDetailOverlay({
     setOwnerOpen(false);
     setVariantPick({});
     setActiveMarketers("…");
+    setReviews([]);
 
     let cancelled = false;
     (async () => {
@@ -109,6 +131,34 @@ export function ProductDetailOverlay({
       } catch (e) {
         console.error("[admin] product detail", e);
         if (!cancelled) setError((e as Error)?.message || "");
+      }
+    })();
+
+    // Reviews, mapped the same way the marketer's sheet maps them.
+    (async () => {
+      try {
+        const rows = await api.listProductReviews(productId);
+        const avUrl = async (path: string) => {
+          try {
+            return await api.avatarPublicUrl(path || "");
+          } catch {
+            return "";
+          }
+        };
+        const mapped = await Promise.all(
+          (rows || []).map(async (r) => ({
+            id: r.id,
+            author: r.author_name || "Marketer",
+            rating: Number(r.rating) || 0,
+            text: r.comment || "",
+            ts: new Date(r.created_at).getTime(),
+            photo: r.photo_url || "",
+            avatar: r.avatar_path ? await avUrl(r.avatar_path) : "",
+          })),
+        );
+        if (!cancelled) setReviews(mapped);
+      } catch (e) {
+        console.error("[admin] product reviews", e);
       }
     })();
 
@@ -149,9 +199,7 @@ export function ProductDetailOverlay({
     const deposit = earnAmt + platFee;
 
     const vg = buildVariantGroups(p);
-    const deliveryEntries = p.delivery && typeof p.delivery === "object" ? Object.entries(p.delivery) : [];
-    const cityCount = deliveryEntries.reduce((n, [, z]) => n + Object.keys((z && z.cities) || {}).length, 0);
-    const cityText = cityCount ? (cityCount === 1 ? "1 city" : cityCount + " cities") : "—";
+    const zones = toZones(p.delivery);
     const qty = effectiveQty(p);
     const low = qty > 0 && qty <= 20;
 
@@ -267,44 +315,13 @@ export function ProductDetailOverlay({
           </div>
         ))}
 
-        {!!deliveryEntries.length && (
-          <>
-            <div className="pd-row pd-row-tap" onClick={() => setZonesOpen((v) => !v)}>
-              <RowIcon>
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                <circle cx="12" cy="10" r="3" />
-              </RowIcon>
-              <div className="pd-row-lbl">Delivery to</div>
-              <div className="pd-row-val">{cityText}<Chev open={zonesOpen} /></div>
-            </div>
-            <div className="pd-zones" style={{ display: zonesOpen ? "flex" : "none" }}>
-              {deliveryEntries.map(([code, z]) => (
-                <div className="pd-zone-card" key={code}>
-                  <div className="pd-zone-hd">{COUNTRY_NAMES[code] || code}</div>
-                  {Object.entries((z && z.cities) || {}).map(([city, c]) => (
-                    <div className="pd-zone-city" key={city}>
-                      <span data-no-i18n>{city}</span>
-                      <span>
-                        Ship{" "}
-                        {Number(c.shipping || 0) === 0 ? (
-                          <span data-no-i18n>{freeLbl()}</span>
-                        ) : (
-                          <CurMoney sym={cur} n={c.shipping} />
-                        )}{" "}
-                        · Deliver{" "}
-                        {Number(c.delivery || 0) === 0 ? (
-                          <span data-no-i18n>{freeLbl()}</span>
-                        ) : (
-                          <CurMoney sym={cur} n={c.delivery} />
-                        )}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        <ZonesSection
+          d={zones}
+          sym={cur}
+          code={(p.currency && p.currency.code) || ""}
+          open={zonesOpen}
+          onToggle={() => setZonesOpen((v) => !v)}
+        />
 
         <div
           className={"pd-row" + (vg.length ? " pd-row-tap" : "")}
@@ -377,6 +394,11 @@ export function ProductDetailOverlay({
           <div className="pd-row-lbl">Revenue</div>
           <div className="pd-row-val"><CurMoney sym={cur} n={p.revenue} /></div>
         </div>
+
+        {/* Read-only: an admin has no review to write, and reporting a product
+            to yourself is not a thing, so the form and the Report button that
+            marketers get stay behind ReviewsSection. */}
+        <ReviewsList reviews={reviews} onPhoto={(u) => lightbox.open(u)} />
 
         {/* Collapsed by default — the owner is reference material, not the point
             of the sheet, so it folds away like the delivery and stock rows. */}
