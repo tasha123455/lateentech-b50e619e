@@ -66,6 +66,7 @@
 .lateen-admin .adm-user-card:last-child { border-bottom: none; }
 .lateen-admin .adm-user-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 14px; cursor: pointer; }
 .lateen-admin .adm-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .adm-user-av img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; object-position: center; display: block; }
 .lateen-admin .adm-user-actions { flex-wrap: wrap; justify-content: flex-start; row-gap: 6px; }
 .lateen-admin .adm-role-pill { font-size: 9px; padding: 2px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .lateen-admin .adm-role-marketer { background: #2d2b4e; color: #a09efc; }
@@ -371,20 +372,28 @@
 .lateen-admin .rpt-resolved-note b { color: var(--ok); }
 .lateen-admin #adm-reports-ov { z-index: 109; }
 .lateen-admin #adm-pdetail { z-index: 110; }
-/* ── Menu sheet (last slot of the bottom nav) ──
-   Bottom sheet built from the same tokens as .adm-pdetail, sitting just under
-   the nav bar so the bar stays reachable while it is open. */
-.lateen-admin .adm-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 105; align-items: flex-end; justify-content: center; }
-.lateen-admin .adm-menu-overlay.open { display: flex; }
-.lateen-admin .adm-menu-sheet { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 10px 14px calc(84px + env(safe-area-inset-bottom, 0px)); border-top: 0.5px solid var(--border); max-height: 82vh; overflow-y: auto; }
-.lateen-admin .adm-menu-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 12px; }
-.lateen-admin .adm-menu-title { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--txt-3); margin: 0 4px 10px; }
-.lateen-admin .adm-menu-item { display: flex; align-items: center; gap: 12px; width: 100%; background: var(--card); border: 0.5px solid var(--border-2); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; font-family: var(--font); text-align: left; }
-.lateen-admin .adm-menu-item:active { background: var(--surface-2); }
-.lateen-admin .adm-menu-icon { width: 34px; height: 34px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+/* ── Menu drawer (last slot of the bottom nav) ──
+   Full-height slide-in from the side, same shape as the business and marketer
+   menus, rather than a short bottom sheet. */
+.lateen-admin .adm-menu-overlay { display: none; position: fixed; inset: 0; z-index: 130; }
+.lateen-admin .adm-menu-overlay.open { display: block; }
+.lateen-admin .adm-menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+.lateen-admin .adm-menu-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(80%, 340px); height: 100dvh; background: var(--surface); padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; border-radius: 20px 0 0 0; border-left: 0.5px solid var(--border); overflow-y: auto; overscroll-behavior: contain; font-family: var(--font); }
+.lateen-admin .adm-menu-close { align-self: flex-end; background: none; border: none; cursor: pointer; color: var(--txt-2); padding: 0; margin-bottom: 1rem; }
+.lateen-admin .adm-menu-head { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; margin-bottom: 0.85rem; border-bottom: 0.5px solid var(--border-2); }
+.lateen-admin .adm-menu-head-name { font-size: 15px; font-weight: 600; color: var(--txt-1); }
+.lateen-admin .adm-menu-head-sub { font-size: 11px; color: var(--txt-2); margin-top: 1px; }
+.lateen-admin .adm-menu-item { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: none; border-bottom: 0.5px solid var(--border-2); padding: 14px 0; cursor: pointer; font-family: var(--font); text-align: left; }
+.lateen-admin .adm-menu-item:last-of-type { border-bottom: none; }
+.lateen-admin .adm-menu-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .lateen-admin .adm-menu-icon svg { width: 17px; height: 17px; }
 .lateen-admin .adm-menu-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.lateen-admin .adm-menu-label { font-size: 14px; font-weight: 600; color: var(--txt-1); }
+.lateen-admin .adm-menu-label { font-size: 14px; font-weight: 500; color: var(--txt-1); }
 .lateen-admin .adm-menu-sub { font-size: 11px; color: var(--txt-2); }
 .lateen-admin .adm-menu-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 700; padding: 2px 7px; min-width: 18px; text-align: center; flex-shrink: 0; }
 .lateen-admin .adm-menu-chev { width: 16px; height: 16px; color: var(--txt-3); flex-shrink: 0; }
+
+/* Header for the pages the menu opens. */
+.lateen-admin .adm-page-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.lateen-admin .adm-back-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--surface); color: var(--txt-1); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; }
+.lateen-admin .adm-back-btn svg { width: 17px; height: 17px; }

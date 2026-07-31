@@ -6,18 +6,22 @@ import "@/styles/admin-dashboard.css";
 
 import { AdminDataProvider, useAdminData } from "./AdminDataProvider";
 import { EmployeesPage } from "./employees/EmployeesPage";
-import { BroadcastOverlay } from "./overlays/BroadcastOverlay";
 import { MenuDrawer } from "./overlays/MenuDrawer";
-import { DeletionRequestsOverlay } from "./users/DeletionRequestsOverlay";
+import { NotificationsPage } from "./overlays/NotificationsPage";
+import { ReportsPage } from "./products/ReportsPage";
+import { DeletionRequestsPage } from "./users/DeletionRequestsPage";
 import { HomePage } from "./home/HomePage";
 import { readPage, readScroll, writePage, writeScroll } from "./lib/storage";
 import type { AdminPageId } from "./lib/types";
 import { PayoutsPage } from "./payouts/PayoutsPage";
+import { ProductDetailOverlay } from "./products/ProductDetailOverlay";
 import { ProductsPage } from "./products/ProductsPage";
 import { BottomNav } from "./ui/BottomNav";
 import { LightboxProvider } from "./ui/Lightbox";
 import { UsersPage } from "./users/UsersPage";
 import { VerifyPage } from "./verify/VerifyPage";
+
+const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-deletions", "adm-reports", "adm-notify"]);
 
 function Shell() {
   const { userId, loadMetrics } = useAdminData();
@@ -26,12 +30,16 @@ function Shell() {
   const [page, setPage] = useState<AdminPageId>(() => readPage(userId) || "adm-home");
   const [signingOut, setSigningOut] = useState(false);
 
-  // Everything the menu opens lives here so each entry has exactly one home.
-  // One slot, not a flag each: the entries all open from the same menu now, so
-  // independent flags would let their sheets stack on top of each other.
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sheet, setSheet] = useState<null | "deletions" | "reports" | "broadcast">(null);
-  const openSheet = (which: typeof sheet) => { setMenuOpen(false); setSheet(which); };
+  // The menu pages sit outside the nav bar, so remember where to go back to.
+  const [returnTo, setReturnTo] = useState<AdminPageId>("adm-home");
+  const [detailFromReport, setDetailFromReport] = useState<string | null>(null);
+
+  const openFromMenu = (id: AdminPageId) => {
+    setMenuOpen(false);
+    setReturnTo((cur) => (MENU_PAGES.has(page) ? cur : page));
+    goTo(id);
+  };
 
   const goTo = useCallback(
     (id: AdminPageId) => {
@@ -132,27 +140,36 @@ function Shell() {
       </section>
 
       <section className={"adm-page" + (page === "adm-products" ? " active" : "")} id="adm-products">
-        <ProductsPage active={page === "adm-products"} reportsOpen={sheet === "reports"} onReportsClose={() => setSheet(null)} />
+        <ProductsPage active={page === "adm-products"} />
       </section>
 
       <section className={"adm-page" + (page === "adm-employees" ? " active" : "")} id="adm-employees">
-        <EmployeesPage active={page === "adm-employees"} />
+        <EmployeesPage active={page === "adm-employees"} onBack={() => goTo(returnTo)} />
       </section>
 
-      <BottomNav page={page} onGo={goTo} onMenu={() => setMenuOpen((v) => !v)} menuOpen={menuOpen} />
+      <section className={"adm-page" + (page === "adm-deletions" ? " active" : "")} id="adm-deletions">
+        <DeletionRequestsPage active={page === "adm-deletions"} onBack={() => goTo(returnTo)} />
+      </section>
+
+      <section className={"adm-page" + (page === "adm-reports" ? " active" : "")} id="adm-reports">
+        <ReportsPage active={page === "adm-reports"} onBack={() => goTo(returnTo)} onOpenProduct={setDetailFromReport} />
+        <ProductDetailOverlay productId={detailFromReport} onClose={() => setDetailFromReport(null)} />
+      </section>
+
+      <section className={"adm-page" + (page === "adm-notify" ? " active" : "")} id="adm-notify">
+        {page === "adm-notify" && <NotificationsPage onBack={() => goTo(returnTo)} />}
+      </section>
+
+      <BottomNav page={page} onGo={goTo} onMenu={() => setMenuOpen((v) => !v)} menuOpen={menuOpen || MENU_PAGES.has(page)} />
 
       <MenuDrawer
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
-        onDeletionRequests={() => openSheet("deletions")}
-        // Reports can open a product, and the product sheet lives on the
-        // Products page — so go there first, then raise the sheet.
-        onReports={() => { goTo("adm-products"); openSheet("reports"); }}
-        onEmployees={() => { openSheet(null); goTo("adm-employees"); }}
-        onNotifications={() => openSheet("broadcast")}
+        onDeletionRequests={() => openFromMenu("adm-deletions")}
+        onReports={() => openFromMenu("adm-reports")}
+        onEmployees={() => openFromMenu("adm-employees")}
+        onNotifications={() => openFromMenu("adm-notify")}
       />
-      <DeletionRequestsOverlay open={sheet === "deletions"} onClose={() => setSheet(null)} />
-      <BroadcastOverlay open={sheet === "broadcast"} onClose={() => setSheet(null)} />
     </div>
   );
 }

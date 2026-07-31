@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
+import { PageHeader } from "../ui/PageHeader";
 import { initials, money, when, whenFull } from "../lib/format";
 import { goToAccount } from "./UserCard";
 
@@ -18,16 +19,16 @@ const FILTERS: Array<{ key: string; label: string }> = [
   { key: "cancelled", label: "Cancelled" },
 ];
 
-export function DeletionRequestsOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { deletionRequests, loadDeletionRequests, api } = useAdminData();
   const [filter, setFilter] = useState("");
   const [comments, setComments] = useState<Record<string, string>>({});
   const [loadedOnce, setLoadedOnce] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!active) return;
     void loadDeletionRequests().then(() => setLoadedOnce(true));
-  }, [open, loadDeletionRequests]);
+  }, [active, loadDeletionRequests]);
 
   const resolve = async (id: string, action: "approve" | "reject") => {
     const comment = (comments[id] || "").trim();
@@ -128,13 +129,8 @@ export function DeletionRequestsOverlay({ open, onClose }: { open: boolean; onCl
   }
 
   return (
-    <div
-      className={"adm-pdetail" + (open ? " open" : "")}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="adm-pdetail-card">
-        <button className="adm-pdetail-close" onClick={onClose}>×</button>
-        <div className="adm-h1" style={{ marginBottom: 12 }}>Deletion Requests</div>
+    <>
+      <PageHeader title="Deletion Requests" onBack={onBack} />
         <div className="adm-filter-row" style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
           {FILTERS.map((f) => (
             <button
@@ -146,8 +142,7 @@ export function DeletionRequestsOverlay({ open, onClose }: { open: boolean; onCl
             </button>
           ))}
         </div>
-        <div>{body}</div>
-      </div>
-    </div>
+      <div>{body}</div>
+    </>
   );
 }
