@@ -27,6 +27,10 @@ const Ctx = createContext<LanguageState | null>(null);
 
 // Cache original English content per node so toggling back is lossless.
 const ORIG_TEXT = new WeakMap<Text, string>();
+// The translation we last wrote into each node. React mutates a text node in
+// place instead of replacing it, so this is how we tell "the app re-rendered
+// this with new English" apart from "nobody has touched it since we wrote".
+const LAST_WRITTEN = new WeakMap<Text, string>();
 const ORIG_ATTR = new WeakMap<Element, Map<string, string>>();
 const TRANSLATABLE_ATTRS = ["placeholder", "title", "aria-label", "alt"] as const;
 
@@ -45,16 +49,26 @@ function applyTextNode(node: Text, lang: Lang) {
     if (orig != null && node.nodeValue !== orig) node.nodeValue = orig;
     return;
   }
+  // If the node no longer holds what we wrote, the app re-rendered it with
+  // fresh source text — adopt that as the new original. Without this, a React
+  // component that updates a translatable string (e.g. the orders "N new"
+  // badge) gets its update overwritten by the translation of the value the
+  // node happened to hold on first paint.
+  const written = LAST_WRITTEN.get(node);
+  if (written !== undefined && node.nodeValue !== written) {
+    ORIG_TEXT.set(node, node.nodeValue ?? "");
+  }
   rememberText(node);
   const orig = ORIG_TEXT.get(node) ?? node.nodeValue ?? "";
   const trimmed = orig.trim();
-  if (!trimmed) return;
+  if (!trimmed) { LAST_WRITTEN.set(node, node.nodeValue ?? ""); return; }
   const tr = translate(orig);
-  if (tr == null) return;
+  if (tr == null) { LAST_WRITTEN.set(node, node.nodeValue ?? ""); return; }
   const leading = orig.match(/^\s*/)?.[0] ?? "";
   const trailing = orig.match(/\s*$/)?.[0] ?? "";
   const next = leading + tr + trailing;
   if (node.nodeValue !== next) node.nodeValue = next;
+  LAST_WRITTEN.set(node, next);
 }
 
 function applyAttributes(el: Element, lang: Lang) {
