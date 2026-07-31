@@ -6,6 +6,9 @@ import "@/styles/admin-dashboard.css";
 
 import { AdminDataProvider, useAdminData } from "./AdminDataProvider";
 import { EmployeesPage } from "./employees/EmployeesPage";
+import { BroadcastOverlay } from "./overlays/BroadcastOverlay";
+import { MenuDrawer } from "./overlays/MenuDrawer";
+import { DeletionRequestsOverlay } from "./users/DeletionRequestsOverlay";
 import { HomePage } from "./home/HomePage";
 import { readPage, readScroll, writePage, writeScroll } from "./lib/storage";
 import type { AdminPageId } from "./lib/types";
@@ -22,6 +25,13 @@ function Shell() {
 
   const [page, setPage] = useState<AdminPageId>(() => readPage(userId) || "adm-home");
   const [signingOut, setSigningOut] = useState(false);
+
+  // Everything the menu opens lives here so each entry has exactly one home.
+  // One slot, not a flag each: the entries all open from the same menu now, so
+  // independent flags would let their sheets stack on top of each other.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [sheet, setSheet] = useState<null | "deletions" | "reports" | "broadcast">(null);
+  const openSheet = (which: typeof sheet) => { setMenuOpen(false); setSheet(which); };
 
   const goTo = useCallback(
     (id: AdminPageId) => {
@@ -122,14 +132,27 @@ function Shell() {
       </section>
 
       <section className={"adm-page" + (page === "adm-products" ? " active" : "")} id="adm-products">
-        <ProductsPage active={page === "adm-products"} />
+        <ProductsPage active={page === "adm-products"} reportsOpen={sheet === "reports"} onReportsClose={() => setSheet(null)} />
       </section>
 
       <section className={"adm-page" + (page === "adm-employees" ? " active" : "")} id="adm-employees">
         <EmployeesPage active={page === "adm-employees"} />
       </section>
 
-      <BottomNav page={page} onGo={goTo} />
+      <BottomNav page={page} onGo={goTo} onMenu={() => setMenuOpen((v) => !v)} menuOpen={menuOpen} />
+
+      <MenuDrawer
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onDeletionRequests={() => openSheet("deletions")}
+        // Reports can open a product, and the product sheet lives on the
+        // Products page — so go there first, then raise the sheet.
+        onReports={() => { goTo("adm-products"); openSheet("reports"); }}
+        onEmployees={() => { openSheet(null); goTo("adm-employees"); }}
+        onNotifications={() => openSheet("broadcast")}
+      />
+      <DeletionRequestsOverlay open={sheet === "deletions"} onClose={() => setSheet(null)} />
+      <BroadcastOverlay open={sheet === "broadcast"} onClose={() => setSheet(null)} />
     </div>
   );
 }

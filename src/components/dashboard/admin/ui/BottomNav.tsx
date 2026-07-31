@@ -10,26 +10,42 @@ const ITEMS: Array<{ id: AdminPageId; label: string; path: React.ReactNode }> = 
     path: <><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 11h5M18.5 8.5v5" /></>,
   },
   { id: "adm-products", label: "Products", path: <path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7" /> },
-  {
-    id: "adm-employees",
-    label: "Employees",
-    path: <><circle cx="12" cy="8" r="3.2" /><path d="M5 21c1-4 4-6 7-6s6 2 7 6" /></>,
-  },
 ];
 
-export function BottomNav({ page, onGo }: { page: AdminPageId; onGo: (id: AdminPageId) => void }) {
+/** Employees moved into the menu, so the last slot opens the menu instead of
+ *  being a sixth page. `menuOpen` keeps it lit while the sheet is up. */
+export function BottomNav({
+  page, onGo, onMenu, menuOpen,
+}: {
+  page: AdminPageId;
+  onGo: (id: AdminPageId) => void;
+  onMenu: () => void;
+  menuOpen: boolean;
+}) {
   return (
     <nav className="adm-bottom-nav">
       {ITEMS.map((it) => (
         <div
           key={it.id}
-          className={"adm-nav-item" + (page === it.id ? " active" : "")}
+          className={"adm-nav-item" + (page === it.id && !menuOpen ? " active" : "")}
           onClick={() => onGo(it.id)}
         >
           <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5">{it.path}</svg>
           <span className="adm-nav-label">{it.label}</span>
         </div>
       ))}
+      <div
+        className={"adm-nav-item" + (menuOpen ? " active" : "")}
+        id="adm-nav-menu"
+        onClick={onMenu}
+      >
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+        <span className="adm-nav-label">Menu</span>
+      </div>
     </nav>
   );
 }
