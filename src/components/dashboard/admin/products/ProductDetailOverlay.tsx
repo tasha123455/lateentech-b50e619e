@@ -66,12 +66,13 @@ const RowIcon = ({ children }: { children: React.ReactNode }) => (
 );
 
 export function ProductDetailOverlay({
-  productId, onClose, hidden = false, onToggleHidden, onDelete,
+  productId, onClose, status, onToggleHidden, onDelete,
 }: {
   productId: string | null;
   onClose: () => void;
-  /** Current status of the product in the grid — drives the Hide / Unhide label. */
-  hidden?: boolean;
+  /** The row's status: "active", "paused" or "hidden". Shown on its own row and
+   *  used for the Hide / Unhide label. */
+  status?: string | null;
   onToggleHidden?: (id: string, next: "active" | "hidden") => void;
   onDelete?: (id: string, name: string) => void;
 }) {
@@ -125,6 +126,8 @@ export function ProductDetailOverlay({
   const open = !!productId;
   const p = detail?.product || null;
   const owner = detail?.owner || {};
+  const hidden = status === "hidden";
+  const paused = status === "paused";
 
   let body: React.ReactNode;
   if (error) {
@@ -312,8 +315,9 @@ export function ProductDetailOverlay({
             <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
           </RowIcon>
           <div className="pd-row-lbl">In stock</div>
-          <div className={"pd-row-val" + (low ? " am" : "")}>
-            {qty} pcs{vg.length ? <Chev open={stockOpen} /> : null}
+          <div className={"pd-row-val" + (low || qty <= 0 ? " am" : "")}>
+            {qty <= 0 ? "Out of stock" : qty + " pcs"}
+            {vg.length ? <Chev open={stockOpen} /> : null}
           </div>
         </div>
         {!!vg.length && (
@@ -331,6 +335,19 @@ export function ProductDetailOverlay({
             ))}
           </div>
         )}
+
+        {/* Marketers only ever see active, in-stock products, so the marketer's
+            sheet has no reason to carry this. The admin needs it. */}
+        <div className="pd-row">
+          <RowIcon>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          </RowIcon>
+          <div className="pd-row-lbl">Status</div>
+          <div className={"pd-row-val" + (hidden || paused ? " am" : "")}>
+            {hidden ? "Hidden by admin" : paused ? "Paused by owner" : "Active"}
+          </div>
+        </div>
 
         <div className="pd-row">
           <RowIcon>
