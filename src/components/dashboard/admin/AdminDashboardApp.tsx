@@ -107,21 +107,20 @@ function Shell() {
 
   return (
     <div className="adm-app">
-      <div className="adm-topbar">
-        <div className="adm-tl">
-          <div className="adm-avatar">A</div>
-          <div>
-            <div className="adm-greet">Admin Console</div>
-            <div className="adm-greet-sub">Wasla platform control</div>
+      {/* Only the analytics page carries the header — the other pages have
+          their own title row and don't need it repeated. */}
+      {page === "adm-home" && (
+        <div className="adm-topbar">
+          <div className="adm-tl">
+            <div className="adm-avatar">A</div>
+            <div>
+              <div className="adm-greet">Admin Console</div>
+              <div className="adm-greet-sub">Wasla platform control</div>
+            </div>
           </div>
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span className="adm-badge">Admin</span>
-          <button className="adm-signout" onClick={onSignOut} aria-busy={signingOut}>
-            {signingOut ? "Signing out…" : "Sign out"}
-          </button>
         </div>
-      </div>
+      )}
 
       <section className={"adm-page" + (page === "adm-home" ? " active" : "")} id="adm-home">
         <HomePage />
@@ -164,6 +163,8 @@ function Shell() {
 
       <MenuDrawer
         open={menuOpen}
+        signingOut={signingOut}
+        onSignOut={onSignOut}
         onClose={() => setMenuOpen(false)}
         onDeletionRequests={() => openFromMenu("adm-deletions")}
         onReports={() => openFromMenu("adm-reports")}

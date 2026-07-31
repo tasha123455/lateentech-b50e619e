@@ -7,6 +7,7 @@ import { useAdminData } from "../AdminDataProvider";
  *  single place. */
 export function MenuDrawer({
   open, onClose, onDeletionRequests, onReports, onEmployees, onNotifications,
+  onSignOut, signingOut,
 }: {
   open: boolean;
   onClose: () => void;
@@ -14,6 +15,8 @@ export function MenuDrawer({
   onReports: () => void;
   onEmployees: () => void;
   onNotifications: () => void;
+  onSignOut: () => void;
+  signingOut: boolean;
 }) {
   const { deletionRequests, reports } = useAdminData();
   const pendingDeletions = deletionRequests.filter((r) => r.status === "wallet_review").length;
@@ -111,6 +114,19 @@ export function MenuDrawer({
             </svg>
           </button>
         ))}
+
+        {/* Sits at the bottom of the drawer, the way the business and marketer
+            menus do — it used to be a button in the header of every page. */}
+        <button className="adm-menu-item adm-menu-signout" onClick={onSignOut} aria-busy={signingOut || undefined}>
+          <span className="adm-menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+            </svg>
+          </span>
+          <span className="adm-menu-text">
+            <span className="adm-menu-label">{signingOut ? "Signing out…" : "Sign out"}</span>
+          </span>
+        </button>
       </div>
     </div>
   );

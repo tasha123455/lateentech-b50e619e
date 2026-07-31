@@ -392,6 +392,13 @@
 .lateen-admin .adm-menu-sub { font-size: 11px; color: var(--txt-2); }
 .lateen-admin .adm-menu-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 700; padding: 2px 7px; min-width: 18px; text-align: center; flex-shrink: 0; }
 .lateen-admin .adm-menu-chev { width: 16px; height: 16px; color: var(--txt-3); flex-shrink: 0; }
+.lateen-admin .adm-wipe-box { background: var(--danger-tint); border: 0.5px solid var(--danger); border-radius: 12px; padding: 12px; margin: 0 0 10px; display: grid; gap: 8px; }
+.lateen-admin .adm-wipe-warn { font-size: 11px; line-height: 1.55; color: var(--danger); }
+.lateen-admin .adm-wipe-msg { font-size: 11px; color: var(--txt-1); }
+
+.lateen-admin .adm-menu-signout { margin-top: auto; border-top: 0.5px solid var(--border-2); border-bottom: none; }
+.lateen-admin .adm-menu-signout .adm-menu-icon { background: var(--danger-tint); color: var(--danger); }
+.lateen-admin .adm-menu-signout .adm-menu-label { color: var(--danger); }
 
 /* Header for the pages the menu opens. */
 .lateen-admin .adm-page-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
