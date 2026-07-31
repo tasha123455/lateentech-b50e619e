@@ -23,6 +23,10 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
   const [body, setBody] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [wipeOpen, setWipeOpen] = useState(false);
+  const [wipeText, setWipeText] = useState("");
+  const [wiping, setWiping] = useState(false);
+  const [wipeMsg, setWipeMsg] = useState("");
 
   const name = u.business_name || u.full_name || "Unnamed";
   const role = u.role || "marketer";
@@ -38,6 +42,25 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
       onChanged();
     } catch (e) {
       alert("Failed: " + (e as Error).message);
+    }
+  };
+
+  /* Confirmation is typed into the card, not a native prompt(). Chrome blocks
+     window.prompt() inside a cross-origin iframe — which is how the preview
+     runs — so the old flow returned null and silently did nothing. */
+  const wipeData = async () => {
+    if (wipeText.trim().toUpperCase() !== "WIPE") return;
+    setWiping(true);
+    setWipeMsg("");
+    try {
+      const res = await api.admin.wipeAllData();
+      const counts = res && typeof res === "object" ? res as Record<string, number> : {};
+      const parts = Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(", ");
+      setWipeMsg("Cleared" + (parts ? ": " + parts : "") + ". Reloading…");
+      setTimeout(() => location.reload(), 1200);
+    } catch (e) {
+      setWiping(false);
+      setWipeMsg("Failed: " + ((e as Error)?.message || String(e)));
     }
   };
 
@@ -162,7 +185,45 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
           >
             {isBanned ? "Unban" : "Ban Email"}
           </button>
+          {role === "admin" && (
+            <button
+              className="adm-go-btn"
+              style={{ background: "#fee", color: "#c00", borderColor: "#fcc" }}
+              onClick={() => { setWipeOpen((v) => !v); setWipeText(""); setWipeMsg(""); }}
+            >
+              Delete data
+            </button>
+          )}
         </div>
+
+        {role === "admin" && wipeOpen && (
+          <div className="adm-wipe-box">
+            <div className="adm-wipe-warn">
+              Deletes every order, product, payout, report, notification, review, favourite and
+              employee record, and resets all wallet balances. User accounts and email bans are
+              kept. This cannot be undone.
+            </div>
+            <input
+              className="adm-notif-inp"
+              placeholder="Type WIPE to confirm"
+              value={wipeText}
+              onChange={(e) => setWipeText(e.target.value)}
+              autoComplete="off"
+            />
+            {wipeMsg && <div className="adm-wipe-msg">{wipeMsg}</div>}
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="adm-btn adm-btn-ghost" onClick={() => setWipeOpen(false)}>Cancel</button>
+              <button
+                className="adm-go-btn"
+                style={{ flex: 1, background: "#c0392b", color: "#fff", borderColor: "#c0392b" }}
+                disabled={wiping || wipeText.trim().toUpperCase() !== "WIPE"}
+                onClick={() => void wipeData()}
+              >
+                {wiping ? "Deleting…" : "Delete all data"}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="adm-notif-box">
           <div className="adm-notif-lbl">Notification title (what they see first)</div>
