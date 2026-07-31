@@ -50,10 +50,10 @@ export function LightboxProvider({ children }: { children: ReactNode }) {
         id="mp-lightbox-overlay"
         onClick={(e) => { if (e.target === e.currentTarget) close(); }}
       >
-        <div
-          className="mp-lightbox-stage"
-          onClick={(e) => { if (e.target === e.currentTarget) close(); }}
-        >
+        {/* Stage is dir="ltr" so the slide transforms stay left-to-right in
+            Arabic, and it takes no click handler of its own — only the
+            overlay backdrop and the buttons close the lightbox. */}
+        <div className="mp-lightbox-stage" dir="ltr">
           <div
             className="mp-lightbox-track"
             id="mp-lightbox-track"
@@ -79,8 +79,12 @@ export function LightboxProvider({ children }: { children: ReactNode }) {
             ))}
           </div>
           <div className="mp-lightbox-nav" id="mp-lightbox-nav" style={{ display: photos.length > 1 ? "flex" : "none" }}>
-            <button className="mp-lightbox-arrow" onClick={(e) => { e.stopPropagation(); go(-1); }} aria-label="Previous">‹</button>
-            <button className="mp-lightbox-arrow" onClick={(e) => { e.stopPropagation(); go(1); }} aria-label="Next">›</button>
+            <div className="mp-lightbox-nav-btn" onClick={(e) => { e.stopPropagation(); go(-1); }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </div>
+            <div className="mp-lightbox-nav-btn" onClick={(e) => { e.stopPropagation(); go(1); }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </div>
           </div>
           <div className="mp-lightbox-dots" id="mp-lightbox-dots">
             {photos.length > 1
@@ -94,10 +98,8 @@ export function LightboxProvider({ children }: { children: ReactNode }) {
               : null}
           </div>
         </div>
-        <div className="mp-lightbox-close" onClick={close}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+        <div className="mp-lightbox-close" role="button" aria-label="Close" onClick={(e) => { e.stopPropagation(); close(); }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
         </div>
       </div>
     </Ctx.Provider>

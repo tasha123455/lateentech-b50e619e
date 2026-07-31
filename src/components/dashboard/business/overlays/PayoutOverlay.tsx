@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { computeEarnByCur, pickWalletCur } from "../home/currency";
-import { isAr, moneyParts, ordFrac } from "../lib/format";
+import { isAr, ordFrac } from "../lib/format";
+import { MoneyH } from "../ui/Money";
 import type { Order, PendingActiveStub } from "../lib/types";
 
 const BD_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -112,13 +113,6 @@ function ComplianceOverlay({ open, onClose }: { open: boolean; onClose: () => vo
       </div>
     </div>
   );
-}
-
-function MoneyH({ n, sym, code }: { n: number; sym: string; code?: string | null }) {
-  const p = moneyParts(n, sym, code);
-  if (p.symbolFirst) return <span data-no-i18n="">{p.symbol}{p.amount}</span>;
-  if (p.spaced) return <span data-no-i18n="">{p.amount} {p.symbol}</span>;
-  return <span data-no-i18n="">{p.amount}{p.symbol}</span>;
 }
 
 export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -235,7 +229,7 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
           className="bd-dd-item clear"
           onClick={(e) => { e.stopPropagation(); pickValue(meta.key, null, range); }}
         >
-          {ar ? "مسح الاختيار" : "Clear selection"}
+          {ar ? "إلغاء التحديد" : "Clear selection"}
         </div>
         {keys.map((k) => (
           <div
@@ -257,7 +251,7 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
         <div className="sheet-handle" />
         <div className="bd-modal-head">
           <div className="bd-head-left">
-            <h2>{ar ? "التفاصيل" : "Breakdown"}</h2>
+            <h2 data-i18n="Breakdown">Breakdown</h2>
             <button className="cmpl-alert-btn" type="button" aria-label="Compliance & Security Policy" onClick={() => setComplianceOpen(true)}>!</button>
           </div>
           <button className="bd-close-btn" onClick={onClose}>✕</button>
@@ -269,11 +263,11 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
             data-range="all"
             onClick={clearAll}
           >
-            {ar ? "كل الوقت" : "All time"}
+            All time
           </div>
-          {renderTab("daily", ar ? "اليوم" : "Day")}
-          {renderTab("monthly", ar ? "الشهر" : "Month")}
-          {renderTab("yearly", ar ? "السنة" : "Year")}
+          {renderTab("daily", "Day")}
+          {renderTab("monthly", "Month")}
+          {renderTab("yearly", "Year")}
         </div>
 
         {renderDropdown("daily", BD_DAYS)}
@@ -289,7 +283,7 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           </div>
-          <span><span>{ar ? "المسوقون النشطون:" : "Marketers active:"}</span> <span className="bd-m-val" id="bd-marketers-val">{data.marketers}</span></span>
+          <span><span data-i18n="Marketers active:">Marketers active:</span> <span className="bd-m-val" id="bd-marketers-val">{data.marketers}</span></span>
         </div>
 
         {frozen && (

@@ -156,11 +156,11 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
           <div style={{ display: "grid", gap: 10 }}>
             <label className="pd-lbl">
               <span className="pd-lbl-head">{t("Full name", "الاسم الكامل")}</span>
-              <input className="pd-inp" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Example: Kim Kardashian", "مثال: هيفاء وهبي")} data-no-i18n="" />
+              <input className="pd-inp" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Example: Kim Kardashian", "مثال: هيفاء وهبي")} />
             </label>
             <label className="pd-lbl">
               <span className="pd-lbl-head">{t("Business name", "اسم المشروع")}</span>
-              <input className="pd-inp" value={biz} onChange={(e) => setBiz(e.target.value)} placeholder="Business name" data-no-i18n="" />
+              <input className="pd-inp" value={biz} onChange={(e) => setBiz(e.target.value)} placeholder="Business name" />
             </label>
             <div style={{ border: "1px solid #2a2a2a", borderRadius: 14, padding: 14, display: "grid", gap: 12, background: "#181818" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
@@ -173,7 +173,7 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Country", "الدولة")}</span>
-                <span style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">🇱🇾 {ar ? "ليبيا" : "Libya"}</span>
+                <span style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">🇱🇾 Libya</span>
               </div>
             </div>
             <button type="button" onClick={() => { setCrPhone(false); setCrEmail(false); setCrCountry(false); setCrOpen(true); }} style={{ width: "100%", background: "transparent", border: "1px solid #3a3a3a", color: "var(--color-text-primary)", borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
@@ -193,16 +193,16 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
                   {pickerOpen ? (
                     <div className="pd-picker-list" style={{ display: "block", position: "absolute", zIndex: 5, width: 190, top: "calc(100% + 4px)" }}>
                       <button type="button" className="pd-picker-item" onClick={() => { setWaCc("\u200E+218\u200E"); setPickerOpen(false); }} dir="ltr">
-                        <span>+218 — {ar ? "ليبيا" : "Libya"}</span>
+                        <span>+218 — <span data-i18n="Libya">Libya</span></span>
                       </button>
                       <div className="pd-picker-item pd-picker-disabled">
-                        <span>{ar ? "المزيد" : "More"}</span>
-                        <span className="pd-soon-pill">{ar ? "قريباً" : "Soon"}</span>
+                        <span data-i18n="More">More</span>
+                        <span className="pd-soon-pill" data-i18n="Soon">Soon</span>
                       </div>
                     </div>
                   ) : null}
                 </div>
-                <input className="pd-inp" value={waNum} onChange={(e) => setWaNum(e.target.value)} placeholder="092xxxxxxx" inputMode="numeric" dir="ltr" style={{ textAlign: "left", flex: 1 }} data-no-i18n="" />
+                <input className="pd-inp" value={waNum} onChange={(e) => setWaNum(e.target.value)} placeholder="092xxxxxxx" inputMode="numeric" dir="ltr" style={{ textAlign: "left", flex: 1 }} />
               </div>
             </label>
           </div>

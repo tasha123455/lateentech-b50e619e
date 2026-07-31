@@ -84,7 +84,7 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
   return (
     <div className="page active" id="pg-notif">
       <div className="page-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <div className="page-title">{tr("Notifications", "الإشعارات")}</div>
+        <div className="page-title">Notifications</div>
         <button
           type="button"
           aria-label="Close"

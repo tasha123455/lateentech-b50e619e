@@ -28,6 +28,10 @@ function Shell() {
 
   return (
     <>
+      {/* The frame the whole dashboard lives in — same wrapper the body HTML
+          opens right before `.app`. It is what gives the shell its clipping
+          box and the containing block for absolutely-positioned children. */}
+      <div style={{ position: "relative", maxWidth: 420, margin: "0 auto", minHeight: 860, overflow: "hidden", background: "#141414" }}>
       <div className="app">
         <div className={"page" + (tab === "home" ? " active" : "")} id="pg-home">
           <HomePage onOpenNotifications={() => setTab("notif")} onOpenPayout={() => setPayoutOpen(true)} onOpenSupport={() => setSupportOpen(true)} onOpenProfile={() => setProfileOpen(true)} />
@@ -45,6 +49,7 @@ function Shell() {
         <div className={"page" + (tab === "notif" ? " active" : "")} id="pg-notif">
           <NotificationsPage active={tab === "notif"} onBack={() => setTab("home")} />
         </div>
+      </div>
       </div>
 
       <BottomNav tab={tab} onTab={setTab} onMenu={() => setMenuOpen(true)} />

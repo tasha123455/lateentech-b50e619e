@@ -425,7 +425,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     let code = ensureUniqueCode(editing ? currentCode : null);
     setCurrentCode(code);
     setSubmitting(true);
-    setSubmitLabel(ar ? "جارٍ رفع الصور…" : "Uploading photos…");
+    setSubmitLabel("Uploading photos…");
     try {
       const jobs = [...uploadJobsRef.current];
       if (jobs.length) await Promise.allSettled(jobs);
@@ -498,14 +498,14 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           <div className="lp-back-btn" onClick={onClose}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
-          <h1 className="lp-page-title">{editing ? (ar ? "تعديل المنتج" : "Edit product") : (ar ? "إضافة منتج" : "Add a product")}</h1>
+          <h1 className="lp-page-title">{editing ? "Edit product" : "Add a product"}</h1>
         </div>
 
         <div className="lp-card">
           <div className="lp-card-head">
             <div className="lp-card-head-left">
               <div className="lp-step-badge">1</div>
-              <div className="lp-card-title">{ar ? "معلومات المنتج" : "Product info"}</div>
+              <div className="lp-card-title">Product info</div>
             </div>
             <div className="lp-icon-chip">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 8v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8m18 0-2-4H5L3 8m18 0H3m9 4v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -520,13 +520,13 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
             </div>
           )}
 
-          <label className="lp-field-label">{ar ? "صور المنتج" : "Product photos"} <span className="lp-req">*</span></label>
+          <label className="lp-field-label">Product photos <span className="lp-req">*</span></label>
           <div className="lp-cover-frame" id="lp-cover-frame" ref={coverFrameRef} style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
             {!coverUrl ? (
               <div className="lp-cover-placeholder" onClick={() => photoInputRef.current?.click()}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                {ar ? "اضغط لرفع الصور" : "Tap to upload photos"}
-                <div className="lp-sub">{ar ? "أول صورة تصبح صورة الغلاف" : "First photo becomes the cover image"}</div>
+                Tap to upload photos
+                <div className="lp-sub">First photo becomes the cover image</div>
               </div>
             ) : (
               <>
@@ -535,7 +535,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
               </>
             )}
           </div>
-          {!!coverUrl && <div className="lp-cover-caption">{ar ? "هذا ما يراه المسوق قبل الضغط على المنتج لرؤية الصورة كاملة" : "This is what the marketer sees before tapping on the product to see the full photo"}</div>}
+          {!!coverUrl && <div className="lp-cover-caption">This is what the marketer sees before tapping on the product to see the full photo</div>}
           <div className="lp-photo-grid" id="photo-grid" style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
             {photos.slice(1).map((src, i) => (
               <div className="photo-preview" key={i}>
@@ -546,17 +546,17 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
             {photos.length < 6 && (
               <div className="add-photo-btn" onClick={() => photoInputRef.current?.click()}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                <div className="add-photo-label">{ar ? "إضافة صورة" : "Add photo"}</div>
+                <div className="add-photo-label">Add photo</div>
               </div>
             )}
           </div>
           <input ref={photoInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { const files = Array.from(e.target.files || []); e.target.value = ""; if (files.length) onPhotosSelected(files); }} />
 
-          <label className="lp-field-label">{ar ? "اسم المنتج" : "Product name"} <span className="lp-req">*</span></label>
-          <input className="lp-input" type="text" value={name} disabled={editLocked} onChange={(e) => setName(e.target.value)} placeholder={ar ? "مثال: حذاء رياضي" : "e.g. Running shoes"} data-no-i18n="" />
+          <label className="lp-field-label">Product name <span className="lp-req">*</span></label>
+          <input className="lp-input" type="text" value={name} disabled={editLocked} onChange={(e) => setName(e.target.value)} placeholder="e.g. Running shoes" data-no-i18n="" />
 
           <div>
-            <label className="lp-field-label">{ar ? "سعر البيع" : "Selling price"} <span className="lp-req">*</span></label>
+            <label className="lp-field-label">Selling price <span className="lp-req">*</span></label>
             <div style={{ position: "relative" }}>
               <span className="price-prefix" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, fontWeight: 500, color: "var(--color-text-secondary)", pointerEvents: "none" }}>{priceSym(selectedCurrency)}</span>
               <input className="lp-input" type="number" value={price} disabled={editLocked} step="0.01" style={{ paddingLeft: 44 }} placeholder="0.00" onChange={(e) => {
@@ -568,20 +568,20 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
             </div>
           </div>
 
-          <label className="lp-field-label">{ar ? "الوصف" : "Description"} <span className="lp-req">*</span></label>
-          <textarea className="lp-input lp-textarea" value={desc} disabled={editLocked} onChange={(e) => setDesc(e.target.value)} placeholder={ar ? "ما الذي يجعل هذا المنتج يستحق البيع؟" : "What makes this product worth selling? Materials, fit, use case…"} data-no-i18n="" />
+          <label className="lp-field-label">Description <span className="lp-req">*</span></label>
+          <textarea className="lp-input lp-textarea" value={desc} disabled={editLocked} onChange={(e) => setDesc(e.target.value)} placeholder="What makes this product worth selling? Materials, fit, use case…" data-no-i18n="" />
 
-          <label className="lp-field-label">{ar ? "العملة" : "Currency"} <span className="lp-req">*</span></label>
+          <label className="lp-field-label">Currency <span className="lp-req">*</span></label>
           <div className="lp-currency-static" onClick={() => !editLocked && setCurrDropdownOpen((v) => !v)} style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
             <span style={{ fontSize: 18, lineHeight: 1 }}>{selectedCurrency ? selectedCurrency.flag : "🌐"}</span>
-            <span style={{ color: "var(--color-text-primary)" }}>{selectedCurrency ? `${selectedCurrency.name} (${selectedCurrency.code})` : (ar ? "اختر عملة" : "Select a currency")}</span>
+            <span style={{ color: "var(--color-text-primary)" }}>{selectedCurrency ? `${selectedCurrency.name} (${selectedCurrency.code})` : "Select a currency"}</span>
             <span style={{ fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 4 }}>{selectedCurrency ? selectedCurrency.symbol : ""}</span>
           </div>
           <div style={{ position: "relative" }}>
             {currDropdownOpen && (
               <div className="currency-search-wrap" style={{ display: "block" }}>
                 <svg className="currency-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <input className="currency-search" type="text" placeholder={ar ? "بحث عن عملة…" : "Search currencies…"} readOnly />
+                <input className="currency-search" type="text" placeholder="Search currencies…" readOnly />
               </div>
             )}
             <div className={`currency-dropdown${currDropdownOpen ? " open" : ""}`}>
@@ -596,20 +596,29 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
             </div>
           </div>
 
-          <label className="lp-field-label">{ar ? "الفئة" : "Category"} <span className="lp-req">*</span></label>
+          <label className="lp-field-label">Category <span className="lp-req">*</span></label>
           <div className="lp-category-picker">
             <div className={`lp-category-picker-input${categoryPanelOpen ? " open" : ""}`} tabIndex={0} onClick={() => !editLocked && setCategoryPanelOpen((v) => !v)} style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
               <span className={`cp-value${selectedCategory ? "" : " placeholder"}`} data-no-i18n={selectedCategory ? "" : undefined}>
-                {selectedCategory ? (ar ? (CATEGORY_ITEM_AR[selectedCategory] || selectedCategory) : selectedCategory) : (ar ? "اختر فئة" : "Select category")}
+                {selectedCategory ? (ar ? (CATEGORY_ITEM_AR[selectedCategory] || selectedCategory) : selectedCategory) : "Select category"}
               </span>
             </div>
             <div className={`lp-category-panel${categoryPanelOpen ? " open" : ""}`}>
               <div className="lp-category-search-wrap">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" /><path d="m21 21-4.3-4.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-                <input type="text" value={categorySearch} placeholder={ar ? "ابحث عن فئة..." : "Search category..."} onClick={(e) => e.stopPropagation()} onChange={(e) => setCategorySearch(e.target.value)} />
+                <input type="text" value={categorySearch} placeholder="Search category..." onClick={(e) => e.stopPropagation()} onChange={(e) => setCategorySearch(e.target.value)} />
               </div>
               <div className="lp-category-list">{categoryPanelOpen && renderCategoryList()}</div>
             </div>
+          </div>
+
+          {/* Product code: auto-generated, not shown to the business owner */}
+          <div style={{ display: "none" }}>
+            <label className="lp-field-label lp-field-label-row">
+              Product code
+              <span className="lp-badge">Auto-generated</span>
+            </label>
+            <input className="lp-input" type="text" id="product-code-display" value={currentCode} disabled readOnly style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }} />
           </div>
         </div>
 
@@ -618,19 +627,19 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           <div className="lp-card-head">
             <div className="lp-card-head-left">
               <div className="lp-step-badge">2</div>
-              <div className="lp-card-title">{ar ? "المتغيرات والمخزون" : "Variants & inventory"} <span className="lp-opt">({ar ? "اختياري" : "optional"})</span></div>
+              <div className="lp-card-title">Variants &amp; inventory <span className="lp-opt">(optional)</span></div>
             </div>
             <div className="lp-icon-chip">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 7 12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
           </div>
           <div className="lp-variant-toggle">
-            <button type="button" className={`lp-vt-btn${variantMode === "none" ? " active" : ""}`} disabled={editLocked} onClick={() => setVariantMode("none")}>{ar ? "بدون متغيرات" : "No variants"}</button>
-            <button type="button" className={`lp-vt-btn${variantMode === "variants" ? " active" : ""}`} disabled={editLocked} onClick={() => { setVariantMode("variants"); setVariantGroups((g) => (g.length ? g : [{ id: gIdCounter++, name: "", placeholder: ar ? EX_PH_AR : EX_PH_EN, valPlaceholder: ar ? VAL_PH_AR : VAL_PH_EN, items: [{ id: vIdCounter++, val: "", qty: "", photo: "" }] }])); }}>{ar ? "لديه متغيرات" : "Has variants"}</button>
+            <button type="button" className={`lp-vt-btn${variantMode === "none" ? " active" : ""}`} disabled={editLocked} onClick={() => setVariantMode("none")}>No variants</button>
+            <button type="button" className={`lp-vt-btn${variantMode === "variants" ? " active" : ""}`} disabled={editLocked} onClick={() => { setVariantMode("variants"); setVariantGroups((g) => (g.length ? g : [{ id: gIdCounter++, name: "", placeholder: ar ? EX_PH_AR : EX_PH_EN, valPlaceholder: ar ? VAL_PH_AR : VAL_PH_EN, items: [{ id: vIdCounter++, val: "", qty: "", photo: "" }] }])); }}>Has variants</button>
           </div>
           {variantMode === "none" ? (
             <div>
-              <label className="lp-field-label">{ar ? "الكمية" : "Quantity"} <span className="lp-req">*</span></label>
+              <label className="lp-field-label">Quantity <span className="lp-req">*</span></label>
               <div className="lp-stepper">
                 <button type="button" className="lp-stepper-btn" disabled={editLocked} onClick={() => setSimpleQty((v) => String(Math.max(0, (parseInt(v || "0", 10) || 0) - 1)))} aria-label="decrease">−</button>
                 <input className="lp-stepper-val" type="number" min={0} step={1} inputMode="numeric" value={simpleQty} disabled={editLocked} onChange={(e) => { let v = parseInt(e.target.value || "", 10); if (!Number.isFinite(v) || v < 0) v = 0; setSimpleQty(String(v)); }} />
@@ -641,7 +650,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
             <div>
               <div id="variant-groups-container" style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
                 {!variantGroups.length ? (
-                  <div className="vb-empty" style={{ border: "0.5px dashed var(--color-border-secondary)", borderRadius: 12, marginBottom: 12 }}>{ar ? 'لا توجد متغيرات. اضغط "إضافة متغير آخر" أدناه.' : 'No variants. Tap "Add another variant" below.'}</div>
+                  <div className="vb-empty" style={{ border: "0.5px dashed var(--color-border-secondary)", borderRadius: 12, marginBottom: 12 }}>No variants. Tap &quot;Add another variant&quot; below.</div>
                 ) : variantGroups.map((g) => (
                   <div className="variant-builder" key={g.id}>
                     <div className="vb-header">
@@ -672,13 +681,13 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                             )}
                           </div>
                         );
-                      }) : <div className="vb-empty">{ar ? "تخطَّ إذا لم ينطبق" : "Skip if not applicable"}</div>}
+                      }) : <div className="vb-empty">Skip if not applicable</div>}
                     </div>
-                    <div className="vb-add-btn" onClick={() => addVariant(g.id)}>+ {ar ? "إضافة قيمة" : "Add value"}</div>
+                    <div className="vb-add-btn" onClick={() => addVariant(g.id)}>+ Add value</div>
                   </div>
                 ))}
               </div>
-              <button type="button" className="lp-add-variant-btn" disabled={editLocked} onClick={addVariantGroup}>+ {ar ? "إضافة متغير آخر" : "Add another variant"}</button>
+              <button type="button" className="lp-add-variant-btn" disabled={editLocked} onClick={addVariantGroup}>+ Add another variant</button>
               {variantGroups.some((g) => g.items.length) && (
                 <div className="lp-total-stock-bar" style={{ display: "flex" }}>
                   <span className="lp-total-stock-label">{ar ? "إجمالي الكميه" : "Total stock"}</span>
@@ -694,13 +703,13 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           <div className="lp-card-head">
             <div className="lp-card-head-left">
               <div className="lp-step-badge">3</div>
-              <div className="lp-card-title">{ar ? "الشحن والتوصيل" : "Shipping & delivery"}</div>
+              <div className="lp-card-title">Shipping &amp; delivery</div>
             </div>
             <div className="lp-icon-chip">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
           </div>
-          <label className="lp-field-label" style={{ marginTop: 0 }}>{ar ? "الدول والمدن المتاحة للتوصيل" : "Countries and cities available for delivery"} <span className="lp-req">*</span></label>
+          <label className="lp-field-label" style={{ marginTop: 0 }}>Countries and cities available for delivery <span className="lp-req">*</span></label>
 
           <div id="zone-builder-list" style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
             {Object.keys(zones).map((code) => {
@@ -732,7 +741,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                   )}
                   {isLY ? (
                     <>
-                      <div onClick={() => setCityPanelOpenFor((v) => (v === code ? null : code))} style={{ width: "100%", padding: "11px 12px", fontSize: 13, border: "1.5px dashed var(--color-border-secondary)", borderRadius: 12, background: "transparent", color: "#34c77b", fontWeight: 700, marginTop: 10, textAlign: "center", cursor: "pointer" }}>
+                      <div onClick={() => setCityPanelOpenFor((v) => (v === code ? null : code))} style={{ width: "100%", padding: "11px 12px", fontSize: 13, border: "1.5px dashed var(--color-border-secondary)", borderRadius: 12, background: "transparent", color: "#34c77b", fontWeight: 700, fontFamily: "var(--font-sans)", marginTop: 10, textAlign: "center", cursor: "pointer" }}>
                         {ck.length ? (ar ? "+ إضافة مدينة" : "+ Add city") : (ar ? "اختر مدينة…" : "Select a city…")}
                       </div>
                       {cityPanelOpenFor === code && (
@@ -755,9 +764,9 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                     </>
                   ) : (
                     <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
-                      <input type="text" id={"new-city-" + code} placeholder={ar ? "أضف مدينة…" : "Add a city…"} style={{ flex: 1, padding: "9px 10px", fontSize: 13, border: "0.5px solid var(--color-border-secondary)", borderRadius: 10, background: "var(--color-background-primary)", color: "var(--color-text-primary)", outline: "none" }}
+                      <input type="text" id={"new-city-" + code} placeholder={ar ? "أضف مدينة…" : "Add a city…"} style={{ flex: 1, padding: "9px 10px", fontSize: 13, border: "0.5px solid var(--color-border-secondary)", borderRadius: 10, background: "var(--color-background-primary)", color: "var(--color-text-primary)", outline: "none", fontFamily: "var(--font-sans)" }}
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); const el = e.target as HTMLInputElement; addCity(code, el.value); el.value = ""; } }} />
-                      <button onClick={(e) => { const input = (e.currentTarget.previousSibling as HTMLInputElement); addCity(code, input.value); input.value = ""; }} style={{ height: 38, padding: "0 14px", borderRadius: 10, border: "none", background: "#34c77b", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>{ar ? "إضافة" : "Add"}</button>
+                      <button onClick={(e) => { const input = (e.currentTarget.previousSibling as HTMLInputElement); addCity(code, input.value); input.value = ""; }} style={{ height: 38, padding: "0 14px", borderRadius: 10, border: "none", background: "#34c77b", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}>{ar ? "إضافة" : "Add"}</button>
                     </div>
                   )}
                 </div>
@@ -768,7 +777,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           {countryDropdownOpen && (
             <div className="currency-search-wrap" style={{ display: "block" }}>
               <svg className="currency-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-              <input className="currency-search" type="text" placeholder={ar ? "بحث عن دولة…" : "Search countries…"} readOnly />
+              <input className="currency-search" type="text" placeholder="Search countries…" readOnly />
             </div>
           )}
           <div className={`currency-dropdown${countryDropdownOpen ? " open" : ""}`}>
@@ -779,7 +788,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
               </>
             )}
           </div>
-          <button className="lp-add-variant-btn" disabled={editLocked} onClick={() => setCountryDropdownOpen((v) => !v)} style={{ marginBottom: 0 }}>+ {ar ? "إضافة دولة" : "Add a country"}</button>
+          <button className="lp-add-variant-btn" disabled={editLocked} onClick={() => setCountryDropdownOpen((v) => !v)} style={{ marginBottom: 0 }}>+ Add a country</button>
         </div>
 
         {/* STEP 4: Marketer profit */}
@@ -787,28 +796,28 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           <div className="lp-card-head">
             <div className="lp-card-head-left">
               <div className="lp-step-badge">4</div>
-              <div className="lp-card-title">{ar ? "ربح المسوق" : "Marketer profit"} <span className="lp-req">*</span></div>
+              <div className="lp-card-title">Marketer profit <span className="lp-req">*</span></div>
             </div>
             <div className="lp-icon-chip">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
           </div>
           <div className="lp-comm-card">
-            <div className="lp-comm-title">{ar ? "حدد ما يربحه المسوقون" : "Set what marketers earn"}</div>
-            <div className="lp-comm-sub">{ar ? "كلما زادت العمولة، زاد عدد المسوقين الذين ستجذبهم للترويج لمنتجك." : "The higher the commission, the more marketers you'll attract to promote your product."}</div>
+            <div className="lp-comm-title">Set what marketers earn</div>
+            <div className="lp-comm-sub">The higher the commission, the more marketers you&apos;ll attract to promote your product.</div>
             <div className="lp-segmented">
-              <button type="button" id="mode-pct" className={commMode === "pct" ? "active" : ""} disabled={editLocked} onClick={() => setCommMode("pct")}>{ar ? "نسبة مئوية" : "Percentage"}</button>
-              <button type="button" id="mode-fixed" className={commMode === "fixed" ? "active" : ""} disabled={editLocked} onClick={() => setCommMode("fixed")}>{ar ? "مبلغ ثابت" : "Fixed amount"}</button>
+              <button type="button" id="mode-pct" className={commMode === "pct" ? "active" : ""} disabled={editLocked} onClick={() => setCommMode("pct")}>Percentage</button>
+              <button type="button" id="mode-fixed" className={commMode === "fixed" ? "active" : ""} disabled={editLocked} onClick={() => setCommMode("fixed")}>Fixed amount</button>
             </div>
             {commMode === "pct" ? (
               <div className="lp-comm-row">
-                <input className="lp-input" type="number" min={1} max={100} step="0.1" style={{ flex: 1 }} value={commPct} disabled={editLocked} placeholder={ar ? "مثال: 12" : "e.g. 12"} onChange={(e) => { setCommPct(e.target.value); const pct = parseFloat(e.target.value) || 0; if (priceNum && pct) setCommFixed(String(pctOf(priceNum, pct))); }} />
-                <span className="lp-comm-unit">{ar ? "% من سعر المنتج" : "% of product price"}</span>
+                <input className="lp-input" type="number" min={1} max={100} step="0.1" style={{ flex: 1 }} value={commPct} disabled={editLocked} placeholder="e.g. 12" onChange={(e) => { setCommPct(e.target.value); const pct = parseFloat(e.target.value) || 0; if (priceNum && pct) setCommFixed(String(pctOf(priceNum, pct))); }} />
+                <span className="lp-comm-unit">% of product price</span>
               </div>
             ) : (
               <div className="lp-comm-row">
                 <input className="lp-input" type="number" min={0} step="0.01" style={{ flex: 1 }} value={commFixed} disabled={editLocked} placeholder="0.00" onChange={(e) => { setCommFixed(e.target.value); const fixed = parseFloat(e.target.value) || 0; if (priceNum && fixed) setCommPct(((fixed / priceNum) * 100).toFixed(1)); }} />
-                <span className="lp-comm-unit">{curCode} {ar ? "لكل عملية بيع" : "per sale"}</span>
+                <span className="lp-comm-unit">{curCode + " per sale"}</span>
               </div>
             )}
             <div className="lp-conversion-note" data-no-i18n="">
@@ -831,21 +840,21 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
         {/* Summary */}
         <div className="lp-card">
           <div className="lp-card-head">
-            <div className="lp-card-title">{ar ? "الملخص" : "Summary"}</div>
+            <div className="lp-card-title">Summary</div>
             <div className="lp-icon-chip">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12h6m-6 4h6M9 8h1M7 4h10a2 2 0 0 1 2 2v13l-3-2-2 2-2-2-2 2-2-2-2 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
           </div>
-          <div className="lp-summary-row"><span>{ar ? "سعر المنتج" : "Product price"}</span><span>{fmtSum(priceNum)}</span></div>
+          <div className="lp-summary-row"><span>Product price</span><span>{fmtSum(priceNum)}</span></div>
           <div className="lp-summary-row"><span data-no-i18n="">{ar ? `عمولة المسوق (${finalPct}%)` : `Marketer commission (${finalPct}%)`}</span><span>{fmtSum(comm)}</span></div>
           <div className="lp-summary-row"><span data-no-i18n="">{platformFixed ? (ar ? "عمولة المنصة" : "Platform commission") : (ar ? `عمولة المنصة (${platformPct}%)` : `Platform commission (${platformPct}%)`)}</span><span>{fmtSum(platform)}</span></div>
-          <div className="lp-summary-row total"><span>{ar ? "إجمالي أرباحك" : "Your total"}</span><span className="lp-val">{fmtSum(total)}</span></div>
+          <div className="lp-summary-row total"><span>Your total</span><span className="lp-val">{fmtSum(total)}</span></div>
         </div>
 
         <div className="lp-bottom">
           <button className="lp-btn-primary" disabled={submitting || editLocked} style={editLocked ? { opacity: 0.5, cursor: "not-allowed" } : (submitting ? { opacity: 0.6, pointerEvents: "none" } : undefined)} onClick={() => void submitProduct()}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            {submitLabel || (ar ? "نشر المنتج" : "Publish product")}
+            {submitLabel || "Publish product"}
           </button>
           <button className="lp-btn-secondary" onClick={onClose}>{ar ? "إلغاء" : "Cancel"}</button>
         </div>

@@ -1,9 +1,6 @@
-import { isAr } from "../lib/format";
-
 export function SupportOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const ar = isAr();
   return (
-    <div className="overlay" id="support-overlay" style={{ zIndex: 150, alignItems: "center", display: open ? "flex" : "none" }}>
+    <div className={"overlay" + (open ? " open" : "")} id="support-overlay" style={{ zIndex: 150, alignItems: "center" }}>
       <div className="overlay-bg" onClick={onClose} />
       <div style={{ position: "relative", zIndex: 1, width: "min(86%,340px)", background: "#A82C34", borderRadius: 20, padding: "30px 24px 28px", textAlign: "center", boxShadow: "0 12px 40px rgba(0,0,0,0.5)" }}>
         <button
@@ -14,12 +11,12 @@ export function SupportOverlay({ open, onClose }: { open: boolean; onClose: () =
         >
           ×
         </button>
-        <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 8 }}>{ar ? "لديك مشكلة؟" : "Have a problem?"}</div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", marginBottom: 20 }}>{ar ? "تواصل مع الأدمن" : "Contact admin"}</div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 8 }}><span data-i18n="Have a problem?">Have a problem?</span></div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", marginBottom: 20 }}><span data-i18n="Contact admin">Contact admin</span></div>
         <a
           href="https://wa.me/218915756638"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
           aria-label="WhatsApp"
           style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 58, height: 58, borderRadius: "50%", background: "#25D366", marginBottom: 16, textDecoration: "none" }}
         >
@@ -30,7 +27,7 @@ export function SupportOverlay({ open, onClose }: { open: boolean; onClose: () =
         <a
           href="https://wa.me/218915756638"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
           style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#fff", letterSpacing: "0.3px", textDecoration: "none", cursor: "pointer", border: "1.5px solid rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: "10px 22px" }}
           dir="ltr"
           data-no-i18n=""
