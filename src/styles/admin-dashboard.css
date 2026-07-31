@@ -110,12 +110,13 @@
 .lateen-admin .cpr { font-size: 13px; font-weight: 500; color: var(--txt-1); }
 .lateen-admin .cco { font-size: 12px; font-weight: 500; color: #8b83e8; }
 .lateen-admin .adm-status-pill { position: absolute; top: 8px; left: 8px; font-size: 9px; padding: 3px 7px; border-radius: 8px; background: rgba(0,0,0,0.7); color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; z-index: 2; }
-.lateen-admin .adm-prod-del-ov { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: var(--danger); border: 1.5px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; z-index: 2; cursor: pointer; }
-.lateen-admin .adm-prod-del-ov:hover { filter: brightness(1.1); }
-.lateen-admin .adm-prod-hide-ov { position: absolute; bottom: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 8px 7px; cursor: pointer; z-index: 2; }
-.lateen-admin .adm-prod-hide-circle { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1.5px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; transition: all .2s; }
-.lateen-admin .adm-prod-hide-circle.on { background: var(--accent); border-color: var(--accent); }
-.lateen-admin .adm-prod-hide-ov span { font-size: 9px; color: rgba(255,255,255,.8); font-weight: 500; font-family: var(--font); }
+/* Hide / Delete moved off the grid thumbnail and into the open product sheet,
+   so the tile is just the product — the same tile the marketer browse grid has. */
+.lateen-admin .adm-pd-actions { display: flex; gap: 8px; margin: 18px 0 0; }
+.lateen-admin .adm-pd-act { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; border: 0.5px solid var(--border); }
+.lateen-admin .adm-pd-act:active { filter: brightness(1.15); }
+.lateen-admin .adm-pd-act-hide { background: #1f1f1f; color: #f0eeeb; }
+.lateen-admin .adm-pd-act-del { background: #3a1a1a; color: #ff7a6b; border-color: #522; }
 .lateen-admin .adm-bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #1a1a1a; border-top: 0.5px solid var(--border-2); padding: 10px 0 16px; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 20; }
 .lateen-admin .adm-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 0.6rem; flex: 1; }
 .lateen-admin .adm-nav-label { font-size: 10px; color: var(--txt-2); }
