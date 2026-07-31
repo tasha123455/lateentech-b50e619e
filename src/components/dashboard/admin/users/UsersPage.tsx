@@ -37,6 +37,23 @@ export function UsersPage({ active }: { active: boolean }) {
     return true;
   };
 
+  // Counts for the chips. Only the tapped chip shows its number, matching the
+  // order filters on the business dashboard.
+  const dateFiltered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return (users || []).filter((u) => {
+      if (q && ![u.full_name, u.business_name, u.email, u.phone].some((v) => String(v || "").toLowerCase().includes(q))) return false;
+      return dateMatches(u.created_at);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users, search, selected]);
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { "": dateFiltered.length, marketer: 0, business: 0, admin: 0 };
+    dateFiltered.forEach((u) => { const r = u.role || "marketer"; if (r in c) c[r]++; });
+    return c;
+  }, [dateFiltered]);
+
   const filtered = useMemo(() => {
     let out = users || [];
     if (roleFilter) out = out.filter((u) => (u.role || "marketer") === roleFilter);
@@ -83,7 +100,7 @@ export function UsersPage({ active }: { active: boolean }) {
             data-role={f.key}
             onClick={() => setRoleFilter(f.key)}
           >
-            {f.label}
+            {f.label}{roleFilter === f.key ? ` (${counts[f.key] || 0})` : ""}
           </button>
         ))}
       </div>

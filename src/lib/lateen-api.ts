@@ -838,7 +838,7 @@ export function createLateenApi(userId: string) {
       async listAllUsers(search?: string) {
         let q = supabase
           .from("profiles")
-          .select("id, full_name, phone, business_name, created_at, banned_at, frozen_at")
+          .select("id, full_name, phone, business_name, created_at, banned_at, frozen_at, avatar_url")
           // Deleted accounts keep their profile row so historical analytics stay
           // intact, but they must not show up as live users.
           .is("account_deleted_at", null);
@@ -856,6 +856,7 @@ export function createLateenApi(userId: string) {
           created_at: string;
           banned_at: string | null;
           frozen_at: string | null;
+          avatar_url: string | null;
         }>;
         if (!profiles.length) return [];
         const { data: roles } = await supabase
@@ -886,7 +887,29 @@ export function createLateenApi(userId: string) {
         } catch {
           /* ignore — email column just won't be shown */
         }
-        return completed.map((p) => ({ ...p, role: rmap.get(p.id) ?? "marketer", email: emap.get(p.id) ?? null }));
+        // Avatars live in a private bucket, so the stored path has to be
+        // signed before it can be rendered. One batch call for the whole page
+        // rather than a round-trip per user.
+        const avatarMap = new Map<string, string>();
+        const paths = completed.map((p) => p.avatar_url).filter((v): v is string => !!v);
+        if (paths.length) {
+          try {
+            const { data: signed } = await supabase.storage
+              .from("avatars")
+              .createSignedUrls(paths, 60 * 60 * 24 * 365 * 5);
+            (signed ?? []).forEach((s: { path?: string | null; signedUrl?: string | null }) => {
+              if (s.path && s.signedUrl) avatarMap.set(s.path, s.signedUrl);
+            });
+          } catch {
+            /* ignore — cards fall back to initials */
+          }
+        }
+        return completed.map((p) => ({
+          ...p,
+          role: rmap.get(p.id) ?? "marketer",
+          email: emap.get(p.id) ?? null,
+          avatar_signed_url: (p.avatar_url && avatarMap.get(p.avatar_url)) || null,
+        }));
       },
       // Wipes operational data across every admin page (orders, products,
       // payouts, reports, notifications, employees, reviews, favourites,

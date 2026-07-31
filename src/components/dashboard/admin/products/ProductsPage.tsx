@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useAdminData } from "../AdminDataProvider";
 import { Money } from "../ui/Money";
 import { ProductDetailOverlay } from "./ProductDetailOverlay";
-import { ReportsOverlay } from "./ReportsOverlay";
 
 const EyeOpen = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -29,8 +28,8 @@ function activeMarketerWarning(n: number, action: string): string {
   );
 }
 
-export function ProductsPage({ active, reportsOpen, onReportsClose }: { active: boolean; reportsOpen: boolean; onReportsClose: () => void }) {
-  const { products, loadProducts, loadReports, reports, loading, failed, api } = useAdminData();
+export function ProductsPage({ active }: { active: boolean }) {
+  const { products, loadProducts, loading, failed, api } = useAdminData();
   const [search, setSearch] = useState("");
   const [detailId, setDetailId] = useState<string | null>(null);
 
@@ -40,12 +39,6 @@ export function ProductsPage({ active, reportsOpen, onReportsClose }: { active: 
     const id = setTimeout(() => { void loadProducts(search); }, search ? 250 : 0);
     return () => clearTimeout(id);
   }, [active, search, loadProducts]);
-
-  useEffect(() => {
-    if (active) void loadReports();
-  }, [active, loadReports]);
-
-  const openCount = reports.filter((r) => r.status === "open").length;
 
   const activeMarketers = async (id: string): Promise<number> => {
     try {
@@ -159,7 +152,6 @@ export function ProductsPage({ active, reportsOpen, onReportsClose }: { active: 
       <div className="adm-prod-grid">{body}</div>
 
       <ProductDetailOverlay productId={detailId} onClose={() => setDetailId(null)} />
-      <ReportsOverlay open={reportsOpen} onClose={onReportsClose} onOpenProduct={setDetailId} />
     </>
   );
 }

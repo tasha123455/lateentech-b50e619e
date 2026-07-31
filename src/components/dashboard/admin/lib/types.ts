@@ -4,7 +4,9 @@ export type LateenApi = ReturnType<typeof createLateenApi>;
 export type AdminApi = LateenApi["admin"];
 
 export type AdminPageId =
-  | "adm-home" | "adm-verify" | "adm-payouts" | "adm-users" | "adm-products" | "adm-employees";
+  | "adm-home" | "adm-verify" | "adm-payouts" | "adm-users" | "adm-products"
+  // reached from the menu rather than the nav bar
+  | "adm-employees" | "adm-deletions" | "adm-reports" | "adm-notify";
 
 /** A person attached to an order / report / request. */
 export type Person = {
@@ -70,6 +72,8 @@ export type AdminUser = Person & {
   role?: string | null;
   banned_at?: string | null;
   frozen_at?: string | null;
+  /** Signed URL for the profile photo, resolved by listAllUsers. */
+  avatar_signed_url?: string | null;
 };
 
 export type AdminProduct = {

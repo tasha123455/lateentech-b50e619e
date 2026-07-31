@@ -103,7 +103,11 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
   return (
     <div className="adm-user-card">
       <div className="adm-user-row" onClick={() => setOpen((v) => !v)}>
-        <div className="adm-user-av" data-no-i18n>{initials(name)}</div>
+        <div className="adm-user-av" data-no-i18n>
+          {u.avatar_signed_url
+            ? <img src={u.avatar_signed_url} alt="" loading="lazy" decoding="async" />
+            : initials(name)}
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="adm-row-name" data-no-i18n>{name}</div>
           <div className="adm-row-sub">

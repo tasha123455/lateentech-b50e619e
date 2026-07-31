@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
+import { PageHeader } from "../ui/PageHeader";
 import { initials, money, when } from "../lib/format";
 import { goToAccount } from "../users/UserCard";
 
@@ -17,11 +18,11 @@ const FILTERS: Array<{ key: string; label: string }> = [
   { key: "resolved", label: "Resolved" },
 ];
 
-export function ReportsOverlay({
-  open, onClose, onOpenProduct,
+export function ReportsPage({
+  active, onBack, onOpenProduct,
 }: {
-  open: boolean;
-  onClose: () => void;
+  active: boolean;
+  onBack: () => void;
   onOpenProduct: (id: string) => void;
 }) {
   const { reports, loadReports, api } = useAdminData();
@@ -30,9 +31,9 @@ export function ReportsOverlay({
   const [loadedOnce, setLoadedOnce] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!active) return;
     void loadReports().then(() => setLoadedOnce(true));
-  }, [open, loadReports]);
+  }, [active, loadReports]);
 
   const resolve = async (id: string) => {
     const comment = (comments[id] || "").trim();
@@ -151,13 +152,8 @@ export function ReportsOverlay({
   }
 
   return (
-    <div
-      className={"adm-pdetail" + (open ? " open" : "")}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="adm-pdetail-card">
-        <button className="adm-pdetail-close" onClick={onClose}>×</button>
-        <div className="adm-h1" style={{ marginBottom: 12 }}>Reports</div>
+    <>
+      <PageHeader title="Reports" onBack={onBack} />
         <div className="adm-filter-row" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           {FILTERS.map((f) => (
             <button
@@ -169,8 +165,7 @@ export function ReportsOverlay({
             </button>
           ))}
         </div>
-        <div>{body}</div>
-      </div>
-    </div>
+      <div>{body}</div>
+    </>
   );
 }

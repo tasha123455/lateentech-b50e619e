@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
+import { PageHeader } from "../ui/PageHeader";
 import { empCycle, empFmtDate, empIsDue, empIsPaid } from "../lib/employees";
 import { initials, money } from "../lib/format";
 import type { Employee } from "../lib/types";
@@ -14,7 +15,7 @@ const FILTERS: Array<{ key: string; label: string }> = [
   { key: "paid", label: "Paid" },
 ];
 
-export function EmployeesPage({ active }: { active: boolean }) {
+export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { employees, loadEmployees, loadMetrics, loading, failed, api } = useAdminData();
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -139,7 +140,7 @@ export function EmployeesPage({ active }: { active: boolean }) {
 
   return (
     <>
-      <div className="adm-h1">Employees &amp; Payroll</div>
+      <PageHeader title="Employees & Payroll" onBack={onBack} />
       <div className="adm-stat-grid">
         <div className="adm-stat full">
           <div className="adm-stat-label">Total Monthly Salaries</div>

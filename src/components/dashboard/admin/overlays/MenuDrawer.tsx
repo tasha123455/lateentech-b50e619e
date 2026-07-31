@@ -79,13 +79,21 @@ export function MenuDrawer({
   ];
 
   return (
-    <div
-      className={"adm-menu-overlay" + (open ? " open" : "")}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="adm-menu-sheet">
-        <div className="adm-menu-handle" />
-        <div className="adm-menu-title">Menu</div>
+    <div className={"adm-menu-overlay" + (open ? " open" : "")}>
+      <div className="adm-menu-backdrop" onClick={onClose} />
+      <div className="adm-menu-drawer">
+        <button className="adm-menu-close" onClick={onClose} aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+        <div className="adm-menu-head">
+          <div className="adm-avatar">A</div>
+          <div>
+            <div className="adm-menu-head-name">Admin Console</div>
+            <div className="adm-menu-head-sub">Wasla platform control</div>
+          </div>
+        </div>
         {items.map((it) => (
           <button key={it.key} className="adm-menu-item" onClick={it.onClick}>
             <span className="adm-menu-icon">
