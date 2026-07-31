@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import { ProductCard } from "@/components/dashboard/marketer/browse/ProductCard";
+import { dbToBrowse } from "@/components/dashboard/marketer/lib/mappers";
 
 import { useAdminData } from "../AdminDataProvider";
-import { Money } from "../ui/Money";
 import { ProductDetailOverlay } from "./ProductDetailOverlay";
+
+/** Admins have no favourites, so nothing is ever saved. */
+const NO_FAVOURITES: Set<string> = new Set();
 
 /** Warns when hiding/deleting a product that marketers are mid-order on. */
 function activeMarketerWarning(n: number, action: string): string {
@@ -63,6 +68,17 @@ export function ProductsPage({ active }: { active: boolean }) {
 
   const detailProduct = detailId ? products.find((x) => x.id === detailId) : undefined;
 
+  // listAllProducts does a `select("*")`, so the rows are exactly what the
+  // marketer's browse grid maps — running them through the same mapper means
+  // the tiles cannot drift apart from the marketer's.
+  const cards = useMemo(
+    () => products.map((p) => ({
+      hidden: p.status === "hidden",
+      bp: dbToBrowse(p as unknown as Record<string, unknown>, NO_FAVOURITES),
+    })),
+    [products],
+  );
+
   let body: React.ReactNode;
   if (loading.products) {
     body = <div className="adm-empty" style={{ gridColumn: "1/-1" }}>Loading…</div>;
@@ -75,34 +91,14 @@ export function ProductsPage({ active }: { active: boolean }) {
       </div>
     );
   } else {
-    body = products.map((p) => {
-      const photo = Array.isArray(p.photos) && p.photos[0];
-      const isHidden = p.status === "hidden";
-      return (
-        <div className="c" key={p.id} onClick={() => setDetailId(p.id)}>
-          <div className="ci2">
-            {photo ? (
-              <img
-                src={photo}
-                alt={p.name}
-                data-no-i18n
-                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
-              />
-            ) : (
-              "📦"
-            )}
-            {isHidden && <span className="adm-status-pill">Hidden</span>}
-          </div>
-          <div className="cb2">
-            <div className="cn" data-no-i18n>{p.name}</div>
-            <div className="cr">
-              <div className="cpr"><Money n={p.price} /></div>
-              <div className="cco">{Number(p.comm_pct || 0)}%</div>
-            </div>
-          </div>
-        </div>
-      );
-    });
+    body = cards.map(({ bp, hidden }) => (
+      <ProductCard
+        key={bp.id}
+        p={bp}
+        onOpen={setDetailId}
+        pill={hidden ? <span className="adm-status-pill">Hidden</span> : null}
+      />
+    ));
   }
 
   return (

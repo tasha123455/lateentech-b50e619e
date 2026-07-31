@@ -16,17 +16,25 @@ export function ProductCover({ p }: { p: BrowseProduct }) {
   );
 }
 
+/** The browse-grid tile. The admin product grid renders this same component so
+ *  the two grids cannot drift apart; it passes no onToggleSave (admins have no
+ *  favourites) and supplies its own "Hidden" pill. */
 export function ProductCard({
-  p, onOpen, onToggleSave,
+  p, onOpen, onToggleSave, pill,
 }: {
   p: BrowseProduct;
   onOpen: (id: string) => void;
-  onToggleSave: (id: string) => void;
+  /** Omit to leave the save button off the cover. */
+  onToggleSave?: (id: string) => void;
+  /** Extra badge drawn over the cover. */
+  pill?: React.ReactNode;
 }) {
   return (
     <div className="c" onClick={() => onOpen(p.id)}>
       <div className="ci2">
         <ProductCover p={p} />
+        {pill}
+        {onToggleSave && (
         <div
           style={{
             position: "absolute", bottom: 0, right: 0, display: "flex", flexDirection: "column",
@@ -50,6 +58,7 @@ export function ProductCard({
             {p.sv ? "Saved" : "Save"}
           </span>
         </div>
+        )}
       </div>
       <div className="cb2">
         <div className="cn" data-no-i18n>{p.n}</div>
