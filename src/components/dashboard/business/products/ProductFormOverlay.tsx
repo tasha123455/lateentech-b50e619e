@@ -611,6 +611,15 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
               <div className="lp-category-list">{categoryPanelOpen && renderCategoryList()}</div>
             </div>
           </div>
+
+          {/* Product code: auto-generated, not shown to the business owner */}
+          <div style={{ display: "none" }}>
+            <label className="lp-field-label lp-field-label-row">
+              Product code
+              <span className="lp-badge">Auto-generated</span>
+            </label>
+            <input className="lp-input" type="text" id="product-code-display" value={currentCode} disabled readOnly style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }} />
+          </div>
         </div>
 
         {/* STEP 2: Variants & inventory */}
@@ -808,7 +817,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
             ) : (
               <div className="lp-comm-row">
                 <input className="lp-input" type="number" min={0} step="0.01" style={{ flex: 1 }} value={commFixed} disabled={editLocked} placeholder="0.00" onChange={(e) => { setCommFixed(e.target.value); const fixed = parseFloat(e.target.value) || 0; if (priceNum && fixed) setCommPct(((fixed / priceNum) * 100).toFixed(1)); }} />
-                <span className="lp-comm-unit">{curCode} per sale</span>
+                <span className="lp-comm-unit">{curCode + " per sale"}</span>
               </div>
             )}
             <div className="lp-conversion-note" data-no-i18n="">
