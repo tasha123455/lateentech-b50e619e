@@ -79,7 +79,7 @@ function RangeTabs({
   return (
     <>
       <div className="bd-range-tabs mp-bd-range-tabs" id={`mp-bd-tabs-${pid}`} onClick={(e) => e.stopPropagation()}>
-        <div className={"bd-range-tab" + (!anySel ? " active" : "")} onClick={allClick}>
+        <div className={"bd-range-tab" + (!anySel ? " active" : "")} data-range="all" data-pid={pid} onClick={allClick}>
           {ar ? "كل الوقت" : "All time"}
         </div>
         {(["daily", "monthly", "yearly"] as Range[]).map((range) => {
@@ -88,6 +88,8 @@ function RangeTabs({
             <div
               key={range}
               className={"bd-range-tab" + (val ? " active" : "") + (openRange === range ? " open" : "")}
+              data-range={range}
+              data-pid={pid}
               onClick={() => tabClick(range)}
             >
               {val || meta[range].defaultLabel} <span className="bd-chev">▾</span>
@@ -99,6 +101,7 @@ function RangeTabs({
         <div
           key={range}
           className={"bd-dropdown-list" + (openRange === range ? " open" : "")}
+          id={`mp-bd-${range}-list-${pid}`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="bd-dd-item clear" onClick={() => pick(range, null)}>
@@ -205,31 +208,49 @@ function AnalyticsBody({ p, orders, sel }: { p: Product; orders: Order[]; sel: S
   );
 }
 
-export function ProductAnalytics({ p, orders }: { p: Product; orders: Order[] }) {
-  const ar = isAr();
+/* mpRenderCard() put the Analytics *button* inside .mp-details-top-row but
+   the *panel* as a sibling of that row. .mp-details-top-row is
+   `display:flex; justify-content:space-between`, so keeping the panel inside
+   it turns the expanded chart into a flex item squeezed next to the code
+   pill instead of spanning the card. Button and panel are exported
+   separately so ProductCard can place each where the original had it. */
+
+export function useAnalyticsState() {
   const [open, setOpen] = useState(false);
   const [sel, setSel] = useState<Sel>({ day: null, month: null, year: null });
+  return { open, setOpen, sel, setSel };
+}
 
+export function AnalyticsButton({ pid, open, onToggle }: { pid: string; open: boolean; onToggle: () => void }) {
+  const ar = isAr();
   return (
-    <>
-      <div
-        className={"mp-analytics-btn-outer" + (open ? " open" : "")}
-        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-      >
-        <div className="mp-analytics-icon">
-          <span style={{ height: 5, opacity: 0.5 }} />
-          <span style={{ height: 9, opacity: 0.7 }} />
-          <span style={{ height: 13 }} />
-        </div>
-        <span className="mp-analytics-btn-label">{ar ? "التحليلات" : "Analytics"}</span>
-        <svg className="mp-analytics-chev" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    <div
+      className={"mp-analytics-btn-outer" + (open ? " open" : "")}
+      id={"mp-abtn-" + pid}
+      onClick={(e) => { e.stopPropagation(); onToggle(); }}
+    >
+      <div className="mp-analytics-icon">
+        <span style={{ height: 5, opacity: 0.5 }} />
+        <span style={{ height: 9, opacity: 0.7 }} />
+        <span style={{ height: 13 }} />
       </div>
-      <div className={"mp-analytics-panel" + (open ? " open" : "")}>
-        <div className="mp-analytics-panel-inner">
-          <RangeTabs pid={p.id} sel={sel} onChange={setSel} />
-          <AnalyticsBody p={p} orders={orders} sel={sel} />
-        </div>
+      <span className="mp-analytics-btn-label">{ar ? "التحليلات" : "Analytics"}</span>
+      <svg className="mp-analytics-chev" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    </div>
+  );
+}
+
+export function AnalyticsPanel({
+  p, orders, open, sel, setSel,
+}: {
+  p: Product; orders: Order[]; open: boolean; sel: Sel; setSel: (s: Sel) => void;
+}) {
+  return (
+    <div className={"mp-analytics-panel" + (open ? " open" : "")} id={"mp-analytics-panel-" + p.id}>
+      <div className="mp-analytics-panel-inner">
+        <RangeTabs pid={p.id} sel={sel} onChange={setSel} />
+        <div id={"mp-analytics-body-" + p.id}><AnalyticsBody p={p} orders={orders} sel={sel} /></div>
       </div>
-    </>
+    </div>
   );
 }

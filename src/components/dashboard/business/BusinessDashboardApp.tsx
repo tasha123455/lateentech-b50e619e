@@ -34,7 +34,7 @@ function Shell() {
       <div style={{ position: "relative", maxWidth: 420, margin: "0 auto", minHeight: 860, overflow: "hidden", background: "#141414" }}>
       <div className="app">
         <div className={"page" + (tab === "home" ? " active" : "")} id="pg-home">
-          <HomePage onOpenNotifications={() => setTab("notif")} onOpenPayout={() => setPayoutOpen(true)} onOpenSupport={() => setSupportOpen(true)} onOpenProfile={() => setProfileOpen(true)} />
+          <HomePage onOpenNotifications={() => setTab("notif")} onOpenPayout={() => setPayoutOpen(true)} onOpenSupport={() => setSupportOpen(true)} onOpenProfile={() => setProfileOpen(true)} onNotifPage={tab === "notif"} />
         </div>
         <div className={"page" + (tab === "products" ? " active" : "")} id="pg-products">
           <ProductsPage
