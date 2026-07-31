@@ -413,3 +413,51 @@
 .lateen-admin .adm-page-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .lateen-admin .adm-back-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--surface); color: var(--txt-1); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; }
 .lateen-admin .adm-back-btn svg { width: 17px; height: 17px; }
+
+/* ===== Browse chrome, shared with the marketer's browse page =====
+   The admin product page renders the marketer's BrowseFilters component, so it
+   needs the same rules. These are the marketer's, copied across with its
+   --color-* variables swapped for the admin palette's equivalents — the two
+   palettes resolve to the same hex values, so the controls render identically.
+   Source of truth: the .lateen-marketer rules in marketer-dashboard.css. */
+.lateen-admin .sr { display: flex; gap: 8px; margin-bottom: 12px; }
+.lateen-admin .sb { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 0 12px; height: 42px; flex: 1; }
+.lateen-admin .sb input { border: none; background: transparent; font-size: 13px; color: var(--txt-1); outline: none; flex: 1; font-family: var(--font); }
+.lateen-admin .sb input::placeholder { color: var(--txt-3); }
+.lateen-admin .fc-row { display: flex; gap: 7px; overflow-x: auto; margin-bottom: 1.25rem; align-items: center; }
+.lateen-admin .fc-row::-webkit-scrollbar { display: none; }
+.lateen-admin .fc-divider { width: 0.5px; height: 20px; background: var(--border); flex-shrink: 0; }
+.lateen-admin .chip-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 5px 13px; border-radius: 20px; border: 0.5px solid var(--border); background: var(--surface); color: var(--txt-2); cursor: pointer; white-space: nowrap; font-family: var(--font); flex-shrink: 0; transition: all .15s; }
+.lateen-admin .chip-btn.on { background: #f0eeeb; color: #0D0D0D; border-color: #f0eeeb; font-weight: 600; }
+.lateen-admin .cat-grp-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 5px 13px; border-radius: 20px; border: 0.5px solid rgba(127,119,221,0.4); background: rgba(127,119,221,0.12); color: #a89ee8; cursor: pointer; white-space: nowrap; font-family: var(--font); flex-shrink: 0; transition: all .15s; }
+.lateen-admin .cat-grp-chip.on { background: #7f77dd; color: #fff; border-color: #7f77dd; font-weight: 600; }
+.lateen-admin .cat-chev { flex-shrink: 0; transition: transform .15s; }
+.lateen-admin .cat-chev.open { transform: rotate(180deg); }
+.lateen-admin .cat-sub-panel { display: none; flex-wrap: wrap; gap: 6px; margin: -4px 0 1.25rem; padding: 10px; border-radius: 12px; background: var(--surface-2); border: 0.5px solid var(--border); }
+.lateen-admin .cat-sub-chip { font-size: 11px; padding: 5px 12px; border-radius: 18px; border: 0.5px solid rgba(127,119,221,0.4); background: rgba(127,119,221,0.08); color: #a89ee8; cursor: pointer; white-space: nowrap; font-family: var(--font); transition: all .15s; }
+.lateen-admin .cat-sub-chip.on { background: #7f77dd; color: #fff; border-color: #7f77dd; font-weight: 600; }
+
+/* Filter & sort sheet. */
+.lateen-admin .ov { display: none; position: fixed; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
+.lateen-admin .ov.open { display: flex; }
+.lateen-admin .ob { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+.lateen-admin .sh { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2.5rem; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--border); }
+.lateen-admin .shh { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 1.25rem; }
+.lateen-admin .sht { font-size: 17px; font-weight: 500; color: var(--txt-1); margin-bottom: 1.5rem; }
+.lateen-admin .shs { font-size: 12px; font-weight: 500; color: var(--txt-2); margin-bottom: 10px; margin-top: 18px; }
+.lateen-admin .shs:first-of-type { margin-top: 0; }
+.lateen-admin .ol { display: flex; flex-direction: column; gap: 6px; }
+.lateen-admin .oa { display: flex; gap: 7px; flex-wrap: wrap; }
+.lateen-admin .oo { font-size: 12px; padding: 6px 13px; border-radius: 20px; border: 0.5px solid var(--border); background: var(--surface-2); color: var(--txt-2); cursor: pointer; font-family: var(--font); transition: all .15s; }
+.lateen-admin .oo.s { background: #2d2b4e; color: #a89ee8; border-color: #534AB7; font-weight: 500; }
+.lateen-admin .sa { display: flex; flex-direction: column; gap: 8px; }
+.lateen-admin .so { display: flex; align-items: center; padding: 12px 14px; border-radius: 12px; border: 0.5px solid var(--border); background: var(--surface-2); cursor: pointer; font-size: 13px; color: var(--txt-1); font-family: var(--font); }
+.lateen-admin .so.s { background: #2d2b4e; border-color: #534AB7; color: #a89ee8; font-weight: 500; }
+.lateen-admin .sr2 { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); margin-left: auto; flex-shrink: 0; }
+.lateen-admin .so.s .sr2 { border-color: #7f77dd; background: #7f77dd; }
+.lateen-admin .ab { width: 100%; height: 44px; border-radius: 12px; border: none; background: #f0eeeb; color: #0D0D0D; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font); margin-top: 20px; }
+.lateen-admin .rb { width: 100%; height: 38px; border-radius: 12px; border: 0.5px solid var(--border); background: transparent; color: var(--txt-2); font-size: 13px; cursor: pointer; font-family: var(--font); margin-top: 8px; }
+.lateen-admin .country-select { width: 100%; background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 10px 12px; color: var(--txt-1); font-size: 13px; font-family: var(--font); outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; padding-inline-end: 36px; padding-inline-start: 12px; }
+.lateen-admin .country-select[dir="rtl"] { background-position: left 12px center; padding-inline-end: 12px; padding-inline-start: 36px; }
+.lateen-admin .country-select option.opt-soon { color: #fff; background: #E24B4A; font-weight: 600; }
+.lateen-admin select option.opt-soon { color: #fff; background: #E24B4A; font-weight: 600; }
