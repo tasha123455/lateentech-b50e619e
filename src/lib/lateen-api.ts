@@ -1,6 +1,5 @@
-// Bridge between the embedded vanilla-JS dashboard scripts and Supabase.
-// Installed onto window.LateenAPI by LateenShell so the scripts can call
-// real backend operations instead of mutating in-memory arrays.
+// Bridge between the dashboards and Supabase. Created per user via
+// createLateenApi() and held by each dashboard's data provider.
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage, IMAGE_PRESETS } from "@/lib/image-utils";
 

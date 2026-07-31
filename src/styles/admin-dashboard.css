@@ -1,0 +1,373 @@
+/* Admin dashboard styles.
+   Extracted verbatim from the <style> block that used to ship inside
+   admin.body.html, scoped under .lateen-admin so they no longer leak into
+   the rest of the app the way the injected <style> tag did. */
+
+/* The Cairo webfont is attached at runtime by AdminDashboardApp — a
+   build-time @import of a remote URL can't be bundled. */
+
+.lateen-admin * { box-sizing: border-box; margin: 0; padding: 0; }
+.lateen-admin {
+  --bg: #141414; --surface: #1e1e1e; --surface-2: #2a2a2a; --card: #0d0d0d;
+  --txt-1: #f0eeeb; --txt-2: #9e9b97; --txt-3: #5e5c58;
+  --border: #333330; --border-2: #272725;
+  --accent: #f5b441; --accent-tint: #3a2a10;
+  --danger: #e07070; --danger-tint: #3a1a1a;
+  --ok: #2dbd8f; --ok-tint: #1a3d2f;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.lateen-admin .adm-app { background: var(--bg); min-height: 100vh; padding: 0.75rem 1.25rem 5rem; max-width: 480px; margin: 0 auto; font-family: var(--font); color: var(--txt-1); position: relative; }
+.lateen-admin .adm-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.lateen-admin .adm-tl { display: flex; align-items: center; gap: 10px; }
+.lateen-admin .adm-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent-tint); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--accent); }
+.lateen-admin .adm-greet { font-size: 15px; font-weight: 500; }
+.lateen-admin .adm-greet-sub { font-size: 11px; color: var(--txt-2); }
+.lateen-admin .adm-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); text-transform: uppercase; }
+.lateen-admin .adm-signout { background: none; border: 0.5px solid var(--border); color: var(--txt-2); font-size: 11px; padding: 6px 11px; border-radius: 14px; cursor: pointer; font-family: var(--font); }
+.lateen-admin .adm-page { display: none; }
+.lateen-admin .adm-page.active { display: block; }
+.lateen-admin .adm-h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; }
+.lateen-admin .adm-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.lateen-admin .adm-stat { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 14px; padding: 14px; }
+.lateen-admin .adm-stat-label { font-size: 11px; color: var(--txt-2); margin-bottom: 6px; }
+.lateen-admin .adm-stat-value { font-size: 22px; font-weight: 500; }
+.lateen-admin .cur-sym { font-size: 0.62em; opacity: 0.82; font-weight: 500; margin-inline-end: 0.18em; letter-spacing: 0.01em; display: inline-block; vertical-align: baseline; }
+.lateen-admin .adm-stat-sub { font-size: 10px; color: var(--txt-3); margin-top: 4px; }
+.lateen-admin .adm-stat.full { grid-column: 1 / -1; background: var(--card); border-color: var(--accent-tint); }
+.lateen-admin .adm-stat.full .adm-stat-value { color: var(--accent); font-size: 28px; }
+.lateen-admin .adm-section { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+.lateen-admin .adm-row { padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); cursor: pointer; }
+.lateen-admin .adm-row:last-child { border-bottom: none; }
+.lateen-admin .adm-row-top { display: flex; align-items: center; gap: 12px; }
+.lateen-admin .adm-thumb { width: 48px; height: 48px; border-radius: 8px; background: var(--surface-2); object-fit: cover; flex-shrink: 0; cursor: zoom-in; }
+.lateen-admin .adm-thumb-empty { width: 48px; height: 48px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--txt-3); flex-shrink: 0; }
+.lateen-admin .adm-row-mid { flex: 1; min-width: 0; }
+.lateen-admin .adm-row-name { font-size: 13px; font-weight: 500; }
+.lateen-admin .adm-row-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+.lateen-admin .adm-row-amt { font-size: 14px; font-weight: 500; color: var(--accent); }
+.lateen-admin .adm-expand { display: none; padding: 12px 14px 14px; border-top: 0.5px solid var(--border-2); }
+.lateen-admin .adm-expand.open { display: block; }
+.lateen-admin .adm-receipt-full { width: 100%; max-height: 360px; object-fit: contain; background: #000; border-radius: 10px; margin-bottom: 10px; }
+.lateen-admin .adm-prod-thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--surface-2); object-fit: cover; flex-shrink: 0; cursor: zoom-in; }
+.lateen-admin .adm-order-detail { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.lateen-admin .adm-order-detail-rows { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.lateen-admin .adm-detail-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--txt-2); }
+.lateen-admin .adm-detail-row span:last-child { color: var(--txt-1); font-weight: 500; }
+.lateen-admin .adm-actions { display: flex; gap: 8px; }
+.lateen-admin .adm-btn { flex: 1; height: 36px; border-radius: 18px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font); }
+.lateen-admin .adm-btn-ok { background: var(--ok); color: #fff; }
+.lateen-admin .adm-btn-no { background: var(--danger); color: #fff; }
+.lateen-admin .adm-btn-ghost { background: transparent; color: var(--txt-2); border: 0.5px solid var(--border); }
+.lateen-admin .adm-btn-acc { background: var(--accent); color: #1a1a1a; }
+.lateen-admin .adm-empty { padding: 32px 16px; text-align: center; color: var(--txt-3); font-size: 12px; }
+.lateen-admin .adm-search { width: 100%; height: 38px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 0 14px; color: var(--txt-1); font-family: var(--font); font-size: 13px; margin-bottom: 12px; }
+.lateen-admin .adm-search:focus { outline: none; border-color: var(--accent); }
+.lateen-admin .adm-user-card { border-bottom: 0.5px solid var(--border-2); }
+.lateen-admin .adm-user-card:last-child { border-bottom: none; }
+.lateen-admin .adm-user-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 14px; cursor: pointer; }
+.lateen-admin .adm-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .adm-user-actions { flex-wrap: wrap; justify-content: flex-start; row-gap: 6px; }
+.lateen-admin .adm-role-pill { font-size: 9px; padding: 2px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.lateen-admin .adm-role-marketer { background: #2d2b4e; color: #a09efc; }
+.lateen-admin .adm-role-business { background: var(--ok-tint); color: var(--ok); }
+.lateen-admin .adm-role-admin { background: var(--accent-tint); color: var(--accent); }
+.lateen-admin .adm-user-chev { font-size: 11px; color: var(--txt-3); transition: transform 0.2s ease; flex-shrink: 0; }
+.lateen-admin .adm-user-chev.open { transform: rotate(180deg); }
+.lateen-admin .adm-notif-box { margin-top: 12px; padding-top: 12px; border-top: 0.5px dashed var(--border-2); display: grid; gap: 8px; }
+.lateen-admin .adm-notif-lbl { font-size: 11px; color: var(--txt-2); font-weight: 500; }
+.lateen-admin .adm-notif-inp, .lateen-admin .adm-notif-textarea { width: 100%; background: var(--card); border: 0.5px solid var(--border); border-radius: 10px; padding: 9px 11px; color: var(--txt-1); font-family: var(--font); font-size: 13px; outline: none; }
+.lateen-admin .adm-notif-inp:focus, .lateen-admin .adm-notif-textarea:focus { border-color: var(--accent); }
+.lateen-admin .adm-notif-textarea { min-height: 64px; resize: vertical; }
+.lateen-admin .adm-notif-photo-row { display: flex; align-items: center; gap: 8px; }
+.lateen-admin .adm-notif-photo-add { width: 40px; height: 40px; border-radius: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .adm-notif-photo-preview { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+.lateen-admin .adm-notif-photo-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; cursor: zoom-in; }
+.lateen-admin .adm-notif-photo-x { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #000; color: #fff; border: none; font-size: 12px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.lateen-admin .adm-notif-hint { font-size: 11px; color: var(--txt-3); }
+.lateen-admin .adm-notif-send-btn { background: var(--accent); color: #1a1a1a; border: none; border-radius: 12px; padding: 10px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+.lateen-admin .adm-notif-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.lateen-admin .adm-broadcast-btn { display: flex; align-items: center; gap: 6px; background: var(--accent-tint); color: var(--accent); border: 0.5px solid var(--accent); border-radius: 14px; font-size: 12px; font-weight: 600; padding: 7px 12px; cursor: pointer; font-family: var(--font); flex-shrink: 0; }
+.lateen-admin .adm-broadcast-panel { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 14px; margin-bottom: 12px; display: none; }
+.lateen-admin .adm-broadcast-panel.open { display: grid; gap: 8px; }
+.lateen-admin .adm-payout-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); gap: 10px; }
+.lateen-admin .adm-payout-row:last-child { border-bottom: none; }
+.lateen-admin .adm-pay-info { flex: 1; min-width: 0; }
+.lateen-admin .adm-pay-name { font-size: 13px; font-weight: 500; }
+.lateen-admin .adm-pay-sub { font-size: 10px; color: var(--txt-3); margin-top: 2px; }
+.lateen-admin .adm-pay-amt { font-size: 14px; font-weight: 500; color: var(--accent); margin-right: 8px; }
+.lateen-admin .adm-prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lateen-admin .c { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 14px; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+.lateen-admin .c:hover { border-color: var(--border); }
+.lateen-admin .ci2 { width: 100%; height: 110px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; }
+.lateen-admin .cb2 { padding: 10px 12px 12px; }
+.lateen-admin .cn { font-size: 13px; font-weight: 500; color: var(--txt-1); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lateen-admin .cr { display: flex; align-items: center; justify-content: space-between; }
+.lateen-admin .cpr { font-size: 13px; font-weight: 500; color: var(--txt-1); }
+.lateen-admin .cco { font-size: 12px; font-weight: 500; color: #8b83e8; }
+.lateen-admin .adm-status-pill { position: absolute; top: 8px; left: 8px; font-size: 9px; padding: 3px 7px; border-radius: 8px; background: rgba(0,0,0,0.7); color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; z-index: 2; }
+.lateen-admin .adm-prod-del-ov { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: var(--danger); border: 1.5px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; z-index: 2; cursor: pointer; }
+.lateen-admin .adm-prod-del-ov:hover { filter: brightness(1.1); }
+.lateen-admin .adm-prod-hide-ov { position: absolute; bottom: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 8px 7px; cursor: pointer; z-index: 2; }
+.lateen-admin .adm-prod-hide-circle { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1.5px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.lateen-admin .adm-prod-hide-circle.on { background: var(--accent); border-color: var(--accent); }
+.lateen-admin .adm-prod-hide-ov span { font-size: 9px; color: rgba(255,255,255,.8); font-weight: 500; font-family: var(--font); }
+.lateen-admin .adm-bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #1a1a1a; border-top: 0.5px solid var(--border-2); padding: 10px 0 16px; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 20; }
+.lateen-admin .adm-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 0.6rem; flex: 1; }
+.lateen-admin .adm-nav-label { font-size: 10px; color: var(--txt-2); }
+.lateen-admin .adm-nav-item.active .adm-nav-label { color: var(--accent); font-weight: 500; }
+.lateen-admin .adm-nav-item.active svg { stroke: var(--accent); }
+.lateen-admin .adm-nav-item svg { width: 20px; height: 20px; stroke: var(--txt-2); }
+.lateen-admin .adm-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+.lateen-admin .adm-lightbox.open { display: flex; }
+.lateen-admin .adm-lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.lateen-admin .adm-lightbox-close { position: absolute; top: calc(16px + env(safe-area-inset-top,0px)); right: 16px; width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); border: 1.5px solid rgba(255,255,255,0.55); color: #fff; font-size: 28px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2147483000; box-shadow: 0 4px 16px rgba(0,0,0,0.6); }
+.lateen-admin .adm-filter-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.lateen-admin .adm-filter-chip { font-size: 11px; padding: 6px 12px; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); color: var(--txt-2); cursor: pointer; font-family: var(--font); font-weight: 500; }
+.lateen-admin .adm-filter-chip.on { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+/* Users page date filter — same dropdown-tab pattern as the Breakdown page. */
+.lateen-admin .bd-range-tabs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.lateen-admin .bd-range-tab { flex: 1; min-width: 74px; background: var(--surface); border: 0.5px solid var(--border); color: var(--txt-1); padding: 10px 8px; border-radius: 14px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; font-family: var(--font); }
+.lateen-admin .bd-range-tab.active { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+.lateen-admin .bd-range-tab .bd-chev { font-size: 10px; transition: transform .2s; }
+.lateen-admin .bd-range-tab.open .bd-chev { transform: rotate(180deg); }
+.lateen-admin .bd-dropdown-list { display: none; flex-direction: column; gap: 6px; margin: 0 0 10px; max-height: 220px; overflow-y: auto; }
+.lateen-admin .bd-dropdown-list.open { display: flex; }
+.lateen-admin .bd-dd-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 9px 13px; font-size: 12.5px; cursor: pointer; color: var(--txt-2); }
+.lateen-admin .bd-dd-item.clear { color: #c0392b; font-weight: 600; }
+.lateen-admin .adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; align-items: flex-end; justify-content: center; }
+.lateen-admin .adm-pdetail.open { display: flex; }
+.lateen-admin .adm-pdetail-card { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; position: relative; padding: 18px 16px 32px; border-top: 0.5px solid var(--border); }
+.lateen-admin .adm-pdetail-close { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.4); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 2; }
+.lateen-admin .adm-pd-owner { background: #191919; border: 0.5px solid #2a2a2a; border-radius: 14px; padding: 14px 16px; margin: 0 0 8px; }
+.lateen-admin .adm-pd-owner-name { font-size: 16px; font-weight: 600; color: #f0eeeb; margin-bottom: 6px; }
+.lateen-admin .adm-pd-owner-row { font-size: 12.5px; color: rgba(255,255,255,.6); margin-top: 5px; }
+.lateen-admin .adm-pd-owner-row span { color: #f0eeeb; font-weight: 500; }
+.lateen-admin .pd-card { background: #191919; border: 0.5px solid #2a2a2a; border-radius: 16px; padding: 14px; margin: 0 0 12px; }
+.lateen-admin .pd-hd-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lateen-admin .pd-hd-name { font-size: 20px; font-weight: 600; color: #fff; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.lateen-admin .pd-hd-code { font-size: 12px; font-weight: 500; color: #c9c6c1; background: #0d0d0d; border: 0.5px solid #2a2a2a; padding: 5px 10px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; letter-spacing: .3px; }
+.lateen-admin .pd-hd-code-lbl { color: #8a8680; font-weight: 400; margin-inline-end: 4px; letter-spacing: 0; }
+.lateen-admin .pd-gallery { position: relative; margin: 0 0 12px; border-radius: 14px; overflow: hidden; background: #0e0e0e; border: 0.5px solid #232323; }
+.lateen-admin .pd-gallery-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; aspect-ratio: 1/1; }
+.lateen-admin .pd-gallery-track::-webkit-scrollbar { display: none; }
+.lateen-admin .pd-gallery-slide { flex: 0 0 100%; min-width: 100%; flex-shrink: 0; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; cursor: zoom-in; background: #0d0d0d; }
+.lateen-admin .pd-gallery-slide img { width: 100%; height: 100%; object-fit: cover; }
+.lateen-admin .pd-gallery-empty .pd-gallery-slide { background: #191919; color: #f0eeeb; }
+.lateen-admin .pd-gallery-dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; gap: 5px; justify-content: center; pointer-events: none; }
+.lateen-admin .pd-gd-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.45); box-shadow: 0 0 4px rgba(0,0,0,.5); }
+.lateen-admin .pd-gd-dot.on { background: #fff; width: 16px; border-radius: 3px; }
+.lateen-admin .pd-sec-ttl { font-size: 13px; font-weight: 600; color: #f0eeeb; margin: 18px 0 8px; }
+.lateen-admin .pd-desc { font-size: 13px; color: #c9c6c1; line-height: 1.6; background: #191919; border: 0.5px solid #232323; border-radius: 12px; padding: 12px 14px; margin: 0; white-space: pre-wrap; }
+.lateen-admin .pd-earn { background: #0D0D0D; border: 0.5px solid #232323; border-radius: 18px; padding: 18px 16px; margin: 0 0 12px; text-align: center; }
+.lateen-admin .pd-earn-lbl { font-size: 12px; color: rgba(255,255,255,.55); margin-bottom: 8px; }
+.lateen-admin .pd-earn-val { font-size: 40px; font-weight: 600; color: #a89ee8; margin-bottom: 14px; line-height: 1; }
+.lateen-admin .pd-earn-divider { height: 0.5px; background: rgba(255,255,255,0.12); margin: 0 0 14px; }
+.lateen-admin .pd-earn-rows { display: flex; flex-direction: column; gap: 10px; text-align: start; }
+.lateen-admin .pd-earn-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lateen-admin .pd-earn-row-lbl { font-size: 12.5px; color: rgba(255,255,255,.6); }
+.lateen-admin .pd-earn-row-val { font-size: 14px; font-weight: 600; color: #fff; }
+.lateen-admin .pd-earn-row-val.pu { color: #a89ee8; }
+.lateen-admin .pd-row { display: flex; align-items: center; background: #191919; border: 0.5px solid #232323; border-radius: 14px; padding: 14px 16px; margin: 0 0 8px; gap: 12px; }
+.lateen-admin .pd-row-ic { width: 32px; height: 32px; border-radius: 50%; background: #2d2b4e; display: flex; align-items: center; justify-content: center; color: #a89ee8; flex-shrink: 0; }
+.lateen-admin .pd-row-lbl { font-size: 14px; color: #f0eeeb; flex: 1; }
+.lateen-admin .pd-row-val { font-size: 14px; color: #f0eeeb; font-weight: 500; text-align: end; }
+.lateen-admin .pd-zone-card { background: #191919; border: 0.5px solid #232323; border-radius: 14px; overflow: hidden; margin: 0 0 8px; }
+.lateen-admin .pd-zone-hd { padding: 10px 16px; background: #151515; font-size: 13px; font-weight: 600; color: #f0eeeb; border-bottom: 0.5px solid #232323; }
+.lateen-admin .pd-zone-city { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; color: #f0eeeb; border-bottom: 0.5px solid #1c1c1c; }
+.lateen-admin .pd-zone-city:last-child { border-bottom: none; }
+.lateen-admin .pd-zone-city span:last-child { color: #c9c6c1; font-size: 12px; text-align: end; }
+.lateen-admin .pd-row-val.am { color: #c9923a; }
+.lateen-admin .pd-row-tap { cursor: pointer; user-select: none; }
+.lateen-admin .pd-row-tap:active { background: #1f1f1f; }
+.lateen-admin .pd-chev { transition: transform .2s ease; vertical-align: middle; opacity: .7; margin-inline-start: 4px; }
+.lateen-admin .pd-chev.open { transform: rotate(180deg); }
+.lateen-admin .pd-zones { margin: 0 0 8px; display: flex; flex-direction: column; gap: 6px; }
+.lateen-admin .pd-variant { display: flex; align-items: center; flex-wrap: wrap; background: #191919; border: 0.5px solid #232323; border-radius: 14px; padding: 10px 16px; margin: 0 0 8px; gap: 12px; }
+.lateen-admin .pd-variant-lbl { font-size: 14px; color: #f0eeeb; flex: 1; min-width: 0; font-weight: 500; }
+.lateen-admin .pd-variant-sel-wrap { position: relative; display: flex; align-items: center; min-width: 44%; }
+.lateen-admin .pd-variant-sel { appearance: none; -webkit-appearance: none; -moz-appearance: none; background: #0d0d0d; border: 0.5px solid #2a2a2a; border-radius: 10px; color: #f0eeeb; font-size: 13px; font-family: var(--font); padding: 9px 30px 9px 12px; width: 100%; cursor: pointer; outline: none; }
+.lateen-admin .pd-variant-chev { position: absolute; right: 10px; color: #a89ee8; pointer-events: none; }
+/* ===== Order Verification Hub v2 (grouped by marketer) ===== */
+.lateen-admin .adm-mkt-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border-2); cursor: pointer; }
+.lateen-admin .adm-mkt-row:last-child { border-bottom: none; }
+.lateen-admin .adm-mkt-av { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-tint); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.lateen-admin .adm-mkt-main { flex: 1; min-width: 0; }
+.lateen-admin .adm-mkt-name-row { display: flex; align-items: center; gap: 8px; }
+.lateen-admin .adm-mkt-name { font-size: 13px; font-weight: 500; }
+.lateen-admin .adm-mkt-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); flex-shrink: 0; white-space: nowrap; }
+.lateen-admin .adm-mkt-badge.clear { background: var(--surface-2); color: var(--txt-3); }
+.lateen-admin .adm-mkt-contact { font-size: 11px; color: var(--txt-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lateen-admin .adm-mkt-chev { color: var(--txt-3); flex-shrink: 0; }
+.lateen-admin .adm-mkt-detail-head { display: flex; align-items: center; gap: 10px; margin: 6px 34px 14px 0; }
+.lateen-admin .adm-mkt-detail-name { font-size: 15px; font-weight: 600; }
+.lateen-admin .adm-mkt-detail-contact { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+.lateen-admin .adm-recpt-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; }
+.lateen-admin .adm-status-pending { background: var(--accent-tint); color: var(--accent); }
+.lateen-admin .adm-status-approved { background: var(--ok-tint); color: var(--ok); }
+.lateen-admin .adm-status-rejected { background: var(--danger-tint); color: var(--danger); }
+.lateen-admin .adm-status-refunded { background: #1c2740; color: #7c9cf0; }
+.lateen-admin .adm-thumbs-row { display: flex; gap: 6px; flex-shrink: 0; }
+.lateen-admin .adm-thumb-block { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.lateen-admin .adm-thumb-block-label { font-size: 8px; color: var(--txt-3); text-transform: uppercase; letter-spacing: 0.05em; }
+.lateen-admin .adm-recpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+.lateen-admin .adm-recpt-card:last-child { margin-bottom: 0; }
+.lateen-admin .adm-note-block { background: var(--surface); border-left: 3px solid var(--danger); border-radius: 8px; padding: 8px 10px; margin: 8px 0 0; }
+.lateen-admin .adm-note-block-label { font-size: 9px; font-weight: 600; color: var(--danger); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+.lateen-admin .adm-note-block-text { font-size: 12px; color: var(--txt-2); line-height: 1.45; }
+/* Refund only ever applies to approved receipts — see admMktDetailCard(). */
+.lateen-admin .adm-btn-refund { width: 100%; margin-top: 8px; height: 34px; border-radius: 17px; background: transparent; border: 0.5px solid #7c9cf0; color: #7c9cf0; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font); }
+.lateen-admin .adm-btn-refund:hover { background: rgba(124,156,240,0.12); }
+.lateen-admin .adm-btn-refund:disabled { opacity: 0.5; cursor: not-allowed; }
+/* ===== Admin Home v2 (pasted design) ===== */
+.lateen-admin .adm-home-v2 {
+  --bg: #0b0b0c;
+  --surface: #17171a;
+  --surface-2: #1d1d20;
+  --line: rgba(255,255,255,0.07);
+  --text: #f3f3f1;
+  --text-2: #9c9c9c;
+  --text-3: #6b6b6b;
+  --accent: #caa05a;
+  --accent-soft: rgba(202,160,90,0.14);
+  --danger: #d98177;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  padding-bottom: 8px;
+}
+.lateen-admin .adm-home-v2 .section-title {
+  font-size: 24px; font-weight:700; color: var(--text);
+  margin: 4px 0 18px;
+}
+/* ---- Date filter: single quiet segmented track ---- */
+.lateen-admin .adm-home-v2 .range-tabs {
+  display:flex; gap:4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 4px; border-radius: 16px;
+  margin-bottom: 18px;
+}
+.lateen-admin .adm-home-v2 .range-tab {
+  flex:1; text-align:center;
+  padding: 10px 6px; border-radius: 12px;
+  font-size: 13px; font-weight:600; color: var(--text-2);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.lateen-admin .adm-home-v2 .range-tab.active { background: var(--accent-soft); color: var(--accent); }
+.lateen-admin .adm-home-v2 .range-tab .chev { font-size: 9px; transition: transform 0.2s; }
+.lateen-admin .adm-home-v2 .range-tab.open .chev { transform: rotate(180deg); }
+.lateen-admin .adm-home-v2 .dropdown-list {
+  display:none; flex-direction:column; gap: 2px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 5px;
+  margin: -8px 0 18px;
+}
+.lateen-admin .adm-home-v2 .dropdown-list.open { display:flex; }
+.lateen-admin .adm-home-v2 .dd-item {
+  padding: 11px 14px; border-radius: 12px;
+  font-size: 13.5px; color: var(--text-2); cursor:pointer; text-align:right;
+}
+.lateen-admin .adm-home-v2 .dd-item:hover { background: var(--surface-2); color: var(--text); }
+.lateen-admin .adm-home-v2 .dd-item.clear { color: var(--danger); font-weight:600; text-align:center; }
+/* ---- Hero card ---- */
+.lateen-admin .adm-home-v2 .hero-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 28px 24px;
+  text-align: right;
+}
+.lateen-admin .adm-home-v2 .hero-label { font-size: 14px; font-weight:600; color: var(--text-2); margin-bottom:16px; }
+.lateen-admin .adm-home-v2 .hero-value {
+  font-size: 44px; font-weight:800; color: var(--accent);
+  line-height:1; margin-bottom: 14px; font-variant-numeric: tabular-nums;
+}
+.lateen-admin .adm-home-v2 .hero-sub { font-size: 12.5px; color: var(--text-3); }
+.lateen-admin .adm-home-v2 .hero-profit-toggle {
+  width:100%; margin-top:20px; padding-top:16px;
+  border:none; border-top:1px solid var(--line); background:none;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  font-family:inherit; font-size:13px; font-weight:600; color: var(--text-2);
+  cursor:pointer;
+}
+.lateen-admin .adm-home-v2 .hero-profit-toggle .chev { font-size:10px; transition: transform 0.2s; flex-shrink:0; }
+.lateen-admin .adm-home-v2 .hero-profit-toggle.open .chev { transform: rotate(180deg); }
+.lateen-admin .adm-home-v2 .hero-profit-panel { display:none; margin-top:14px; }
+.lateen-admin .adm-home-v2 .hero-profit-panel.open { display:block; }
+.lateen-admin .adm-home-v2 .hero-profit-value { font-size:30px; font-weight:800; color: var(--text); line-height:1; margin-bottom:8px; font-variant-numeric: tabular-nums; }
+.lateen-admin .adm-home-v2 .hero-profit-breakdown { font-size:11.5px; color: var(--text-3); }
+/* ---- Stats list: one quiet card, rows instead of many boxes ---- */
+.lateen-admin .adm-home-v2 .stats-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 4px 20px;
+  margin-top: 14px;
+}
+.lateen-admin .adm-home-v2 .stat-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.lateen-admin .adm-home-v2 .stat-row:last-child { border-bottom:none; }
+.lateen-admin .adm-home-v2 .stat-left { display:flex; align-items:center; gap:13px; }
+.lateen-admin .adm-home-v2 .stat-icon {
+  width:36px; height:36px; border-radius:11px;
+  background: var(--surface-2);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--text-2); flex-shrink:0;
+}
+.lateen-admin .adm-home-v2 .stat-icon svg { width:17px; height:17px; }
+.lateen-admin .adm-home-v2 .stat-label { font-size: 14px; font-weight:600; color: var(--text); }
+.lateen-admin .adm-home-v2 .stat-sub { font-size: 11.5px; color: var(--text-3); margin-top:2px; }
+.lateen-admin .adm-home-v2 .stat-value { font-size: 21px; font-weight:700; color: var(--text); font-variant-numeric: tabular-nums; }
+/* ---- Analytics chart ---- */
+.lateen-admin .adm-home-v2 .chart-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 20px 18px 16px;
+  margin-top: 14px;
+}
+.lateen-admin .adm-home-v2 .chart-title { font-size: 14px; font-weight:600; color: var(--text); margin-bottom:2px; }
+.lateen-admin .adm-home-v2 .chart-caption { font-size: 11.5px; color: var(--text-3); margin-bottom:16px; }
+.lateen-admin .adm-home-v2 .chart-filters {
+  display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:14px;
+  scrollbar-width:none;
+}
+.lateen-admin .adm-home-v2 .chart-filters::-webkit-scrollbar { display:none; }
+.lateen-admin .adm-home-v2 .chip {
+  flex:0 0 auto;
+  background: var(--surface-2); border:1px solid var(--line); color: var(--text-2);
+  font-family:inherit; font-size:12px; font-weight:600;
+  padding: 8px 14px; border-radius: 14px; white-space:nowrap; cursor:pointer;
+}
+.lateen-admin .adm-home-v2 .chip.active { background: var(--surface-2); color: var(--text); border-color:#3a3a3a; font-weight:700; }
+.lateen-admin .adm-home-v2 .chart-wrap { position:relative; height:220px; }
+/* ---- Reports ---- */
+.lateen-admin .adm-h1-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 1rem; }
+.lateen-admin .adm-reports-btn { display: flex; align-items: center; gap: 6px; background: var(--danger-tint); color: var(--danger); border: 0.5px solid var(--danger); border-radius: 14px; font-size: 12px; font-weight: 600; padding: 7px 12px; cursor: pointer; font-family: var(--font); }
+.lateen-admin .adm-reports-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 700; padding: 1px 6px; min-width: 16px; text-align: center; line-height: 1.4; }
+.lateen-admin .rpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.lateen-admin .rpt-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.lateen-admin .rpt-type-pill { font-size: 9px; padding: 3px 8px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; background: var(--accent-tint); color: var(--accent); }
+.lateen-admin .rpt-status-pill { font-size: 9px; padding: 3px 8px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.lateen-admin .rpt-status-open { background: var(--danger-tint); color: var(--danger); }
+.lateen-admin .rpt-status-resolved { background: var(--ok-tint); color: var(--ok); }
+.lateen-admin .rpt-reporter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.lateen-admin .rpt-name { font-size: 12.5px; font-weight: 500; color: var(--txt-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lateen-admin .rpt-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+.lateen-admin .rpt-msg { font-size: 13px; color: var(--txt-1); line-height: 1.5; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; white-space: pre-wrap; word-break: break-word; }
+.lateen-admin .rpt-field-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--txt-2); margin-bottom: 4px; }
+.lateen-admin .rpt-type-row { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--txt-1); margin-bottom: 10px; }
+.lateen-admin .rpt-mini-prod { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 12px; padding: 8px 10px; margin-bottom: 10px; cursor: pointer; }
+.lateen-admin .rpt-mini-thumb { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
+.lateen-admin .rpt-mini-thumb-empty { width: 42px; height: 42px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.lateen-admin .rpt-mini-info { flex: 1; min-width: 0; }
+.lateen-admin .rpt-biz-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.lateen-admin .rpt-comment-ta { width: 100%; min-height: 64px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; color: var(--txt-1); padding: 9px 10px; font-size: 12.5px; font-family: var(--font); resize: vertical; box-sizing: border-box; margin-bottom: 8px; }
+.lateen-admin .rpt-resolved-note { background: var(--ok-tint); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--ok); line-height: 1.5; }
+.lateen-admin .rpt-resolved-note b { color: var(--ok); }
+.lateen-admin #adm-reports-ov { z-index: 109; }
+.lateen-admin #adm-pdetail { z-index: 110; }

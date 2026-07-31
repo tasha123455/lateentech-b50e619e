@@ -1,0 +1,35 @@
+import type { AdminPageId } from "../lib/types";
+
+const ITEMS: Array<{ id: AdminPageId; label: string; path: React.ReactNode }> = [
+  { id: "adm-home", label: "Home", path: <path d="M3 12l9-9 9 9M5 10v10h14V10" /> },
+  { id: "adm-verify", label: "Verify", path: <path d="M9 12l2 2 4-4M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> },
+  { id: "adm-payouts", label: "Payouts", path: <path d="M3 7h18v10H3zM3 11h18M7 15h2" /> },
+  {
+    id: "adm-users",
+    label: "Users",
+    path: <><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 11h5M18.5 8.5v5" /></>,
+  },
+  { id: "adm-products", label: "Products", path: <path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7" /> },
+  {
+    id: "adm-employees",
+    label: "Employees",
+    path: <><circle cx="12" cy="8" r="3.2" /><path d="M5 21c1-4 4-6 7-6s6 2 7 6" /></>,
+  },
+];
+
+export function BottomNav({ page, onGo }: { page: AdminPageId; onGo: (id: AdminPageId) => void }) {
+  return (
+    <nav className="adm-bottom-nav">
+      {ITEMS.map((it) => (
+        <div
+          key={it.id}
+          className={"adm-nav-item" + (page === it.id ? " active" : "")}
+          onClick={() => onGo(it.id)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5">{it.path}</svg>
+          <span className="adm-nav-label">{it.label}</span>
+        </div>
+      ))}
+    </nav>
+  );
+}

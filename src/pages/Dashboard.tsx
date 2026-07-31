@@ -2,9 +2,9 @@ import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { LateenShell } from "@/components/dashboard/lateen/LateenShell";
 import { BusinessDashboardApp } from "@/components/dashboard/business/BusinessDashboardApp";
 import { MarketerDashboardApp } from "@/components/dashboard/marketer/MarketerDashboardApp";
+import { AdminDashboardApp } from "@/components/dashboard/admin/AdminDashboardApp";
 
 type Impersonation = { userId: string; role: "marketer" | "business"; name: string };
 
@@ -112,5 +112,5 @@ export function Dashboard({ prod }: { prod?: string }) {
 
   if (role === "marketer") return <MarketerDashboardApp userId={user.id} prod={prod} />;
 
-  return <LateenShell role={role} />;
+  return <AdminDashboardApp userId={user.id} />;
 }
