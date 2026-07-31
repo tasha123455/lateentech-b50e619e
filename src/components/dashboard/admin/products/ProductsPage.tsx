@@ -101,11 +101,18 @@ export function ProductsPage({ active }: { active: boolean }) {
   const all = useMemo(() => {
     const rows = products.map((p) => p as unknown as Record<string, unknown>);
     rows.sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
-    return rows.map((r) => ({
-      hidden: r.status === "hidden",
-      shop: String(r.biz_name || ""),
-      bp: dbToBrowse(r, NO_FAVOURITES),
-    }));
+    return rows.map((r) => {
+      const bp = dbToBrowse(r, NO_FAVOURITES);
+      return {
+        hidden: r.status === "hidden",
+        paused: r.status === "paused",
+        // dbToBrowse already nets off reserved stock and takes the smallest
+        // variant group, so this is the same count the tile would sell from.
+        outOfStock: bp.q <= 0,
+        shop: String(r.biz_name || ""),
+        bp,
+      };
+    });
   }, [products]);
 
   const shown = useMemo(() => {
@@ -131,12 +138,23 @@ export function ProductsPage({ active }: { active: boolean }) {
       </div>
     );
   } else {
-    body = shown.map(({ bp, hidden }) => (
+    /* Marketers never see a hidden, paused or out-of-stock product, so the
+       browse tile has nothing to say about them. The admin is the one place
+       they all have to surface, and where more than one applies they all show. */
+    body = shown.map(({ bp, hidden, paused, outOfStock }) => (
       <ProductCard
         key={bp.id}
         p={bp}
         onOpen={setDetailId}
-        pill={hidden ? <span className="adm-status-pill">Hidden</span> : null}
+        pill={
+          hidden || paused || outOfStock ? (
+            <div className="adm-pill-stack">
+              {hidden && <span className="adm-status-pill">Hidden</span>}
+              {paused && <span className="adm-status-pill paused">Paused</span>}
+              {outOfStock && <span className="adm-status-pill oos">Out of stock</span>}
+            </div>
+          ) : null
+        }
       />
     ));
   }
@@ -159,7 +177,7 @@ export function ProductsPage({ active }: { active: boolean }) {
       <ProductDetailOverlay
         productId={detailId}
         onClose={() => setDetailId(null)}
-        hidden={detailProduct?.status === "hidden"}
+        status={detailProduct?.status}
         onToggleHidden={(id, next) => void toggleProduct(id, next)}
         onDelete={(id, name) => void deleteProduct(id, name)}
       />
