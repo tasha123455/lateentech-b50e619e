@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import "@/styles/lateen-business.css";
 import "@/styles/business-dashboard.css";
 import { BusinessDataProvider } from "./BusinessDataProvider";
 import { LightboxProvider } from "./ui/Lightbox";
