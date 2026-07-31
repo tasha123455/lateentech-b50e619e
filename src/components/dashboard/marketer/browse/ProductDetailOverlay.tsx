@@ -2,13 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { PLAT_THRESHOLD, platformFeeForPrice } from "../lib/constants";
-import { freeLbl, isAr, moneyS, pctTxt } from "../lib/format";
-import { cityLabel, countryName, detailVariantGroups } from "../lib/mappers";
+import { isAr, moneyS, pctTxt } from "../lib/format";
+import { detailVariantGroups } from "../lib/mappers";
 import type { BrowseProduct, ProductReview } from "../lib/types";
 import { Money } from "../ui/Money";
 import { usePhotoLightbox } from "../ui/PhotoLightbox";
 import { ReportModal } from "./ReportModal";
 import { ReviewsSection } from "./Reviews";
+import { ZonesSection } from "./ZonesSection";
 import { pdT } from "./pdText";
 
 const Chevron = ({ open, size = 14, style }: { open?: boolean; size?: number; style?: React.CSSProperties }) => (
@@ -28,9 +29,6 @@ const Chevron = ({ open, size = 14, style }: { open?: boolean; size?: number; st
   </svg>
 );
 
-const FreeOr = ({ n, sym, code }: { n: number; sym: string; code: string }) =>
-  Number(n || 0) === 0 ? <b style={{ color: "#34c77b" }}>{freeLbl()}</b> : <Money n={n} sym={sym} code={code} short />;
-
 export function ProductDetailOverlay({
   productId, onClose, onOpenAffSoon,
 }: {
@@ -45,7 +43,6 @@ export function ProductDetailOverlay({
 
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [zonesOpen, setZonesOpen] = useState(false);
-  const [openZone, setOpenZone] = useState<string | null>(null);
   const [stockOpen, setStockOpen] = useState(false);
   const [variantPick, setVariantPick] = useState<Record<number, string>>({});
   const [activeMarketers, setActiveMarketers] = useState<string>("…");
@@ -91,7 +88,6 @@ export function ProductDetailOverlay({
     if (!productId) return;
     setGalleryIdx(0);
     setZonesOpen(false);
-    setOpenZone(null);
     setStockOpen(false);
     setVariantPick({});
     setReviews([]);
@@ -134,7 +130,6 @@ export function ProductDetailOverlay({
   const photos = (p.ph || []).filter(Boolean);
   const low = p.q > 0 && p.q <= 20;
   const vgList = detailVariantGroups(p);
-  const zoneCodes = Object.keys(p.d || {});
 
   const onGalleryScroll = () => {
     const tr = galleryRef.current;
@@ -317,64 +312,13 @@ export function ProductDetailOverlay({
           );
         })}
 
-        <div className="pd-row pd-row-tap" onClick={() => { setZonesOpen((v) => !v); setOpenZone(null); }}>
-          <div className="pd-row-ic">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </div>
-          <div className="pd-row-lbl">{t.shipsTo}</div>
-          <div className="pd-row-val"><Chevron open={zonesOpen} /></div>
-        </div>
-
-        {zonesOpen && (
-          <div className="pd-zones">
-            {!zoneCodes.length ? (
-              <div className="pd-zone-empty">{isAr() ? "لا توجد مناطق" : "No zones"}</div>
-            ) : (
-              zoneCodes.map((code) => {
-                const z = p.d[code];
-                const cities = Object.entries(z.c || {}).map(([city, v]) => ({
-                  city, d: Number(v.d) || 0, s: Number(v.s) || 0,
-                }));
-                const ship = cities.reduce((a, c) => Math.max(a, c.s), 0);
-                const isOpen = openZone === code;
-                return (
-                  <div className="pd-zone" key={code}>
-                    <div className="pd-zone-hdr" onClick={() => setOpenZone(isOpen ? null : code)}>
-                      <div className="pd-zone-name">{countryName(code)}</div>
-                      <div className="pd-zone-meta">
-                        <span className="pd-zone-ship-lbl">{t.ship}</span>{" "}
-                        <span className="pd-zone-ship-val">
-                          {cities.length ? <FreeOr n={ship} sym={s} code={cc} /> : "—"}
-                        </span>{" "}
-                        <Chevron open={isOpen} size={13} />
-                      </div>
-                    </div>
-                    {isOpen && (
-                      <div className="pd-zone-cities">
-                        {cities.length ? (
-                          cities.map((c) => (
-                            <div className="pd-zone-city" key={c.city}>
-                              <div className="pd-zone-city-name">{cityLabel(c.city)}</div>
-                              <div className="pd-zone-city-val">
-                                <span className="pd-zone-city-lbl">{t.deliv}</span>{" "}
-                                <FreeOr n={c.d} sym={s} code={cc} />
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="pd-zone-empty">{isAr() ? "لا توجد مدن" : "No cities"}</div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        )}
+        <ZonesSection
+          d={p.d}
+          sym={s}
+          code={cc}
+          open={zonesOpen}
+          onToggle={() => setZonesOpen((v) => !v)}
+        />
 
         <div
           className={"pd-row" + (p.vg && p.vg.length ? " pd-row-tap" : "")}

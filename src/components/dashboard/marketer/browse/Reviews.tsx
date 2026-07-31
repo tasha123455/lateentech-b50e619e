@@ -14,10 +14,35 @@ export function ReviewsSection({
   onReload: () => void;
   onReport: () => void;
 }) {
+  const lightbox = usePhotoLightbox();
+  return (
+    <>
+      <ReviewsList
+        reviews={reviews}
+        onPhoto={(u) => lightbox.openOne(u)}
+        trailing={<ReportButton onClick={onReport} />}
+      />
+      <ReviewForm productId={productId} onSubmitted={onReload} />
+    </>
+  );
+}
+
+/** The read-only half: the heading with the average, and the review carousel.
+ *
+ *  The admin's product sheet renders this on its own — an admin has no review
+ *  to write and nobody to report a product to, so the form and the report
+ *  button stay behind ReviewsSection. */
+export function ReviewsList({
+  reviews, onPhoto, trailing,
+}: {
+  reviews: ProductReview[];
+  onPhoto: (url: string) => void;
+  /** Extra control in the section title, e.g. the marketer's Report button. */
+  trailing?: React.ReactNode;
+}) {
   const t = pdT();
   const [idx, setIdx] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
-  const lightbox = usePhotoLightbox();
 
   const n = reviews.length;
   useEffect(() => { setIdx((i) => Math.min(i, Math.max(0, n - 1))); }, [n]);
@@ -109,7 +134,7 @@ export function ReviewsSection({
             <img
               src={r.photo}
               alt=""
-              onClick={() => lightbox.openOne(r.photo)}
+              onClick={() => onPhoto(r.photo)}
               style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, cursor: "pointer", display: "block" }}
             />
           </div>
@@ -132,7 +157,7 @@ export function ReviewsSection({
               <span style={{ margin: "0 4px" }}>{avg.toFixed(1)}</span>
             </span>
           )}
-          <ReportButton onClick={onReport} />
+          {trailing}
         </span>
       </div>
 
@@ -158,8 +183,6 @@ export function ReviewsSection({
           </div>
         </div>
       )}
-
-      <ReviewForm productId={productId} onSubmitted={onReload} />
     </>
   );
 }
