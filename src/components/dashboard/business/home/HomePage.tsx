@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useBusinessData } from "../BusinessDataProvider";
-import { isAr, tlbl, money, moneyParts, ddmmyyyy } from "../lib/format";
+import { isAr, tlbl, money, rawSym, ddmmyyyy } from "../lib/format";
 import type { Order, PendingActiveStub } from "../lib/types";
-import { computeEarnByCur, pickWalletCur } from "./currency";
+import { MoneyH } from "../ui/Money";
+import { computeEarnByCur, pickWalletCur, type CurEarn } from "./currency";
 
 /* ── Chart.js loading (same CDN URLs as LateenShell.tsx) ───────────────── */
 
@@ -161,6 +162,61 @@ function buildAnalytics(orders: Order[], stubs: PendingActiveStub[]): AnalyticsR
   return { chartData, analyticsData };
 }
 
+/* ── Wallet currency breakdown ──
+   `__ensureBizBreakdownDiv()` inserted #biz-wallet-breakdown directly after
+   `.bal-sub` and filled it whenever a business had earnings in more than one
+   currency; tapping a row switched which currency the balance card shows.
+   The whole control was absent from the port, which left multi-currency
+   accounts stuck on whichever currency happened to sort first. */
+
+function WalletCurrencyBreakdown({
+  byCur, selected, onSelect,
+}: {
+  byCur: Record<string, CurEarn>;
+  selected: string;
+  onSelect: (code: string) => void;
+}) {
+  const [listOpen, setListOpen] = useState(false);
+  const codes = Object.keys(byCur);
+  if (codes.length <= 1) return null;
+
+  return (
+    <div id="biz-wallet-breakdown" style={{ display: "block", margin: "8px 0 14px 0", padding: 0, borderRadius: 12, background: "transparent", border: "none", fontSize: 11, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
+      <button
+        data-no-i18n=""
+        onClick={() => setListOpen((v) => !v)}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "9px 12px", borderRadius: 10, border: "0.5px solid #232323", background: "#141414", color: "#fff", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
+      >
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <span style={{ opacity: 0.55, letterSpacing: "0.04em" }}>{isAr() ? "صافي الأرباح حسب العملة" : "NET EARNINGS BY CURRENCY"}</span>
+          <span style={{ opacity: 0.5 }}>·</span>
+          <span style={{ opacity: 0.85 }}>{codes.length} currencies</span>
+        </span>
+        <span id="biz-wallet-cur-caret" style={{ display: "inline-block", transition: "transform .15s", opacity: 0.7, transform: listOpen ? "rotate(180deg)" : undefined }}>▾</span>
+      </button>
+      <div id="biz-wallet-cur-list" style={{ display: listOpen ? "block" : "none", marginTop: 8 }}>
+        {codes.map((c) => {
+          const a = c === selected;
+          return (
+            <button
+              key={c}
+              data-no-i18n=""
+              onClick={() => onSelect(c)}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, width: "100%", margin: "0 0 6px 0", padding: "10px 12px", borderRadius: 10, border: "0.5px solid " + (a ? "#7f77dd" : "#232323"), background: a ? "#1a1830" : "#0f0f0f", color: "#fff", fontSize: 12, cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
+            >
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <span style={{ opacity: 0.7 }}>{rawSym(byCur[c].sym, c)}</span>
+                <span>{c}</span>
+              </span>
+              <span style={{ fontWeight: 500 }}><MoneyH n={byCur[c].net} sym={byCur[c].sym} code={c} /></span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ── Marketer avatar helper (inline, DOM-imperative like the original) ── */
 
 function Avatar({ url, onClick }: { url?: string | null; onClick?: () => void }) {
@@ -188,7 +244,6 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
   const walletCur = pickWalletCur(byCur, walletCurState);
   useEffect(() => { if (walletCurState !== walletCur) setWalletCurState(walletCur); }, [walletCur, walletCurState]);
   const sel = byCur[walletCur] || { sym: "د.ل", gross: 0, comm: 0, plat: 0, net: 0 };
-  const walletParts = moneyParts(sel.net, sel.sym, walletCur);
 
   /* ── analytics / chart data ── */
   const { chartData, analyticsData } = useMemo(
@@ -359,7 +414,9 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
   const okPct = total > 0 ? Math.round((a.ok / total) * 100) : 0;
   const failPct = total > 0 ? 100 - okPct : 0;
   const ringPct = ringShowFail ? failPct : okPct;
-  const ringSub = ringShowFail ? (ar ? "فاشل" : "failed") : (ar ? "ناجح" : "success");
+  // __ringUpdateLabel wrote the English word and let the page translator swap
+  // it — hardcoding Arabic here produced different wording than the app shows.
+  const ringSub = ringShowFail ? "failed" : "success";
 
   return (
     <>
@@ -385,9 +442,9 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
             type="button"
             onClick={onOpenSupport}
             aria-label="Support"
-            style={{ height: 36, padding: "0 14px", borderRadius: 10, border: "0.5px solid rgba(224,112,112,0.35)", background: "rgba(58,26,26,0.9)", color: "var(--color-text-primary)", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+            style={{ height: 36, padding: "0 14px", borderRadius: 10, border: "0.5px solid rgba(224,112,112,0.35)", background: "rgba(58,26,26,0.9)", color: "#f0eeeb", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-sans)" }}
           >
-            <span>{ar ? "الدعم" : "Support"}</span>
+            <span data-i18n="Support">Support</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
             </svg>
@@ -402,28 +459,25 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
       </div>
 
       <div className="balance-card">
-        <div className="bal-label">{ar ? "صافي الأرباح" : "NET EARNINGS"}</div>
-        <div className="bal-amount wallet-amount">
-          {walletParts.symbolFirst ? <span className="cur-sym">{walletParts.symbol}</span> : null}
-          {walletParts.amount}
-          {!walletParts.symbolFirst ? <span className="cur-sym">{(walletParts.spaced ? " " : "") + walletParts.symbol}</span> : null}
-        </div>
-        <div className="bal-sub">{ar ? "بعد العمولات ورسوم المنصة" : "After commissions & platform fees"}</div>
+        <div className="bal-label">NET EARNINGS</div>
+        <div className="bal-amount wallet-amount"><MoneyH n={sel.net} sym={sel.sym} code={walletCur} /></div>
+        <div className="bal-sub">After commissions &amp; platform fees</div>
+        <WalletCurrencyBreakdown byCur={byCur} selected={walletCur} onSelect={setWalletCurState} />
         <div className="bal-row">
-          <button className="payout-btn" onClick={onOpenPayout}>{ar ? "عرض التفاصيل" : "View breakdown"}</button>
+          <button className="payout-btn" onClick={onOpenPayout}>View breakdown</button>
         </div>
       </div>
 
       <div className="chart-card">
         <div className="chart-top">
           <div className="chart-toggle">
-            <button className={"ctoggle" + (currentMetric === "revenue" ? " active" : "")} onClick={() => setCurrentMetric("revenue")}>{ar ? "الإيرادات" : "Revenue"}</button>
-            <button className={"ctoggle" + (currentMetric === "pieces" ? " active" : "")} onClick={() => setCurrentMetric("pieces")}>{ar ? "القطع" : "Pieces"}</button>
+            <button className={"ctoggle" + (currentMetric === "revenue" ? " active" : "")} onClick={() => setCurrentMetric("revenue")}>Revenue</button>
+            <button className={"ctoggle" + (currentMetric === "pieces" ? " active" : "")} onClick={() => setCurrentMetric("pieces")}>Pieces</button>
           </div>
           <div className="period-tabs">
-            <button className={"ptab" + (currentPeriod === "D" ? " active" : "")} onClick={() => setCurrentPeriod("D")}>{ar ? "ي" : "D"}</button>
-            <button className={"ptab" + (currentPeriod === "M" ? " active" : "")} onClick={() => setCurrentPeriod("M")}>{ar ? "ش" : "M"}</button>
-            <button className={"ptab" + (currentPeriod === "Y" ? " active" : "")} onClick={() => setCurrentPeriod("Y")}>{ar ? "س" : "Y"}</button>
+            <button className={"ptab" + (currentPeriod === "D" ? " active" : "")} onClick={() => setCurrentPeriod("D")}>D</button>
+            <button className={"ptab" + (currentPeriod === "M" ? " active" : "")} onClick={() => setCurrentPeriod("M")}>M</button>
+            <button className={"ptab" + (currentPeriod === "Y" ? " active" : "")} onClick={() => setCurrentPeriod("Y")}>Y</button>
           </div>
         </div>
         <div className="chart-wrap"><canvas id="mainChart" ref={canvasRef} style={{ touchAction: "pan-y" }} /></div>
@@ -437,11 +491,11 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
           </div>
           <div className="analytics-legend">
             <div className="leg-row" id="leg-row-ok" onClick={(e) => { e.stopPropagation(); setRingShowFail(false); }}>
-              <div className="leg-left"><div className="leg-dot" style={{ background: "#35c98f" }} />{ar ? "تم التسليم" : "Delivered"}</div>
+              <div className="leg-left"><div className="leg-dot" style={{ background: "#35c98f" }} />Delivered</div>
               <div className="leg-val" style={{ color: "#35c98f" }} id="leg-ok">{a.ok.toLocaleString()}</div>
             </div>
             <div className="leg-row" id="leg-row-fail" onClick={(e) => { e.stopPropagation(); setRingShowFail(true); }}>
-              <div className="leg-left"><div className="leg-dot" style={{ background: "#e2685f" }} />{ar ? "فشل (عند الاستلام)" : "Failed (COD)"}</div>
+              <div className="leg-left"><div className="leg-dot" style={{ background: "#e2685f" }} />Failed (COD)</div>
               <div className="leg-val" style={{ color: "#e2685f" }} id="leg-fail">{a.fail.toLocaleString()}</div>
             </div>
           </div>

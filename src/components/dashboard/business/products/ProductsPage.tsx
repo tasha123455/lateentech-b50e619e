@@ -32,34 +32,6 @@ function InfoModal({ title, body, onClose }: { title: string; body: string; onCl
   );
 }
 
-function ConfirmModal({ body, onCancel, onConfirm }: { body: string; onCancel: () => void; onConfirm: () => void }) {
-  const ar = isAr();
-  return (
-    <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
-      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
-    >
-      <div style={{ background: "#1a2030", borderRadius: 16, padding: 18, width: "100%", maxWidth: 380, boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }}>
-        <div style={{ fontSize: 13, color: "#c7ccd6", lineHeight: 1.6 }}>{body}</div>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
-          <button
-            onClick={onCancel}
-            style={{ background: "transparent", color: "#c7ccd6", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
-          >
-            {ar ? "إلغاء" : "Cancel"}
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{ background: "#e24b4a", color: "#fff", border: 0, borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
-          >
-            {ar ? "حذف" : "Delete"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function ProductsPage({
   onAddProduct,
   onEditProduct,
@@ -76,8 +48,6 @@ export function ProductsPage({
   const [filter, setFilter] = useState<FilterKey>("all");
   const [pauseBlocked, setPauseBlocked] = useState(false);
   const [adminHidden, setAdminHidden] = useState(false);
-  const [deleteBlockedMsg, setDeleteBlockedMsg] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const h = () => { /* re-render on language change is handled by parent via context, no-op here */ };
@@ -203,18 +173,18 @@ export function ProductsPage({
       const label = ar
         ? (n === 1 ? "مسوّق نشط واحد" : n === 2 ? "مسوّقين نشطين" : `${n} مسوّقين نشطين`)
         : `${n} active marketer${n === 1 ? "" : "s"}`;
-      setDeleteBlockedMsg(
+      alert(
         ar ? `لا يمكن حذف هذا المنتج — لديه ${label} حالياً. انتظر حتى تكتمل طلباتهم.` : `This product can't be deleted — it has ${label} right now. Wait until those orders complete.`,
       );
       return;
     }
-    setConfirmDeleteId(p.id);
+    void confirmDelete(p.id);
   };
 
-  const confirmDelete = async () => {
-    const id = confirmDeleteId;
-    setConfirmDeleteId(null);
-    if (!id) return;
+  // deleteProduct() asked with a native confirm() and reported the blocked
+  // case with a native alert() — no styled modal was ever shown here.
+  const confirmDelete = async (id: string) => {
+    if (!confirm(ar ? "هل تريد حذف هذا المنتج؟ لن يظهر للمسوّقين بعد الآن." : "Delete this product? Marketers will no longer see it.")) return;
     try {
       await api.deleteProduct(id);
       await reloadProducts();
@@ -228,7 +198,7 @@ export function ProductsPage({
     <div className="page active" id="pg-products">
       <div className="sub-header">
         <div>
-          <div className="sub-title">{ar ? "منتجاتي" : "My products"}</div>
+          <div className="sub-title">My products</div>
         </div>
         <button
           className="add-btn"
@@ -238,7 +208,7 @@ export function ProductsPage({
           onClick={onAddProduct}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-          {ar ? "إضافة منتج" : "Add product"}
+          Add product
         </button>
       </div>
 
@@ -249,7 +219,7 @@ export function ProductsPage({
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={ar ? "ابحث عن منتجات…" : "Search products…"}
+          placeholder="Search products…" data-i18n-ph="Search products…"
         />
       </div>
 
@@ -267,7 +237,7 @@ export function ProductsPage({
 
       <div id="product-list">
         {!products.length ? (
-          <div className="mp-empty-state">{ar ? "لا توجد منتجات بعد." : "No products yet."}</div>
+          <div className="mp-empty-state">No products yet.</div>
         ) : !filteredList.length ? (
           <div className="mp-empty-state" data-no-i18n="">{ar ? "لا توجد منتجات مطابقة لبحثك" : "No products match your search."}</div>
         ) : (
@@ -298,20 +268,6 @@ export function ProductsPage({
           title={ar ? "المنتج مخفي من الإدارة" : "Hidden by the administrator"}
           body={ar ? "هذا المنتج تم إخفاؤه من قبل الإدارة، ولا يمكن إعادة تفعيله إلا من الإدارة." : "This product was hidden by an administrator. Only an administrator can make it active again."}
           onClose={() => setAdminHidden(false)}
-        />
-      ) : null}
-      {deleteBlockedMsg ? (
-        <InfoModal
-          title={ar ? "تعذر الحذف" : "Unable to delete"}
-          body={deleteBlockedMsg}
-          onClose={() => setDeleteBlockedMsg(null)}
-        />
-      ) : null}
-      {confirmDeleteId ? (
-        <ConfirmModal
-          body={ar ? "هل تريد حذف هذا المنتج؟ لن يظهر للمسوّقين بعد الآن." : "Delete this product? Marketers will no longer see it."}
-          onCancel={() => setConfirmDeleteId(null)}
-          onConfirm={confirmDelete}
         />
       ) : null}
     </div>

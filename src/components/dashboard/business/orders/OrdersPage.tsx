@@ -492,7 +492,7 @@ export function OrdersPage({ onOpenNotifications: _onOpenNotifications }: { onOp
               {chipLabels[f]}
               {active ? ` (${n})` : ""}
               {f === "new" && n > 0 ? (
-                <span style={{ display: "inline-block", width: 5, height: 5, borderRadius: "50%", background: "#ef5566", marginLeft: 3, verticalAlign: "middle" }} />
+                <span style={{ display: "inline-block", width: 5, height: 5, borderRadius: "50%", background: "#ef5566", marginLeft: 3, verticalAlign: "middle", animation: "blink 1.5s infinite" }} />
               ) : null}
             </div>
           );

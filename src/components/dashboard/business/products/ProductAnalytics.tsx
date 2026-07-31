@@ -15,9 +15,9 @@ type Range = "daily" | "monthly" | "yearly";
 
 function Money({ p, n }: { p: Product; n: unknown }) {
   const { amount, symbol, symbolFirst, spaced } = fmtMoney(p, n);
-  if (symbolFirst) return <>{symbol}{amount}</>;
-  if (spaced) return <>{amount} {symbol}</>;
-  return <>{amount}{symbol}</>;
+  if (symbolFirst) return <><span className="cur-sym">{symbol}</span>{amount}</>;
+  if (spaced) return <>{amount} <span className="cur-sym">{symbol}</span></>;
+  return <>{amount}<span className="cur-sym">{symbol}</span></>;
 }
 
 /** __mpInSel */

@@ -33,8 +33,11 @@ export function MenuDrawer({
   }, [open]);
 
   const ar = isAr();
+  // refreshProfile(): menu-sub is "<business name> · Business", not the bare
+  // business name — the suffix stayed even when a business name was set.
+  const bizLabel = ar ? "تاجر" : "Business";
   const name = profile?.full_name || (ar ? "أهلاً بك" : "Welcome");
-  const biz = profile?.business_name || (ar ? "تاجر" : "Business");
+  const biz = (profile?.business_name ? profile.business_name + " · " : "") + bizLabel;
   const avatarUrl = profile?.avatar_signed_url as string | undefined;
 
   const handleSignOut = async () => {
@@ -42,9 +45,12 @@ export function MenuDrawer({
     setSigningOut(true);
     try {
       await signOut();
-    } catch (e) {
-      console.error("[Lateen] sign out failed", e);
+    } catch (err) {
+      console.error("[Lateen] sign-out failed", err);
       setSigningOut(false);
+      try {
+        alert(ar ? "تعذّر تسجيل الخروج. حاول مرة أخرى." : "Sign out failed. Please try again.");
+      } catch { /* ignore */ }
     }
   };
 
@@ -89,21 +95,27 @@ export function MenuDrawer({
           </svg>
         </div>
 
+        {/* The busy state replaces the row's whole contents — icon included —
+            exactly like the [data-action="sign-out"] handler did. */}
         <div
           className="menu-item"
+          data-action="sign-out"
           onClick={handleSignOut}
-          role="button"
-          tabIndex={0}
-          style={{ marginTop: "auto", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 14, opacity: signingOut ? 0.7 : 1, pointerEvents: signingOut ? "none" : "auto" }}
+          aria-busy={signingOut || undefined}
+          style={signingOut
+            ? { marginTop: "auto", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 14, pointerEvents: "none", opacity: "0.6" }
+            : { marginTop: "auto", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 14 }}
         >
-          <div className="menu-icon-wrap mi-red">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-            </svg>
-          </div>
-          <div className="menu-item-label" style={{ color: "#e07070" }}>
-            {signingOut ? (ar ? "جارٍ تسجيل الخروج…" : "Signing out…") : (ar ? "تسجيل الخروج" : "Sign out")}
-          </div>
+          {signingOut ? (ar ? "جارٍ تسجيل الخروج…" : "Signing out…") : (
+            <>
+              <div className="menu-icon-wrap mi-red">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" strokeWidth="1.8" strokeLinecap="round">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                </svg>
+              </div>
+              <div className="menu-item-label" style={{ color: "#e07070" }}>Sign out</div>
+            </>
+          )}
         </div>
       </div>
     </div>

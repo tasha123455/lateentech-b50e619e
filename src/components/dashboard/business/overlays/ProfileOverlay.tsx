@@ -196,8 +196,8 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
                         <span>+218 — {ar ? "ليبيا" : "Libya"}</span>
                       </button>
                       <div className="pd-picker-item pd-picker-disabled">
-                        <span>{ar ? "المزيد" : "More"}</span>
-                        <span className="pd-soon-pill">{ar ? "قريباً" : "Soon"}</span>
+                        <span data-i18n="More">More</span>
+                        <span className="pd-soon-pill" data-i18n="Soon">Soon</span>
                       </div>
                     </div>
                   ) : null}
