@@ -4,7 +4,7 @@ import { cityLbl, categoryLabel, COUNTRY_FLAGS, COUNTRY_NAMES, COUNTRY_NAMES_AR 
 import type { Order, PendingActiveStub, Product } from "../lib/types";
 import { useLightbox } from "../ui/Lightbox";
 import { activeMarketerCount, effectiveQty, fmtMoney, LOW_STOCK_THRESHOLD, statusBadges } from "./productHelpers";
-import { ProductAnalytics } from "./ProductAnalytics";
+import { AnalyticsButton, AnalyticsPanel, useAnalyticsState } from "./ProductAnalytics";
 
 type ReviewEntry = { author: string; rating: number; text: string; photo: string; avatar: string };
 
@@ -36,10 +36,11 @@ export function ProductCard({
   const [photoIdx, setPhotoIdx] = useState(0);
   const [openFolds, setOpenFolds] = useState<Record<string, boolean>>({});
   const { open: openLightbox } = useLightbox();
+  const an = useAnalyticsState();
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const touch = useRef<{ x: number; y: number; dragging: boolean }>({ x: 0, y: 0, dragging: false });
 
-  useEffect(() => { setPhotoIdx(0); }, [p.photos]);
+  useEffect(() => { setPhotoIdx(0); setSlid(false); }, [p.photos]);
 
   const photos = (p.photos || []).filter(Boolean);
   const eq = effectiveQty(p);
@@ -48,7 +49,8 @@ export function ProductCard({
   const locked = nActive > 0;
 
   const dir = ar ? 1 : -1;
-  const trackStyle = { transform: `translateX(${dir * photoIdx * 100}%)` };
+  const [slid, setSlid] = useState(false);
+  const trackStyle = slid ? { transform: `translateX(${dir * photoIdx * 100}%)` } : undefined;
 
   const toggleFold = (key: string) => setOpenFolds((s) => ({ ...s, [key]: !s[key] }));
 
@@ -63,7 +65,7 @@ export function ProductCard({
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40 && photos.length > 1) {
       const fwd = ar ? dx > 0 : dx < 0;
       const next = fwd ? Math.min(photoIdx + 1, photos.length - 1) : Math.max(photoIdx - 1, 0);
-      setPhotoIdx(next);
+      setPhotoIdx(next); setSlid(true);
     }
   };
 
@@ -80,10 +82,11 @@ export function ProductCard({
       <div className="mp-p-head" onClick={() => setExpanded((v) => !v)}>
         <div
           className="mp-p-thumb-wrap"
+          id={"mp-thumb-wrap-" + p.id}
           onClick={(e) => { e.stopPropagation(); if (photos.length) openLightbox(photos, photoIdx); }}
         >
-          <div className="mp-p-thumb" ref={wrapRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-            <div className="mp-p-thumb-track" style={trackStyle}>
+          <div className="mp-p-thumb" id={"mp-thumb-" + p.id} ref={wrapRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+            <div className="mp-p-thumb-track" id={"mp-thumb-track-" + p.id} style={trackStyle}>
               {photos.length ? (
                 photos.map((url, i) => (
                   <div className="mp-p-thumb-slide" key={i}>
@@ -101,7 +104,7 @@ export function ProductCard({
                   <span
                     key={i}
                     className={"mp-thumb-dot" + (i === photoIdx ? " active" : "")}
-                    onClick={(e) => { e.stopPropagation(); setPhotoIdx(i); }}
+                    onClick={(e) => { e.stopPropagation(); setPhotoIdx(i); setSlid(true); }}
                   />
                 ))}
               </div>
@@ -149,16 +152,17 @@ export function ProductCard({
               <span className="mp-code-label">{ar ? "كود المنتج" : "Product code"}</span>
               <span className="mp-code-val" data-no-i18n="">{p.code}</span>
             </div>
-            <ProductAnalytics p={p} orders={orders} />
+            <AnalyticsButton pid={p.id} open={an.open} onToggle={() => an.setOpen((v) => !v)} />
           </div>
+          <AnalyticsPanel p={p} orders={orders} open={an.open} sel={an.sel} setSel={an.setSel} />
 
           {/* Marketer info fold */}
           <div className="mp-fold-section mp-marketer-fold">
             <div className="mp-fold-head" onClick={(e) => { e.stopPropagation(); toggleFold("marketer"); }}>
               <div><div className="mp-fold-label">{ar ? "معلومات المسوّق" : "Marketer info"}</div></div>
-              <svg className={"mp-fold-chevron" + (openFolds.marketer ? " open" : "")} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg className={"mp-fold-chevron" + (openFolds.marketer ? " open" : "")} id={"mp-chev-marketer-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-            <div className={"mp-fold-body" + (openFolds.marketer ? " open" : "")}>
+            <div className={"mp-fold-body" + (openFolds.marketer ? " open" : "")} id={"mp-fold-marketer-" + p.id}>
               <div className="mp-fold-body-inner">
                 <div className="mp-mb-grid">
                   <div className="mp-mb-tile"><div className="l">{ar ? "عمولة المسوّق" : "Marketer fee"}</div><div className="v">{`${p.commPct || 0}%`}</div></div>
@@ -181,9 +185,9 @@ export function ProductCard({
                       : `${zoneCodes.length} ${zoneCodes.length === 1 ? "country" : "countries"}`}
                   </div>
                 </div>
-                <svg className={"mp-fold-chevron" + (openFolds.shipping ? " open" : "")} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <svg className={"mp-fold-chevron" + (openFolds.shipping ? " open" : "")} id={"mp-chev-shipping-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <div className={"mp-fold-body" + (openFolds.shipping ? " open" : "")}>
+              <div className={"mp-fold-body" + (openFolds.shipping ? " open" : "")} id={"mp-fold-shipping-" + p.id}>
                 <div className="mp-fold-body-inner">
                   {zoneCodes.map((code) => {
                     const z = p.delivery[code] || {};
@@ -224,9 +228,9 @@ export function ProductCard({
                     : (ar ? "لا توجد تقييمات بعد" : "No reviews yet")}
                 </div>
               </div>
-              <svg className={"mp-fold-chevron" + (openFolds.reviews ? " open" : "")} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg className={"mp-fold-chevron" + (openFolds.reviews ? " open" : "")} id={"mp-chev-reviews-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-            <div className={"mp-fold-body" + (openFolds.reviews ? " open" : "")}>
+            <div className={"mp-fold-body" + (openFolds.reviews ? " open" : "")} id={"mp-fold-reviews-" + p.id}>
               <div className="mp-fold-body-inner">
                 {reviews.length ? reviews.map((r, i) => {
                   const stars = Math.max(0, Math.min(5, Number(r.rating) || 0));

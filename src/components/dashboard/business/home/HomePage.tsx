@@ -178,7 +178,14 @@ function WalletCurrencyBreakdown({
 }) {
   const [listOpen, setListOpen] = useState(false);
   const codes = Object.keys(byCur);
-  if (codes.length <= 1) return null;
+  const many = codes.length > 1;
+
+  // __ensureBizBreakdownDiv() inserted this div once and then toggled its
+  // display, so it stays in the DOM (empty, hidden) on single-currency
+  // accounts rather than disappearing.
+  if (!many) {
+    return <div id="biz-wallet-breakdown" style={{ display: "none", margin: "8px 0 14px 0", padding: "10px 12px", borderRadius: 12, background: "#141414", border: "0.5px solid #232323", fontSize: 11, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }} />;
+  }
 
   return (
     <div id="biz-wallet-breakdown" style={{ display: "block", margin: "8px 0 14px 0", padding: 0, borderRadius: 12, background: "transparent", border: "none", fontSize: 11, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
@@ -227,11 +234,12 @@ function Avatar({ url, onClick }: { url?: string | null; onClick?: () => void })
   );
 }
 
-export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onOpenProfile }: { onOpenNotifications: () => void; onOpenPayout: () => void; onOpenSupport: () => void; onOpenProfile: () => void }) {
+export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onOpenProfile, onNotifPage = false }: { onOpenNotifications: () => void; onOpenPayout: () => void; onOpenSupport: () => void; onOpenProfile: () => void; onNotifPage?: boolean }) {
   const { profile, orders, pendingActiveStubs, products, notifications, frozen } = useBusinessData();
   const ar = isAr();
 
   const unreadCount = notifications.filter((n) => !n.read_at).length;
+  const showDot = !onNotifPage && unreadCount > 0;
 
   const name = profile?.full_name || "";
   const biz = profile?.business_name || "";
@@ -424,17 +432,15 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
         <div className="topbar-left">
           <Avatar url={profile?.avatar_signed_url} onClick={onOpenProfile} />
           <div>
-            <div className="greet" id="user-greet" data-no-i18n>{(ar ? "هلا، " : "Hey, ") + first}</div>
-            <div className="greet-sub" id="user-sub" data-no-i18n>{biz || bizFallback}</div>
-            {frozen ? (
-              <div
-                id="frozen-chip"
-                data-no-i18n
-                style={{ display: "block", marginTop: 4, padding: "2px 8px", borderRadius: 999, background: "rgba(234,179,8,0.14)", border: "0.5px solid rgba(234,179,8,0.45)", color: "#eab308", fontSize: 11, fontWeight: 700, width: "fit-content" }}
-              >
-                {ar ? "الحساب مجمّد" : "Account frozen"}
-              </div>
-            ) : null}
+            <div className="greet" id="user-greet" data-no-i18n="">{(ar ? "هلا، " : "Hey, ") + first}</div>
+            <div className="greet-sub" id="user-sub" data-no-i18n="">{biz || bizFallback}</div>
+            <div
+              id="frozen-chip"
+              data-no-i18n=""
+              style={{ display: frozen ? "block" : "none", marginTop: 4, padding: "2px 8px", borderRadius: 999, background: "rgba(234,179,8,0.14)", border: "0.5px solid rgba(234,179,8,0.45)", color: "#eab308", fontSize: 11, fontWeight: 700, width: "fit-content" }}
+            >
+              {ar ? "الحساب مجمّد" : "Account frozen"}
+            </div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -453,7 +459,7 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" strokeWidth="1.8" strokeLinecap="round">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
             </svg>
-            <div className="notif-dot" id="notif-dot" style={{ display: unreadCount > 0 ? "block" : "none" }} />
+            <div className="notif-dot" id="notif-dot" style={{ display: showDot ? "flex" : "none" }}>{showDot ? (unreadCount > 99 ? "99+" : String(unreadCount)) : ""}</div>
           </div>
         </div>
       </div>

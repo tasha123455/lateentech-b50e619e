@@ -1,11 +1,12 @@
 import type { ReactElement } from "react";
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { useLightbox } from "../ui/Lightbox";
+import { MoneyH } from "../ui/Money";
 import { locSearchText } from "../lib/constants";
 import {
-  isAr, escH, freeLbl, isFreeVal, money, normSearch, splitCC,
+  isAr, escH, freeLbl, isFreeVal, normSearch, splitCC,
   PLATFORM_FEE_THRESHOLD,
 } from "../lib/format";
 import type { Order, OrderUiStatus } from "../lib/types";
@@ -22,8 +23,8 @@ const STEPS = ["New", "Confirmed", "Delivered"];
 
 type Filter = "all" | "new" | "confirmed" | "delivered" | "failed";
 
-function fmt(n: number, sym: string, code: string): string {
-  return money(n, sym, code);
+function fmt(n: number, sym: string, code: string): ReactElement {
+  return <MoneyH n={n} sym={sym} code={code} />;
 }
 
 function computeOrdFin(o: Order) {
@@ -57,13 +58,13 @@ function buildOrdStepper(status: OrderUiStatus): ReactElement {
   return (
     <div className="progress">
       {STEPS.map((step, i) => (
-        <span key={step} style={{ display: "contents" }}>
+        <Fragment key={step}>
           <div className={"step" + (i === si ? " active" : "")}>
             <div className="bubble" />
             <div className="lbl">{step}</div>
           </div>
           {i < STEPS.length - 1 ? <div className="line" /> : null}
-        </span>
+        </Fragment>
       ))}
     </div>
   );
@@ -221,11 +222,11 @@ function OrderCard({
     }
     return (
       <div className="r variant-combo" key={i}>
-        <span className="k" data-no-i18n="" dangerouslySetInnerHTML={{ __html: escH(sv.name || "") }} />
+        <span className="k" data-no-i18n="">{String(sv.name || "")}</span>
         <div className="v variant-combo-val">
+          {/* The value is a bare text node in the original, not its own span. */}
           <div className="variant-combo-text" data-no-i18n="">
-            <span dangerouslySetInnerHTML={{ __html: escH(sv.value || "") }} />{" "}
-            <span style={{ opacity: 0.65, fontWeight: 600 }}>×{o.qty}</span>
+            {String(sv.value || "")} <span style={{ opacity: 0.65, fontWeight: 600 }}>×{o.qty}</span>
           </div>
           {thumb ? (
             <div className="variant-thumb" onClick={(e) => { e.stopPropagation(); open([thumb], 0); }}>
@@ -283,15 +284,15 @@ function OrderCard({
 
   return (
     <div className={"order-card" + (isExp ? " expanded" : "") + (isNewBucket ? " new" : "")} data-status={o.status} data-id={o.id}>
-      <div className="card-top" onClick={onToggle}>
+      <div className="card-top" data-action="toggle" onClick={onToggle}>
         <HeroPhotos photos={photos} />
         <div className="row-text">
           <div className="row-info">
             <div className="row-name-line">
-              <span className="row-name" data-no-i18n="">{o.customerName || "—"}</span>
+              <span className="row-name">{o.customerName || "—"}</span>
               <span className="id-badge">{o.id}</span>
             </div>
-            <div className="row-sub" data-no-i18n="">{o.product}</div>
+            <div className="row-sub">{o.product}</div>
           </div>
           <div className="row-right">
             {o.status === "pending" ? statusTag : null}
@@ -304,10 +305,10 @@ function OrderCard({
         {buildOrdStepper(o.status)}
         <div className="section-lbl">Customer &amp; delivery</div>
         <div className="box">
-          <div className="r"><span className="k">Name</span><span className="v" data-no-i18n="">{o.customerName}</span></div>
-          <div className="r"><span className="k">Address</span><span className="v" data-no-i18n="">{o.address}</span></div>
-          <div className="r"><span className="k">City</span><span className="v" data-no-i18n="">{o.city}</span></div>
-          <div className="r"><span className="k">Country</span><span className="v" data-no-i18n="">{o.country}</span></div>
+          <div className="r"><span className="k">Name</span><span className="v">{o.customerName}</span></div>
+          <div className="r"><span className="k">Address</span><span className="v">{o.address}</span></div>
+          <div className="r"><span className="k">City</span><span className="v">{o.city}</span></div>
+          <div className="r"><span className="k">Country</span><span className="v">{o.country}</span></div>
           <PhoneRow label="Phone" value={o.customerPhone} />
           {o.customerWhatsapp ? (
             <PhoneRow label={ar ? "واتساب أو رقم هاتف إضافي" : "WhatsApp or additional phone number"} value={o.customerWhatsapp} />
@@ -316,7 +317,7 @@ function OrderCard({
         <div className="section-lbl">Order</div>
         <div className="box">
           <div className="r"><span className="k">Order ID</span><span className="v mono">{o.id}</span></div>
-          <div className="r"><span className="k">Product</span><span className="v" data-no-i18n="">{o.product}</span></div>
+          <div className="r"><span className="k">Product</span><span className="v">{o.product}</span></div>
           <div className="r"><span className="k">Product code</span><span className="v mono">{o.productCode || "—"}</span></div>
           <div className="r"><span className="k">Quantity</span><span className="v">{o.qty}</span></div>
           {variantRows}
@@ -328,7 +329,7 @@ function OrderCard({
           <div className="fin-row"><span className="k">Shipping</span><span className="v">{Number(o.shipping || 0) === 0 ? <span data-no-i18n="">{freeLbl()}</span> : om(o.shipping)}</span></div>
           <div className="fin-row"><span className="k">Delivery fee</span><span className="v">{Number(o.delivery || 0) === 0 ? <span data-no-i18n="">{freeLbl()}</span> : om(o.delivery)}</span></div>
           <div className="fin-row"><span className="k">Marketer commission <span className="pct">({fin.commissionPct}%)</span></span><span className="v neg">−{om(o.commission)}</span></div>
-          <div className="fin-row"><span className="k">Platform fee{fin.platformFixed ? "" : <span className="pct"> ({fin.platformPct}%)</span>}</span><span className={"v neg" + (o.status === "failed" || o.status === "rejected" ? " " : "")} style={o.status === "failed" || o.status === "rejected" ? { color: "#ef4444" } : undefined}>−{om(o.platformFee)}</span></div>
+          <div className="fin-row"><span className="k">Platform fee{fin.platformFixed ? "" : <> <span className="pct">({fin.platformPct}%)</span></>}</span><span className="v neg">−{om(o.platformFee)}</span></div>
           <div className={"fin-total-extra" + (fin.extra ? " open-capable" : "")}>
             <div className="fin-total">
               <span className="k">Total</span>

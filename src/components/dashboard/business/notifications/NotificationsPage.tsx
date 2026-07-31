@@ -82,7 +82,7 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
   const items = useMemo(() => notifications, [notifications]);
 
   return (
-    <div className="page active" id="pg-notif">
+    <>
       <div className="page-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div className="page-title">Notifications</div>
         <button
@@ -101,7 +101,7 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
           </div>
         ) : (
           items.map((n) => {
-            const kind = (n.type as string) || (n as Record<string, unknown>).kind as string || "";
+            const kind = ((n as Record<string, unknown>).kind as string) || "";
             let t = n.title || "";
             let b = n.body || "";
             let reviewDetails: React.ReactNode = null;
@@ -283,6 +283,6 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
           })
         )}
       </div>
-    </div>
+    </>
   );
 }
