@@ -35,7 +35,7 @@ export function when(iso?: string | null): string {
   return Math.floor(h / 24) + "d ago";
 }
 
-/** Absolute stamp: "5 Mar 2024, 3:07 PM". */
+/** Absolute stamp: "Mar 5, 2024, 3:07 PM". */
 export function whenFull(iso?: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -47,7 +47,10 @@ export function whenFull(iso?: string | null): string {
   const ampm = h >= 12 ? "PM" : "AM";
   h = h % 12;
   if (h === 0) h = 12;
-  return `${day} ${month} ${year}, ${h}:${mins} ${ampm}`;
+  // Day sits between month and year: a leading digit gets pulled to the end of
+  // the line by the bidi algorithm in RTL, which rendered "13 May 2026, 5:20 PM"
+  // as "May 2026, 5:20 PM 13".
+  return `${month} ${day}, ${year}, ${h}:${mins} ${ampm}`;
 }
 
 export const MONTH_NAMES = [
@@ -71,3 +74,21 @@ export const MONTH_MAP: Record<string, string> = Object.fromEntries(MON_ABBR.map
 export const COUNTRY_NAMES: Record<string, string> = {
   NG: "Nigeria", GH: "Ghana", EG: "Egypt", KE: "Kenya", ZA: "South Africa", MA: "Morocco",
 };
+
+/** Splits a stored phone into dial code and the rest, wrapped in LRM marks so
+    the digits keep their order inside Arabic text. Mirrors __splitCC from the
+    business dashboard. */
+export function splitPhone(p?: string | null): { cc: string; num: string } {
+  const s = String(p ?? "").trim();
+  if (!s) return { cc: "", num: "" };
+  const m = s.match(/^(\+\d{1,3})[\s-]*(.*)$/);
+  if (m) return { cc: "\u200E" + m[1] + "\u200E", num: "\u200E" + m[2].replace(/\s+/g, "") + "\u200E" };
+  return { cc: "", num: "\u200E" + s + "\u200E" };
+}
+
+/** "+218 | 0928174312", or just the number when there is no dial code. */
+export function dispPhone(p?: string | null): string {
+  const s = splitPhone(p);
+  if (!s.cc && !s.num) return "";
+  return s.cc ? `${s.cc} | ${s.num}` : s.num;
+}

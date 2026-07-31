@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
-import { initials, whenFull } from "../lib/format";
+import { dispPhone, initials, whenFull } from "../lib/format";
 import type { AdminUser } from "../lib/types";
 import { PhotoPicker } from "../ui/PhotoPicker";
 
@@ -134,7 +134,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="adm-row-name" data-no-i18n>{name}</div>
           <div className="adm-row-sub">
-            {(u.email || "no email") + " · " + (u.phone || "no phone")}
+            {(u.email || "no email") + " · " + (dispPhone(u.phone) || "no phone")}
           </div>
           {(isBanned || isFrozen) && (
             <div style={{ marginTop: 2 }}>
@@ -230,6 +230,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
           </div>
         )}
 
+        {role !== "admin" && (
         <div className="adm-notif-box">
           <div className="adm-notif-lbl">Notification title (what they see first)</div>
           <input
@@ -251,6 +252,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
             {sending ? "Sending…" : "Send Notification"}
           </button>
         </div>
+        )}
       </div>
     </div>
   );

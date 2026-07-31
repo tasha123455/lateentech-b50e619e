@@ -4,20 +4,6 @@ import { useAdminData } from "../AdminDataProvider";
 import { Money } from "../ui/Money";
 import { ProductDetailOverlay } from "./ProductDetailOverlay";
 
-const EyeOpen = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-
-const EyeOff = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.77 21.77 0 015.06-6.06M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.77 21.77 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24" />
-    <line x1="1" y1="1" x2="23" y2="23" />
-  </svg>
-);
-
 /** Warns when hiding/deleting a product that marketers are mid-order on. */
 function activeMarketerWarning(n: number, action: string): string {
   const label = n + " active marketer" + (n === 1 ? "" : "s");
@@ -75,6 +61,8 @@ export function ProductsPage({ active }: { active: boolean }) {
     }
   };
 
+  const detailProduct = detailId ? products.find((x) => x.id === detailId) : undefined;
+
   let body: React.ReactNode;
   if (loading.products) {
     body = <div className="adm-empty" style={{ gridColumn: "1/-1" }}>Loading…</div>;
@@ -104,25 +92,6 @@ export function ProductsPage({ active }: { active: boolean }) {
               "📦"
             )}
             {isHidden && <span className="adm-status-pill">Hidden</span>}
-            <div
-              className="adm-prod-del-ov"
-              title="Delete"
-              onClick={(e) => { e.stopPropagation(); void deleteProduct(p.id, p.name); }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-              </svg>
-            </div>
-            <div
-              className="adm-prod-hide-ov"
-              onClick={(e) => { e.stopPropagation(); void toggleProduct(p.id, isHidden ? "active" : "hidden"); }}
-            >
-              <div className={"adm-prod-hide-circle" + (isHidden ? " on" : "")}>
-                {isHidden ? <EyeOpen /> : <EyeOff />}
-              </div>
-              <span>{isHidden ? "Unhide" : "Hide"}</span>
-            </div>
           </div>
           <div className="cb2">
             <div className="cn" data-no-i18n>{p.name}</div>
@@ -151,7 +120,13 @@ export function ProductsPage({ active }: { active: boolean }) {
 
       <div className="adm-prod-grid">{body}</div>
 
-      <ProductDetailOverlay productId={detailId} onClose={() => setDetailId(null)} />
+      <ProductDetailOverlay
+        productId={detailId}
+        onClose={() => setDetailId(null)}
+        hidden={detailProduct?.status === "hidden"}
+        onToggleHidden={(id, next) => void toggleProduct(id, next)}
+        onDelete={(id, name) => void deleteProduct(id, name)}
+      />
     </>
   );
 }

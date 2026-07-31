@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
-import { COUNTRY_NAMES, freeLbl, when } from "../lib/format";
+import { COUNTRY_NAMES, dispPhone, freeLbl, when } from "../lib/format";
 import { effectiveQty } from "../lib/employees";
 import type { ProductDetail, VariantGroup } from "../lib/types";
 import { CurMoney } from "../ui/Money";
@@ -43,6 +43,20 @@ const Chev = ({ open }: { open: boolean }) => (
   </svg>
 );
 
+const EyeOpen = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOff = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.77 21.77 0 015.06-6.06M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.77 21.77 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24" />
+    <line x1="1" y1="1" x2="23" y2="23" />
+  </svg>
+);
+
 const RowIcon = ({ children }: { children: React.ReactNode }) => (
   <div className="pd-row-ic">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -51,7 +65,16 @@ const RowIcon = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-export function ProductDetailOverlay({ productId, onClose }: { productId: string | null; onClose: () => void }) {
+export function ProductDetailOverlay({
+  productId, onClose, hidden = false, onToggleHidden, onDelete,
+}: {
+  productId: string | null;
+  onClose: () => void;
+  /** Current status of the product in the grid — drives the Hide / Unhide label. */
+  hidden?: boolean;
+  onToggleHidden?: (id: string, next: "active" | "hidden") => void;
+  onDelete?: (id: string, name: string) => void;
+}) {
   const { api } = useAdminData();
   const lightbox = useLightbox();
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -61,6 +84,7 @@ export function ProductDetailOverlay({ productId, onClose }: { productId: string
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [zonesOpen, setZonesOpen] = useState(false);
   const [stockOpen, setStockOpen] = useState(false);
+  const [ownerOpen, setOwnerOpen] = useState(false);
   const [variantPick, setVariantPick] = useState<Record<number, string>>({});
   const [activeMarketers, setActiveMarketers] = useState("…");
 
@@ -71,6 +95,7 @@ export function ProductDetailOverlay({ productId, onClose }: { productId: string
     setGalleryIdx(0);
     setZonesOpen(false);
     setStockOpen(false);
+    setOwnerOpen(false);
     setVariantPick({});
     setActiveMarketers("…");
 
@@ -336,21 +361,61 @@ export function ProductDetailOverlay({ productId, onClose }: { productId: string
           <div className="pd-row-val"><CurMoney sym={cur} n={p.revenue} /></div>
         </div>
 
-        <div className="pd-sec-ttl">Business owner</div>
-        <div className="adm-pd-owner">
-          <div className="adm-pd-owner-name" data-no-i18n>{ownerName}</div>
-          {!!ownerOther && (
-            <div className="adm-pd-owner-row">Business owner name: <span data-no-i18n>{ownerOther}</span></div>
-          )}
-          <div className="adm-pd-owner-row">Phone: <span>{owner.phone || "—"}</span></div>
-          {!!owner.email && <div className="adm-pd-owner-row">Email: <span>{owner.email}</span></div>}
-          <div className="adm-pd-owner-row">Joined: <span>{owner.created_at ? when(owner.created_at) : "—"}</span></div>
-          <div className="adm-pd-owner-row" style={{ marginTop: 8 }}>
-            <button className="adm-go-btn" onClick={() => goToAccount(p.business_id, "business", ownerName)}>
-              Go to Account
-            </button>
+        {/* Collapsed by default — the owner is reference material, not the point
+            of the sheet, so it folds away like the delivery and stock rows. */}
+        <div className="pd-row pd-row-tap" onClick={() => setOwnerOpen((v) => !v)}>
+          <RowIcon>
+            <path d="M3 21h18" />
+            <path d="M5 21V7l7-4 7 4v14" />
+            <path d="M10 21v-6h4v6" />
+          </RowIcon>
+          <div className="pd-row-lbl">Business owner</div>
+          <div className="pd-row-val">
+            <span data-no-i18n>{ownerName}</span><Chev open={ownerOpen} />
           </div>
         </div>
+        {ownerOpen && (
+          <div className="adm-pd-owner">
+            <div className="adm-pd-owner-name" data-no-i18n>{ownerName}</div>
+            {!!ownerOther && (
+              <div className="adm-pd-owner-row">Business owner name: <span data-no-i18n>{ownerOther}</span></div>
+            )}
+            <div className="adm-pd-owner-row">Phone: <span>{dispPhone(owner.phone) || "—"}</span></div>
+            {!!owner.email && <div className="adm-pd-owner-row">Email: <span>{owner.email}</span></div>}
+            <div className="adm-pd-owner-row">Joined: <span>{owner.created_at ? when(owner.created_at) : "—"}</span></div>
+            <div className="adm-pd-owner-row" style={{ marginTop: 8 }}>
+              <button className="adm-go-btn" onClick={() => goToAccount(p.business_id, "business", ownerName)}>
+                Go to Account
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Hide and Delete used to float on the grid thumbnail, where they were
+            easy to hit by accident. They now live at the foot of the open sheet,
+            in the slot the marketer sheet uses for its own actions. */}
+        {(onToggleHidden || onDelete) && (
+          <div className="adm-pd-actions">
+            {onToggleHidden && (
+              <button
+                className="adm-pd-act adm-pd-act-hide"
+                onClick={() => onToggleHidden(p.id, hidden ? "active" : "hidden")}
+              >
+                {hidden ? <EyeOpen /> : <EyeOff />}
+                {hidden ? "Unhide" : "Hide"}
+              </button>
+            )}
+            {onDelete && (
+              <button className="adm-pd-act adm-pd-act-del" onClick={() => onDelete(p.id, p.name)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+                Delete
+              </button>
+            )}
+          </div>
+        )}
       </>
     );
   }
