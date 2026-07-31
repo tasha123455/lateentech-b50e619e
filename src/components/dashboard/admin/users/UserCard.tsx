@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
-import { initials, when } from "../lib/format";
+import { initials, whenFull } from "../lib/format";
 import type { AdminUser } from "../lib/types";
 import { PhotoPicker } from "../ui/PhotoPicker";
 
@@ -134,7 +134,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="adm-row-name" data-no-i18n>{name}</div>
           <div className="adm-row-sub">
-            {(u.email || "no email") + " · " + (u.phone || "no phone") + " · " + when(u.created_at)}
+            {(u.email || "no email") + " · " + (u.phone || "no phone")}
           </div>
           {(isBanned || isFrozen) && (
             <div style={{ marginTop: 2 }}>
@@ -194,6 +194,11 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
               Delete data
             </button>
           )}
+        </div>
+
+        <div className="adm-joined-row">
+          <span className="adm-joined-lbl">Date joined</span>
+          <span className="adm-joined-val" data-no-i18n>{whenFull(u.created_at) || "—"}</span>
         </div>
 
         {role === "admin" && wipeOpen && (
