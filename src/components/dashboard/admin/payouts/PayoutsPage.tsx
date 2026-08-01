@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { money as marketerMoney, moneyParts } from "@/components/dashboard/marketer/lib/format";
 import { useAdminData, usePayoutsOpenRef } from "../AdminDataProvider";
-import { dispPhone, initials, money, when } from "../lib/format";
+import { dispPhone, initials, money, whenOrDate } from "../lib/format";
 import type { PayoutRequest } from "../lib/types";
 import { PhotoPicker } from "../ui/PhotoPicker";
 
@@ -62,9 +62,7 @@ function PayoutCard({
         <div className="pay-head-mid">
           <div className="adm-pay-name" data-no-i18n>{name}</div>
           {!!u.email && <div className="adm-pay-sub" data-no-i18n>{u.email}</div>}
-          <div className="adm-pay-sub" data-no-i18n>
-            {[dispPhone(u.phone), when(p.requested_at)].filter(Boolean).join(" · ")}
-          </div>
+          <div className="adm-pay-sub" data-no-i18n>{dispPhone(u.phone)}</div>
         </div>
         <div className="adm-pay-amt"><WalletAmount n={liveBal} sym={cur} code={curCode} /></div>
         <svg
@@ -108,11 +106,15 @@ function PayoutCard({
               {detail("IBAN", u.payout_iban)}
               {detail("SWIFT/BIC", u.payout_swift)}
               {detail("Notes", u.payout_notes)}
+              {detail("Requested", whenOrDate(p.requested_at))}
             </div>
           ) : (
-            <div className="adm-pay-details adm-pay-details-empty">
-              No payout details on file — contact the marketer.
-            </div>
+            <>
+              <div className="adm-pay-details adm-pay-details-empty">
+                No payout details on file — contact the marketer.
+              </div>
+              <div className="adm-pay-details">{detail("Requested", whenOrDate(p.requested_at))}</div>
+            </>
           )}
 
           {/* Sending a note fails the request, so it is named for what it does. */}
@@ -230,7 +232,7 @@ export function PayoutsPage({ active }: { active: boolean }) {
   return (
     <>
       <div className="adm-h1">Payout Manager</div>
-      <div className="adm-section">{body}</div>
+      <div>{body}</div>
     </>
   );
 }
