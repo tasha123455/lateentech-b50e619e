@@ -28,8 +28,13 @@ ALTER TABLE public.presence_daily ENABLE ROW LEVEL SECURITY;
 
 -- No direct access: everything goes through the two functions below, so a
 -- client can neither read who else is online nor forge someone else's row.
+-- Dropped first so the whole file can be re-run: everything else here is
+-- CREATE OR REPLACE or IF NOT EXISTS, and these two policies were the only
+-- statements that would have failed on a second pass.
+DROP POLICY IF EXISTS "Admins read presence" ON public.user_presence;
 CREATE POLICY "Admins read presence" ON public.user_presence
   FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+DROP POLICY IF EXISTS "Admins read presence daily" ON public.presence_daily;
 CREATE POLICY "Admins read presence daily" ON public.presence_daily
   FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
