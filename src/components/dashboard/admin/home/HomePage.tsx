@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
-import { CHART_METRICS, getFees } from "../lib/analytics";
+import { CHART_METRICS, getEmployeeSalaryPaid, getFees } from "../lib/analytics";
 import { MON_ABBR, WDAYS } from "../lib/format";
 import type { DateSelection, MetricKey } from "../lib/types";
 import { DateFilterTabs, EN_LABELS, USERS_CLASSES, buildYearItems } from "../ui/DateFilterTabs";
@@ -36,8 +36,11 @@ export function HomePage() {
   const [selected, setSelected] = useState<DateSelection>({ day: null, month: null, year: null });
   const [activeMetric, setActiveMetric] = useState<MetricKey | "all">("all");
   const [live, setLive] = useState<number | null>(null);
+  const [profitOpen, setProfitOpen] = useState(false);
 
   const fees = useMemo(() => getFees(homeRaw, selected), [homeRaw, selected]);
+  const salaries = useMemo(() => getEmployeeSalaryPaid(homeRaw, selected), [homeRaw, selected]);
+  const profit = Math.round((fees - salaries) * 100) / 100;
   const day = useMemo(() => selectedDay(selected), [selected]);
 
   /* No filter: the live count, refreshed on a timer so it stays live. A single
@@ -82,6 +85,28 @@ export function HomePage() {
           </div>
           {!!metricsError && (
             <div className="adm-stat-sub" style={{ color: "var(--danger)" }}>{metricsError}</div>
+          )}
+
+          {/* Net profit folds out of the fees card, the way it used to. What
+              went is the breakdown line and the "after deducting employee
+              salaries" qualifier — not the number itself. */}
+          <button
+            className={"adm-profit-toggle" + (profitOpen ? " open" : "")}
+            onClick={() => setProfitOpen((v) => !v)}
+          >
+            <span>Net profit</span>
+            <svg
+              className="adm-profit-chev"
+              width="13" height="13" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {profitOpen && (
+            <div className="adm-profit-value">
+              {metricsError ? "—" : <Money n={profit} />}
+            </div>
           )}
         </div>
 

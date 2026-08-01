@@ -736,6 +736,7 @@ export const DICT: Record<string, string> = {
   "↺ Refunded": "↺ تم الإرجاع",
 
   // ----- Admin: home & product sheet -----
+  "Net profit": "صافي الربح",
   "Live Users": "المستخدمون المتصلون الآن",
   "Peak Live Users": "أعلى عدد متصلين",
   "Total Products": "إجمالي المنتجات",
