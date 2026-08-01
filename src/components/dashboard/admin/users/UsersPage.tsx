@@ -66,7 +66,7 @@ export function UsersPage({ active }: { active: boolean }) {
 
       <input
         className="adm-search"
-        placeholder="Search by name, email, phone, business…"
+        placeholder="Search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

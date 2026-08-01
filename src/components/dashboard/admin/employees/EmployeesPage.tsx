@@ -148,14 +148,10 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
            that needs acting on, so the whole card carries the tint — not just
            its button. */
         <div className={"adm-emp-row" + (payable ? " payable" : "")} key={e.id}>
-          <div className="adm-emp-badge-row">
-            <span className="adm-emp-role" data-no-i18n>{e.job_title || "—"}</span>
-          </div>
           <div className="adm-emp-top">
             <div className="adm-emp-av" data-no-i18n>{initials(e.full_name)}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="adm-emp-name" data-no-i18n>{e.full_name}</div>
-            </div>
+            <div className="adm-emp-name" data-no-i18n>{e.full_name}</div>
+            <span className="adm-emp-role" data-no-i18n>{e.job_title || "—"}</span>
           </div>
           <div className="adm-emp-facts">
             <div className="adm-emp-fact">

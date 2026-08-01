@@ -112,7 +112,7 @@ export function VerifyPage({ active }: { active: boolean }) {
       <div className="adm-h1">Order Verification Hub</div>
       <input
         className="adm-search"
-        placeholder="Search by marketer name, phone, or email"
+        placeholder="Search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

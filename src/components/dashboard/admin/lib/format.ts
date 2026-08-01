@@ -1,12 +1,17 @@
 /* Formatting helpers ported from admin.script.js. */
 
+const isAr = (): boolean =>
+  typeof document !== "undefined" && document.documentElement.lang === "ar";
+
 export const freeLbl = (): string =>
   typeof document !== "undefined" && document.documentElement.lang === "ar" ? "مجاني" : "Free";
 
-/** Admin totals are always Libyan Dinar, isolated so RTL digits stay put. */
+/** Admin totals are always Libyan Dinar. Same placement the marketer uses:
+    the symbol leads in Arabic, the ISO code trails in English. */
 export function money(n: unknown): string {
   const v = Number(n || 0);
-  return "⁦د.ل⁩" + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const a = v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return isAr() ? "⁦د.ل⁩" + a : a + " LYD";
 }
 
 /** The numeric half of money(), for rendering next to a <span class="cur-sym">. */
@@ -21,9 +26,6 @@ export function initials(name?: string | null): string {
   if (!name) return "?";
   return name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 }
-
-const isAr = (): boolean =>
-  typeof document !== "undefined" && document.documentElement.lang === "ar";
 
 /** Relative age: "just now" / "5m ago" / "3h ago" / "2d ago".
  *  Built from a number, so the shared dictionary cannot reach it — it has to
