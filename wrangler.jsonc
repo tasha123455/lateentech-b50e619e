@@ -4,4 +4,14 @@
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
+
+  // Server-side only — Workers expose these to the running code, never to the
+  // browser. Anything the browser is meant to see goes through a VITE_ prefix
+  // instead, and must not be put here.
+  "vars": {
+    // Second lock on the box that changes somebody's sign-in email, inside
+    // their profile in support mode. The first lock is being a signed-in
+    // admin; this one is so that being one is not enough on its own.
+    "ADMIN_EMAIL_UNLOCK_CODE": "1234512345",
+  },
 }
