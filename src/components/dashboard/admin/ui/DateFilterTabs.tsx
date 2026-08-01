@@ -15,9 +15,8 @@ export type DateFilterClasses = {
 
 /** The Home page uses the .range-* classes, the Users page the .bd-range-*
     ones; everything else about the two filters is identical. */
-export const HOME_CLASSES: DateFilterClasses = {
-  tabs: "range-tabs", tab: "range-tab", list: "dropdown-list", item: "dd-item", chev: "chev",
-};
+/* HOME_CLASSES used to point at the home page's own pasted-design classes.
+   That design is gone, and so are its styles — everything uses USERS_CLASSES. */
 export const USERS_CLASSES: DateFilterClasses = {
   tabs: "bd-range-tabs", tab: "bd-range-tab", list: "bd-dropdown-list", item: "bd-dd-item", chev: "bd-chev",
 };

@@ -74,7 +74,7 @@ export function HomePage() {
         yearItems={buildYearItems()}
       />
 
-      <div className="adm-stat-grid">
+      <div className="adm-stat-grid adm-stat-stack">
         <div className="adm-stat full">
           <div className="adm-stat-label">Total Platform Fees Collected</div>
           <div className="adm-stat-value">
@@ -110,7 +110,7 @@ export function HomePage() {
           <div className="adm-stat-value">{stat(metrics?.succeededUpfronts)}</div>
         </div>
 
-        <div className="adm-stat" style={{ gridColumn: "1 / -1" }}>
+        <div className="adm-stat">
           <div className="adm-stat-label">Succeeded Pieces Sold</div>
           <div className="adm-stat-value">{stat(metrics?.succeededPiecesSold)}</div>
         </div>
