@@ -67,24 +67,30 @@
 .lateen-admin .adm-emp-badge-row { display: flex; justify-content: flex-end; }
 .lateen-admin .adm-emp-role { font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 10px; background: #3a2a10; color: #f5b441; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Pay day, then salary, then the folded-away rest. */
-.lateen-admin .adm-emp-facts { display: grid; gap: 6px; padding-left: 50px; }
-.lateen-admin .adm-emp-fact { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 12px; }
-.lateen-admin .adm-emp-fact-k { color: #9e9b97; }
+.lateen-admin .adm-emp-facts { display: grid; gap: 4px; padding-inline-start: 50px; }
+/* Label and value sit together as "Pay day: Aug 01, 2026". Pushed to opposite
+   edges they were separated by half a card of dead space. The colon comes from
+   here rather than the markup so the label stays one clean text node for the
+   translator to match. */
+.lateen-admin .adm-emp-fact { display: flex; align-items: baseline; gap: 6px; font-size: 12px; flex-wrap: wrap; }
+.lateen-admin .adm-emp-fact-k { color: #9e9b97; flex-shrink: 0; }
+.lateen-admin .adm-emp-fact-k::after { content: ":"; }
 .lateen-admin .adm-emp-fact-v { color: #f0eeeb; font-weight: 500; }
 .lateen-admin .adm-emp-fact-v.amt { color: #f5b441; }
-.lateen-admin .adm-emp-more { margin-left: 50px; border: 0.5px solid #272725; border-radius: 10px; overflow: hidden; background: #191919; }
+.lateen-admin .adm-emp-more { margin-inline-start: 50px; border: 0.5px solid #272725; border-radius: 10px; overflow: hidden; background: #191919; }
 .lateen-admin .adm-emp-more-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; background: transparent; border: none; color: #c9c6c1; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; }
 .lateen-admin .adm-emp-more-chev { transition: transform .2s ease; opacity: .7; flex-shrink: 0; }
 .lateen-admin .adm-emp-more-chev.open { transform: rotate(180deg); }
-.lateen-admin .adm-emp-more-body { border-top: 0.5px solid #272725; padding: 4px 12px 10px; display: grid; gap: 6px; }
-.lateen-admin .adm-emp-more-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 12px; padding-top: 6px; }
+.lateen-admin .adm-emp-more-body { border-top: 0.5px solid #272725; padding: 4px 12px 10px; display: grid; gap: 4px; }
+.lateen-admin .adm-emp-more-row { display: flex; align-items: baseline; gap: 6px; font-size: 12px; padding-top: 6px; flex-wrap: wrap; }
 .lateen-admin .adm-emp-more-k { color: #9e9b97; flex-shrink: 0; }
-.lateen-admin .adm-emp-more-v { color: #f0eeeb; text-align: end; overflow-wrap: anywhere; }
+.lateen-admin .adm-emp-more-k::after { content: ":"; }
+.lateen-admin .adm-emp-more-v { color: #f0eeeb; overflow-wrap: anywhere; }
 /* Waiting to be paid: the tint puts the whole card forward, not just its
    button, so a full list still reads at a glance. */
 .lateen-admin .adm-emp-row.payable { background: rgba(224,112,112,0.09); box-shadow: inset 3px 0 0 #e07070; }
 .lateen-admin .adm-emp-row.payable .adm-emp-more { background: rgba(0,0,0,0.22); }
-.lateen-admin .adm-emp-actions { display: flex; gap: 8px; padding-left: 50px; }
+.lateen-admin .adm-emp-actions { display: flex; gap: 8px; padding-inline-start: 50px; }
 .lateen-admin .adm-emp-pay-btn {
   flex: 1; height: 34px; border-radius: 17px; border: none;
   background: #e07070; color: #fff; font-size: 12px; font-weight: 600;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
-import { initials, money, when, whenFull } from "../lib/format";
+import { dispPhone, initials, money, when, whenFull } from "../lib/format";
 import { goToAccount } from "./UserCard";
 
 const STATUS_LABEL = (s?: string | null) =>
@@ -78,7 +78,11 @@ export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBa
             <div className="adm-user-av" data-no-i18n>{initials(name)}</div>
             <div style={{ flex: 1, minWidth: 120 }}>
               <div className="rpt-name" data-no-i18n>{name}</div>
-              <div className="rpt-sub">{(person.phone || "no phone") + " · Requested " + when(r.requested_at)}</div>
+              <div className="rpt-sub">
+                <span data-no-i18n>{dispPhone(person.phone) || ""}</span>
+                {!dispPhone(person.phone) && <span>no phone</span>}
+                {" · "}<span>Requested</span>{" "}<span data-no-i18n>{when(r.requested_at)}</span>
+              </div>
             </div>
             <button className="adm-go-btn" onClick={() => goToAccount(r.user_id, r.role || "marketer", name)}>
               Go to Account

@@ -43,7 +43,7 @@ function MoreInfo({ e }: { e: Employee }) {
         <div className="adm-emp-more-body">
           {rows.map(([k, v]) => (
             <div className="adm-emp-more-row" key={k}>
-              <span className="adm-emp-more-k">{k}:</span>
+              <span className="adm-emp-more-k">{k}</span>
               <span className="adm-emp-more-v" data-no-i18n>{v}</span>
             </div>
           ))}
@@ -89,16 +89,28 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
 
   // Only the tapped chip shows its number, matching the order filters on the
   // business dashboard.
+  /* "Pending" means payable right now. Somebody whose payday has not arrived
+     yet is not waiting on the admin for anything — their button reads "Pending"
+     and does nothing — so listing them here only buried the ones that do need
+     action. They are still under "All". */
+  const isPending = (e: Employee) => {
+    const cyc = cycles.get(e.id)!;
+    return !empIsPaid(e, cyc) && empIsDue(cyc);
+  };
+
   const counts = useMemo(() => {
     const c: Record<string, number> = { "": employees.length, pending: 0, paid: 0 };
-    employees.forEach((e) => { if (empIsPaid(e, cycles.get(e.id)!)) c.paid++; else c.pending++; });
+    employees.forEach((e) => {
+      if (empIsPaid(e, cycles.get(e.id)!)) c.paid++;
+      else if (isPending(e)) c.pending++;
+    });
     return c;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employees, cycles]);
 
   const filtered = employees.filter((e) => {
-    const paid = empIsPaid(e, cycles.get(e.id)!);
-    if (filter === "paid" && !paid) return false;
-    if (filter === "pending" && paid) return false;
+    if (filter === "paid") return empIsPaid(e, cycles.get(e.id)!);
+    if (filter === "pending") return isPending(e);
     return true;
   });
 

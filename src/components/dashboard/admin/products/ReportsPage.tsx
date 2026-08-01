@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
-import { initials, money, when } from "../lib/format";
+import { dispPhone, initials, money, when } from "../lib/format";
 import { goToAccount } from "../users/UserCard";
 
 const typeLabel = (t?: string | null): string => {
@@ -80,7 +80,11 @@ export function ReportsPage({
             <div className="adm-user-av" data-no-i18n>{initials(reporterName)}</div>
             <div style={{ flex: 1, minWidth: 120 }}>
               <div className="rpt-name" data-no-i18n>{reporterName}</div>
-              <div className="rpt-sub">{(reporter.phone || "no phone") + " · " + when(r.created_at)}</div>
+              <div className="rpt-sub">
+                <span data-no-i18n>{dispPhone(reporter.phone) || ""}</span>
+                {!dispPhone(reporter.phone) && <span>no phone</span>}
+                {" · "}<span data-no-i18n>{when(r.created_at)}</span>
+              </div>
             </div>
             <button className="adm-go-btn" onClick={() => goToAccount(r.reporter_id || "", "marketer", reporterName)}>
               Go to marketer account
@@ -120,7 +124,7 @@ export function ReportsPage({
             <div className="rpt-biz-row">
               <div style={{ minWidth: 0 }}>
                 <div className="rpt-name" data-no-i18n>{businessName}</div>
-                <div className="rpt-sub">{business.phone || "no phone"}</div>
+                <div className="rpt-sub">{dispPhone(business.phone) ? <span data-no-i18n>{dispPhone(business.phone)}</span> : <span>no phone</span>}</div>
               </div>
               <button className="adm-go-btn" onClick={() => goToAccount(r.business_id!, "business", businessName)}>
                 Go to business account

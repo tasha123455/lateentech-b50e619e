@@ -22,17 +22,24 @@ export function initials(name?: string | null): string {
   return name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 }
 
-/** Relative age: "just now" / "5m ago" / "3h ago" / "2d ago". */
+const isAr = (): boolean =>
+  typeof document !== "undefined" && document.documentElement.lang === "ar";
+
+/** Relative age: "just now" / "5m ago" / "3h ago" / "2d ago".
+ *  Built from a number, so the shared dictionary cannot reach it — it has to
+ *  carry its own Arabic. */
 export function when(iso?: string | null): string {
   if (!iso) return "";
+  const ar = isAr();
   const d = new Date(iso);
   const diff = Date.now() - d.getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return m + "m ago";
+  if (m < 1) return ar ? "توّه" : "just now";
+  if (m < 60) return ar ? "قبل " + m + " دقيقة" : m + "m ago";
   const h = Math.floor(m / 60);
-  if (h < 24) return h + "h ago";
-  return Math.floor(h / 24) + "d ago";
+  if (h < 24) return ar ? "قبل " + h + " ساعة" : h + "h ago";
+  const days = Math.floor(h / 24);
+  return ar ? "قبل " + days + " يوم" : days + "d ago";
 }
 
 /** Absolute stamp: "Mar 5, 2024, 3:07 PM". */
