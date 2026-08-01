@@ -513,6 +513,24 @@ export type Database = {
         }
         Relationships: []
       }
+      presence_daily: {
+        Row: {
+          day: string
+          peak: number
+          updated_at: string
+        }
+        Insert: {
+          day: string
+          peak?: number
+          updated_at?: string
+        }
+        Update: {
+          day?: string
+          peak?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_reviews: {
         Row: {
           comment: string | null
@@ -866,6 +884,21 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      user_presence: {
+        Row: {
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          last_seen_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1282,6 +1315,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_presence_stats: { Args: { _day?: string }; Returns: number }
       admin_refund_order: {
         Args: { _comment?: string; _order_id: string }
         Returns: {
@@ -1687,6 +1721,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      live_user_count: { Args: never; Returns: number }
       mark_delivered: {
         Args: { _order_id: string }
         Returns: {
@@ -1921,6 +1956,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      touch_presence: { Args: never; Returns: undefined }
       verify_account_deletion_cron_secret: {
         Args: { _secret: string }
         Returns: boolean
