@@ -554,17 +554,23 @@
    Role badge and the way into the account on one row, then the person's
    details beside their photo, the wallet strip, the note and the two
    decisions. */
-.lateen-admin .del-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
-.lateen-admin .del-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-.lateen-admin .del-who { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-.lateen-admin .del-who .adm-user-av { width: 42px; height: 42px; font-size: 14px; }
-.lateen-admin .del-who .adm-user-av img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block; }
-.lateen-admin .del-rows { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.lateen-admin .del-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+/* Collapsed, the head row is the whole card: who, which role, how long
+   ago, and a dot when there is still money in the wallet. */
+.lateen-admin .del-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: transparent; border: none; font-family: var(--font); text-align: start; cursor: pointer; }
+.lateen-admin .del-head .adm-user-av img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block; }
+.lateen-admin .del-head-mid { flex: 1; min-width: 0; }
+.lateen-admin .del-head-name { font-size: 13px; font-weight: 600; color: var(--txt-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lateen-admin .del-head-sub { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+.lateen-admin .del-funds-dot { color: var(--danger); font-size: 9px; line-height: 1; }
+.lateen-admin .del-body { padding: 0 12px 12px; border-top: 0.5px solid var(--border-2); padding-top: 10px; }
+.lateen-admin .del-top { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
+.lateen-admin .del-rows { display: grid; gap: 3px; margin-bottom: 10px; }
 .lateen-admin .del-row { display: flex; align-items: baseline; gap: 6px; font-size: 13px; flex-wrap: wrap; }
 .lateen-admin .del-k { color: var(--txt-2); flex-shrink: 0; }
 .lateen-admin .del-k::after { content: ":"; }
 .lateen-admin .del-v { color: var(--txt-1); overflow-wrap: anywhere; }
-.lateen-admin .del-ago { font-size: 11px; color: var(--txt-3); margin-inline-start: auto; flex-shrink: 0; }
+.lateen-admin .del-ago { font-size: 10px; color: var(--txt-3); flex-shrink: 0; white-space: nowrap; }
 .lateen-admin .del-wallet { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 12.5px; color: var(--txt-2); }
 .lateen-admin .del-wallet b { color: var(--txt-1); }
 /* Money still sitting in the wallet is the reason the request needs a human,

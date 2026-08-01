@@ -66,6 +66,60 @@ export type LateenProduct = {
   deleted_at: string | null;
 };
 
+/** Profiles for a set of user ids, with the two fields that are not on the
+ *  profiles table: the email (it lives on auth.users, behind
+ *  admin_list_user_emails) and a usable avatar URL (the stored value is a path
+ *  into a private bucket and has to be signed). Every admin list that shows a
+ *  person goes through here, so none of them can quietly drop one again. */
+async function loadAdminPeople(ids: string[]) {
+  const map = new Map<string, Record<string, unknown>>();
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (!unique.length) return map;
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, business_name, phone, avatar_url")
+    .in("id", unique);
+  const people = (profiles ?? []) as Array<{ id: string; avatar_url?: string | null }>;
+  if (!people.length) return map;
+
+  let emails = new Map<string, string | null>();
+  try {
+    const { data: rows } = await supabase.rpc("admin_list_user_emails", {
+      _user_ids: people.map((p) => p.id),
+    });
+    emails = new Map(
+      ((rows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
+    );
+  } catch {
+    /* ignore — the card falls back to "—" */
+  }
+
+  const avatars = new Map<string, string>();
+  const paths = people.map((p) => p.avatar_url).filter((v): v is string => !!v);
+  if (paths.length) {
+    try {
+      const { data: signed } = await supabase.storage
+        .from("avatars")
+        .createSignedUrls(paths, 60 * 60 * 24 * 365 * 5);
+      (signed ?? []).forEach((x: { path?: string | null; signedUrl?: string | null }) => {
+        if (x.path && x.signedUrl) avatars.set(x.path, x.signedUrl);
+      });
+    } catch {
+      /* ignore — the card falls back to initials */
+    }
+  }
+
+  people.forEach((p) => {
+    map.set(p.id, {
+      ...p,
+      email: emails.get(p.id) ?? null,
+      avatar_signed_url: (p.avatar_url && avatars.get(p.avatar_url)) || null,
+    });
+  });
+  return map;
+}
+
 export type LateenAPI = ReturnType<typeof createLateenApi>;
 
 export function createLateenApi(userId: string) {
@@ -1043,53 +1097,8 @@ export function createLateenApi(userId: string) {
           created_at: string;
         }>;
         if (!reports.length) return [];
-        const peopleIds = [
-          ...new Set(
-            reports.flatMap((r) => [r.reporter_id, r.business_id].filter(Boolean) as string[]),
-          ),
-        ];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, business_name, phone, avatar_url")
-          .in("id", peopleIds);
-        const people = (profiles ?? []) as Array<{ id: string; avatar_url?: string | null }>;
-        /* Emails live on auth.users, not profiles, and avatars live in a
-           private bucket — both need the same resolution the Users page does,
-           which is why the report card showed neither. */
-        let emap = new Map<string, string | null>();
-        try {
-          const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
-            _user_ids: people.map((p) => p.id),
-          });
-          emap = new Map(
-            ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
-          );
-        } catch {
-          /* ignore — the card falls back to "—" */
-        }
-        const avatarMap = new Map<string, string>();
-        const avatarPaths = people.map((p) => p.avatar_url).filter((v): v is string => !!v);
-        if (avatarPaths.length) {
-          try {
-            const { data: signed } = await supabase.storage
-              .from("avatars")
-              .createSignedUrls(avatarPaths, 60 * 60 * 24 * 365 * 5);
-            (signed ?? []).forEach((x: { path?: string | null; signedUrl?: string | null }) => {
-              if (x.path && x.signedUrl) avatarMap.set(x.path, x.signedUrl);
-            });
-          } catch {
-            /* ignore — the card falls back to initials */
-          }
-        }
-        const pmap = new Map(
-          people.map((p) => [
-            p.id,
-            {
-              ...p,
-              email: emap.get(p.id) ?? null,
-              avatar_signed_url: (p.avatar_url && avatarMap.get(p.avatar_url)) || null,
-            },
-          ]),
+        const pmap = await loadAdminPeople(
+          reports.flatMap((r) => [r.reporter_id, r.business_id].filter(Boolean) as string[]),
         );
         const productIds = [...new Set(reports.map((r) => r.product_id).filter(Boolean) as string[])];
         let products: Array<{ id: string; name: string; price: number; code: string; photos: string[] }> = [];
@@ -1136,11 +1145,7 @@ export function createLateenApi(userId: string) {
         }>;
         if (!reqs.length) return [];
         const ids = [...new Set(reqs.map((r) => r.user_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, business_name, phone")
-          .in("id", ids);
-        const pmap = new Map((profiles ?? []).map((p: { id: string }) => [p.id, p]));
+        const pmap = await loadAdminPeople(ids);
         const { data: wallets } = await supabase
           .from("wallets")
           .select("user_id, balance, pending")
