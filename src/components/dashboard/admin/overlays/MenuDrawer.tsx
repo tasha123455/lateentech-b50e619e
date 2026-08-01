@@ -5,7 +5,7 @@ import { empPayableCount } from "../lib/employees";
  *  in the nav badges its own two lists, and the Menu slot badges the total of
  *  the pages hidden behind it. */
 export function useAdminCounts() {
-  const { deletionRequests, reports, employees, verifyMarketers, payouts } = useAdminData();
+  const { deletionRequests, reports, employees, verifyMarketers, payouts, changeRequests } = useAdminData();
   const deletions = deletionRequests.filter((r) => r.status === "wallet_review").length;
   const openReports = reports.filter((r) => r.status === "open").length;
   const payable = empPayableCount(employees);
@@ -13,7 +13,9 @@ export function useAdminCounts() {
   return {
     deletions,
     reports: openReports,
-    requests: deletions + openReports,
+    changes: changeRequests.length,
+    /* Everything on the Requests page, whichever of its tabs it is under. */
+    requests: deletions + openReports + changeRequests.length,
     receipts,
     /* Both halves of the Money page: receipts to check and payouts to send. */
     money: receipts + payouts.length,

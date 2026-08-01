@@ -133,6 +133,18 @@ export function createLateenApi(userId: string) {
       if (error) throw error;
     },
 
+    /** "Please change my phone / email / country." Goes to the admin's
+     *  requests page rather than to WhatsApp, so it can be counted, answered
+     *  and closed. Asking again replaces the previous ask rather than adding
+     *  a second one. */
+    async submitChangeRequest(fields: string[], note?: string | null) {
+      const { error } = await supabase.rpc("submit_change_request" as never, {
+        _fields: fields,
+        _note: note && note.trim() ? note.trim() : null,
+      } as never);
+      if (error) throw error;
+    },
+
     async listMyProducts(): Promise<LateenProduct[]> {
       const { data, error } = await supabase
         .from("products")
@@ -695,7 +707,8 @@ export function createLateenApi(userId: string) {
         | "admin-wallets"
         | "admin-payouts"
         | "admin-reports"
-        | "admin-deletion-requests",
+        | "admin-deletion-requests"
+        | "admin-change-requests",
       onChange: () => void,
     ) {
       const ch = supabase.channel(`lateen-${key}-${userId}-${crypto.randomUUID()}`);
@@ -714,6 +727,7 @@ export function createLateenApi(userId: string) {
       if (key === "business-reviews") filters.push({ table: "product_reviews" });
       if (key === "admin-wallets") filters.push({ table: "wallets" });
       if (key === "admin-payouts") filters.push({ table: "payouts" });
+      if (key === "admin-change-requests") filters.push({ table: "change_requests" });
       if (key === "admin-reports") filters.push({ table: "reports" });
       if (key === "admin-deletion-requests") filters.push({ table: "account_deletion_requests" });
       for (const f of filters) {
@@ -1118,6 +1132,49 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
         return data;
       },
+      /* Somebody asking to have details changed that they cannot edit
+         themselves. Only open ones — a closed request is finished with, the
+         same way a reviewed report is. */
+      async listChangeRequests() {
+        /* The generated Database types come from the live schema and this table
+           is newer than the last regeneration, hence the casts — the same
+           escape the other recent tables and functions here use. */
+        const { data, error } = await supabase
+          .from("change_requests" as never)
+          .select("*")
+          .eq("status" as never, "open" as never)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        const reqs = (data ?? []) as unknown as Array<{
+          id: string;
+          user_id: string;
+          fields: string[];
+          note: string | null;
+          status: string;
+          created_at: string;
+        }>;
+        if (!reqs.length) return [];
+        const pmap = await loadAdminPeople([...new Set(reqs.map((r) => r.user_id))]);
+        const { data: roleRows } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", reqs.map((r) => r.user_id));
+        const rmap = new Map((roleRows ?? []).map((r: { user_id: string; role: string }) => [r.user_id, r.role]));
+        return reqs.map((r) => ({
+          ...r,
+          role: rmap.get(r.user_id) ?? "marketer",
+          person: pmap.get(r.user_id) ?? null,
+        }));
+      },
+
+      async resolveChangeRequest(id: string, comment: string) {
+        const { error } = await supabase.rpc("admin_resolve_change_request" as never, {
+          _id: id,
+          _comment: comment,
+        } as never);
+        if (error) throw error;
+      },
+
       async listDeletionRequests() {
         const { data, error } = await supabase
           .from("account_deletion_requests")

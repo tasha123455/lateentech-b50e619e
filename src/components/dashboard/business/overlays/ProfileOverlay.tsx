@@ -23,6 +23,8 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
   // Shown straight away after an admin changes it, so the row is not stale.
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [crNote, setCrNote] = useState("");
+  const [crBusy, setCrBusy] = useState(false);
   const [crCountry, setCrCountry] = useState(false);
   const [delStatus, setDelStatus] = useState<{ id: string; status: string; scheduled_for?: string | null } | null>(null);
   const [delOverlayOpen, setDelOverlayOpen] = useState(false);
@@ -87,21 +89,24 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
     }
   };
 
-  const sendChangeRequest = () => {
-    const items: string[] = [];
-    if (crPhone) items.push(ar ? "رقم الهاتف" : "Phone number");
-    if (crEmail) items.push(ar ? "البريد الإلكتروني" : "Email");
-    if (crCountry) items.push(ar ? "الدولة" : "Country");
-    if (!items.length) return;
-    const p = profile || {};
-    const pname = p.full_name || "";
-    const lines = ar
-      ? ["مرحباً، أرغب بطلب تغيير في بيانات حسابي على لاتين.", "الاسم: " + pname, "الهاتف الحالي: " + (p.phone || "-"), "البريد الحالي: " + (p.email || "-"), "أريد تغيير: " + items.join("، ")]
-      : ["Hello, I would like to request a change to my Lateen account.", "Name: " + pname, "Current phone: " + (p.phone || "-"), "Current email: " + (p.email || "-"), "I want to change: " + items.join(", ")];
-    const msg = encodeURIComponent(lines.join("\n"));
-    window.open("https://wa.me/218915756638?text=" + msg, "_blank");
-    setCrOpen(false);
-    alert(t("WhatsApp opened to send your request to the admin", "تم فتح واتساب لإرسال طلبك إلى الأدمن"));
+  /* Files a request the admin's page can count, answer and close, instead of
+     handing it to WhatsApp where none of that was possible and the shop was
+     left with nothing to look at afterwards. */
+  const sendChangeRequest = async () => {
+    const fields: string[] = [];
+    if (crPhone) fields.push("phone");
+    if (crEmail) fields.push("email");
+    if (crCountry) fields.push("country");
+    if (!fields.length || crBusy) return;
+    setCrBusy(true);
+    try {
+      await api.submitChangeRequest(fields, crNote);
+      setCrOpen(false);
+      alert(t("Your request has reached the admin.", "وصل طلبك للأدمن. حيتواصل معاك."));
+    } catch (e) {
+      alert(t("Could not send: ", "تعذّر الإرسال: ") + (e as Error).message);
+    }
+    setCrBusy(false);
   };
 
   const saveTxt = saveState === "saving" ? t("Saving…", "جارٍ الحفظ…") : saveState === "saved" ? t("Saved", "تم الحفظ") : t("Save", "حفظ");
@@ -186,7 +191,7 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
                 <span style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">🇱🇾 Libya</span>
               </div>
             </div>
-            <button type="button" onClick={() => { setCrPhone(false); setCrEmail(false); setCrCountry(false); setCrOpen(true); }} style={{ width: "100%", background: "transparent", border: "1px solid #3a3a3a", color: "var(--color-text-primary)", borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+            <button type="button" onClick={() => { setCrPhone(false); setCrEmail(false); setCrCountry(false); setCrNote(""); setCrOpen(true); }} style={{ width: "100%", background: "transparent", border: "1px solid #3a3a3a", color: "var(--color-text-primary)", borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
               {t("Change", "تغيير")}
             </button>
             <label className="pd-lbl">
@@ -254,16 +259,22 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
                 <span style={{ fontSize: 13, color: "var(--color-text-primary)" }}>{t("Change country", "تغيير الدولة")}</span>
               </label>
             </div>
+            {/* What they want it changed to. Without it the admin gets a card
+                that says "email" and nothing else, and has to go and ask. */}
+            <textarea
+              value={crNote}
+              onChange={(e) => setCrNote(e.target.value)}
+              rows={3}
+              placeholder={t("Write what you want it changed to (optional)", "اكتب البيانات الجديدة اللي تبيها (اختياري)")}
+              style={{ width: "100%", marginBottom: 14, padding: "10px 12px", fontSize: 13, lineHeight: 1.5, borderRadius: 10, border: "0.5px solid #2a2a2a", background: "#141414", color: "var(--color-text-primary)", outline: "none", resize: "none", fontFamily: "var(--font-sans)" }}
+            />
             <button
               type="button"
-              onClick={sendChangeRequest}
-              disabled={!crPhone && !crEmail && !crCountry}
-              style={{ width: "100%", background: "#8b83e8", color: "#fff", border: "none", borderRadius: 12, padding: 13, fontSize: 13, fontWeight: 500, cursor: "pointer", opacity: (!crPhone && !crEmail && !crCountry) ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+              onClick={() => void sendChangeRequest()}
+              disabled={(!crPhone && !crEmail && !crCountry) || crBusy}
+              style={{ width: "100%", background: "#8b83e8", color: "#fff", border: "none", borderRadius: 12, padding: 13, fontSize: 13, fontWeight: 500, cursor: "pointer", opacity: ((!crPhone && !crEmail && !crCountry) || crBusy) ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-              </svg>
-              <span>{t("Send to admin for change", "إرسال إلى الأدمن للتغيير")}</span>
+              <span>{crBusy ? t("Sending…", "جارٍ الإرسال…") : t("Send request to admin", "إرسال الطلب إلى الأدمن")}</span>
             </button>
           </div>
         </div>

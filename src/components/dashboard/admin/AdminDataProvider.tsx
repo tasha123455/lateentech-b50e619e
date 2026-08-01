@@ -4,7 +4,8 @@ import {
 
 import { createLateenApi } from "@/lib/lateen-api";
 import type {
-  AdminMetrics, AdminProduct, AdminReport, AdminUser, DeletionRequest, Employee, HomeRaw,
+  AdminMetrics, AdminProduct, AdminReport, AdminUser, ChangeRequest,
+  DeletionRequest, Employee, HomeRaw,
   LateenApi, PayoutRequest, ReceiptOrder, VerifyMarketer,
 } from "./lib/types";
 
@@ -22,6 +23,7 @@ type Ctx = {
   products: AdminProduct[];
   reports: AdminReport[];
   deletionRequests: DeletionRequest[];
+  changeRequests: ChangeRequest[];
   employees: Employee[];
 
   /** True until a section's first load resolves — drives the "Loading…" row. */
@@ -36,6 +38,7 @@ type Ctx = {
   loadProducts: (search: string) => Promise<void>;
   loadReports: () => Promise<void>;
   loadDeletionRequests: () => Promise<void>;
+  loadChangeRequests: () => Promise<void>;
   loadEmployees: (search: string) => Promise<void>;
 };
 
@@ -60,6 +63,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [deletionRequests, setDeletionRequests] = useState<DeletionRequest[]>([]);
+  const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   const [loading, setLoading] = useState<Record<string, boolean>>({
@@ -178,6 +182,14 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     }
   }, [admin]);
 
+  const loadChangeRequests = useCallback(async () => {
+    try {
+      setChangeRequests((await admin.listChangeRequests()) as ChangeRequest[]);
+    } catch (e) {
+      console.error("[admin] listChangeRequests", e);
+    }
+  }, [admin]);
+
   const loadEmployees = useCallback(async (search: string) => {
     try {
       setEmployees((await admin.listEmployees(search)) as Employee[]);
@@ -196,10 +208,11 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     void loadMetrics();
     void loadReports();
     void loadDeletionRequests();
+    void loadChangeRequests();
     void loadEmployees("");
     void loadVerify();
     void loadPayouts();
-  }, [loadMetrics, loadReports, loadDeletionRequests, loadEmployees, loadVerify, loadPayouts]);
+  }, [loadMetrics, loadReports, loadDeletionRequests, loadChangeRequests, loadEmployees, loadVerify, loadPayouts]);
 
   /* ── Realtime + payout polling ──
      Payouts move without any action on this screen (a marketer requesting,
@@ -216,12 +229,13 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     unsubs.push(api.subscribe("admin-payouts", refreshPayouts));
     unsubs.push(api.subscribe("admin-reports", () => { void loadReports(); }));
     unsubs.push(api.subscribe("admin-deletion-requests", () => { void loadDeletionRequests(); }));
+    unsubs.push(api.subscribe("admin-change-requests", () => { void loadChangeRequests(); }));
     return () => {
       for (const u of unsubs) {
         try { u(); } catch { /* ignore */ }
       }
     };
-  }, [api, loadPayouts, loadReports, loadDeletionRequests]);
+  }, [api, loadPayouts, loadReports, loadDeletionRequests, loadChangeRequests]);
 
   useEffect(() => {
     const iv = setInterval(() => {
@@ -235,15 +249,15 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     () => ({
       api, userId,
       metrics, homeRaw, metricsError,
-      verifyMarketers, payouts, users, products, reports, deletionRequests, employees,
+      verifyMarketers, payouts, users, products, reports, deletionRequests, changeRequests, employees,
       loading, failed,
-      loadMetrics, loadVerify, loadPayouts, loadUsers, loadProducts, loadReports,
+      loadMetrics, loadVerify, loadPayouts, loadUsers, loadProducts, loadReports, loadChangeRequests,
       loadDeletionRequests, loadEmployees,
     }),
     [
       api, userId, metrics, homeRaw, metricsError, verifyMarketers, payouts, users, products,
-      reports, deletionRequests, employees, loading, failed,
-      loadMetrics, loadVerify, loadPayouts, loadUsers, loadProducts, loadReports,
+      reports, deletionRequests, changeRequests, employees, loading, failed,
+      loadMetrics, loadVerify, loadPayouts, loadUsers, loadProducts, loadReports, loadChangeRequests,
       loadDeletionRequests, loadEmployees,
     ],
   );

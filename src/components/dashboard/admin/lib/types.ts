@@ -150,6 +150,19 @@ export type DeletionRequest = {
   person?: Person | null;
 };
 
+/** Somebody asking for details they cannot edit themselves to be changed. */
+export type ChangeRequest = {
+  id: string;
+  user_id: string;
+  role?: string | null;
+  /** Any of "phone", "email", "country". */
+  fields: string[];
+  note?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+  person?: Person | null;
+};
+
 export type EmployeePayment = {
   period_year: number;
   period_month: number;

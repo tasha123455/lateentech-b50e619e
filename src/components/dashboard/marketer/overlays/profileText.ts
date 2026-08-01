@@ -22,7 +22,11 @@ export const profT = () => {
     crPhone: ar ? "تغيير رقم الهاتف" : "Change phone number",
     crEmail: ar ? "تغيير البريد الإلكتروني" : "Change email",
     crCountry: ar ? "تغيير الدولة" : "Change country",
-    crSend: ar ? "إرسال إلى الأدمن للتغيير" : "Send to admin for change",
-    crSent: ar ? "تم فتح واتساب لإرسال طلبك إلى الأدمن" : "WhatsApp opened to send your request to the admin",
+    crNote: ar
+      ? "اكتب البيانات الجديدة اللي تبيها (اختياري)"
+      : "Write what you want it changed to (optional)",
+    crSend: ar ? "إرسال الطلب إلى الأدمن" : "Send request to admin",
+    crSending: ar ? "جارٍ الإرسال…" : "Sending…",
+    crSent: ar ? "وصل طلبك للأدمن. حيتواصل معاك." : "Your request has reached the admin.",
   };
 };

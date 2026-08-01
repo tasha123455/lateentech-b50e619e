@@ -1,50 +1,42 @@
 import { useEffect, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { ADMIN_WHATSAPP } from "../lib/constants";
 import { isAr } from "../lib/format";
 import { profT } from "./profileText";
 
-/** Asks the admin (over WhatsApp) to change details the marketer can't edit. */
+/** Asks the admin to change details the marketer can't edit himself.
+ *
+ *  It used to hand the request to WhatsApp with the message pre-written, which
+ *  put it somewhere the admin panel could not count or close and left the
+ *  marketer with nothing to look at afterwards. It now files a request that
+ *  shows up on the admin's own page, and asking again replaces the last ask
+ *  rather than adding a second one. */
 export function ChangeRequestOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { profile } = useMarketerData();
+  const { api } = useMarketerData();
   const [checks, setChecks] = useState({ phone: false, email: false, country: false });
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (open) setChecks({ phone: false, email: false, country: false });
+    if (open) { setChecks({ phone: false, email: false, country: false }); setNote(""); setBusy(false); }
   }, [open]);
 
   const t = profT();
+  const ar = isAr();
   const any = checks.phone || checks.email || checks.country;
 
-  const send = () => {
-    const ar = isAr();
-    const items: string[] = [];
-    if (checks.phone) items.push(ar ? "رقم الهاتف" : "Phone number");
-    if (checks.email) items.push(ar ? "البريد الإلكتروني" : "Email");
-    if (checks.country) items.push(ar ? "الدولة" : "Country");
-    if (!items.length) return;
-
-    const p = profile || {};
-    const name = p.full_name || "";
-    const lines = ar
-      ? [
-          "مرحباً، أرغب بطلب تغيير في بيانات حسابي على لاتين.",
-          "الاسم: " + name,
-          "الهاتف الحالي: " + (p.phone || "-"),
-          "البريد الحالي: " + (p.email || "-"),
-          "أريد تغيير: " + items.join("، "),
-        ]
-      : [
-          "Hello, I would like to request a change to my Lateen account.",
-          "Name: " + name,
-          "Current phone: " + (p.phone || "-"),
-          "Current email: " + (p.email || "-"),
-          "I want to change: " + items.join(", "),
-        ];
-    window.open("https://wa.me/" + ADMIN_WHATSAPP + "?text=" + encodeURIComponent(lines.join("\n")), "_blank");
-    onClose();
-    alert(t.crSent);
+  const send = async () => {
+    const fields = (Object.keys(checks) as Array<keyof typeof checks>).filter((k) => checks[k]);
+    if (!fields.length || busy) return;
+    setBusy(true);
+    try {
+      await api.submitChangeRequest(fields, note);
+      onClose();
+      alert(t.crSent);
+    } catch (e) {
+      alert((ar ? "تعذّر الإرسال: " : "Could not send: ") + (e as Error).message);
+    }
+    setBusy(false);
   };
 
   const row = (key: keyof typeof checks, label: string, last?: boolean) => (
@@ -92,20 +84,32 @@ export function ChangeRequestOverlay({ open, onClose }: { open: boolean; onClose
           {row("country", t.crCountry, true)}
         </div>
 
+        {/* What they want it changed to. Without it the admin gets a card that
+            says "email" and nothing else, and has to go and ask. */}
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder={t.crNote}
+          rows={3}
+          style={{
+            width: "100%", marginBottom: 14, padding: "10px 12px", fontSize: 13, lineHeight: 1.5,
+            borderRadius: 10, border: "0.5px solid #2a2a2a", background: "#141414",
+            color: "var(--color-text-primary)", outline: "none", resize: "none",
+            fontFamily: "var(--font-sans)",
+          }}
+        />
+
         <button
           type="button"
-          disabled={!any}
-          onClick={send}
+          disabled={!any || busy}
+          onClick={() => void send()}
           style={{
             width: "100%", background: "#8b83e8", color: "#fff", border: "none", borderRadius: 12,
-            padding: 13, fontSize: 13, fontWeight: 500, cursor: "pointer", opacity: any ? 1 : 0.5,
+            padding: 13, fontSize: 13, fontWeight: 500, cursor: "pointer", opacity: any && !busy ? 1 : 0.5,
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
           }}
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-          </svg>
-          <span>{t.crSend}</span>
+          <span>{busy ? t.crSending : t.crSend}</span>
         </button>
       </div>
     </div>
