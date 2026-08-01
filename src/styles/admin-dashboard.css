@@ -471,6 +471,12 @@
 .lateen-admin .adm-stat-stack .adm-stat.full .adm-stat-value { font-size: 24px; }
 .lateen-admin .adm-stat-stack .adm-stat-sub { flex-basis: 100%; margin-top: 0; }
 
+/* Net profit, folded into the platform-fees card. */
+.lateen-admin .adm-profit-toggle { flex-basis: 100%; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 10px; border: none; border-top: 0.5px solid var(--border-2); background: transparent; color: var(--txt-2); font-size: 12px; font-weight: 500; font-family: var(--font); cursor: pointer; }
+.lateen-admin .adm-profit-chev { transition: transform .2s ease; opacity: .7; flex-shrink: 0; }
+.lateen-admin .adm-profit-toggle.open .adm-profit-chev { transform: rotate(180deg); }
+.lateen-admin .adm-profit-value { flex-basis: 100%; margin-top: 6px; font-size: 20px; font-weight: 500; color: var(--ok); }
+
 /* ===== Admin home =====
    Built from the same stat cards and chips every other admin page uses; it
    used to be a pasted design with its own palette, its own type scale and
