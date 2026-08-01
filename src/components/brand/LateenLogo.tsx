@@ -14,10 +14,17 @@ type Props = {
  * The art was once padded, and the layout leaned on that padding — heights were
  * set on the whole canvas and negative margins pulled the empty parts back
  * together. These numbers are that geometry, measured off the original
- * canvases, so the lockup lands exactly where it always did. */
+ * canvases, so the lockup lands exactly where it always did.
+ *
+ * The lettering heights were nudged when it moved from traced outlines to the
+ * ones in the Illustrator files. The trace was a little fatter, so its box was
+ * a little taller for the same line of text, and these are set against height:
+ * left alone, thinner letters would have drawn a narrower lockup. Each is
+ * scaled by the change in the piece's aspect ratio, which holds the rendered
+ * width — and so the lockup's silhouette — where it was. */
 const MARK_H = 0.80282;
-const WORD_H = { en: 0.37979, ar: 0.33745 };
-const TAG_H = { en: 0.09, ar: 0.11 };
+const WORD_H = { en: 0.37624, ar: 0.33554 };
+const TAG_H = { en: 0.08886, ar: 0.1088 };
 const MARK_TO_WORD = { en: 0.37958, ar: 0.31862 };
 const WORD_TO_TAG = { en: 0.50862, ar: 0.34192 };
 
