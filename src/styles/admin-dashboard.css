@@ -501,16 +501,23 @@
 .lateen-admin .adm-chart-chips::-webkit-scrollbar { display: none; }
 .lateen-admin .adm-chart-body { position: relative; height: 200px; }
 
+.lateen-admin .adm-mkt-av img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block; }
+
 /* ===== Verify: receipt card =====
    Collapsed it is one row — the receipt, where it stands, what the platform
    earns and what the marketer owes. Who the customer is and what they bought
    are a fold inside a fold, because neither decides anything. */
-.lateen-admin .adm-recpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+.lateen-admin .adm-recpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; margin-bottom: 10px; overflow: hidden; position: relative; }
+/* Corner badge: out of the flow so it costs no height and never pushes the
+   money around. */
+.lateen-admin .adm-recpt-card > .adm-recpt-status { position: absolute; top: 6px; inset-inline-end: 8px; z-index: 1; font-size: 9px; padding: 2px 7px; border-radius: 8px; letter-spacing: 0.02em; }
 .lateen-admin .rcpt-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: transparent; border: none; font-family: var(--font); text-align: start; cursor: pointer; }
 .lateen-admin .rcpt-head-thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; cursor: zoom-in; }
 .lateen-admin .rcpt-head-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .lateen-admin .rcpt-head-thumb-empty { font-size: 20px; }
-.lateen-admin .rcpt-head-mid { flex: 1; min-width: 0; display: grid; gap: 3px; }
+/* Platform fee and Total side by side, not stacked. They wrap on a narrow
+   phone rather than squeezing. */
+.lateen-admin .rcpt-head-mid { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding-top: 12px; }
 .lateen-admin .rcpt-head-money { display: flex; align-items: baseline; gap: 6px; font-size: 12px; flex-wrap: wrap; }
 .lateen-admin .rcpt-head-fee { color: var(--accent); font-weight: 500; }
 .lateen-admin .rcpt-head-total { color: var(--txt-1); font-weight: 600; }
@@ -528,6 +535,7 @@
 .lateen-admin .rcpt-info-body { border-top: 0.5px solid var(--border-2); padding: 10px 11px; display: grid; gap: 5px; }
 .lateen-admin .rcpt-info-photo { margin-bottom: 4px; }
 .lateen-admin .rcpt-info-photo img { width: 76px; height: 76px; border-radius: 10px; object-fit: cover; display: block; cursor: zoom-in; background: var(--surface-2); }
+.lateen-admin .rcpt-figures { border: 0.5px solid var(--border-2); border-radius: 10px; background: var(--surface); padding: 10px 11px; gap: 5px; }
 .lateen-admin .rcpt-info-photo-empty { width: 76px; height: 76px; border-radius: 10px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 26px; }
 /* Timestamps pinned in the corner of the fullscreen receipt. */
 .lateen-admin .adm-lightbox-caption { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); inset-inline-start: 16px; max-width: calc(100% - 32px); background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.18); border-radius: 12px; padding: 9px 12px; font-size: 11.5px; line-height: 1.7; color: #e8e6e2; font-family: var(--font); pointer-events: auto; }

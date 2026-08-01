@@ -112,6 +112,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
             name: (o.marketer && o.marketer.full_name) || "Unknown marketer",
             phone: (o.marketer && o.marketer.phone) || "",
             email: (o.marketer && o.marketer.email) || "",
+            avatar_signed_url: (o.marketer && o.marketer.avatar_signed_url) || null,
             pending: [],
             history: [],
           });

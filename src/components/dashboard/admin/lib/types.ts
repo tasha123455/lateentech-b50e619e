@@ -49,6 +49,8 @@ export type VerifyMarketer = {
   name: string;
   phone: string;
   email: string;
+  /** Signed URL for the marketer's photo, resolved with their profile. */
+  avatar_signed_url?: string | null;
   pending: ReceiptOrder[];
   history: ReceiptOrder[];
 };

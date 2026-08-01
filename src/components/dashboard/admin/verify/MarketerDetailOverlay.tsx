@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { initials } from "../lib/format";
+import { normSearch } from "@/components/dashboard/marketer/lib/format";
+
+import { dispPhone, initials } from "../lib/format";
 import type { VerifyMarketer } from "../lib/types";
 import { ReceiptCard } from "./ReceiptCard";
 
@@ -29,7 +31,7 @@ export function MarketerDetailOverlay({
   }, [marketerId]);
 
   const open = !!marketer;
-  const q = search.trim().toLowerCase();
+  const q = normSearch(search);
 
   let body: React.ReactNode = null;
   if (!marketer) {
@@ -37,32 +39,42 @@ export function MarketerDetailOverlay({
   } else {
     const baseList = tab === "new" ? marketer.pending : marketer.history;
     const list = q
-      ? baseList.filter((o) => {
-          const product = ((o.product && o.product.name) || "").toLowerCase();
-          const custName = (o.customer_name || "").toLowerCase();
-          const custPhone = (o.customer_phone || "").toLowerCase();
-          const orderCode = ("#" + (o.order_number || String(o.id || "").slice(0, 8))).toLowerCase();
-          return product.includes(q) || custName.includes(q) || custPhone.includes(q) || orderCode.includes(q);
-        })
+      ? baseList.filter((o) =>
+          normSearch(
+            [
+              o.product && o.product.name,
+              o.customer_name,
+              o.customer_phone,
+              "#" + (o.order_number || String(o.id || "").slice(0, 8)),
+              marketer.name, marketer.phone, marketer.email,
+            ]
+              .filter(Boolean)
+              .join(" "),
+          ).includes(q),
+        )
       : baseList;
 
     body = (
       <>
         <div className="adm-mkt-detail-head">
-          <div className="adm-mkt-av" data-no-i18n>{initials(marketer.name)}</div>
+          <div className="adm-mkt-av" data-no-i18n>
+            {marketer.avatar_signed_url
+              ? <img src={marketer.avatar_signed_url} alt="" loading="lazy" decoding="async" />
+              : initials(marketer.name)}
+          </div>
           <div>
             <div className="adm-mkt-detail-name" data-no-i18n>{marketer.name}</div>
-            <div className="adm-mkt-detail-contact">
-              {[marketer.phone, marketer.email].filter(Boolean).join(" · ")}
+            <div className="adm-mkt-detail-contact" data-no-i18n>
+              {[dispPhone(marketer.phone), marketer.email].filter(Boolean).join(" · ")}
             </div>
           </div>
         </div>
         <div className="adm-filter-row">
           <button className={"adm-filter-chip" + (tab === "new" ? " on" : "")} onClick={() => setTab("new")}>
-            New ({marketer.pending.length})
+            New{tab === "new" ? ` (${marketer.pending.length})` : ""}
           </button>
           <button className={"adm-filter-chip" + (tab === "history" ? " on" : "")} onClick={() => setTab("history")}>
-            History ({marketer.history.length})
+            History{tab === "history" ? ` (${marketer.history.length})` : ""}
           </button>
         </div>
         <input
