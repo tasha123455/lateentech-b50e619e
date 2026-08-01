@@ -22,6 +22,7 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
   const [crEmail, setCrEmail] = useState(false);
   // Shown straight away after an admin changes it, so the row is not stale.
   const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [crCountry, setCrCountry] = useState(false);
   const [delStatus, setDelStatus] = useState<{ id: string; status: string; scheduled_for?: string | null } | null>(null);
   const [delOverlayOpen, setDelOverlayOpen] = useState(false);
@@ -168,13 +169,18 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
             <div style={{ border: "1px solid #2a2a2a", borderRadius: 14, padding: 14, display: "grid", gap: 12, background: "#181818" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Phone number", "رقم الهاتف")}</span>
-                <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">{dispPhone(profile?.phone)}</span>
+                <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">{dispPhone(newPhone || profile?.phone)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Email", "البريد الإلكتروني")}</span>
                 <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)", textAlign: "end", wordBreak: "break-all" }} data-no-i18n="">{newEmail || (profile?.email as string) || ""}</span>
               </div>
-              <AdminEmailEditor current={newEmail || (profile?.email as string)} onChanged={setNewEmail} />
+              <AdminEmailEditor
+                current={newEmail || (profile?.email as string)}
+                currentPhone={newPhone || (profile?.phone as string)}
+                onChanged={setNewEmail}
+                onPhoneChanged={setNewPhone}
+              />
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Country", "الدولة")}</span>
                 <span style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">🇱🇾 Libya</span>

@@ -607,3 +607,6 @@ to {opacity:1;transform:scale(1);}
 .lateen-marketer .aee-cancel { justify-self:start; padding:0; border:none; background:none; color:var(--color-text-tertiary); font-size:11px; font-family:var(--font-sans); cursor:pointer; text-decoration:underline; }
 .lateen-marketer .aee-err { font-size:11px; line-height:1.5; color:#e07070; }
 .lateen-marketer .aee-ok { font-size:11px; color:#34c77b; }
+.lateen-marketer .aee-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--color-text-secondary); }
+.lateen-marketer .aee-cc { display:flex; align-items:center; justify-content:center; gap:4px; height:38px; padding:0 8px; font-size:13px; font-family:var(--font-sans); border:0.5px solid var(--color-border-secondary); border-radius:10px; background:var(--color-background-secondary); color:var(--color-text-primary); cursor:pointer; }
+.lateen-marketer .aee-warn { font-size:11px; line-height:1.55; color:#c9923a; background:#3a2a10; border-radius:9px; padding:9px 11px; }

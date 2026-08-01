@@ -27,6 +27,7 @@ export function ProfileOverlay({
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   // Shown straight away after an admin changes it, so the row is not stale.
   const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [avatarHint, setAvatarHint] = useState("");
   const [changeOpen, setChangeOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -184,7 +185,7 @@ export function ProfileOverlay({
                 {t.phone}
               </span>
               <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n>
-                {dispPhone(p.phone) || "—"}
+                {dispPhone(newPhone || p.phone) || "—"}
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
@@ -195,7 +196,12 @@ export function ProfileOverlay({
                 {newEmail || p.email || "—"}
               </span>
             </div>
-            <AdminEmailEditor current={newEmail || p.email} onChanged={setNewEmail} />
+            <AdminEmailEditor
+              current={newEmail || p.email}
+              currentPhone={newPhone || p.phone}
+              onChanged={setNewEmail}
+              onPhoneChanged={setNewPhone}
+            />
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }} data-i18n="Country">
                 Country
