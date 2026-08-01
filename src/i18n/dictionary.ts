@@ -671,6 +671,13 @@ export const DICT: Record<string, string> = {
   "e.g. New update available": "مثال: فمّا تحديث جديد",
 
   // ----- Admin: menu & pages -----
+  "Wallet balance": "رصيد المحفظة",
+  "Scheduled for": "مجدولة ليوم",
+  "No requests here.": "ما فماش طلبات هنا.",
+  "No requests match your search.": "ما فماش طلبات مطابقة لبحثك.",
+  "Send to All Users": "ابعت لكل المستخدمين",
+  "Broadcast to all users": "إرسال لكل المستخدمين",
+  "Notification title (what users see first)": "عنوان الإشعار (اللي يشوفوه المستخدمين أول)",
   "No reports match your search.": "ما فماش بلاغات مطابقة لبحثك.",
   "Report Type": "نوع البلاغ",
   "Comment": "التعليق",

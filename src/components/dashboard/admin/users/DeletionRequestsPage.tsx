@@ -1,27 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import { normSearch } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
 import { dispPhone, initials, money, when, whenFull } from "../lib/format";
+import type { DeletionRequest } from "../lib/types";
 import { goToAccount } from "./UserCard";
 
-const STATUS_LABEL = (s?: string | null) =>
-  s === "wallet_review" ? "Needs Review"
-    : s === "scheduled" ? "Scheduled"
-      : s === "rejected" ? "Rejected"
-        : s === "cancelled" ? "Cancelled" : "Completed";
-
+/* Only the two states an admin acts on or waits out. Rejected and cancelled
+   requests are finished with — like reports, they stay in the database without
+   taking up room on the page. */
 const FILTERS: Array<{ key: string; label: string }> = [
-  { key: "", label: "All" },
   { key: "wallet_review", label: "Needs Review" },
   { key: "scheduled", label: "Scheduled" },
-  { key: "rejected", label: "Rejected" },
-  { key: "cancelled", label: "Cancelled" },
 ];
+
+/** Everything a request can be found by, normalised so typing in either
+ *  language matches. */
+function searchText(r: DeletionRequest): string {
+  const p = r.person || {};
+  return normSearch(
+    [p.full_name, p.business_name, p.email, p.phone, r.role, r.admin_comment].filter(Boolean).join(" "),
+  );
+}
 
 export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { deletionRequests, loadDeletionRequests, api } = useAdminData();
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState("wallet_review");
+  const [search, setSearch] = useState("");
   const [comments, setComments] = useState<Record<string, string>>({});
   const [loadedOnce, setLoadedOnce] = useState(false);
 
@@ -49,13 +56,24 @@ export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBa
     }
   };
 
-  const list = filter ? deletionRequests.filter((r) => r.status === filter) : deletionRequests;
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { wallet_review: 0, scheduled: 0 };
+    deletionRequests.forEach((r) => { if (r.status && r.status in c) c[r.status]++; });
+    return c;
+  }, [deletionRequests]);
+
+  const list = useMemo(() => {
+    const inFilter = deletionRequests.filter((r) => r.status === filter);
+    const q = normSearch(search);
+    if (!q) return inFilter;
+    return inFilter.filter((r) => searchText(r).includes(q));
+  }, [deletionRequests, filter, search]);
 
   let body: React.ReactNode;
   if (!deletionRequests.length && !loadedOnce) {
     body = <div className="adm-empty">Loading…</div>;
   } else if (!list.length) {
-    body = <div className="adm-empty">No requests{filter ? " in this filter" : ""}.</div>;
+    body = <div className="adm-empty">{search ? "No requests match your search." : "No requests here."}</div>;
   } else {
     body = list.map((r) => {
       const person = r.person || {};
@@ -67,64 +85,69 @@ export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBa
       const needsReview = r.status === "wallet_review";
 
       return (
-        <div className="rpt-card" key={r.id}>
-          <div className="rpt-top">
+        <div className="del-card" key={r.id}>
+          {/* Role on one side, the way into the account on the other. */}
+          <div className="del-top">
             <span className="rpt-type-pill">{r.role === "business" ? "Business" : "Marketer"}</span>
-            <span className={"rpt-status-pill " + (needsReview ? "rpt-status-open" : "rpt-status-resolved")}>
-              {STATUS_LABEL(r.status)}
-            </span>
-          </div>
-          <div className="rpt-reporter-row">
-            <div className="adm-user-av" data-no-i18n>{initials(name)}</div>
-            <div style={{ flex: 1, minWidth: 120 }}>
-              <div className="rpt-name" data-no-i18n>{name}</div>
-              <div className="rpt-sub">
-                <span data-no-i18n>{dispPhone(person.phone) || ""}</span>
-                {!dispPhone(person.phone) && <span>no phone</span>}
-                {" · "}<span>Requested</span>{" "}<span data-no-i18n>{when(r.requested_at)}</span>
-              </div>
-            </div>
             <button className="adm-go-btn" onClick={() => goToAccount(r.user_id, r.role || "marketer", name)}>
               Go to Account
             </button>
           </div>
 
+          <div className="del-who">
+            <div className="adm-user-av" data-no-i18n>
+              {person.avatar_signed_url
+                ? <img src={person.avatar_signed_url} alt="" loading="lazy" decoding="async" />
+                : initials(name)}
+            </div>
+            <div className="del-rows">
+              <div className="del-row">
+                <span className="del-k">Name</span>
+                <span className="del-v" data-no-i18n>{name}</span>
+              </div>
+              <div className="del-row">
+                <span className="del-k">Phone number</span>
+                <span className="del-v" data-no-i18n>{dispPhone(person.phone) || "—"}</span>
+              </div>
+              <div className="del-row">
+                <span className="del-k">Email</span>
+                <span className="del-v" data-no-i18n>{person.email || "—"}</span>
+                <span className="del-ago" data-no-i18n>{when(r.requested_at)}</span>
+              </div>
+            </div>
+          </div>
+
           {hasFunds ? (
-            <div className="rpt-resolved-note" style={{ background: "#2a1a1a", color: "#f0c0c0" }}>
-              Wallet balance: <b>{money(bal)}</b>
-              {pending > 0 ? <> · Pending: <b>{money(pending)}</b></> : null}
+            <div className="del-wallet has-funds">
+              <span>Wallet balance</span>
+              <b data-no-i18n>{money(bal)}</b>
+              {pending > 0 ? <span className="del-wallet-pending">· Pending: <b data-no-i18n>{money(pending)}</b></span> : null}
             </div>
           ) : (
-            <div className="rpt-resolved-note">Wallet is empty.</div>
+            <div className="del-wallet">Wallet is empty.</div>
           )}
 
           {needsReview ? (
-            <div className="rpt-comment-box">
+            <>
               <textarea
-                className="rpt-comment-ta"
+                className="rpt-comment-ta del-note"
                 placeholder="Optional note for approval, or the reason if you're rejecting this request"
                 value={comments[r.id] || ""}
                 onChange={(e) => setComments((prev) => ({ ...prev, [r.id]: e.target.value }))}
               />
-              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                <button className="adm-btn adm-btn-acc" style={{ flex: 1 }} onClick={() => void resolve(r.id, "approve")}>
-                  Approve &amp; schedule deletion
-                </button>
-                <button
-                  className="adm-go-btn"
-                  style={{ flex: 1, background: "#fee", color: "#c00", borderColor: "#fcc" }}
-                  onClick={() => void resolve(r.id, "reject")}
-                >
+              <div className="del-actions">
+                <button className="del-btn del-btn-reject" onClick={() => void resolve(r.id, "reject")}>
                   Reject
                 </button>
+                <button className="del-btn del-btn-approve" onClick={() => void resolve(r.id, "approve")}>
+                  Approve &amp; schedule deletion
+                </button>
               </div>
-            </div>
-          ) : r.status === "scheduled" ? (
-            <div className="rpt-resolved-note"><b>Scheduled for:</b> {whenFull(r.scheduled_for)}</div>
+            </>
           ) : (
-            <div className="rpt-resolved-note">
-              <b>Admin comment:</b> <span data-no-i18n>{r.admin_comment || ""}</span>
-              <div style={{ marginTop: 4, opacity: 0.8, fontSize: 11 }}>Reviewed {when(r.resolved_at)}</div>
+            <div className="del-wallet">
+              <span>Scheduled for</span>
+              <b data-no-i18n>{whenFull(r.scheduled_for)}</b>
             </div>
           )}
         </div>
@@ -134,18 +157,24 @@ export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBa
 
   return (
     <>
-      <PageHeader title="Deletion Requests" onBack={onBack} count={deletionRequests.filter((r) => r.status === "wallet_review").length} />
-        <div className="adm-filter-row" style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              className={"adm-filter-chip" + (filter === f.key ? " on" : "")}
-              onClick={() => setFilter(f.key)}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+      <PageHeader title="Deletion Requests" onBack={onBack} count={counts.wallet_review} />
+      <div className="adm-filter-row">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            className={"adm-filter-chip" + (filter === f.key ? " on" : "")}
+            onClick={() => setFilter(f.key)}
+          >
+            {f.label}{filter === f.key ? ` (${counts[f.key] || 0})` : ""}
+          </button>
+        ))}
+      </div>
+      <input
+        className="adm-search"
+        placeholder="Search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <div>{body}</div>
     </>
   );

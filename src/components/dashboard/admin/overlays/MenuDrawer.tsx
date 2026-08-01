@@ -79,7 +79,7 @@ export function MenuDrawer({
     {
       key: "notifications",
       label: "Send Notification",
-      sub: "Broadcast to all marketers",
+      sub: "Broadcast to all users",
       count: 0,
       onClick: onNotifications,
       icon: (

@@ -38,7 +38,7 @@ export function NotificationsPage({ onBack }: { onBack: () => void }) {
     <>
       <PageHeader title="Send Notification" onBack={onBack} />
 
-        <div className="adm-notif-lbl">Notification title (what marketers see first)</div>
+        <div className="adm-notif-lbl">Notification title (what users see first)</div>
         <input
           type="text"
           className="adm-notif-inp"
@@ -57,7 +57,7 @@ export function NotificationsPage({ onBack }: { onBack: () => void }) {
         <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
           <button className="adm-btn adm-btn-ghost" onClick={onBack}>Cancel</button>
           <button className="adm-notif-send-btn" style={{ flex: 1 }} disabled={sending} onClick={() => void send()}>
-            {sending ? "Sending…" : "Send to All Marketers"}
+            {sending ? "Sending…" : "Send to All Users"}
           </button>
         </div>
     </>
