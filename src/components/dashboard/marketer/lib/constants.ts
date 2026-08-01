@@ -117,7 +117,11 @@ export const LIBYA_CITIES: Array<{ en: string; ar: string }> = [
   { en: "Bint Bayya", ar: "بنت بية" },
 ];
 
-/** Banks offered in the payout / withdrawal forms. */
+/** Banks offered in the payout / withdrawal forms.
+ *
+ *  The Arabic name is the stored value — it is what is already sitting in
+ *  every profile's payout_bank_name — so it stays the key and only the label
+ *  changes with the language. */
 export const PAYOUT_BANKS = [
   "مصرف الجمهورية", "مصرف الامان", "مصرف التجارة والتنمية", "مصرف ليبيا المركزي - بنغازي",
   "مصرف الضمان الاسلامي", "محفظة GPAY", "مصرف التمويل الإسلامي", "مصرف الاسلامي الليبي",
@@ -125,6 +129,43 @@ export const PAYOUT_BANKS = [
   "محفظة paynow", "محفظة RUNPAY", "مصرف الصحاري", "مصرف السراج الاسلامي", "تطبيق التداول",
   "مصرف التضامن",
 ];
+
+/* The name each of these banks trades under in English, taken from the Central
+ * Bank of Libya's own register rather than translated.
+ *
+ * There is no rule to derive these. Some Libyan banks carry a translated name
+ * — مصرف شمال افريقيا really is North Africa Bank — and some carry the Arabic
+ * word transliterated, so مصرف الوحدة is Wahda Bank and not Unity Bank, and
+ * مصرف الجمهورية is Jumhouria Bank and not Republic Bank. Translating them
+ * would produce names that no Libyan bank answers to and that no marketer
+ * could match against their own bank card. */
+export const PAYOUT_BANK_EN: Record<string, string> = {
+  "مصرف الجمهورية": "Jumhouria Bank",
+  "مصرف الامان": "Aman Bank",
+  "مصرف التجارة والتنمية": "Bank of Commerce & Development",
+  "مصرف ليبيا المركزي - بنغازي": "Central Bank of Libya — Benghazi",
+  "مصرف الضمان الاسلامي": "Daman Islamic Bank",
+  "محفظة GPAY": "GPAY Wallet",
+  "مصرف التمويل الإسلامي": "Islamic Finance Bank",
+  "مصرف الاسلامي الليبي": "Libyan Islamic Bank",
+  "مصرف المتوسط": "Mediterranean Bank",
+  "مصرف شمال افريقيا": "North Africa Bank",
+  "مصرف التجاري الوطني": "National Commercial Bank",
+  "مصرف الاتحاد الوطني": "National Union Bank",
+  "محفظة paynow": "PayNow Wallet",
+  "محفظة RUNPAY": "RunPay Wallet",
+  "مصرف الصحاري": "Sahara Bank",
+  "مصرف السراج الاسلامي": "Al Seraj Islamic Bank",
+  "تطبيق التداول": "Tadawul App",
+  "مصرف التضامن": "Tadhamon Bank",
+};
+
+/** The bank as it should read in the language on screen. Anything not in the
+ *  list — an older stored value, a bank added since — is left alone. */
+export const bankLabel = (v: unknown, ar: boolean): string => {
+  const s = String(v ?? "");
+  return ar ? s : PAYOUT_BANK_EN[s] || s;
+};
 
 export const PAYOUT_METHODS = ["One pay", "Bank of Unity", "Libyana Credit", "Madar Credit"];
 
