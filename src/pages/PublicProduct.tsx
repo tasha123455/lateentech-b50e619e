@@ -260,7 +260,7 @@ export function PublicProduct({ id }: { id: string }) {
       <header className="flex items-center justify-between px-4 py-3">
         <Link to={withLang("/")} aria-label="Wasla" className="flex items-center gap-2">
           <img src="/wasla-mark-64.png" alt="Wasla" width={28} height={28} className="h-7 w-auto" />
-          <img src={lang === "ar" ? "/wasla-wordmark-ar.png" : "/wasla-wordmark-en.png"} alt="" aria-hidden className="h-4 w-auto" />
+          <img src={lang === "ar" ? "/wasla-wordmark-ar-tight.png" : "/wasla-wordmark-en-tight.png"} alt="" aria-hidden className="h-4 w-auto" />
         </Link>
       </header>
       <div

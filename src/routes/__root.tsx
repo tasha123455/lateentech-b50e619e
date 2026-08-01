@@ -90,13 +90,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.json" },
       { rel: "icon", href: "/wasla-icon-192.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/wasla-icon-192.png" },
-      // Preload brand assets so the logo/wordmark/tagline appear instantly
-      // on first paint everywhere (splash, auth, landing, headers).
-      { rel: "preload", as: "image", href: "/wasla-mark.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-wordmark-en.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-wordmark-ar.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-tagline-en.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-tagline-ar.png", fetchpriority: "high" } as any,
+      // Preload the brand art used at large sizes — the splash mark and the
+      // landing lockup. The small lockup on the auth pages is inlined in the
+      // bundle and never asks the network for anything.
+      { rel: "preload", as: "image", href: "/wasla-mark-tight.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-wordmark-en-tight.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-wordmark-ar-tight.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-tagline-en-tight.png", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: "/wasla-tagline-ar-tight.png", fetchpriority: "high" } as any,
     ],
 
   }),

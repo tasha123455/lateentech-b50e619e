@@ -80,10 +80,11 @@ export function SignInForm({ role }: { role: Role }) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-sm text-text-2">{subtitle}</p>
+      <div className="text-center">
+        <h1 className="text-xl font-medium text-text-1">Sign in</h1>
+        <p className="mt-1 text-sm text-text-2">{subtitle}</p>
       </div>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      <AuthError>{error}</AuthError>
       <GoogleButton onClick={signInGoogle}>Sign in with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
         New here?{" "}
@@ -92,6 +93,21 @@ export function SignInForm({ role }: { role: Role }) {
         </Link>
       </p>
     </div>
+  );
+}
+
+/** Sign-in failures are the one thing on these pages a person has to read, and
+ *  as a line of small red text they were easy to miss entirely — especially the
+ *  wrong-role message, which is a paragraph. */
+export function AuthError({ children }: { children?: React.ReactNode }) {
+  if (!children) return null;
+  return (
+    <p
+      role="alert"
+      className="rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2.5 text-xs leading-relaxed text-destructive"
+    >
+      {children}
+    </p>
   );
 }
 

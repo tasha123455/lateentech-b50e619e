@@ -2,7 +2,7 @@ import { useMemo, useRef, useState, useEffect, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { GoogleButton } from "./GoogleButton";
-import { Field } from "./SignInForm";
+import { AuthError, Field } from "./SignInForm";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -202,9 +202,7 @@ export function RegisterForm({ role }: { role: Role }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div>
-        <h1 className="text-xl font-medium text-text-1">Create account</h1>
-      </div>
+      <h1 className="text-center text-xl font-medium text-text-1">Create account</h1>
 
       <Field label="Full name" required>
         <input
@@ -292,7 +290,7 @@ export function RegisterForm({ role }: { role: Role }) {
         </CollapsibleContent>
       </Collapsible>
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      <AuthError>{error}</AuthError>
 
       <div
         className={!canSubmit || busy ? "pointer-events-none opacity-60" : ""}
