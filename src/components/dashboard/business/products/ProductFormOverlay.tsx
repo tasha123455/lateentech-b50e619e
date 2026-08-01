@@ -4,7 +4,7 @@ import { useBusinessData } from "../BusinessDataProvider";
 import type { Product } from "../lib/types";
 import {
   isAr, priceSym, freeLbl, isFreeVal, pctOf, genCode, platformFeeForPrice,
-  PLATFORM_FEE_THRESHOLD, moneyParts, normSearch,
+  PLATFORM_FEE_THRESHOLD, moneyParts, searchMatcher,
 } from "../lib/format";
 import {
   CURRENCIES, COUNTRIES, COUNTRY_CUR_MAP, CATEGORY_DATA, CATEGORY_GROUP_AR,
@@ -266,18 +266,17 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
 
   // ---- category ----
   const renderCategoryList = () => {
-    /* normSearch, and both languages regardless of which one the form is in:
-       a lowercase compare could not fold the Arabic letter variants, and the
-       Arabic labels were only searchable while the page itself was Arabic. */
-    const q = normSearch(categorySearch);
+    /* Both languages regardless of which one the form is in: the Arabic labels
+       used to be searchable only while the page itself was Arabic. The matcher
+       forgives a typo and folds the Arabic letter variants. */
+    const match = searchMatcher(categorySearch);
     const rows: ReactElement[] = [];
     let any = false;
     CATEGORY_DATA.forEach((section) => {
       const groupLbl = ar ? (CATEGORY_GROUP_AR[section.group] || section.group) : section.group;
-      const groupHay = normSearch([section.group, CATEGORY_GROUP_AR[section.group]].filter(Boolean).join(" "));
-      const groupMatches = groupHay.includes(q);
+      const groupMatches = match([section.group, CATEGORY_GROUP_AR[section.group]].filter(Boolean).join(" "));
       const items = section.items.filter(
-        (it) => groupMatches || normSearch([it, CATEGORY_ITEM_AR[it]].filter(Boolean).join(" ")).includes(q),
+        (it) => groupMatches || match([it, CATEGORY_ITEM_AR[it]].filter(Boolean).join(" ")),
       );
       if (!items.length) return;
       any = true;

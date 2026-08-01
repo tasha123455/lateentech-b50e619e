@@ -151,7 +151,7 @@ export function AnalyticsBreakdown({
               </div>
             </div>
 
-            <TransactionsCard />
+            <TransactionsCard sel={sel} />
           </div>
         </div>
       </div>

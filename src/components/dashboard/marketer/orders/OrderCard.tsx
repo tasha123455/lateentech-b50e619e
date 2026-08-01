@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 
-import { codPaysParts, dispPhone, fmtDT, isAr } from "../lib/format";
+import { codPaysParts, dispPhone, fmtDT, isAr, isSafeUrl } from "../lib/format";
 import { orderVariants } from "../lib/mappers";
 import type { BrowseProduct, FormProduct, MarketerOrder } from "../lib/types";
 import { ProductCover } from "../browse/ProductCard";
 import { FreeOrMoney, Money } from "../ui/Money";
+import { usePhotoLightbox } from "../ui/PhotoLightbox";
 import { orderT } from "./orderText";
 
 const Check = ({ size = 11, className = "variant-check" }: { size?: number; className?: string }) => (
@@ -56,6 +57,7 @@ export function OrderCard({
   const [open, setOpen] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
+  const lightbox = usePhotoLightbox();
 
   const T = orderT();
   const st = o._status || "pending";
@@ -109,6 +111,26 @@ export function OrderCard({
     setPhotoIdx(Math.round(tr.scrollLeft / w));
   };
 
+  /* The photo strip is a scroller and it sits inside the row that expands the
+     card, so a tap has to be told apart from both a swipe through the photos
+     and a tap meant for the row. Anything that travelled counts as a drag and
+     is left alone; a tap that stayed put opens the viewer and stops there. */
+  const pressAt = useRef<{ x: number; y: number } | null>(null);
+  const onPressStart = (e: React.PointerEvent) => { pressAt.current = { x: e.clientX, y: e.clientY }; };
+  const tapped = (e: React.MouseEvent) => {
+    const p = pressAt.current;
+    pressAt.current = null;
+    if (!p) return true;
+    return Math.abs(e.clientX - p.x) < 10 && Math.abs(e.clientY - p.y) < 10;
+  };
+
+  const viewable = photos.filter(isSafeUrl);
+  const openPhotos = (e: React.MouseEvent, start: number) => {
+    if (!viewable.length || !tapped(e)) return;
+    e.stopPropagation();
+    lightbox.open(viewable, start);
+  };
+
   const uploading = uploadingId === o.id;
 
   let receiptBtn: React.ReactNode;
@@ -150,7 +172,14 @@ export function OrderCard({
             {photos.length ? (
               photos.map((u, i) => (
                 <div className="photo-slide" key={u + i}>
-                  <img src={u} alt="" loading="lazy" />
+                  <img
+                    src={u}
+                    alt=""
+                    loading="lazy"
+                    onPointerDown={onPressStart}
+                    onClick={(e) => openPhotos(e, viewable.indexOf(u))}
+                    style={isSafeUrl(u) ? { cursor: "zoom-in" } : undefined}
+                  />
                 </div>
               ))
             ) : (
@@ -213,7 +242,18 @@ export function OrderCard({
                         <span className="variant-value" data-no-i18n>{v.val}</span>
                       </div>
                       {!!v.photo && (
-                        <div className="variant-swatch" style={{ backgroundImage: `url('${v.photo}')` }} />
+                        <div
+                          className="variant-swatch"
+                          role={isSafeUrl(v.photo) ? "button" : undefined}
+                          aria-label={isSafeUrl(v.photo) ? `${v.group || ""} ${v.val}` : undefined}
+                          onClick={isSafeUrl(v.photo)
+                            ? (e) => { e.stopPropagation(); lightbox.openOne(v.photo as string); }
+                            : undefined}
+                          style={{
+                            backgroundImage: `url('${v.photo}')`,
+                            ...(isSafeUrl(v.photo) ? { cursor: "zoom-in" } : null),
+                          }}
+                        />
                       )}
                     </div>
                   ))}
@@ -290,7 +330,12 @@ export function OrderCard({
             <div className={"commission-block" + (isApproved ? "" : " muted")}>
               <div>
                 <div className="commission-label">{T.comm}{qtyN > 1 ? ` (×${qtyN})` : ""}</div>
-                {!isApproved && <div className="commission-hint">{T.pendingComm}</div>}
+                {/* "Pending review" is a statement about where the order is, so
+                    it belongs only to the order that is actually under review.
+                    It used to show for everything that was not yet approved,
+                    which meant a rejected, cancelled or not-yet-sent order all
+                    claimed a review that nobody was doing. */}
+                {isPending && <div className="commission-hint">{T.pendingComm}</div>}
               </div>
               {isApproved ? (
                 <span className="commission-value">+<Money n={commAmount} sym={o._sym} code={o._curCode} /></span>

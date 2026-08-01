@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { normSearch } from "@/components/dashboard/marketer/lib/format";
+import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { UserCard } from "./UserCard";
@@ -22,13 +22,12 @@ export function UsersPage({ active, onNotify }: { active: boolean; onNotify: () 
     if (active) void loadUsers();
   }, [active, loadUsers]);
 
-  /* normSearch rather than a plain lowercase compare: it folds the Arabic
-     letter variants, so "احمد" finds "أحمد". */
-  const matchesSearch = (u: (typeof users)[number]) => {
-    const q = normSearch(search);
-    if (!q) return true;
-    return normSearch([u.full_name, u.business_name, u.email, u.phone].filter(Boolean).join(" ")).includes(q);
-  };
+  /* The shared matcher rather than a plain lowercase compare: it folds the
+     Arabic letter variants, so "احمد" finds "أحمد", and it forgives a typo, so
+     a name half-remembered still finds its row. */
+  const match = searchMatcher(search);
+  const matchesSearch = (u: (typeof users)[number]) =>
+    match([u.full_name, u.business_name, u.email, u.phone].filter(Boolean).join(" "));
 
   // Counts for the chips. Only the tapped chip shows its number, matching the
   // order filters on the business dashboard.

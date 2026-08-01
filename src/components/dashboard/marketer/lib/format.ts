@@ -169,6 +169,148 @@ export function normSearch(s: unknown): string {
     .trim();
 }
 
+/* Anything that is not a letter or a digit separates words. Written with
+   Unicode classes so it splits Arabic exactly as it splits English. */
+const WORD_BREAK = /[^\p{L}\p{N}]+/u;
+const WORD_BREAK_G = /[^\p{L}\p{N}]+/gu;
+
+/** How many typos a word of this length is allowed to carry.
+ *
+ *  Short words get none: at three letters almost everything is within one edit
+ *  of everything else, and the list fills with noise. The allowance grows with
+ *  length because a long word is a long chance to slip, and because a long
+ *  word matched loosely is still a specific word.
+ *
+ *  Two edits are held back until eight letters. At seven it was enough to put
+ *  "mohamed" within reach of "ahmed", which is not a near miss — it is a
+ *  different name. */
+const typoBudget = (len: number): number => (len <= 3 ? 0 : len <= 7 ? 1 : 2);
+
+/** Edit distance between `a` and the closest prefix of `b`, capped at `budget`.
+ *
+ *  Matching a prefix rather than the whole word is what lets a half-typed word
+ *  find the full one \u2014 "\u0642\u0645\u064A" reaches \u0642\u0645\u064A\u0635, "delive" reaches delivered \u2014 while
+ *  still paying for the letters that are actually wrong.
+ *
+ *  Swapping two neighbouring letters costs one, not two. It is the typo people
+ *  actually make \u2014 "shrit", "recieve" \u2014 and charging it as a deletion plus an
+ *  insertion put it out of reach of the budget a word that short is given.
+ *
+ *  The table is banded: an alignment that strays further than `budget` from the
+ *  diagonal has already spent more than the budget, so those cells are left at
+ *  the cap. That makes the cost O(len \u00D7 budget) rather than O(len\u00B2). */
+function prefixDistance(a: string, b: string, budget: number): number {
+  const n = a.length;
+  const m = b.length;
+  if (!n) return 0;
+  const cap = budget + 1;
+  if (m + budget < n) return cap;
+
+  // Three rows, because a transposition reaches two back on both axes.
+  let two = new Array<number>(m + 1).fill(cap);
+  let prev = new Array<number>(m + 1).fill(cap);
+  let cur = new Array<number>(m + 1).fill(cap);
+  for (let j = 0; j <= m && j <= budget; j++) prev[j] = j;
+
+  for (let i = 1; i <= n; i++) {
+    const lo = Math.max(0, i - budget);
+    const hi = Math.min(m, i + budget);
+    for (let j = lo; j <= hi; j++) cur[j] = cap;
+    if (i <= budget) cur[0] = i;
+    for (let j = Math.max(1, lo); j <= hi; j++) {
+      const same = a.charCodeAt(i - 1) === b.charCodeAt(j - 1);
+      let v = Math.min(prev[j - 1] + (same ? 0 : 1), prev[j] + 1, cur[j - 1] + 1);
+      if (
+        i > 1 && j > 1 &&
+        a.charCodeAt(i - 1) === b.charCodeAt(j - 2) &&
+        a.charCodeAt(i - 2) === b.charCodeAt(j - 1)
+      ) {
+        const swapped = two[j - 2] + 1;
+        if (swapped < v) v = swapped;
+      }
+      cur[j] = v < cap ? v : cap;
+    }
+    const spare = two;
+    two = prev;
+    prev = cur;
+    cur = spare;
+  }
+
+  let best = cap;
+  for (let j = Math.max(0, n - budget); j <= Math.min(m, n + budget); j++) {
+    if (prev[j] < best) best = prev[j];
+  }
+  return best;
+}
+
+/* The Arabic definite article is not a typo \u2014 it is a word wearing a hat, and
+   whether the writer put it on is not something a search box should care
+   about. Two edits would swallow the whole budget of a short word, so it comes
+   off both sides before they are compared. Guarded on length so that words
+   which merely begin with those letters survive. */
+const bareAr = (s: string): string => (s.length > 4 && s.startsWith("\u0627\u0644") ? s.slice(2) : s);
+
+/** Builds the test one search box runs against every row it is filtering.
+ *
+ *  Typing is imprecise, so the box is too. Three things make a query land:
+ *
+ *  - every word of the query has to match, but they may be in any order and
+ *    anywhere in the row, so "red shirt" finds "Shirt \u2014 cotton, red";
+ *  - a word matches as a substring first, so an exact query behaves exactly as
+ *    it always did and costs the same;
+ *  - failing that, a word matches a word of the row it is within a typo or two
+ *    of, counting a prefix as a whole match, so a half-typed or misspelt word
+ *    still finds its row.
+ *
+ *  The folding in `normSearch` runs on both sides, so all of this holds in
+ *  Arabic \u2014 where a query lands whichever way the writer spelled their alefs,
+ *  and where a missing \u0627\u0644 is just two edits like any other slip.
+ *
+ *  An empty query matches everything, which is what a search box that has not
+ *  been typed into should do. */
+export function searchMatcher(query: unknown): (hay: unknown) => boolean {
+  const tokens = normSearch(query).split(WORD_BREAK).filter(Boolean);
+  if (!tokens.length) return () => true;
+
+  /* Codes, order numbers and phone numbers get written both with and without
+     their punctuation — EMP-002 and EMP002, +218 91 234 and 21891234 — and
+     which one somebody types says nothing about what they are looking for. So
+     there is a second strict pass with every separator taken out of both
+     sides. It is exact, not fuzzy, so it adds reach without adding noise. */
+  const tight = tokens.map((t) => t.replace(WORD_BREAK_G, ""));
+
+  return (raw: unknown) => {
+    const hay = normSearch(raw);
+    if (!hay) return false;
+    let words: string[] | null = null;
+    let squashed: string | null = null;
+
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      if (hay.includes(token)) continue;
+      if (tight[i] !== token || WORD_BREAK.test(hay)) {
+        if (squashed === null) squashed = hay.replace(WORD_BREAK_G, "");
+        if (tight[i] && squashed.includes(tight[i])) continue;
+      }
+      const bare = bareAr(token);
+      const budget = Math.max(typoBudget(token.length), typoBudget(bare.length));
+      if (!budget) return false;
+      if (!words) words = hay.split(WORD_BREAK).filter(Boolean);
+      let hit = false;
+      for (const w of words) {
+        if (prefixDistance(token, w, budget) <= budget) { hit = true; break; }
+        const bw = bareAr(w);
+        if ((bare !== token || bw !== w) && prefixDistance(bare, bw, typoBudget(bare.length)) <= typoBudget(bare.length)) {
+          hit = true;
+          break;
+        }
+      }
+      if (!hit) return false;
+    }
+    return true;
+  };
+}
+
 export const pad2 = (n: number): string => (n < 10 ? "0" + n : "" + n);
 export const ddmmyyyy = (d: Date): string => pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1) + "/" + d.getFullYear();
 export const today2 = (): string => {

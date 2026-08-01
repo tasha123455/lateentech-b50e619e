@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { normSearch } from "@/components/dashboard/marketer/lib/format";
+import { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, whenFull } from "../lib/format";
@@ -299,9 +299,9 @@ export function ReportsTab({
      as the audit trail — it is just not something the admin has to scroll past. */
   const list = useMemo(() => {
     const open = reports.filter((r) => r.status === "open");
-    const q = normSearch(search);
-    if (!q) return open;
-    return open.filter((r) => searchText(r).includes(q));
+    if (!search.trim()) return open;
+    const match = searchMatcher(search);
+    return open.filter((r) => match(searchText(r)));
   }, [reports, search]);
 
   const resolve = async (id: string, comment: string) => {

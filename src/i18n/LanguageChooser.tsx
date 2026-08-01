@@ -48,7 +48,7 @@ export function LanguageChooser({
       dir="ltr"
     >
       <div className="mb-10">
-        <LateenLogo variant="mark" size={128} glow />
+        <LateenLogo variant="mark" size={150} glow />
       </div>
       <h1 className="mb-2 text-center text-2xl font-semibold text-foreground">
         Choose your language

@@ -12,7 +12,7 @@ type Props = {
   logoSize?: number;
 };
 
-export function AuthCard({ role, children, backTo, logoSize = 100 }: Props) {
+export function AuthCard({ role, children, backTo, logoSize = 120 }: Props) {
   const tint = role === "marketer" ? "bg-marketer-tint text-marketer-foreground" : "bg-business-tint text-business";
   const label = role === "marketer" ? "Marketer" : "Business";
   const { lang, otherLangPath, withLang } = useLanguage();
