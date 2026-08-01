@@ -33,6 +33,7 @@ import { Route as ArMarketerSigninRouteImport } from './routes/ar.marketer.signi
 import { Route as ArMarketerRegisterRouteImport } from './routes/ar.marketer.register'
 import { Route as ArBusinessSigninRouteImport } from './routes/ar.business.signin'
 import { Route as ArBusinessRegisterRouteImport } from './routes/ar.business.register'
+import { Route as ApiAdminAccountEmailRouteImport } from './routes/api/admin/account-email'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -160,6 +161,11 @@ const ArBusinessRegisterRoute = ArBusinessRegisterRouteImport.update({
   path: '/business/register',
   getParentRoute: () => ArRoute,
 } as any)
+const ApiAdminAccountEmailRoute = ApiAdminAccountEmailRouteImport.update({
+  id: '/api/admin/account-email',
+  path: '/api/admin/account-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/p/$id': typeof PIdRoute
   '/ar/': typeof ArIndexRoute
   '/en/': typeof EnIndexRoute
+  '/api/admin/account-email': typeof ApiAdminAccountEmailRoute
   '/ar/business/register': typeof ArBusinessRegisterRoute
   '/ar/business/signin': typeof ArBusinessSigninRoute
   '/ar/marketer/register': typeof ArMarketerRegisterRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/p/$id': typeof PIdRoute
   '/ar': typeof ArIndexRoute
   '/en': typeof EnIndexRoute
+  '/api/admin/account-email': typeof ApiAdminAccountEmailRoute
   '/ar/business/register': typeof ArBusinessRegisterRoute
   '/ar/business/signin': typeof ArBusinessSigninRoute
   '/ar/marketer/register': typeof ArMarketerRegisterRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/p/$id': typeof PIdRoute
   '/ar/': typeof ArIndexRoute
   '/en/': typeof EnIndexRoute
+  '/api/admin/account-email': typeof ApiAdminAccountEmailRoute
   '/ar/business/register': typeof ArBusinessRegisterRoute
   '/ar/business/signin': typeof ArBusinessSigninRoute
   '/ar/marketer/register': typeof ArMarketerRegisterRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/p/$id'
     | '/ar/'
     | '/en/'
+    | '/api/admin/account-email'
     | '/ar/business/register'
     | '/ar/business/signin'
     | '/ar/marketer/register'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/p/$id'
     | '/ar'
     | '/en'
+    | '/api/admin/account-email'
     | '/ar/business/register'
     | '/ar/business/signin'
     | '/ar/marketer/register'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/p/$id'
     | '/ar/'
     | '/en/'
+    | '/api/admin/account-email'
     | '/ar/business/register'
     | '/ar/business/signin'
     | '/ar/marketer/register'
@@ -385,6 +397,7 @@ export interface RootRouteChildren {
   MarketerRegisterRoute: typeof MarketerRegisterRoute
   MarketerSigninRoute: typeof MarketerSigninRoute
   PIdRoute: typeof PIdRoute
+  ApiAdminAccountEmailRoute: typeof ApiAdminAccountEmailRoute
   LovableAccountDeletionsProcessRoute: typeof LovableAccountDeletionsProcessRoute
   ApiPublicNotificationsPushRoute: typeof ApiPublicNotificationsPushRoute
   ApiPublicNotificationsVapidPublicKeyRoute: typeof ApiPublicNotificationsVapidPublicKeyRoute
@@ -563,6 +576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArBusinessRegisterRouteImport
       parentRoute: typeof ArRoute
     }
+    '/api/admin/account-email': {
+      id: '/api/admin/account-email'
+      path: '/api/admin/account-email'
+      fullPath: '/api/admin/account-email'
+      preLoaderRoute: typeof ApiAdminAccountEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -655,6 +675,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketerRegisterRoute: MarketerRegisterRoute,
   MarketerSigninRoute: MarketerSigninRoute,
   PIdRoute: PIdRoute,
+  ApiAdminAccountEmailRoute: ApiAdminAccountEmailRoute,
   LovableAccountDeletionsProcessRoute: LovableAccountDeletionsProcessRoute,
   ApiPublicNotificationsPushRoute: ApiPublicNotificationsPushRoute,
   ApiPublicNotificationsVapidPublicKeyRoute:

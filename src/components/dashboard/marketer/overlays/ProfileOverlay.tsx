@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { dispPhone, isAr, stripCC } from "../lib/format";
@@ -24,6 +25,8 @@ export function ProfileOverlay({
   const [waCc, setWaCc] = useState("‎+218‎");
   const [waPickerOpen, setWaPickerOpen] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  // Shown straight away after an admin changes it, so the row is not stale.
+  const [newEmail, setNewEmail] = useState("");
   const [avatarHint, setAvatarHint] = useState("");
   const [changeOpen, setChangeOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -189,9 +192,10 @@ export function ProfileOverlay({
                 {t.email}
               </span>
               <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)", textAlign: "end", wordBreak: "break-all" }} data-no-i18n>
-                {p.email || "—"}
+                {newEmail || p.email || "—"}
               </span>
             </div>
+            <AdminEmailEditor current={newEmail || p.email} onChanged={setNewEmail} />
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }} data-i18n="Country">
                 Country

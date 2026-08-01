@@ -591,4 +591,19 @@ to {opacity:1;transform:scale(1);}
 .lateen-marketer .pd-vth.oos img {filter:grayscale(1);}
 .lateen-marketer .pd-vth img {width:100%;height:64px;object-fit:cover;border-radius:8px;display:block;background:#0d0d0d;}
 .lateen-marketer .pd-vth-lbl {font-size:10px;color:#c8c4be;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
+/* The admin-only sign-in email box inside a profile sheet. Invisible to the
+   person whose profile it is — it renders nothing at all unless an admin is
+   viewing the account. */
+.lateen-marketer .aee { margin-top: 2px; }
+.lateen-marketer .aee-open { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:9px; border:0.5px solid var(--color-border-secondary); background:transparent; color:var(--color-text-secondary); font-size:11px; font-family:var(--font-sans); cursor:pointer; }
+.lateen-marketer .aee-open:hover { color:var(--color-text-primary); }
+.lateen-marketer .aee-panel { display:grid; gap:8px; padding:12px; border-radius:12px; border:0.5px solid var(--color-border-secondary); background:var(--color-background-primary); }
+.lateen-marketer .aee-hint { font-size:11px; line-height:1.5; color:var(--color-text-secondary); }
+.lateen-marketer .aee-row { display:flex; gap:8px; }
+.lateen-marketer .aee-inp { flex:1; min-width:0; height:38px; padding:0 10px; font-size:13px; font-family:var(--font-sans); border:0.5px solid var(--color-border-secondary); border-radius:10px; background:var(--color-background-secondary); color:var(--color-text-primary); outline:none; }
+.lateen-marketer .aee-inp:focus { border-color:#34c77b; }
+.lateen-marketer .aee-btn { height:38px; padding:0 14px; border:none; border-radius:10px; background:#34c77b; color:#fff; font-size:12px; font-weight:600; font-family:var(--font-sans); cursor:pointer; white-space:nowrap; }
+.lateen-marketer .aee-btn:disabled { opacity:.45; cursor:default; }
+.lateen-marketer .aee-cancel { justify-self:start; padding:0; border:none; background:none; color:var(--color-text-tertiary); font-size:11px; font-family:var(--font-sans); cursor:pointer; text-decoration:underline; }
+.lateen-marketer .aee-err { font-size:11px; line-height:1.5; color:#e07070; }
+.lateen-marketer .aee-ok { font-size:11px; color:#34c77b; }

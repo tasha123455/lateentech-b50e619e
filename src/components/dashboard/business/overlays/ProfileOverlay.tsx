@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr, splitCC, stripCC, dispPhone } from "../lib/format";
@@ -19,6 +20,8 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
   const [crOpen, setCrOpen] = useState(false);
   const [crPhone, setCrPhone] = useState(false);
   const [crEmail, setCrEmail] = useState(false);
+  // Shown straight away after an admin changes it, so the row is not stale.
+  const [newEmail, setNewEmail] = useState("");
   const [crCountry, setCrCountry] = useState(false);
   const [delStatus, setDelStatus] = useState<{ id: string; status: string; scheduled_for?: string | null } | null>(null);
   const [delOverlayOpen, setDelOverlayOpen] = useState(false);
@@ -169,8 +172,9 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Email", "البريد الإلكتروني")}</span>
-                <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)", textAlign: "end", wordBreak: "break-all" }} data-no-i18n="">{profile?.email as string || ""}</span>
+                <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)", textAlign: "end", wordBreak: "break-all" }} data-no-i18n="">{newEmail || (profile?.email as string) || ""}</span>
               </div>
+              <AdminEmailEditor current={newEmail || (profile?.email as string)} onChanged={setNewEmail} />
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Country", "الدولة")}</span>
                 <span style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">🇱🇾 Libya</span>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IMPERSONATION_KEY } from "@/lib/impersonation";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, whenFull } from "../lib/format";
@@ -11,7 +12,7 @@ import { PhotoPicker } from "../ui/PhotoPicker";
 export function goToAccount(userId: string, role: string, name: string, productId?: string) {
   if (!confirm("Open " + name + "’s account?\n\nYou’ll see their dashboard for support purposes. You can exit anytime via the banner at the top.")) return;
   try {
-    sessionStorage.setItem("lateen_impersonate", JSON.stringify({ userId, role, name, productId }));
+    sessionStorage.setItem(IMPERSONATION_KEY, JSON.stringify({ userId, role, name, productId }));
     window.location.reload();
   } catch (e) {
     alert("Failed: " + (e as Error).message);

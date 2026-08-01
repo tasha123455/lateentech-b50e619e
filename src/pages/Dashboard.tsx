@@ -2,23 +2,11 @@ import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { createLateenApi } from "@/lib/lateen-api";
+import { IMPERSONATION_KEY, readImpersonation, type Impersonation } from "@/lib/impersonation";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { BusinessDashboardApp } from "@/components/dashboard/business/BusinessDashboardApp";
 import { MarketerDashboardApp } from "@/components/dashboard/marketer/MarketerDashboardApp";
 import { AdminDashboardApp } from "@/components/dashboard/admin/AdminDashboardApp";
-
-type Impersonation = { userId: string; role: "marketer" | "business"; name: string; productId?: string };
-
-function readImpersonation(): Impersonation | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = sessionStorage.getItem("lateen_impersonate");
-    if (!raw) return null;
-    const v = JSON.parse(raw);
-    if (v && typeof v.userId === "string" && (v.role === "marketer" || v.role === "business")) return v;
-    return null;
-  } catch { return null; }
-}
 
 /** Marks the signed-in account as here, every minute, for as long as a
  *  dashboard is open. The admin home's live-user count reads the other end of
@@ -59,7 +47,7 @@ export function Dashboard({ prod }: { prod?: string }) {
 
   useEffect(() => {
     if (impersonation && role && role !== "admin") {
-      sessionStorage.removeItem("lateen_impersonate");
+      sessionStorage.removeItem(IMPERSONATION_KEY);
       setImpersonation(null);
     }
   }, [impersonation, role]);
@@ -85,7 +73,7 @@ export function Dashboard({ prod }: { prod?: string }) {
   }
 
   const exitImpersonation = () => {
-    sessionStorage.removeItem("lateen_impersonate");
+    sessionStorage.removeItem(IMPERSONATION_KEY);
     setImpersonation(null);
     window.location.reload();
   };

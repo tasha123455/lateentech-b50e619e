@@ -770,3 +770,19 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 .pd-picker-disabled{opacity:0.5;cursor:default;pointer-events:none;}
 .pd-picker-disabled:active{background:transparent;}
 .lateen-business .pd-picker-item.pd-picker-disabled{display:flex;align-items:center;justify-content:flex-start;gap:6px;}
+/* The admin-only sign-in email box inside a profile sheet. Invisible to the
+  person whose profile it is — it renders nothing at all unless an admin is
+  viewing the account. */
+ .aee { margin-top: 2px; }
+ .aee-open { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:9px; border:0.5px solid var(--color-border-secondary); background:transparent; color:var(--color-text-secondary); font-size:11px; font-family:var(--font-sans); cursor:pointer; }
+ .aee-open:hover { color:var(--color-text-primary); }
+ .aee-panel { display:grid; gap:8px; padding:12px; border-radius:12px; border:0.5px solid var(--color-border-secondary); background:var(--color-background-primary); }
+ .aee-hint { font-size:11px; line-height:1.5; color:var(--color-text-secondary); }
+ .aee-row { display:flex; gap:8px; }
+ .aee-inp { flex:1; min-width:0; height:38px; padding:0 10px; font-size:13px; font-family:var(--font-sans); border:0.5px solid var(--color-border-secondary); border-radius:10px; background:var(--color-background-secondary); color:var(--color-text-primary); outline:none; }
+ .aee-inp:focus { border-color:#34c77b; }
+ .aee-btn { height:38px; padding:0 14px; border:none; border-radius:10px; background:#34c77b; color:#fff; font-size:12px; font-weight:600; font-family:var(--font-sans); cursor:pointer; white-space:nowrap; }
+ .aee-btn:disabled { opacity:.45; cursor:default; }
+ .aee-cancel { justify-self:start; padding:0; border:none; background:none; color:var(--color-text-tertiary); font-size:11px; font-family:var(--font-sans); cursor:pointer; text-decoration:underline; }
+ .aee-err { font-size:11px; line-height:1.5; color:#e07070; }
+ .aee-ok { font-size:11px; color:#34c77b; }
