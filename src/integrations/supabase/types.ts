@@ -223,6 +223,7 @@ export type Database = {
           monthly_salary: number
           notes: string | null
           phone: string | null
+          phone2: string | null
           updated_at: string
         }
         Insert: {
@@ -236,6 +237,7 @@ export type Database = {
           monthly_salary?: number
           notes?: string | null
           phone?: string | null
+          phone2?: string | null
           updated_at?: string
         }
         Update: {
@@ -249,6 +251,7 @@ export type Database = {
           monthly_salary?: number
           notes?: string | null
           phone?: string | null
+          phone2?: string | null
           updated_at?: string
         }
         Relationships: []
