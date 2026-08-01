@@ -50,10 +50,16 @@
 :root {
   --radius: 0.875rem;
 
-  /* Surfaces — #141414 / #1e1e1e / #2a2a2a */
-  --background: oklch(0.18 0 0);
-  --surface: oklch(0.225 0 0);
-  --surface-2: oklch(0.265 0 0);
+  /* Surfaces — #080808 / #121212 / #1c1c1c
+   *
+   * The whole ladder sits ten sRGB steps below where it started, so the page
+   * reads as near-black rather than dark grey. Every rung moved by the same
+   * amount rather than being squashed towards black: the gaps between page,
+   * card and hover are what make a card look like a card, and closing them
+   * would have flattened the thing while darkening it. */
+  --background: oklch(0.1344 0 0);
+  --surface: oklch(0.1823 0 0);
+  --surface-2: oklch(0.2264 0 0);
 
   /* Text — #f0eeeb / #9e9b97 / #5e5c58 */
   --foreground: oklch(0.945 0.005 80);
@@ -61,10 +67,11 @@
   --text-2: oklch(0.66 0.005 80);
   --text-3: oklch(0.45 0.005 80);
 
-  /* Borders — #333330 / #272725 */
-  --border: oklch(0.295 0.003 80);
-  --border-strong: oklch(0.34 0.003 80);
-  --input: oklch(0.295 0.003 80);
+  /* Borders — #232320 / #2e2e2b — down the same ten steps as the surfaces,
+     so a hairline still reads as a hairline against the darker card. */
+  --border: oklch(0.2562 0.003 80);
+  --border-strong: oklch(0.3012 0.003 80);
+  --input: oklch(0.2562 0.003 80);
   --ring: oklch(0.55 0.005 80);
 
   --card: var(--surface);

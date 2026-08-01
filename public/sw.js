@@ -6,7 +6,7 @@
    frame, and "You're offline" in the browser's language rather than the app's.
    Caching one page lets us answer with our own — same logo, no box, and in
    Arabic for somebody who reads Arabic. */
-const OFFLINE_CACHE = "wasla-offline-v1";
+const OFFLINE_CACHE = "wasla-offline-v2";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
