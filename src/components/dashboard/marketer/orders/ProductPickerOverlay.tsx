@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { productHasStock } from "../lib/mappers";
+import { normSearch } from "../lib/format";
+import { catSearchText, productHasStock } from "../lib/mappers";
 import type { BrowseProduct } from "../lib/types";
 import { ProductCover } from "../browse/ProductCard";
 import { pkT } from "../browse/pdText";
@@ -43,14 +44,17 @@ export function ProductPickerOverlay({
   }, [open]);
 
   const inStock = favs.filter(productHasStock);
-  const qq = query.trim().toLowerCase();
+  /* Same normaliser as the browse and saved pages: a plain lowercase compare
+     missed "احمد" typed without its hamza, and missed the category entirely
+     when the marketer typed it in the other language. */
+  const qq = normSearch(query);
   const filtered = qq
     ? inStock.filter(
         (p) =>
-          p.n.toLowerCase().includes(qq) ||
-          (p.cat || "").toLowerCase().includes(qq) ||
-          (p.biz || "").toLowerCase().includes(qq) ||
-          (p.code || "").toLowerCase().includes(qq),
+          normSearch(p.n).includes(qq) ||
+          catSearchText(p.cat || "").includes(qq) ||
+          normSearch(p.biz || "").includes(qq) ||
+          normSearch(p.code || "").includes(qq),
       )
     : inStock;
 

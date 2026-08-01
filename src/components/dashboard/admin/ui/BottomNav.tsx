@@ -9,8 +9,9 @@ const ITEMS: Array<{ id: AdminPageId; label: string; path: React.ReactNode }> = 
     label: "Analytics",
     path: <><path d="M3 3v18h18" /><path d="M7 15l4-5 3 3 5-7" /></>,
   },
-  { id: "adm-verify", label: "Verify", path: <path d="M9 12l2 2 4-4M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> },
-  { id: "adm-payouts", label: "Payouts", path: <path d="M3 7h18v10H3zM3 11h18M7 15h2" /> },
+  /* Receipts coming in and payouts going out are two tabs of one page — the
+     platform's money in a single slot. */
+  { id: "adm-money", label: "Money", path: <path d="M3 7h18v10H3zM3 11h18M7 15h2" /> },
   {
     id: "adm-users",
     label: "Users",

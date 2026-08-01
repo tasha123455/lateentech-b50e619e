@@ -128,7 +128,6 @@ export function VerifyPage({ active }: { active: boolean }) {
 
   return (
     <>
-      <div className="adm-h1">Order Verification Hub</div>
       <input
         className="adm-search"
         placeholder="Search"

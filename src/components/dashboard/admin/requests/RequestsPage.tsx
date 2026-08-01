@@ -2,14 +2,10 @@ import { useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
 import { ReportsTab } from "../products/ReportsPage";
+import { TabBar } from "../ui/TabBar";
 import { DeletionsTab } from "../users/DeletionRequestsPage";
 
 type TabKey = "reports" | "deletions";
-
-const TABS: Array<{ key: TabKey; label: string }> = [
-  { key: "reports", label: "Reports" },
-  { key: "deletions", label: "Deletions" },
-];
 
 /** Reports and deletion requests are the same job — a person asking the admin
  *  to decide something — so they share one page and switch with the two tabs
@@ -33,29 +29,15 @@ export function RequestsPage({
 
   return (
     <>
-      <div className="adm-tabbar">
-        <button className="adm-back-btn" onClick={onBack} aria-label="Back">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <div className="adm-tabs" role="tablist">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              role="tab"
-              aria-selected={tab === t.key}
-              className={"adm-tab" + (tab === t.key ? " on" : "")}
-              onClick={() => setTab(t.key)}
-            >
-              <span className="adm-tab-lbl">{t.label}</span>
-              {counts[t.key] > 0 && <span className="adm-tab-count" data-no-i18n>{counts[t.key]}</span>}
-            </button>
-          ))}
-        </div>
-        {/* Balances the back button so the tabs sit centred on the page. */}
-        <span className="adm-tabbar-pad" aria-hidden="true" />
-      </div>
+      <TabBar
+        tab={tab}
+        onTab={setTab}
+        onBack={onBack}
+        tabs={[
+          { key: "reports", label: "Reports", count: counts.reports },
+          { key: "deletions", label: "Deletions", count: counts.deletions },
+        ]}
+      />
 
       {tab === "reports"
         ? <ReportsTab active={active} onOpenProduct={onOpenProduct} />

@@ -12,7 +12,7 @@ const ROLE_FILTERS: Array<{ key: string; label: string }> = [
   { key: "admin", label: "Admins" },
 ];
 
-export function UsersPage({ active }: { active: boolean }) {
+export function UsersPage({ active, onNotify }: { active: boolean; onNotify: () => void }) {
   const { users, loadUsers, loading, failed } = useAdminData();
 
   const [roleFilter, setRoleFilter] = useState("");
@@ -66,6 +66,16 @@ export function UsersPage({ active }: { active: boolean }) {
             {f.label}{roleFilter === f.key ? ` (${counts[f.key] || 0})` : ""}
           </button>
         ))}
+        {/* Broadcasting goes to everybody in this list, so the way to send it
+            sits at the end of the same row — the way "+ New" does on the
+            employees page. It was only reachable from the menu before. */}
+        <button className="adm-filter-chip adm-notify-chip" onClick={onNotify}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span>Notify</span>
+        </button>
       </div>
 
       <input

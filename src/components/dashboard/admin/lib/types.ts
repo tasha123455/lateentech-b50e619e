@@ -4,7 +4,7 @@ export type LateenApi = ReturnType<typeof createLateenApi>;
 export type AdminApi = LateenApi["admin"];
 
 export type AdminPageId =
-  | "adm-home" | "adm-verify" | "adm-payouts" | "adm-users" | "adm-products"
+  | "adm-home" | "adm-money" | "adm-users" | "adm-products"
   // reached from the menu rather than the nav bar
   | "adm-employees" | "adm-requests" | "adm-notify";
 

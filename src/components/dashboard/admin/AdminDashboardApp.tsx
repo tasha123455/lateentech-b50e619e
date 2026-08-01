@@ -12,13 +12,12 @@ import { HomePage } from "./home/HomePage";
 import { readPage, readScroll, writePage, writeScroll } from "./lib/storage";
 import { RequestsPage } from "./requests/RequestsPage";
 import type { AdminPageId } from "./lib/types";
-import { PayoutsPage } from "./payouts/PayoutsPage";
+import { MoneyPage } from "./money/MoneyPage";
 import { ProductDetailOverlay } from "./products/ProductDetailOverlay";
 import { ProductsPage } from "./products/ProductsPage";
 import { BottomNav } from "./ui/BottomNav";
 import { LightboxProvider } from "./ui/Lightbox";
 import { UsersPage } from "./users/UsersPage";
-import { VerifyPage } from "./verify/VerifyPage";
 
 const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-requests", "adm-notify"]);
 
@@ -126,16 +125,12 @@ function Shell() {
         <HomePage />
       </section>
 
-      <section className={"adm-page" + (page === "adm-verify" ? " active" : "")} id="adm-verify">
-        <VerifyPage active={page === "adm-verify"} />
-      </section>
-
-      <section className={"adm-page" + (page === "adm-payouts" ? " active" : "")} id="adm-payouts">
-        <PayoutsPage active={page === "adm-payouts"} />
+      <section className={"adm-page" + (page === "adm-money" ? " active" : "")} id="adm-money">
+        <MoneyPage active={page === "adm-money"} />
       </section>
 
       <section className={"adm-page" + (page === "adm-users" ? " active" : "")} id="adm-users">
-        <UsersPage active={page === "adm-users"} />
+        <UsersPage active={page === "adm-users"} onNotify={() => openFromMenu("adm-notify")} />
       </section>
 
       <section className={"adm-page" + (page === "adm-products" ? " active" : "")} id="adm-products">

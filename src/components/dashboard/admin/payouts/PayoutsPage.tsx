@@ -249,7 +249,6 @@ export function PayoutsPage({ active }: { active: boolean }) {
 
   return (
     <>
-      <div className="adm-h1">Payout Manager</div>
       <input
         className="adm-search"
         placeholder="Search"
