@@ -107,7 +107,7 @@ export function AnalyticsChart({
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart) return;
-    const cfg = getChartConfig(selected);
+    const cfg = getChartConfig(raw, selected);
     chart.data.labels = cfg.labels;
     chart.data.datasets.forEach((ds, i) => {
       ds.data = cfg.ends.map((ts) => metricValueAsOf(raw, CHART_METRICS[i].key, ts));

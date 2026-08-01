@@ -1,6 +1,7 @@
 import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/auth/AuthContext";
+import { createLateenApi } from "@/lib/lateen-api";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { BusinessDashboardApp } from "@/components/dashboard/business/BusinessDashboardApp";
 import { MarketerDashboardApp } from "@/components/dashboard/marketer/MarketerDashboardApp";
@@ -19,11 +20,38 @@ function readImpersonation(): Impersonation | null {
   } catch { return null; }
 }
 
+/** Marks the signed-in account as here, every minute, for as long as a
+ *  dashboard is open. The admin home's live-user count reads the other end of
+ *  this; nothing else depends on it, so a failed beat is ignored. */
+function usePresenceHeartbeat(userId: string | undefined) {
+  useEffect(() => {
+    if (!userId) return;
+    const api = createLateenApi(userId);
+    let stopped = false;
+    const beat = () => {
+      if (stopped || document.visibilityState === "hidden") return;
+      void api.touchPresence().catch(() => { /* presence is best-effort */ });
+    };
+    beat();
+    const iv = setInterval(beat, 60000);
+    document.addEventListener("visibilitychange", beat);
+    return () => {
+      stopped = true;
+      clearInterval(iv);
+      document.removeEventListener("visibilitychange", beat);
+    };
+  }, [userId]);
+}
+
 export function Dashboard({ prod }: { prod?: string }) {
   const { user, role, loading } = useAuth();
   const { withLang } = useLanguage();
   const nav = useNavigate();
   const [impersonation, setImpersonation] = useState<Impersonation | null>(() => readImpersonation());
+
+  // The real account, not the impersonated one — an admin looking at someone
+  // else's dashboard is the admin being here, not that user.
+  usePresenceHeartbeat(user?.id);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: withLang("/") });
