@@ -119,6 +119,8 @@ export function ReceiptCard({
     <div className={"adm-recpt-card" + (open ? " open" : "")}>
       {/* Collapsed, this is the whole card: the receipt to look at, what the
           platform earns, what the marketer owes, and where it stands. */}
+      {/* Small, in the corner — the state is a glance, not a headline. */}
+      <StatusPill o={o} />
       <button className="rcpt-head" onClick={() => setOpen((v) => !v)}>
         <span
           className="rcpt-head-thumb"
@@ -134,7 +136,6 @@ export function ReceiptCard({
           )}
         </span>
         <span className="rcpt-head-mid">
-          <StatusPill o={o} />
           <span className="rcpt-head-money">
             <span className="rcpt-kv-k">Platform fee</span>
             <span className="rcpt-head-fee"><Money n={platformFee} /></span>
@@ -164,7 +165,9 @@ export function ReceiptCard({
             </div>
           )}
 
-          <div className="adm-order-detail-rows">
+          {/* Bordered, so the figures read as one block rather than loose
+              lines running into the buttons below. */}
+          <div className="adm-order-detail-rows rcpt-figures">
             <div className="adm-detail-row"><span>Price</span><span><Money n={unitPrice} /></span></div>
             <div className="adm-detail-row"><span>Qty</span><span>{qty}</span></div>
             <div className="adm-detail-row"><span>Order value</span><span><Money n={orderValue} /></span></div>

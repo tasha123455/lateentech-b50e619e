@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { normSearch } from "@/components/dashboard/marketer/lib/format";
+
 import { useAdminData } from "../AdminDataProvider";
-import { initials } from "../lib/format";
-import type { ReceiptOrder } from "../lib/types";
+import { dispPhone, initials } from "../lib/format";
+import type { ReceiptOrder, VerifyMarketer } from "../lib/types";
 import { MarketerDetailOverlay } from "./MarketerDetailOverlay";
 import { RefundModal } from "./RefundModal";
 
@@ -16,18 +18,29 @@ export function VerifyPage({ active }: { active: boolean }) {
     if (active) void loadVerify();
   }, [active, loadVerify]);
 
-  const q = search.trim().toLowerCase();
-  const list = useMemo(
-    () =>
-      verifyMarketers.filter(
-        (m) =>
-          !q ||
-          m.name.toLowerCase().includes(q) ||
-          m.phone.toLowerCase().includes(q) ||
-          m.email.toLowerCase().includes(q),
-      ),
-    [verifyMarketers, q],
-  );
+  /* A marketer is a match on their own details or on anything in any receipt
+     of theirs — customer, that customer's number, the order code, the product.
+     normSearch folds case and the Arabic letter variants, so typing in either
+     language finds the same row. */
+  const q = normSearch(search);
+  const list = useMemo(() => {
+    if (!q) return verifyMarketers;
+    const text = (m: VerifyMarketer) =>
+      normSearch(
+        [
+          m.name, m.phone, m.email,
+          ...[...m.pending, ...m.history].flatMap((o) => [
+            o.customer_name,
+            o.customer_phone,
+            "#" + (o.order_number || String(o.id || "").slice(0, 8)),
+            o.product && o.product.name,
+          ]),
+        ]
+          .filter(Boolean)
+          .join(" "),
+      );
+    return verifyMarketers.filter((m) => text(m).includes(q));
+  }, [verifyMarketers, q]);
 
   const approve = async (id: string) => {
     if (!confirm("Approve this receipt? The order will be forwarded to the business owner.")) return;
@@ -86,7 +99,11 @@ export function VerifyPage({ active }: { active: boolean }) {
   } else {
     body = list.map((m) => (
       <div className="adm-mkt-row" key={m.id} onClick={() => setDetailId(m.id)}>
-        <div className="adm-mkt-av" data-no-i18n>{initials(m.name)}</div>
+        <div className="adm-mkt-av" data-no-i18n>
+          {m.avatar_signed_url
+            ? <img src={m.avatar_signed_url} alt="" loading="lazy" decoding="async" />
+            : initials(m.name)}
+        </div>
         <div className="adm-mkt-main">
           <div className="adm-mkt-name-row">
             <span className="adm-mkt-name" data-no-i18n>{m.name}</span>
@@ -96,7 +113,9 @@ export function VerifyPage({ active }: { active: boolean }) {
               <span className="adm-mkt-badge clear">All clear</span>
             )}
           </div>
-          <div className="adm-mkt-contact">{[m.phone, m.email].filter(Boolean).join(" · ")}</div>
+          <div className="adm-mkt-contact" data-no-i18n>
+            {[dispPhone(m.phone), m.email].filter(Boolean).join(" · ")}
+          </div>
         </div>
         <div className="adm-mkt-chev">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

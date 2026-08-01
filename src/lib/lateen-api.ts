@@ -757,28 +757,14 @@ export function createLateenApi(userId: string) {
         );
         const marketerIds = [...new Set(list.map((o) => o.marketer_id))];
         const productIds = [...new Set(list.map((o) => o.product_id))];
-        const [{ data: profs }, { data: prods }] = await Promise.all([
-          marketerIds.length
-            ? supabase.from("profiles").select("id, full_name, phone").in("id", marketerIds)
-            : Promise.resolve({ data: [] as Array<{ id: string; full_name: string | null; phone: string | null }> }),
+        // Through the shared resolver so the marketer arrives with an email and
+        // a signed avatar, like every other admin list.
+        const [pmap, { data: prods }] = await Promise.all([
+          loadAdminPeople(marketerIds),
           productIds.length
             ? supabase.from("products").select("id, name, photos").in("id", productIds)
             : Promise.resolve({ data: [] as Array<{ id: string; name: string; photos: string[] }> }),
         ]);
-        let emap = new Map<string, string | null>();
-        try {
-          const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
-            _user_ids: marketerIds,
-          });
-          emap = new Map(
-            ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
-          );
-        } catch {
-          /* ignore — email just won't be shown */
-        }
-        const pmap = new Map(
-          (profs ?? []).map((p) => [p.id, { ...p, email: emap.get(p.id) ?? null }]),
-        );
         const prodmap = new Map((prods ?? []).map((p) => [p.id, p]));
         return list.map((o) => ({
           ...o,
@@ -832,28 +818,14 @@ export function createLateenApi(userId: string) {
         );
         const marketerIds = [...new Set(list.map((o) => o.marketer_id))];
         const productIds = [...new Set(list.map((o) => o.product_id))];
-        const [{ data: profs }, { data: prods }] = await Promise.all([
-          marketerIds.length
-            ? supabase.from("profiles").select("id, full_name, phone").in("id", marketerIds)
-            : Promise.resolve({ data: [] as Array<{ id: string; full_name: string | null; phone: string | null }> }),
+        // Through the shared resolver so the marketer arrives with an email and
+        // a signed avatar, like every other admin list.
+        const [pmap, { data: prods }] = await Promise.all([
+          loadAdminPeople(marketerIds),
           productIds.length
             ? supabase.from("products").select("id, name, photos").in("id", productIds)
             : Promise.resolve({ data: [] as Array<{ id: string; name: string; photos: string[] }> }),
         ]);
-        let emap = new Map<string, string | null>();
-        try {
-          const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
-            _user_ids: marketerIds,
-          });
-          emap = new Map(
-            ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
-          );
-        } catch {
-          /* ignore — email just won't be shown */
-        }
-        const pmap = new Map(
-          (profs ?? []).map((p) => [p.id, { ...p, email: emap.get(p.id) ?? null }]),
-        );
         const prodmap = new Map((prods ?? []).map((p) => [p.id, p]));
         return list.map((o) => ({
           ...o,
