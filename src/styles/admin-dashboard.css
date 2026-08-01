@@ -465,17 +465,27 @@
    squeezed a long label like "Total Platform Fees Collected" onto three
    lines beside a number. */
 .lateen-admin .adm-stat-stack { grid-template-columns: 1fr; }
-.lateen-admin .adm-stat-stack .adm-stat { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* A grid, not a flex row: the label and the number share the first row, and
+   anything after them — the profit toggle, the profit, an error — takes a full
+   row of its own. As a flex row without wrapping they all crammed onto one
+   line and the label broke across four. */
+.lateen-admin .adm-stat-stack .adm-stat { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px; row-gap: 2px; }
 .lateen-admin .adm-stat-stack .adm-stat-label { margin-bottom: 0; }
 .lateen-admin .adm-stat-stack .adm-stat-value { font-size: 20px; text-align: end; white-space: nowrap; }
 .lateen-admin .adm-stat-stack .adm-stat.full .adm-stat-value { font-size: 24px; }
-.lateen-admin .adm-stat-stack .adm-stat-sub { flex-basis: 100%; margin-top: 0; }
+.lateen-admin .adm-stat-stack .adm-stat-sub,
+.lateen-admin .adm-stat-stack .adm-profit-toggle,
+.lateen-admin .adm-stat-stack .adm-profit-value { grid-column: 1 / -1; }
+.lateen-admin .adm-stat-stack .adm-stat-sub { margin-top: 4px; }
 
 /* Net profit, folded into the platform-fees card. */
-.lateen-admin .adm-profit-toggle { flex-basis: 100%; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 10px; border: none; border-top: 0.5px solid var(--border-2); background: transparent; color: var(--txt-2); font-size: 12px; font-weight: 500; font-family: var(--font); cursor: pointer; }
+.lateen-admin .adm-profit-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 10px; border: none; border-top: 0.5px solid var(--border-2); background: transparent; color: var(--txt-2); font-size: 12px; font-weight: 500; font-family: var(--font); cursor: pointer; }
 .lateen-admin .adm-profit-chev { transition: transform .2s ease; opacity: .7; flex-shrink: 0; }
 .lateen-admin .adm-profit-toggle.open .adm-profit-chev { transform: rotate(180deg); }
-.lateen-admin .adm-profit-value { flex-basis: 100%; margin-top: 6px; font-size: 20px; font-weight: 500; color: var(--ok); }
+.lateen-admin .adm-profit-value { margin-top: 4px; font-size: 22px; font-weight: 500; color: var(--ok); }
+/* Fees can be smaller than the salaries paid over the same period, and a loss
+   dressed in the same green as a profit reads as a win. */
+.lateen-admin .adm-profit-value.loss { color: var(--danger); }
 
 /* ===== Admin home =====
    Built from the same stat cards and chips every other admin page uses; it

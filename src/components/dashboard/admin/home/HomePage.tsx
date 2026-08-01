@@ -104,7 +104,7 @@ export function HomePage() {
             </svg>
           </button>
           {profitOpen && (
-            <div className="adm-profit-value">
+            <div className={"adm-profit-value" + (profit < 0 ? " loss" : "")}>
               {metricsError ? "—" : <Money n={profit} />}
             </div>
           )}
