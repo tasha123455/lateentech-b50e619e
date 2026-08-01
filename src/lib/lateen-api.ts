@@ -1156,6 +1156,8 @@ export function createLateenApi(userId: string) {
         full_name: string;
         job_title?: string | null;
         email?: string | null;
+        phone?: string | null;
+        phone2?: string | null;
         monthly_salary: number;
         hired_at: string;
         notes?: string | null;

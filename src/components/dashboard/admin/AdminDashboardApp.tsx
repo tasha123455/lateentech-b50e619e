@@ -6,7 +6,7 @@ import "@/styles/admin-dashboard.css";
 
 import { AdminDataProvider, useAdminData } from "./AdminDataProvider";
 import { EmployeesPage } from "./employees/EmployeesPage";
-import { MenuDrawer } from "./overlays/MenuDrawer";
+import { MenuDrawer, useMenuCounts } from "./overlays/MenuDrawer";
 import { NotificationsPage } from "./overlays/NotificationsPage";
 import { ReportsPage } from "./products/ReportsPage";
 import { DeletionRequestsPage } from "./users/DeletionRequestsPage";
@@ -25,6 +25,7 @@ const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-deletions", "adm-
 
 function Shell() {
   const { userId, loadMetrics } = useAdminData();
+  const menuCounts = useMenuCounts();
   const { signOut } = useAuth();
 
   const [page, setPage] = useState<AdminPageId>(() => readPage(userId) || "adm-home");
@@ -159,7 +160,13 @@ function Shell() {
         {page === "adm-notify" && <NotificationsPage onBack={() => goTo(returnTo)} />}
       </section>
 
-      <BottomNav page={page} onGo={goTo} onMenu={() => setMenuOpen((v) => !v)} menuOpen={menuOpen || MENU_PAGES.has(page)} />
+      <BottomNav
+        page={page}
+        onGo={goTo}
+        onMenu={() => setMenuOpen((v) => !v)}
+        menuOpen={menuOpen || MENU_PAGES.has(page)}
+        menuCount={menuCounts.total}
+      />
 
       <MenuDrawer
         open={menuOpen}

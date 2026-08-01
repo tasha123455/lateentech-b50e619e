@@ -1,5 +1,4 @@
-import { empFmtDate } from "../lib/employees";
-import { MONTH_NAMES } from "../lib/format";
+import { empFmtDate, empPaydayFor } from "../lib/employees";
 import type { Employee } from "../lib/types";
 import { Money } from "../ui/Money";
 
@@ -33,20 +32,39 @@ export function EmployeeHistoryOverlay({
               <div style={{ fontSize: 12, color: "#9e9b97", marginTop: 2 }} data-no-i18n>
                 {employee.employee_number} · {employee.job_title || "—"}
               </div>
-              <div style={{ marginTop: 10, fontSize: 13 }}>
-                Total paid: <b style={{ color: "#2dbd8f" }}><Money n={total} /></b> across {pays.length}{" "}
-                payment{pays.length === 1 ? "" : "s"}
+              {/* Two separate lines rather than one sentence with the amount
+                  spliced into the middle of it: in Arabic that ran the label,
+                  an LTR amount and an untranslated "across N payments" into a
+                  single scrambled line. */}
+              <div className="adm-emp-hist-total">
+                <span className="adm-emp-hist-total-lbl">Total paid</span>
+                <b className="adm-emp-hist-total-val"><Money n={total} /></b>
+              </div>
+              <div className="adm-emp-hist-count">
+                <span>Payments</span>
+                <span data-no-i18n>{pays.length}</span>
               </div>
             </div>
             <div className="adm-section" style={{ margin: "0 18px 18px" }}>
               {pays.length ? (
-                pays.map((p, i) => (
-                  <div className="adm-emp-hist-row" key={i}>
-                    <span>{MONTH_NAMES[p.period_month - 1]} {p.period_year}</span>
-                    <span style={{ color: "#9e9b97" }}>{empFmtDate(p.paid_at)}</span>
-                    <b><Money n={p.amount} /></b>
+                <>
+                  {/* The columns were unlabelled, so which date was which was
+                      anybody's guess. */}
+                  <div className="adm-emp-hist-row head">
+                    <span>Paid at</span>
+                    <span>Pay day</span>
+                    <span>Payment</span>
                   </div>
-                ))
+                  {pays.map((p, i) => (
+                    <div className="adm-emp-hist-row" key={i}>
+                      <span data-no-i18n>{empFmtDate(p.paid_at)}</span>
+                      <span style={{ color: "#9e9b97" }} data-no-i18n>
+                        {empFmtDate(empPaydayFor(employee, p.period_year, p.period_month))}
+                      </span>
+                      <b><Money n={p.amount} /></b>
+                    </div>
+                  ))}
+                </>
               ) : (
                 <div className="adm-empty">No payments recorded yet.</div>
               )}

@@ -130,7 +130,7 @@ export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBa
 
   return (
     <>
-      <PageHeader title="Deletion Requests" onBack={onBack} />
+      <PageHeader title="Deletion Requests" onBack={onBack} count={deletionRequests.filter((r) => r.status === "wallet_review").length} />
         <div className="adm-filter-row" style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
           {FILTERS.map((f) => (
             <button

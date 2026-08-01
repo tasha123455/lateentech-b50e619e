@@ -187,12 +187,16 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     }
   }, [admin, settle]);
 
-  /* ── Boot ── */
+  /* ── Boot ──
+     Employees load up front, unlike the other lazy pages: the badge on the nav
+     and on the menu entry counts who can be paid right now, and a badge that
+     only appears once you have already opened the page is no use. */
   useEffect(() => {
     void loadMetrics();
     void loadReports();
     void loadDeletionRequests();
-  }, [loadMetrics, loadReports, loadDeletionRequests]);
+    void loadEmployees("");
+  }, [loadMetrics, loadReports, loadDeletionRequests, loadEmployees]);
 
   /* ── Realtime + payout polling ──
      Payouts move without any action on this screen (a marketer requesting,

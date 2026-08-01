@@ -1,6 +1,14 @@
 /** Header for the pages reached from the menu. They are full pages rather
  *  than sheets, so they need their own way back to wherever you came from. */
-export function PageHeader({ title, onBack }: { title: string; onBack: () => void }) {
+export function PageHeader({
+  title, onBack, count = 0,
+}: {
+  title: string;
+  onBack: () => void;
+  /** Items on the page waiting to be acted on. Badged next to the title, and
+   *  the same number the menu entry carries. */
+  count?: number;
+}) {
   return (
     <div className="adm-page-head">
       <button className="adm-back-btn" onClick={onBack} aria-label="Back">
@@ -9,6 +17,7 @@ export function PageHeader({ title, onBack }: { title: string; onBack: () => voi
         </svg>
       </button>
       <div className="adm-h1" style={{ marginBottom: 0 }}>{title}</div>
+      {count > 0 && <span className="adm-page-count" data-no-i18n>{count}</span>}
     </div>
   );
 }

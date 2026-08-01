@@ -62,6 +62,28 @@
 .lateen-admin .adm-emp-sub { font-size: 11px; color: #9e9b97; margin-top: 2px; }
 .lateen-admin .adm-emp-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: 11px; color: #9e9b97; padding-left: 50px; }
 .lateen-admin .adm-emp-meta b { color: #f0eeeb; font-weight: 500; }
+/* The job title reads as a badge in the top corner rather than being buried in
+   a subtitle line next to the email. */
+.lateen-admin .adm-emp-badge-row { display: flex; justify-content: flex-end; }
+.lateen-admin .adm-emp-role { font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 10px; background: #3a2a10; color: #f5b441; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Pay day, then salary, then the folded-away rest. */
+.lateen-admin .adm-emp-facts { display: grid; gap: 6px; padding-left: 50px; }
+.lateen-admin .adm-emp-fact { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 12px; }
+.lateen-admin .adm-emp-fact-k { color: #9e9b97; }
+.lateen-admin .adm-emp-fact-v { color: #f0eeeb; font-weight: 500; }
+.lateen-admin .adm-emp-fact-v.amt { color: #f5b441; }
+.lateen-admin .adm-emp-more { margin-left: 50px; border: 0.5px solid #272725; border-radius: 10px; overflow: hidden; background: #191919; }
+.lateen-admin .adm-emp-more-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; background: transparent; border: none; color: #c9c6c1; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; }
+.lateen-admin .adm-emp-more-chev { transition: transform .2s ease; opacity: .7; flex-shrink: 0; }
+.lateen-admin .adm-emp-more-chev.open { transform: rotate(180deg); }
+.lateen-admin .adm-emp-more-body { border-top: 0.5px solid #272725; padding: 4px 12px 10px; display: grid; gap: 6px; }
+.lateen-admin .adm-emp-more-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 12px; padding-top: 6px; }
+.lateen-admin .adm-emp-more-k { color: #9e9b97; flex-shrink: 0; }
+.lateen-admin .adm-emp-more-v { color: #f0eeeb; text-align: end; overflow-wrap: anywhere; }
+/* Waiting to be paid: the tint puts the whole card forward, not just its
+   button, so a full list still reads at a glance. */
+.lateen-admin .adm-emp-row.payable { background: rgba(224,112,112,0.09); box-shadow: inset 3px 0 0 #e07070; }
+.lateen-admin .adm-emp-row.payable .adm-emp-more { background: rgba(0,0,0,0.22); }
 .lateen-admin .adm-emp-actions { display: flex; gap: 8px; padding-left: 50px; }
 .lateen-admin .adm-emp-pay-btn {
   flex: 1; height: 34px; border-radius: 17px; border: none;
@@ -89,8 +111,23 @@
 }
 .lateen-admin .adm-emp-inp:focus { border-color: #666; }
 .lateen-admin .adm-emp-hist-row {
-  display: flex; justify-content: space-between; padding: 10px 14px;
-  border-bottom: 0.5px solid #272725; font-size: 13px;
+  display: grid; grid-template-columns: 1fr 1fr auto; align-items: baseline; gap: 10px;
+  padding: 10px 14px; border-bottom: 0.5px solid #272725; font-size: 13px;
 }
+.lateen-admin .adm-emp-hist-row > :last-child { text-align: end; }
 .lateen-admin .adm-emp-hist-row:last-child { border-bottom: none; }
 .lateen-admin .adm-emp-hist-row b { color: #2dbd8f; }
+.lateen-admin .adm-emp-hist-row.head { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #5e5c58; padding-bottom: 6px; }
+.lateen-admin .adm-emp-hist-total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 10px; font-size: 13px; }
+.lateen-admin .adm-emp-hist-total-lbl { color: #9e9b97; }
+.lateen-admin .adm-emp-hist-total-val { color: #2dbd8f; }
+.lateen-admin .adm-emp-hist-count { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 4px; font-size: 12px; color: #9e9b97; }
+/* Read-only fields in the employee form, and its inline validation message. */
+.lateen-admin .adm-emp-fixed { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; background: #232323; border: 0.5px solid #2f2f2f; border-radius: 8px; padding: 10px 12px; }
+.lateen-admin .adm-emp-fixed-lbl { font-size: 11px; color: #9e9b97; text-transform: uppercase; letter-spacing: 0.5px; }
+.lateen-admin .adm-emp-fixed-val { font-size: 13px; color: #f0eeeb; font-weight: 500; }
+.lateen-admin .adm-emp-err { font-size: 12px; color: #e07070; background: rgba(224,112,112,0.1); border: 0.5px solid rgba(224,112,112,0.35); border-radius: 8px; padding: 8px 10px; }
+/* Counts: on a menu page's own header, and on the nav slot that opens them. */
+.lateen-admin .adm-page-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: #e07070; color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.lateen-admin .adm-nav-item { position: relative; }
+.lateen-admin .adm-nav-count { position: absolute; top: -3px; inset-inline-start: calc(50% + 5px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #e07070; color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }

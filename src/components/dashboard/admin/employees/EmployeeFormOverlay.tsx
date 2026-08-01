@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
+import { empFmtDate } from "../lib/employees";
 import type { Employee } from "../lib/types";
 
 type Fields = {
-  name: string; num: string; job: string; email: string; salary: string; hired: string; notes: string;
+  name: string; num: string; job: string; email: string;
+  phone: string; phone2: string; salary: string; notes: string;
 };
 
 const EMPTY = (): Fields => ({
-  name: "", num: "", job: "", email: "", salary: "",
-  hired: new Date().toISOString().slice(0, 10), notes: "",
+  name: "", num: "", job: "", email: "", phone: "", phone2: "", salary: "", notes: "",
 });
+
+const digits = (s: string): string => s.replace(/\D/g, "");
 
 export function EmployeeFormOverlay({
   seed, onClose, onSaved,
@@ -22,12 +25,20 @@ export function EmployeeFormOverlay({
   const { api } = useAdminData();
   const [f, setF] = useState<Fields>(EMPTY);
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
 
   const editing = seed?.employee || null;
+
+  /* The hire date is not an input. It is the day the employee was listed, it
+     drives every pay cycle from then on, and there is nothing an admin would
+     legitimately change it to — so it is set once, on create, and shown
+     read-only afterwards. */
+  const hiredAt = editing?.hired_at || new Date().toISOString().slice(0, 10);
 
   // Re-seed each time the form opens, for a new or an existing employee.
   useEffect(() => {
     if (!seed) return;
+    setErr("");
     const e = seed.employee;
     setF(
       e
@@ -36,8 +47,9 @@ export function EmployeeFormOverlay({
             num: e.employee_number || "",
             job: e.job_title || "",
             email: e.email || "",
+            phone: e.phone || "",
+            phone2: e.phone2 || "",
             salary: String(e.monthly_salary ?? 0),
-            hired: (e.hired_at || "").slice(0, 10),
             notes: e.notes || "",
           }
         : EMPTY(),
@@ -46,27 +58,46 @@ export function EmployeeFormOverlay({
 
   const set = (patch: Partial<Fields>) => setF((prev) => ({ ...prev, ...patch }));
 
+  /** Everything but the notes is required. */
+  const problem = (): string => {
+    if (!f.name.trim()) return "Full name is required.";
+    if (!f.num.trim()) return "Employee number is required.";
+    if (!f.job.trim()) return "Job title is required.";
+    if (!f.email.trim()) return "Email is required.";
+    if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) return "That email does not look right.";
+    if (!digits(f.phone)) return "Phone number 1 is required.";
+    if (!digits(f.phone2)) return "Phone number 2 is required.";
+    if (digits(f.phone) === digits(f.phone2)) return "The two phone numbers have to be different.";
+    if (!f.salary.trim()) return "Monthly salary is required.";
+    if (!Number.isFinite(Number(f.salary)) || Number(f.salary) < 0) return "Monthly salary has to be a number.";
+    return "";
+  };
+
   const save = async () => {
-    if (!f.name.trim() || !f.num.trim()) {
-      alert("Name and employee number are required.");
+    const bad = problem();
+    if (bad) {
+      setErr(bad);
       return;
     }
     setBusy(true);
+    setErr("");
     try {
       const payload: Record<string, unknown> = {
         full_name: f.name.trim(),
         employee_number: f.num.trim(),
-        job_title: f.job.trim() || null,
-        email: f.email.trim() || null,
+        job_title: f.job.trim(),
+        email: f.email.trim(),
+        phone: f.phone.trim(),
+        phone2: f.phone2.trim(),
         monthly_salary: Number(f.salary.trim()) || 0,
-        hired_at: f.hired.trim() || new Date().toISOString().slice(0, 10),
+        hired_at: hiredAt,
         notes: f.notes.trim() || null,
       };
       if (editing) payload.id = editing.id;
       await api.admin.upsertEmployee(payload as never);
       onSaved();
     } catch (e) {
-      alert("Save failed: " + (e as Error).message);
+      setErr("Save failed: " + (e as Error).message);
     }
     setBusy(false);
   };
@@ -79,12 +110,26 @@ export function EmployeeFormOverlay({
       await api.admin.deleteEmployee(editing.id);
       onSaved();
     } catch (e) {
-      alert("Delete failed: " + (e as Error).message);
+      setErr("Delete failed: " + (e as Error).message);
     }
     setBusy(false);
   };
 
   const open = !!seed;
+
+  /** inputMode="numeric" is what raises the number pad on a phone; type stays
+      "tel" so a leading + and spaces are still accepted. */
+  const phoneInput = (val: string, onChange: (v: string) => void, placeholder: string) => (
+    <input
+      type="tel"
+      inputMode="numeric"
+      autoComplete="off"
+      className="adm-emp-inp"
+      placeholder={placeholder}
+      value={val}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
 
   return (
     <div
@@ -113,23 +158,30 @@ export function EmployeeFormOverlay({
             Email
             <input type="email" className="adm-emp-inp" value={f.email} onChange={(e) => set({ email: e.target.value })} />
           </label>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <label className="adm-emp-lbl">
-              Monthly salary ($)
-              <input
-                type="number" min="0" step="0.01" className="adm-emp-inp"
-                value={f.salary} onChange={(e) => set({ salary: e.target.value })}
-              />
-            </label>
-            <label className="adm-emp-lbl">
-              Date of hire
-              <input type="date" className="adm-emp-inp" value={f.hired} onChange={(e) => set({ hired: e.target.value })} />
-            </label>
+          <label className="adm-emp-lbl">
+            Phone number 1
+            {phoneInput(f.phone, (v) => set({ phone: v }), "0912345678")}
+          </label>
+          <label className="adm-emp-lbl">
+            Phone number 2
+            {phoneInput(f.phone2, (v) => set({ phone2: v }), "0923456789")}
+          </label>
+          <label className="adm-emp-lbl">
+            Monthly salary
+            <input
+              type="number" inputMode="decimal" min="0" step="0.01" className="adm-emp-inp"
+              value={f.salary} onChange={(e) => set({ salary: e.target.value })}
+            />
+          </label>
+          <div className="adm-emp-fixed">
+            <span className="adm-emp-fixed-lbl">Employment date</span>
+            <span className="adm-emp-fixed-val" data-no-i18n>{empFmtDate(hiredAt)}</span>
           </div>
           <label className="adm-emp-lbl">
-            Notes
+            Notes (optional)
             <textarea rows={3} className="adm-emp-inp" value={f.notes} onChange={(e) => set({ notes: e.target.value })} />
           </label>
+          {!!err && <div className="adm-emp-err">{err}</div>}
           <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
             <button className="adm-btn adm-btn-ghost" onClick={onClose}>Cancel</button>
             <button className="adm-btn adm-btn-acc" disabled={busy} onClick={() => void save()}>Save</button>

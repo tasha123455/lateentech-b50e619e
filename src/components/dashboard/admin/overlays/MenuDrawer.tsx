@@ -1,4 +1,15 @@
 import { useAdminData } from "../AdminDataProvider";
+import { empPayableCount } from "../lib/employees";
+
+/** The numbers the menu entries carry, so the nav's Menu slot can badge their
+ *  total without the drawer being open. */
+export function useMenuCounts() {
+  const { deletionRequests, reports, employees } = useAdminData();
+  const deletions = deletionRequests.filter((r) => r.status === "wallet_review").length;
+  const openReports = reports.filter((r) => r.status === "open").length;
+  const payable = empPayableCount(employees);
+  return { deletions, reports: openReports, employees: payable, total: deletions + openReports + payable };
+}
 
 /** Bottom-sheet menu behind the last slot of the nav bar.
  *
@@ -18,16 +29,14 @@ export function MenuDrawer({
   onSignOut: () => void;
   signingOut: boolean;
 }) {
-  const { deletionRequests, reports } = useAdminData();
-  const pendingDeletions = deletionRequests.filter((r) => r.status === "wallet_review").length;
-  const openReports = reports.filter((r) => r.status === "open").length;
+  const counts = useMenuCounts();
 
   const items = [
     {
       key: "deletions",
       label: "Deletion Requests",
       sub: "Accounts asking to be removed",
-      count: pendingDeletions,
+      count: counts.deletions,
       onClick: onDeletionRequests,
       icon: (
         <>
@@ -43,7 +52,7 @@ export function MenuDrawer({
       key: "reports",
       label: "Reports",
       sub: "Products flagged by marketers",
-      count: openReports,
+      count: counts.reports,
       onClick: onReports,
       icon: (
         <>
@@ -57,7 +66,7 @@ export function MenuDrawer({
       key: "employees",
       label: "Employees",
       sub: "Staff, pay cycles and history",
-      count: 0,
+      count: counts.employees,
       onClick: onEmployees,
       icon: (
         <>

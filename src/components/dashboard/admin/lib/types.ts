@@ -159,6 +159,9 @@ export type Employee = {
   employee_number: string;
   job_title?: string | null;
   email?: string | null;
+  phone?: string | null;
+  /** Second contact number. Always a different number from `phone`. */
+  phone2?: string | null;
   monthly_salary?: number | null;
   hired_at?: string | null;
   notes?: string | null;

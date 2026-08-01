@@ -153,7 +153,7 @@ export function ReportsPage({
 
   return (
     <>
-      <PageHeader title="Reports" onBack={onBack} />
+      <PageHeader title="Reports" onBack={onBack} count={reports.filter((r) => r.status === "open").length} />
         <div className="adm-filter-row" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           {FILTERS.map((f) => (
             <button

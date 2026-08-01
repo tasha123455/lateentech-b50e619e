@@ -38,6 +38,25 @@ export const empIsPaid = (emp: Employee, cyc: EmpCycle): boolean =>
     greyed-out "Pending" until that date arrives. */
 export const empIsDue = (cyc: EmpCycle): boolean => new Date() >= cyc.payday;
 
+/** The scheduled payday of one past cycle, from its (period_year, period_month)
+    key. Same 30-day arithmetic empCycle() uses, run backwards. */
+export function empPaydayFor(emp: Employee, year: number, month: number): Date {
+  const hired = new Date((emp.hired_at || new Date().toISOString().slice(0, 10)) + "T00:00:00");
+  const cycleIndex = year * 12 + (month - 1) - (hired.getFullYear() * 12 + hired.getMonth());
+  const isQA = String(emp.employee_number || "").trim() === "5050505050";
+  const payday = new Date(hired);
+  payday.setDate(payday.getDate() + (cycleIndex + (isQA ? 0 : 1)) * 30);
+  return payday;
+}
+
+/** How many employees can be paid right now — the number badged on the
+    Employees page, its menu entry and the nav's Menu slot. */
+export const empPayableCount = (emps: Employee[]): number =>
+  (emps || []).reduce((n, e) => {
+    const cyc = empCycle(e);
+    return n + (!empIsPaid(e, cyc) && empIsDue(cyc) ? 1 : 0);
+  }, 0);
+
 /** Lowest tracked stock across a product's variant groups, falling back to the
     top-level qty when nothing is tracked. */
 export function effectiveQty(p: { qty?: number | null; variant_groups?: Array<{ items?: unknown[] }> | null }): number {

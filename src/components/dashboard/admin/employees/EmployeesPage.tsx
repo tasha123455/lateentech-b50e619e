@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
-import { empCycle, empFmtDate, empIsDue, empIsPaid } from "../lib/employees";
-import { initials, money } from "../lib/format";
+import { empCycle, empFmtDate, empIsDue, empIsPaid, empPayableCount } from "../lib/employees";
+import { dispPhone, initials, money } from "../lib/format";
 import type { Employee } from "../lib/types";
 import { Money } from "../ui/Money";
 import { EmployeeFormOverlay } from "./EmployeeFormOverlay";
@@ -14,6 +14,44 @@ const FILTERS: Array<{ key: string; label: string }> = [
   { key: "pending", label: "Pending" },
   { key: "paid", label: "Paid" },
 ];
+
+/** Employee number, phones, email, employment date and notes, folded away —
+ *  the card only shows what you need to decide whether to pay someone. */
+function MoreInfo({ e }: { e: Employee }) {
+  const [open, setOpen] = useState(false);
+  const phones = [e.phone, e.phone2].filter(Boolean).map((p) => dispPhone(p)).join("  /  ");
+  const rows: Array<[string, string]> = [
+    ["Employee number", e.employee_number || "—"],
+    ["Phone numbers", phones || "—"],
+    ["Email", e.email || "—"],
+    ["Employment date", empFmtDate(e.hired_at)],
+    ["Notes", e.notes || "—"],
+  ];
+  return (
+    <div className="adm-emp-more">
+      <button className="adm-emp-more-hd" onClick={() => setOpen((v) => !v)}>
+        <span>More info</span>
+        <svg
+          className={"adm-emp-more-chev" + (open ? " open" : "")}
+          width="13" height="13" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {open && (
+        <div className="adm-emp-more-body">
+          {rows.map(([k, v]) => (
+            <div className="adm-emp-more-row" key={k}>
+              <span className="adm-emp-more-k">{k}:</span>
+              <span className="adm-emp-more-v" data-no-i18n>{v}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { employees, loadEmployees, loadMetrics, loading, failed, api } = useAdminData();
@@ -39,19 +77,22 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
     let totalSalary = 0;
     let paidAmt = 0;
     let pendingAmt = 0;
-    let paidCount = 0;
     employees.forEach((e) => {
       const cyc = cycles.get(e.id)!;
       const sal = Number(e.monthly_salary || 0);
       totalSalary += sal;
-      if (empIsPaid(e, cyc)) {
-        paidAmt += sal;
-        paidCount++;
-      } else {
-        pendingAmt += sal;
-      }
+      if (empIsPaid(e, cyc)) paidAmt += sal;
+      else pendingAmt += sal;
     });
-    return { totalSalary, paidAmt, pendingAmt, paidCount };
+    return { totalSalary, paidAmt, pendingAmt };
+  }, [employees, cycles]);
+
+  // Only the tapped chip shows its number, matching the order filters on the
+  // business dashboard.
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { "": employees.length, pending: 0, paid: 0 };
+    employees.forEach((e) => { if (empIsPaid(e, cycles.get(e.id)!)) c.paid++; else c.pending++; });
+    return c;
   }, [employees, cycles]);
 
   const filtered = employees.filter((e) => {
@@ -88,40 +129,33 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
       const cyc = cycles.get(e.id)!;
       const paid = empIsPaid(e, cyc);
       const due = empIsDue(cyc);
+      const payable = !paid && due;
       const paydayLabel = empFmtDate(paid ? cyc.nextPayday : cyc.payday);
       return (
-        <div className="adm-emp-row" key={e.id}>
+        /* Somebody who can be paid right now is the only thing on this page
+           that needs acting on, so the whole card carries the tint — not just
+           its button. */
+        <div className={"adm-emp-row" + (payable ? " payable" : "")} key={e.id}>
+          <div className="adm-emp-badge-row">
+            <span className="adm-emp-role" data-no-i18n>{e.job_title || "—"}</span>
+          </div>
           <div className="adm-emp-top">
             <div className="adm-emp-av" data-no-i18n>{initials(e.full_name)}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="adm-emp-name" data-no-i18n>
-                {e.full_name} <span style={{ color: "#9e9b97", fontWeight: 400 }}>· {e.employee_number}</span>
-              </div>
-              <div className="adm-emp-sub" data-no-i18n>
-                {(e.job_title || "—") + " · " + (e.email || "no email")}
-              </div>
-            </div>
-            <div style={{ textAlign: "right", fontSize: 13, fontWeight: 500, color: "#f5b441" }}>
-              <Money n={e.monthly_salary} />
+              <div className="adm-emp-name" data-no-i18n>{e.full_name}</div>
             </div>
           </div>
-          <div className="adm-emp-meta">
-            <div>Hired <b>{empFmtDate(e.hired_at)}</b></div>
-            <div>Payday <b>{paydayLabel}</b></div>
-            <div style={{ gridColumn: "1/-1" }}>
-              Status:{" "}
-              {paid ? (
-                <span style={{ color: "#2dbd8f" }}>Paid · next due {paydayLabel}</span>
-              ) : due ? (
-                <span style={{ color: "#e07070" }}>Pending · due {paydayLabel}</span>
-              ) : (
-                <span style={{ color: "#9e9b97" }}>Pending · due {paydayLabel}</span>
-              )}
+          <div className="adm-emp-facts">
+            <div className="adm-emp-fact">
+              <span className="adm-emp-fact-k">Pay day</span>
+              <span className="adm-emp-fact-v" data-no-i18n>{paydayLabel}</span>
             </div>
-            {!!e.notes && (
-              <div style={{ gridColumn: "1/-1", color: "#9e9b97", fontStyle: "italic" }} data-no-i18n>{e.notes}</div>
-            )}
+            <div className="adm-emp-fact">
+              <span className="adm-emp-fact-k">Salary</span>
+              <span className="adm-emp-fact-v amt"><Money n={e.monthly_salary} /></span>
+            </div>
           </div>
+          <MoreInfo e={e} />
           <div className="adm-emp-actions">
             <button
               className={"adm-emp-pay-btn " + (paid ? "paid" : due ? "" : "not-due")}
@@ -140,14 +174,11 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
 
   return (
     <>
-      <PageHeader title="Employees & Payroll" onBack={onBack} />
+      <PageHeader title="Employees & Payroll" onBack={onBack} count={empPayableCount(employees)} />
       <div className="adm-stat-grid">
         <div className="adm-stat full">
           <div className="adm-stat-label">Total Monthly Salaries</div>
           <div className="adm-stat-value"><Money n={totals.totalSalary} /></div>
-          <div className="adm-stat-sub">
-            <span>{employees.length}</span> employees · <span>{totals.paidCount}</span> paid this cycle
-          </div>
         </div>
         <div className="adm-stat">
           <div className="adm-stat-label">Paid This Cycle</div>
@@ -167,7 +198,7 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
             data-emp-filter={f.key}
             onClick={() => setFilter(f.key)}
           >
-            {f.label}
+            {f.label}{filter === f.key ? ` (${counts[f.key] || 0})` : ""}
           </button>
         ))}
         <button
@@ -181,7 +212,7 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
 
       <input
         className="adm-search"
-        placeholder="Search by name, number, role, email…"
+        placeholder="Search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

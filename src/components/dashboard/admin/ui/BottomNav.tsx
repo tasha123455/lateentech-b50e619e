@@ -15,12 +15,15 @@ const ITEMS: Array<{ id: AdminPageId; label: string; path: React.ReactNode }> = 
 /** Employees moved into the menu, so the last slot opens the menu instead of
  *  being a sixth page. `menuOpen` keeps it lit while the sheet is up. */
 export function BottomNav({
-  page, onGo, onMenu, menuOpen,
+  page, onGo, onMenu, menuOpen, menuCount = 0,
 }: {
   page: AdminPageId;
   onGo: (id: AdminPageId) => void;
   onMenu: () => void;
   menuOpen: boolean;
+  /** Everything waiting behind the menu, added up — the pages themselves are
+   *  out of sight, so the slot that opens them carries their total. */
+  menuCount?: number;
 }) {
   return (
     <nav className="adm-bottom-nav">
@@ -45,6 +48,7 @@ export function BottomNav({
           <line x1="3" y1="18" x2="21" y2="18" />
         </svg>
         <span className="adm-nav-label">Menu</span>
+        {menuCount > 0 && <span className="adm-nav-count" data-no-i18n>{menuCount}</span>}
       </div>
     </nav>
   );
