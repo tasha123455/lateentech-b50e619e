@@ -8,50 +8,63 @@ type Props = {
   children: ReactNode;
   /** Absolute path (already language-prefixed). Defaults to the language root. */
   backTo?: string;
+  /** The register form is long, so it gets a smaller lockup than sign-in. */
+  logoSize?: number;
 };
 
-export function AuthCard({ role, children, backTo }: Props) {
+export function AuthCard({ role, children, backTo, logoSize = 100 }: Props) {
   const tint = role === "marketer" ? "bg-marketer-tint text-marketer-foreground" : "bg-business-tint text-business";
   const label = role === "marketer" ? "Marketer" : "Business";
   const { lang, otherLangPath, withLang } = useLanguage();
   const langLabel = lang === "en" ? "العربية" : "English";
   const effectiveBack = backTo ?? withLang("/");
 
-  /* Back and language are the same kind of thing — small ways out of this page
-     — so they are built from the same chip. The language pill used to carry a
-     block of inline colours that had drifted away from every token near it. */
-  const chip =
-    "inline-flex h-9 items-center rounded-xl border border-border bg-surface-2 text-text-2 transition hover:bg-surface hover:text-text-1";
-
   return (
     <div className="flex min-h-dvh items-center justify-center overflow-x-hidden bg-background px-4 py-10">
-      <div className="w-full max-w-[400px] rounded-2xl border border-border bg-surface p-6 shadow-2xl">
-        <div className="mb-6 flex items-center justify-between gap-2">
-          <Link to={effectiveBack} aria-label="Back" className={`${chip} w-9 justify-center text-base`}>
-            <span aria-hidden className="-mt-px">‹</span>
-          </Link>
-          <Link
-            data-no-i18n
-            to={otherLangPath}
-            aria-label="Toggle language"
-            className={`${chip} gap-1.5 px-3 text-xs font-medium`}
+      {/* The back button sits above the card rather than inside it. The header
+          row already carries the language switch and the role badge, and a
+          third control turned it into a toolbar.
+          It is in normal flow rather than positioned over the page, so a short
+          screen scrolls it into view instead of clipping it, and `self-start`
+          puts it at the reading start without needing a rule per direction. */}
+      <div className="flex w-full max-w-[400px] flex-col gap-3">
+        <Link
+          to={effectiveBack}
+          aria-label="Back"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center self-start rounded-full border border-border bg-surface text-text-2 transition hover:bg-surface-2 hover:text-text-1"
+        >
+          <svg
+            className="h-[18px] w-[18px] rtl:rotate-180"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           >
-            <span aria-hidden className="text-sm">🌐</span>
-            <span>{langLabel}</span>
-          </Link>
-        </div>
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </Link>
 
-        {/* Centred, the way the front page introduces itself — and it gives the
-            lockup room to read as the logo rather than as an icon squeezed in
-            beside a badge. */}
-        <div className="mb-6 flex flex-col items-center">
-          <LateenLogo variant="wordmark" lang={lang === "ar" ? "ar" : "en"} size={52} showTagline={false} />
-          <span className={`mt-3 rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider ${tint}`}>
-            {label}
-          </span>
-        </div>
+        <div className="w-full rounded-3xl border border-border bg-surface px-6 pb-7 pt-5 shadow-2xl">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <Link
+              data-no-i18n
+              to={otherLangPath}
+              aria-label="Toggle language"
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-surface-2 px-4 text-[13px] font-medium text-text-1 transition hover:bg-surface"
+            >
+              <span aria-hidden className="text-[15px]">🌐</span>
+              <span>{langLabel}</span>
+            </Link>
+            <span className={`rounded-full px-3.5 py-1.5 text-[11px] font-semibold ${tint}`}>{label}</span>
+          </div>
 
-        {children}
+          {/* Big, because it is the only thing on the page that says whose app
+              this is. The tagline stays off — the heading below it already says
+              what the page is for. */}
+          <div className="flex flex-col items-center py-4">
+            <LateenLogo variant="wordmark" lang={lang === "ar" ? "ar" : "en"} size={logoSize} showTagline={false} />
+          </div>
+
+          {children}
+        </div>
       </div>
     </div>
   );

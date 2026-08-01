@@ -5,7 +5,7 @@ import { RegisterForm } from "@/components/auth/RegisterForm";
 export const Route = createFileRoute("/ar/marketer/register")({
   head: () => ({ meta: [{ title: "إنشاء حساب — مسوّق · وصلة" }] }),
   component: () => (
-    <AuthCard role="marketer" backTo="/ar/marketer/signin">
+    <AuthCard role="marketer" backTo="/ar/marketer/signin" logoSize={64}>
       <RegisterForm role="marketer" />
     </AuthCard>
   ),

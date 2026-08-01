@@ -76,14 +76,11 @@ export function SignInForm({ role }: { role: Role }) {
     if (oauthError) setError(oauthError.message);
   };
 
-  const subtitle = role === "marketer" ? "Sign in to your marketer account" : "Sign in to your business account";
-
   return (
     <div className="space-y-4">
-      <div className="text-center">
-        <h1 className="text-xl font-medium text-text-1">Sign in</h1>
-        <p className="mt-1 text-sm text-text-2">{subtitle}</p>
-      </div>
+      {/* Start-aligned, and no subtitle: the badge at the top of the card
+          already says which side of the platform this is. */}
+      <h1 className="text-start text-xl font-medium text-text-1">Sign in</h1>
       <AuthError>{error}</AuthError>
       <GoogleButton onClick={signInGoogle}>Sign in with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">
