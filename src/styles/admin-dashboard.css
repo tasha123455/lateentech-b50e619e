@@ -549,3 +549,32 @@
 .lateen-admin .country-select[dir="rtl"] { background-position: left 12px center; padding-inline-end: 12px; padding-inline-start: 36px; }
 .lateen-admin .country-select option.opt-soon { color: #fff; background: #E24B4A; font-weight: 600; }
 .lateen-admin select option.opt-soon { color: #fff; background: #E24B4A; font-weight: 600; }
+
+/* ===== Deletion requests =====
+   Role badge and the way into the account on one row, then the person's
+   details beside their photo, the wallet strip, the note and the two
+   decisions. */
+.lateen-admin .del-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+.lateen-admin .del-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.lateen-admin .del-who { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.lateen-admin .del-who .adm-user-av { width: 42px; height: 42px; font-size: 14px; }
+.lateen-admin .del-who .adm-user-av img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block; }
+.lateen-admin .del-rows { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.lateen-admin .del-row { display: flex; align-items: baseline; gap: 6px; font-size: 13px; flex-wrap: wrap; }
+.lateen-admin .del-k { color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .del-k::after { content: ":"; }
+.lateen-admin .del-v { color: var(--txt-1); overflow-wrap: anywhere; }
+.lateen-admin .del-ago { font-size: 11px; color: var(--txt-3); margin-inline-start: auto; flex-shrink: 0; }
+.lateen-admin .del-wallet { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 12.5px; color: var(--txt-2); }
+.lateen-admin .del-wallet b { color: var(--txt-1); }
+/* Money still sitting in the wallet is the reason the request needs a human,
+   so it is the one thing on the card that is coloured. */
+.lateen-admin .del-wallet.has-funds { background: #2a1a1a; border-color: #4a2020; color: #f0c0c0; }
+.lateen-admin .del-wallet.has-funds b { color: var(--ok); }
+.lateen-admin .del-wallet-pending { color: inherit; }
+.lateen-admin .del-note { min-height: 76px; margin-bottom: 8px; }
+.lateen-admin .del-actions { display: flex; gap: 8px; }
+.lateen-admin .del-btn { flex: 1; min-width: 0; min-height: 40px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; padding: 8px 12px; line-height: 1.25; }
+.lateen-admin .del-btn-reject { background: #fdeeee; color: #c0392b; }
+.lateen-admin .del-btn-approve { background: var(--accent); color: #1a1a1a; }
+.lateen-admin .del-btn:active { filter: brightness(0.95); }

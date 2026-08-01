@@ -168,10 +168,8 @@ function ReportCard({
         </div>
         <div className="rpt-head-mid">
           <div className="rpt-name" data-no-i18n>{reporterName}</div>
-          <div className="rpt-head-sub" data-no-i18n>
-            {product.name || businessName}
-            {product.code ? " · " + product.code : ""}
-          </div>
+          {/* The business, not the product — the product belongs inside. */}
+          <div className="rpt-head-sub" data-no-i18n>{businessName}</div>
         </div>
         <div className="rpt-head-end">
           <span className="rpt-type-pill">{typeLabel(r.report_type)}</span>
