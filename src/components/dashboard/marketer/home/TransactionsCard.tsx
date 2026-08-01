@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
+import { dateMatches, type BreakdownSelection } from "../lib/analytics";
 import { fmtDT, isAr, isSafeUrl, parseData, t } from "../lib/format";
 import type { NotificationRow } from "../lib/types";
 import { DetailRow, NoteBlock, OrderDetailRows } from "../notifications/detailBits";
@@ -15,14 +16,19 @@ const KINDS: Record<string, "add" | "subtract" | "withdraw" | "reject" | "failed
   payout_note: "failed",
 };
 
-export function TransactionsCard() {
+export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
   const { notifications, orders, walletCur, analytics } = useMarketerData();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const lightbox = usePhotoLightbox();
 
+  /* This card lives inside the analytics card, under the boxes the range tabs
+     drive, so it answers to the same tabs. A movement is dated by when it
+     happened — the notification's own timestamp — which is the date the row
+     already prints. */
+  const noFilter = !sel.day && !sel.month && !sel.year;
   const rows = (notifications || [])
-    .filter((n) => KINDS[n.kind])
+    .filter((n) => KINDS[n.kind] && (noFilter || dateMatches(new Date(n.created_at), sel)))
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const rawSymbol = (analytics.earnByCur[walletCur] && analytics.earnByCur[walletCur].sym) || "د.ل";
@@ -59,7 +65,9 @@ export function TransactionsCard() {
               {!rows.length ? (
                 <div className="empty-center" style={{ padding: "40px 20px" }}>
                   <div className="empty-text" style={{ textAlign: "center", color: "var(--color-text-secondary)", fontSize: 13 }}>
-                    {t("No transactions yet.", "لا توجد تحركات بعد.")}
+                    {noFilter
+                      ? t("No transactions yet.", "لا توجد تحركات بعد.")
+                      : t("No transactions in this range.", "لا توجد تحركات في هذه الفترة.")}
                   </div>
                 </div>
               ) : (

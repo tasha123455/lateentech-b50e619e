@@ -6,7 +6,7 @@ import { useLightbox } from "../ui/Lightbox";
 import { MoneyH } from "../ui/Money";
 import { locSearchText } from "../lib/constants";
 import {
-  isAr, escH, freeLbl, isFreeVal, normSearch, splitCC,
+  isAr, escH, freeLbl, isFreeVal, searchMatcher, splitCC,
   PLATFORM_FEE_THRESHOLD,
 } from "../lib/format";
 import type { Order, OrderUiStatus } from "../lib/types";
@@ -397,21 +397,21 @@ export function OrdersPage({ onOpenNotifications: _onOpenNotifications }: { onOp
   const newCount = counts.new;
 
   const filtered = useMemo(() => {
-    const q = normSearch(search);
+    const q = search.trim();
+    const match = searchMatcher(q);
     return orders.filter((o) => {
       const mf =
         activeFilter === "all" ||
         (activeFilter === "new" && (o.status === "pending" || o.status === "approved")) ||
         (activeFilter === "failed" && (o.status === "failed" || o.status === "rejected")) ||
         (activeFilter !== "new" && activeFilter !== "failed" && o.status === activeFilter);
-      const s = (x: unknown) => normSearch(x);
       const mq =
         !q ||
-        s(o.id).includes(q) ||
-        s(o.customerName).includes(q) ||
-        s(locSearchText(o.city, o.country, undefined)).includes(q) ||
-        s(o.product).includes(q) ||
-        s(o.customerPhone).includes(q);
+        match(
+          [o.id, o.customerName, locSearchText(o.city, o.country, undefined), o.product, o.customerPhone]
+            .filter(Boolean)
+            .join(" "),
+        );
       return mf && mq;
     });
   }, [orders, activeFilter, search]);

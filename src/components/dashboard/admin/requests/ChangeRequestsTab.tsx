@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { normSearch } from "@/components/dashboard/marketer/lib/format";
+import { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, whenFull } from "../lib/format";
@@ -139,9 +139,9 @@ export function ChangeRequestsTab({ active }: { active: boolean }) {
   };
 
   const list = useMemo(() => {
-    const q = normSearch(search);
-    if (!q) return changeRequests;
-    return changeRequests.filter((r) => searchText(r).includes(q));
+    if (!search.trim()) return changeRequests;
+    const match = searchMatcher(search);
+    return changeRequests.filter((r) => match(searchText(r)));
   }, [changeRequests, search]);
 
   let body: React.ReactNode;

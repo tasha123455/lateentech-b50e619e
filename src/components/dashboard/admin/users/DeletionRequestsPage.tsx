@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { normSearch } from "@/components/dashboard/marketer/lib/format";
+import { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, money, when, whenFull } from "../lib/format";
@@ -171,9 +171,9 @@ export function DeletionsTab({ active }: { active: boolean }) {
 
   const list = useMemo(() => {
     const inFilter = deletionRequests.filter((r) => r.status === filter);
-    const q = normSearch(search);
-    if (!q) return inFilter;
-    return inFilter.filter((r) => searchText(r).includes(q));
+    if (!search.trim()) return inFilter;
+    const match = searchMatcher(search);
+    return inFilter.filter((r) => match(searchText(r)));
   }, [deletionRequests, filter, search]);
 
   let body: React.ReactNode;

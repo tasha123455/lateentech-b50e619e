@@ -137,20 +137,8 @@ export const genCode = (len?: number): string => {
 };
 export const genId = (): string => "p" + Math.random().toString(36).slice(2, 7);
 
-/** Normalized search text (Arabic-insensitive), ported verbatim. */
-export function normSearch(s: unknown): string {
-  if (s == null) return "";
-  let t = String(s);
-  try { t = t.normalize("NFKC"); } catch { /* ignore */ }
-  return t
-    .toLowerCase()
-    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
-    .replace(/\u0640/g, "")
-    .replace(/[\u0622\u0623\u0625\u0671]/g, "\u0627")
-    .replace(/\u0649/g, "\u064A")
-    .replace(/\u0626/g, "\u064A")
-    .replace(/\u0624/g, "\u0648")
-    .replace(/\u0629/g, "\u0647")
-    .replace(/[\u200B-\u200F\u202A-\u202E]/g, "")
-    .trim();
-}
+/* Search behaviour is one rule for the whole app, so there is one copy of it.
+   This file used to carry its own character-for-character duplicate of
+   normSearch, which was fine while the two only folded letters and would not
+   have survived one of them learning to forgive a typo. */
+export { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";

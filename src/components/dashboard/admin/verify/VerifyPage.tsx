@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { normSearch } from "@/components/dashboard/marketer/lib/format";
+import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials } from "../lib/format";
@@ -20,26 +20,25 @@ export function VerifyPage({ active }: { active: boolean }) {
 
   /* A marketer is a match on their own details or on anything in any receipt
      of theirs — customer, that customer's number, the order code, the product.
-     normSearch folds case and the Arabic letter variants, so typing in either
-     language finds the same row. */
-  const q = normSearch(search);
+     The shared matcher folds case and the Arabic letter variants, so typing in
+     either language finds the same row, and forgives a typo in either. */
+  const q = search.trim();
   const list = useMemo(() => {
     if (!q) return verifyMarketers;
+    const match = searchMatcher(q);
     const text = (m: VerifyMarketer) =>
-      normSearch(
-        [
-          m.name, m.phone, m.email,
-          ...[...m.pending, ...m.history].flatMap((o) => [
-            o.customer_name,
-            o.customer_phone,
-            "#" + (o.order_number || String(o.id || "").slice(0, 8)),
-            o.product && o.product.name,
-          ]),
-        ]
-          .filter(Boolean)
-          .join(" "),
-      );
-    return verifyMarketers.filter((m) => text(m).includes(q));
+      [
+        m.name, m.phone, m.email,
+        ...[...m.pending, ...m.history].flatMap((o) => [
+          o.customer_name,
+          o.customer_phone,
+          "#" + (o.order_number || String(o.id || "").slice(0, 8)),
+          o.product && o.product.name,
+        ]),
+      ]
+        .filter(Boolean)
+        .join(" ");
+    return verifyMarketers.filter((m) => match(text(m)));
   }, [verifyMarketers, q]);
 
   const approve = async (id: string) => {

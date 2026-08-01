@@ -1,5 +1,5 @@
 import { CATEGORY_DATA } from "../lib/constants";
-import { normSearch } from "../lib/format";
+import { searchMatcher } from "../lib/format";
 import { catSearchText, productHasStock, zoneSearchText } from "../lib/mappers";
 import type { BrowseProduct } from "../lib/types";
 import type { Filters } from "./FilterOverlay";
@@ -46,19 +46,21 @@ export function applyBrowseFilters(
   } = {},
 ): BrowseProduct[] {
   const { requireStock = true, extraText, alsoMatchesQuery } = opts;
-  const q = normSearch(s.query);
+  const q = s.query.trim();
+  const match = searchMatcher(q);
   const { country, cities, sort } = s.filters;
 
   const out = products.filter((p) => {
     if (requireStock && !productHasStock(p)) return false;
+    /* One haystack rather than a field at a time, so a query can spend its
+       words across two of them — a name and a city, a category and a shop. */
     const mq =
       !q ||
-      normSearch(p.n).includes(q) ||
-      normSearch(p.code || "").includes(q) ||
-      catSearchText(p.cat).includes(q) ||
-      normSearch(p.desc || "").includes(q) ||
-      zoneSearchText(p).includes(q) ||
-      (!!extraText && normSearch(extraText(p)).includes(q)) ||
+      match(
+        [p.n, p.code, catSearchText(p.cat), p.desc, zoneSearchText(p), extraText && extraText(p)]
+          .filter(Boolean)
+          .join(" "),
+      ) ||
       (!!alsoMatchesQuery && alsoMatchesQuery(p));
     const mc = !country || !!p.d[country];
     const mct =

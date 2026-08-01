@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useBusinessData } from "../BusinessDataProvider";
 import { catSearchText, zoneSearchText } from "../lib/constants";
-import { isAr, normSearch } from "../lib/format";
+import { isAr, searchMatcher } from "../lib/format";
 import type { Product } from "../lib/types";
 import { ProductCard } from "./ProductCard";
 import { activeMarketerCount, effectiveQty, LOW_STOCK_THRESHOLD } from "./productHelpers";
@@ -122,15 +122,13 @@ export function ProductsPage({
     else if (filter === "lowstock") list = list.filter((p) => { const eq = effectiveQty(p); return eq > 0 && eq <= LOW_STOCK_THRESHOLD; });
     else if (filter === "outofstock") list = list.filter((p) => effectiveQty(p) <= 0);
 
-    const q = normSearch(search);
+    const q = search.trim();
     if (q) {
+      const match = searchMatcher(q);
       list = list.filter((p) =>
-        normSearch(p.name).includes(q) ||
-        normSearch(p.code || "").includes(q) ||
-        catSearchText(p.category).includes(q) ||
-        normSearch(p.desc || "").includes(q) ||
-        zoneSearchText(p.delivery).includes(q),
-      );
+        match([p.name, p.code, catSearchText(p.category), p.desc, zoneSearchText(p.delivery)]
+          .filter(Boolean)
+          .join(" ")));
     }
     return list;
   }, [products, filter, search]);

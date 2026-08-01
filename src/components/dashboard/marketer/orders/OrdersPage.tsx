@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { isAr, normSearch } from "../lib/format";
+import { isAr, searchMatcher } from "../lib/format";
 import { locSearchText, orderMatchesFilter } from "../lib/mappers";
 import { removeDraft } from "../lib/storage";
 import type { MarketerOrder } from "../lib/types";
@@ -25,7 +25,7 @@ export function OrdersPage({
   const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
 
-  const q = normSearch(query.trim());
+  const q = query.trim();
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: 0, draft: 0, pending: 0, approved: 0, rejected: 0, failed: 0 };
@@ -37,21 +37,19 @@ export function OrdersPage({
     return c;
   }, [orders]);
 
-  const shown = useMemo(
-    () =>
-      orders.filter((o) => {
-        if (!orderMatchesFilter(o, filter)) return false;
-        if (!q) return true;
-        const hay = normSearch(
-          [o.id, o.customerName, o.phone, o.whatsapp, o.address, o.productName, o.size, o.color, o.notes,
-           locSearchText(o.city, o.country, o.countryCode)]
-            .filter(Boolean)
-            .join(" "),
-        );
-        return hay.includes(q);
-      }),
-    [orders, filter, q],
-  );
+  const shown = useMemo(() => {
+    const match = searchMatcher(q);
+    return orders.filter((o) => {
+      if (!orderMatchesFilter(o, filter)) return false;
+      if (!q) return true;
+      return match(
+        [o.id, o.customerName, o.phone, o.whatsapp, o.address, o.productName, o.size, o.color, o.notes,
+         locSearchText(o.city, o.country, o.countryCode)]
+          .filter(Boolean)
+          .join(" "),
+      );
+    });
+  }, [orders, filter, q]);
 
   const labels = filterLabels();
   const ar = isAr();

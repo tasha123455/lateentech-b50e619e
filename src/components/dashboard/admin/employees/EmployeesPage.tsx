@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { normSearch } from "@/components/dashboard/marketer/lib/format";
+import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
@@ -69,15 +69,13 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
     if (active) void loadEmployees("");
   }, [active, loadEmployees]);
 
-  const matchesSearch = (e: Employee) => {
-    const q = normSearch(search);
-    if (!q) return true;
-    return normSearch(
+  const match = searchMatcher(search);
+  const matchesSearch = (e: Employee) =>
+    match(
       [e.full_name, e.employee_number, e.job_title, e.email, e.phone, e.phone2, e.notes]
         .filter(Boolean)
         .join(" "),
-    ).includes(q);
-  };
+    );
 
   const cycles = useMemo(() => {
     const map = new Map<string, ReturnType<typeof empCycle>>();

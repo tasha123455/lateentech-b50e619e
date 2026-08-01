@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { money as marketerMoney, moneyParts, normSearch } from "@/components/dashboard/marketer/lib/format";
+import { money as marketerMoney, moneyParts, searchMatcher } from "@/components/dashboard/marketer/lib/format";
 import { useAdminData, usePayoutsOpenRef } from "../AdminDataProvider";
 import { dispPhone, initials, money, whenOrDate } from "../lib/format";
 import type { PayoutRequest } from "../lib/types";
@@ -204,13 +204,11 @@ export function PayoutsPage({ active }: { active: boolean }) {
   /* Name, email or phone, through the same normaliser the rest of the admin
      uses — so an Arabic name types the same way it reads. */
   const list = useMemo(() => {
-    const q = normSearch(search);
-    if (!q) return payouts;
+    if (!search.trim()) return payouts;
+    const match = searchMatcher(search);
     return payouts.filter((p) => {
       const u = p.user || {};
-      return normSearch(
-        [u.full_name, u.business_name, u.email, u.phone].filter(Boolean).join(" "),
-      ).includes(q);
+      return match([u.full_name, u.business_name, u.email, u.phone].filter(Boolean).join(" "));
     });
   }, [payouts, search]);
 

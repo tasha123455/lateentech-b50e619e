@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { normSearch } from "@/components/dashboard/marketer/lib/format";
+import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { dispPhone, initials } from "../lib/format";
 import type { VerifyMarketer } from "../lib/types";
@@ -31,7 +31,8 @@ export function MarketerDetailOverlay({
   }, [marketerId]);
 
   const open = !!marketer;
-  const q = normSearch(search);
+  const q = search.trim();
+  const match = searchMatcher(q);
 
   let body: React.ReactNode = null;
   if (!marketer) {
@@ -40,7 +41,7 @@ export function MarketerDetailOverlay({
     const baseList = tab === "new" ? marketer.pending : marketer.history;
     const list = q
       ? baseList.filter((o) =>
-          normSearch(
+          match(
             [
               o.product && o.product.name,
               o.customer_name,
@@ -50,7 +51,7 @@ export function MarketerDetailOverlay({
             ]
               .filter(Boolean)
               .join(" "),
-          ).includes(q),
+          ),
         )
       : baseList;
 

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { isAr, normSearch } from "../lib/format";
+import { isAr, searchMatcher } from "../lib/format";
 import { catSearchText, productHasStock, zoneSearchText } from "../lib/mappers";
 import { ProductCover } from "../browse/ProductCard";
 import { pkT } from "../browse/pdText";
@@ -11,18 +11,13 @@ export function SavedPage({ onOpenProduct }: { onOpenProduct: (id: string) => vo
   const { products, toggleFavorite } = useMarketerData();
   const [query, setQuery] = useState("");
 
-  const q = normSearch(query);
+  const q = query.trim();
   const saved = useMemo(() => {
+    const match = searchMatcher(q);
     let list = products.filter((p) => p.sv);
     if (q) {
-      list = list.filter(
-        (p) =>
-          normSearch(p.n).includes(q) ||
-          normSearch(p.code || "").includes(q) ||
-          catSearchText(p.cat).includes(q) ||
-          normSearch(p.desc || "").includes(q) ||
-          zoneSearchText(p).includes(q),
-      );
+      list = list.filter((p) =>
+        match([p.n, p.code, catSearchText(p.cat), p.desc, zoneSearchText(p)].filter(Boolean).join(" ")));
     }
     return list;
   }, [products, q]);

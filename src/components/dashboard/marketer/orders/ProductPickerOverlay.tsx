@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { normSearch } from "../lib/format";
+import { searchMatcher } from "../lib/format";
 import { catSearchText, productHasStock } from "../lib/mappers";
 import type { BrowseProduct } from "../lib/types";
 import { ProductCover } from "../browse/ProductCard";
@@ -44,18 +44,12 @@ export function ProductPickerOverlay({
   }, [open]);
 
   const inStock = favs.filter(productHasStock);
-  /* Same normaliser as the browse and saved pages: a plain lowercase compare
-     missed "احمد" typed without its hamza, and missed the category entirely
-     when the marketer typed it in the other language. */
-  const qq = normSearch(query);
-  const filtered = qq
-    ? inStock.filter(
-        (p) =>
-          normSearch(p.n).includes(qq) ||
-          catSearchText(p.cat || "").includes(qq) ||
-          normSearch(p.biz || "").includes(qq) ||
-          normSearch(p.code || "").includes(qq),
-      )
+  /* Same matcher as the browse and saved pages. The fields are joined into one
+     haystack rather than tested one at a time, so a query may draw its words
+     from more than one of them — the name and the shop, say. */
+  const match = searchMatcher(query);
+  const filtered = query.trim()
+    ? inStock.filter((p) => match([p.n, catSearchText(p.cat || ""), p.biz, p.code].filter(Boolean).join(" ")))
     : inStock;
 
   return (
