@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { normSearch } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
-import { PageHeader } from "../ui/PageHeader";
 import { dispPhone, initials, money, when, whenFull } from "../lib/format";
 import type { DeletionRequest } from "../lib/types";
 import { goToAccount } from "./UserCard";
@@ -131,7 +130,9 @@ function DeletionCard({
   );
 }
 
-export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
+/** The Deletions half of the Requests page — list, its two states and search;
+ *  the header and tabs belong to the page. */
+export function DeletionsTab({ active }: { active: boolean }) {
   const { deletionRequests, loadDeletionRequests, api } = useAdminData();
   const [filter, setFilter] = useState("wallet_review");
   const [search, setSearch] = useState("");
@@ -188,7 +189,6 @@ export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBa
 
   return (
     <>
-      <PageHeader title="Deletion Requests" onBack={onBack} count={counts.wallet_review} />
       <div className="adm-filter-row">
         {FILTERS.map((f) => (
           <button

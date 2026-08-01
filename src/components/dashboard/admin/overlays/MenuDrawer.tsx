@@ -17,13 +17,12 @@ export function useMenuCounts() {
  *  and Products headers (plus the Employees tab), so each one now lives in a
  *  single place. */
 export function MenuDrawer({
-  open, onClose, onDeletionRequests, onReports, onEmployees, onNotifications,
+  open, onClose, onRequests, onEmployees, onNotifications,
   onSignOut, signingOut,
 }: {
   open: boolean;
   onClose: () => void;
-  onDeletionRequests: () => void;
-  onReports: () => void;
+  onRequests: () => void;
   onEmployees: () => void;
   onNotifications: () => void;
   onSignOut: () => void;
@@ -33,31 +32,18 @@ export function MenuDrawer({
   const ar = typeof document !== "undefined" && document.documentElement.lang === "ar";
 
   const items = [
+    /* One entry for both: reports and deletion requests are the same job —
+       somebody asking the admin to decide — and they open as two tabs of the
+       same page, so the menu shows one door with both their numbers on it. */
     {
-      key: "deletions",
-      label: "Deletion Requests",
-      count: counts.deletions,
-      onClick: onDeletionRequests,
+      key: "requests",
+      label: "Requests & Reports",
+      count: counts.deletions + counts.reports,
+      onClick: onRequests,
       icon: (
         <>
-          <path d="M3 6h18" />
-          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-          <line x1="10" y1="11" x2="10" y2="17" />
-          <line x1="14" y1="11" x2="14" y2="17" />
-        </>
-      ),
-    },
-    {
-      key: "reports",
-      label: "Reports",
-      count: counts.reports,
-      onClick: onReports,
-      icon: (
-        <>
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-          <line x1="12" y1="9" x2="12" y2="13" />
-          <line x1="12" y1="17" x2="12.01" y2="17" />
+          <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+          <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
         </>
       ),
     },

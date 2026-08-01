@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { normSearch } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
-import { PageHeader } from "../ui/PageHeader";
 import { dispPhone, initials, whenFull } from "../lib/format";
 import type { AdminReport } from "../lib/types";
 import { Money } from "../ui/Money";
@@ -278,11 +277,12 @@ function ReportCard({
   );
 }
 
-export function ReportsPage({
-  active, onBack, onOpenProduct,
+/** The Reports half of the Requests page. The page itself owns the header and
+ *  the tabs, so this is the list and its search. */
+export function ReportsTab({
+  active, onOpenProduct,
 }: {
   active: boolean;
-  onBack: () => void;
   onOpenProduct: (id: string) => void;
 }) {
   const { reports, loadReports, api } = useAdminData();
@@ -333,8 +333,6 @@ export function ReportsPage({
     }
   };
 
-  const openCount = reports.filter((r) => r.status === "open").length;
-
   let body: React.ReactNode;
   if (!reports.length && !loadedOnce) {
     body = <div className="adm-empty">Loading…</div>;
@@ -354,7 +352,6 @@ export function ReportsPage({
 
   return (
     <>
-      <PageHeader title="Reports" onBack={onBack} count={openCount} />
       <input
         className="adm-search"
         placeholder="Search"

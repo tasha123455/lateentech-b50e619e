@@ -8,10 +8,9 @@ import { AdminDataProvider, useAdminData } from "./AdminDataProvider";
 import { EmployeesPage } from "./employees/EmployeesPage";
 import { MenuDrawer, useMenuCounts } from "./overlays/MenuDrawer";
 import { NotificationsPage } from "./overlays/NotificationsPage";
-import { ReportsPage } from "./products/ReportsPage";
-import { DeletionRequestsPage } from "./users/DeletionRequestsPage";
 import { HomePage } from "./home/HomePage";
 import { readPage, readScroll, writePage, writeScroll } from "./lib/storage";
+import { RequestsPage } from "./requests/RequestsPage";
 import type { AdminPageId } from "./lib/types";
 import { PayoutsPage } from "./payouts/PayoutsPage";
 import { ProductDetailOverlay } from "./products/ProductDetailOverlay";
@@ -21,7 +20,7 @@ import { LightboxProvider } from "./ui/Lightbox";
 import { UsersPage } from "./users/UsersPage";
 import { VerifyPage } from "./verify/VerifyPage";
 
-const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-deletions", "adm-reports", "adm-notify"]);
+const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-requests", "adm-notify"]);
 
 function Shell() {
   const { userId, loadMetrics } = useAdminData();
@@ -147,12 +146,8 @@ function Shell() {
         <EmployeesPage active={page === "adm-employees"} onBack={() => goTo(returnTo)} />
       </section>
 
-      <section className={"adm-page" + (page === "adm-deletions" ? " active" : "")} id="adm-deletions">
-        <DeletionRequestsPage active={page === "adm-deletions"} onBack={() => goTo(returnTo)} />
-      </section>
-
-      <section className={"adm-page" + (page === "adm-reports" ? " active" : "")} id="adm-reports">
-        <ReportsPage active={page === "adm-reports"} onBack={() => goTo(returnTo)} onOpenProduct={setDetailFromReport} />
+      <section className={"adm-page" + (page === "adm-requests" ? " active" : "")} id="adm-requests">
+        <RequestsPage active={page === "adm-requests"} onBack={() => goTo(returnTo)} onOpenProduct={setDetailFromReport} />
         <ProductDetailOverlay productId={detailFromReport} onClose={() => setDetailFromReport(null)} />
       </section>
 
@@ -173,8 +168,7 @@ function Shell() {
         signingOut={signingOut}
         onSignOut={onSignOut}
         onClose={() => setMenuOpen(false)}
-        onDeletionRequests={() => openFromMenu("adm-deletions")}
-        onReports={() => openFromMenu("adm-reports")}
+        onRequests={() => openFromMenu("adm-requests")}
         onEmployees={() => openFromMenu("adm-employees")}
         onNotifications={() => openFromMenu("adm-notify")}
       />

@@ -378,6 +378,18 @@
 .lateen-admin .adm-back-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--surface); color: var(--txt-1); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; }
 .lateen-admin .adm-back-btn svg { width: 17px; height: 17px; }
 
+/* Two feeds, one page: the Requests header swaps a title for the two tabs it
+   switches between, centred between the back button and a pad of its width.
+   The underline is the only thing that moves, so nothing shifts on a tap. */
+.lateen-admin .adm-tabbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.lateen-admin .adm-tabbar-pad { width: 34px; flex-shrink: 0; }
+.lateen-admin .adm-tabs { flex: 1; display: flex; justify-content: center; gap: 24px; min-width: 0; }
+.lateen-admin .adm-tab { position: relative; display: flex; align-items: center; gap: 5px; background: none; border: none; padding: 3px 2px 9px; color: var(--txt-2); font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.lateen-admin .adm-tab.on { color: var(--txt-1); font-weight: 700; }
+.lateen-admin .adm-tab.on::after { content: ""; position: absolute; inset-inline-start: 50%; transform: translateX(-50%); bottom: 0; width: 20px; height: 2px; border-radius: 2px; background: var(--accent); }
+.lateen-admin[dir="rtl"] .adm-tab.on::after, [dir="rtl"] .lateen-admin .adm-tab.on::after { transform: translateX(50%); }
+.lateen-admin .adm-tab-count { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--danger); color: #fff; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+
 /* ===== Browse chrome, shared with the marketer's browse page =====
    The admin product page renders the marketer's BrowseFilters component, so it
    needs the same rules. These are the marketer's, copied across with its

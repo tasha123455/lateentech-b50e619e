@@ -705,6 +705,8 @@ export const DICT: Record<string, string> = {
   "Reports": "البلاغات",
   "Send Notification": "إرسال إشعار",
   "Deletion Requests": "طلبات حذف الحساب",
+  "Requests & Reports": "الطلبات والبلاغات",
+  "Deletions": "طلبات الحذف",
   "Needs Review": "تحتاج مراجعة",
   "Scheduled": "مجدولة",
   "Cancelled": "ملغاة",

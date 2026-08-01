@@ -6,7 +6,7 @@ export type AdminApi = LateenApi["admin"];
 export type AdminPageId =
   | "adm-home" | "adm-verify" | "adm-payouts" | "adm-users" | "adm-products"
   // reached from the menu rather than the nav bar
-  | "adm-employees" | "adm-deletions" | "adm-reports" | "adm-notify";
+  | "adm-employees" | "adm-requests" | "adm-notify";
 
 /** A person attached to an order / report / request. */
 export type Person = {
