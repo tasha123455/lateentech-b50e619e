@@ -54,35 +54,32 @@
 .lateen-admin .adm-pay-details-empty { color: #d97706; font-style: italic; }
 
 /* Employees */
-.lateen-admin .adm-emp-row { padding: 14px; border-bottom: 0.5px solid #272725; display: grid; gap: 8px; }
+.lateen-admin .adm-emp-row { padding: 11px 12px; border-bottom: 0.5px solid #272725; display: grid; gap: 5px; }
 .lateen-admin .adm-emp-row:last-child { border-bottom: none; }
-.lateen-admin .adm-emp-top { display: flex; align-items: center; gap: 10px; }
-.lateen-admin .adm-emp-av { width: 40px; height: 40px; border-radius: 50%; background: #3a2a10; color: #f5b441; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
-.lateen-admin .adm-emp-name { font-size: 14px; font-weight: 500; color: #f0eeeb; }
+/* Avatar, name and the role badge share one row, and nothing below is indented
+   past the avatar. The old layout gave the badge a line of its own and pushed
+   every other line 50px in, which left a wide empty gutter down the card. */
+.lateen-admin .adm-emp-top { display: flex; align-items: center; gap: 8px; }
+.lateen-admin .adm-emp-av { width: 30px; height: 30px; border-radius: 50%; background: #3a2a10; color: #f5b441; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; flex-shrink: 0; }
+.lateen-admin .adm-emp-name { font-size: 14px; font-weight: 500; color: #f0eeeb; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lateen-admin .adm-emp-sub { font-size: 11px; color: #9e9b97; margin-top: 2px; }
-.lateen-admin .adm-emp-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: 11px; color: #9e9b97; padding-left: 50px; }
-.lateen-admin .adm-emp-meta b { color: #f0eeeb; font-weight: 500; }
-/* The job title reads as a badge in the top corner rather than being buried in
-   a subtitle line next to the email. */
-.lateen-admin .adm-emp-badge-row { display: flex; justify-content: flex-end; }
-.lateen-admin .adm-emp-role { font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 10px; background: #3a2a10; color: #f5b441; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Pay day, then salary, then the folded-away rest. */
-.lateen-admin .adm-emp-facts { display: grid; gap: 4px; padding-inline-start: 50px; }
+.lateen-admin .adm-emp-role { font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 10px; background: #3a2a10; color: #f5b441; flex-shrink: 0; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Label and value sit together as "Pay day: Aug 01, 2026". Pushed to opposite
    edges they were separated by half a card of dead space. The colon comes from
    here rather than the markup so the label stays one clean text node for the
    translator to match. */
-.lateen-admin .adm-emp-fact { display: flex; align-items: baseline; gap: 6px; font-size: 12px; flex-wrap: wrap; }
+.lateen-admin .adm-emp-facts { display: grid; gap: 2px; }
+.lateen-admin .adm-emp-fact { display: flex; align-items: baseline; gap: 5px; font-size: 12px; flex-wrap: wrap; }
 .lateen-admin .adm-emp-fact-k { color: #9e9b97; flex-shrink: 0; }
 .lateen-admin .adm-emp-fact-k::after { content: ":"; }
 .lateen-admin .adm-emp-fact-v { color: #f0eeeb; font-weight: 500; }
 .lateen-admin .adm-emp-fact-v.amt { color: #f5b441; }
-.lateen-admin .adm-emp-more { margin-inline-start: 50px; border: 0.5px solid #272725; border-radius: 10px; overflow: hidden; background: #191919; }
-.lateen-admin .adm-emp-more-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; background: transparent; border: none; color: #c9c6c1; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; }
+.lateen-admin .adm-emp-more { border: 0.5px solid #272725; border-radius: 9px; overflow: hidden; background: #191919; }
+.lateen-admin .adm-emp-more-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; background: transparent; border: none; color: #c9c6c1; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; }
 .lateen-admin .adm-emp-more-chev { transition: transform .2s ease; opacity: .7; flex-shrink: 0; }
 .lateen-admin .adm-emp-more-chev.open { transform: rotate(180deg); }
-.lateen-admin .adm-emp-more-body { border-top: 0.5px solid #272725; padding: 4px 12px 10px; display: grid; gap: 4px; }
-.lateen-admin .adm-emp-more-row { display: flex; align-items: baseline; gap: 6px; font-size: 12px; padding-top: 6px; flex-wrap: wrap; }
+.lateen-admin .adm-emp-more-body { border-top: 0.5px solid #272725; padding: 2px 10px 8px; display: grid; gap: 2px; }
+.lateen-admin .adm-emp-more-row { display: flex; align-items: baseline; gap: 5px; font-size: 12px; padding-top: 5px; flex-wrap: wrap; }
 .lateen-admin .adm-emp-more-k { color: #9e9b97; flex-shrink: 0; }
 .lateen-admin .adm-emp-more-k::after { content: ":"; }
 .lateen-admin .adm-emp-more-v { color: #f0eeeb; overflow-wrap: anywhere; }
@@ -90,9 +87,9 @@
    button, so a full list still reads at a glance. */
 .lateen-admin .adm-emp-row.payable { background: rgba(224,112,112,0.09); box-shadow: inset 3px 0 0 #e07070; }
 .lateen-admin .adm-emp-row.payable .adm-emp-more { background: rgba(0,0,0,0.22); }
-.lateen-admin .adm-emp-actions { display: flex; gap: 8px; padding-inline-start: 50px; }
+.lateen-admin .adm-emp-actions { display: flex; gap: 6px; margin-top: 1px; }
 .lateen-admin .adm-emp-pay-btn {
-  flex: 1; height: 34px; border-radius: 17px; border: none;
+  flex: 1; min-width: 0; height: 30px; border-radius: 15px; border: none;
   background: #e07070; color: #fff; font-size: 12px; font-weight: 600;
   cursor: pointer; font-family: inherit;
 }
@@ -104,7 +101,7 @@
   background: #2a2a2a; color: #5e5c58; cursor: not-allowed;
 }
 .lateen-admin .adm-emp-link-btn {
-  height: 34px; padding: 0 14px; border-radius: 17px;
+  height: 30px; padding: 0 12px; border-radius: 15px; flex-shrink: 0;
   background: transparent; border: 0.5px solid #333330; color: #9e9b97;
   font-size: 12px; cursor: pointer; font-family: inherit;
 }

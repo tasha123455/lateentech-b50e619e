@@ -67,7 +67,7 @@ export function MarketerDetailOverlay({
         </div>
         <input
           className="adm-search"
-          placeholder="Search by product, customer name, phone, or order code"
+          placeholder="Search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

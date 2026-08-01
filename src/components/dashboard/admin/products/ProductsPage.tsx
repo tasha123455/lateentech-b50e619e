@@ -169,7 +169,7 @@ export function ProductsPage({ active }: { active: boolean }) {
         products={all.map((c) => c.bp)}
         state={state}
         onChange={setState}
-        placeholder="Search by name, code, shop…"
+        placeholder="Search"
       />
 
       <div className="adm-prod-grid">{body}</div>

@@ -188,9 +188,10 @@ export function ProductDetailOverlay({
     body = <div className="adm-empty">Product not found.</div>;
   } else {
     const cur = (p.currency && p.currency.symbol) || "$";
+    const curCode = (p.currency && p.currency.code) || "";
     const photos = Array.isArray(p.photos) ? p.photos : [];
     const commVal = p.comm_mode === "fixed"
-      ? <CurMoney sym={cur} n={p.comm_fixed} />
+      ? <CurMoney sym={cur} code={curCode} n={p.comm_fixed} />
       : Number(p.comm_pct || 0) + "%";
     const earnAmt = p.comm_mode === "fixed"
       ? Number(p.comm_fixed || 0)
@@ -259,7 +260,7 @@ export function ProductDetailOverlay({
 
         <div className="pd-earn">
           <div className="pd-earn-lbl">Marketer's earning per sale</div>
-          <div className="pd-earn-val"><CurMoney sym={cur} n={earnAmt} /></div>
+          <div className="pd-earn-val"><CurMoney sym={cur} code={curCode} n={earnAmt} /></div>
           <div className="pd-earn-divider" />
           <div className="pd-earn-rows">
             <div className="pd-earn-row">
@@ -268,11 +269,11 @@ export function ProductDetailOverlay({
             </div>
             <div className="pd-earn-row">
               <span className="pd-earn-row-lbl">Platform fee</span>
-              <span className="pd-earn-row-val"><CurMoney sym={cur} n={platFee} /></span>
+              <span className="pd-earn-row-val"><CurMoney sym={cur} code={curCode} n={platFee} /></span>
             </div>
             <div className="pd-earn-row">
               <span className="pd-earn-row-lbl">Deposit (with platform fee)</span>
-              <span className="pd-earn-row-val"><CurMoney sym={cur} n={deposit} /></span>
+              <span className="pd-earn-row-val"><CurMoney sym={cur} code={curCode} n={deposit} /></span>
             </div>
           </div>
         </div>
@@ -283,7 +284,7 @@ export function ProductDetailOverlay({
             <line x1="7" y1="7" x2="7.01" y2="7" />
           </RowIcon>
           <div className="pd-row-lbl">Product price</div>
-          <div className="pd-row-val"><CurMoney sym={cur} n={p.price} /></div>
+          <div className="pd-row-val"><CurMoney sym={cur} code={curCode} n={p.price} /></div>
         </div>
 
         {vg.map((g, gi) => (
@@ -318,7 +319,7 @@ export function ProductDetailOverlay({
         <ZonesSection
           d={zones}
           sym={cur}
-          code={(p.currency && p.currency.code) || ""}
+          code={curCode}
           open={zonesOpen}
           onToggle={() => setZonesOpen((v) => !v)}
         />
@@ -392,7 +393,7 @@ export function ProductDetailOverlay({
             <polyline points="17 6 23 6 23 12" />
           </RowIcon>
           <div className="pd-row-lbl">Revenue</div>
-          <div className="pd-row-val"><CurMoney sym={cur} n={p.revenue} /></div>
+          <div className="pd-row-val"><CurMoney sym={cur} code={curCode} n={p.revenue} /></div>
         </div>
 
         {/* Read-only: an admin has no review to write, and reporting a product
