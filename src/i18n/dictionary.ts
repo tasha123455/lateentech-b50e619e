@@ -722,6 +722,7 @@ export const DICT: Record<string, string> = {
   "Write your review of this report — the marketer will see it as 'Report reviewed'": "اكتب مراجعتك للبلاغ — المسوّق بيشوفها كـ \u2018تمت مراجعة البلاغ\u2019",
 
   // ----- Admin: verify & payouts -----
+  "No payouts match your search.": "ما فماش سحوبات مطابقة لبحثك.",
   "Account #": "رقم الحساب",
   "Attach transfer receipt": "أرفق إيصال التحويل",
   "Receipt attached": "تم إرفاق الإيصال",

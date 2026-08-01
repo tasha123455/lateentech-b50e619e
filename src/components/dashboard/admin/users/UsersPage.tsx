@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { normSearch } from "@/components/dashboard/marketer/lib/format";
+
 import { useAdminData } from "../AdminDataProvider";
 import { UserCard } from "./UserCard";
 
@@ -20,10 +22,12 @@ export function UsersPage({ active }: { active: boolean }) {
     if (active) void loadUsers();
   }, [active, loadUsers]);
 
+  /* normSearch rather than a plain lowercase compare: it folds the Arabic
+     letter variants, so "احمد" finds "أحمد". */
   const matchesSearch = (u: (typeof users)[number]) => {
-    const q = search.trim().toLowerCase();
+    const q = normSearch(search);
     if (!q) return true;
-    return [u.full_name, u.business_name, u.email, u.phone].some((v) => String(v || "").toLowerCase().includes(q));
+    return normSearch([u.full_name, u.business_name, u.email, u.phone].filter(Boolean).join(" ")).includes(q);
   };
 
   // Counts for the chips. Only the tapped chip shows its number, matching the

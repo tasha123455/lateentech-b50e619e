@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { normSearch } from "@/components/dashboard/marketer/lib/format";
+
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
 import { empCycle, empFmtDate, empIsDue, empIsPaid, empPayableCount } from "../lib/employees";
@@ -60,12 +62,22 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
   const [formFor, setFormFor] = useState<{ employee: Employee | null } | null>(null);
   const [histFor, setHistFor] = useState<Employee | null>(null);
 
-  // Debounced server-side search, same 250ms as the original.
+  /* The whole list loads at boot for the payable badge, so searching happens
+     in the browser: the server's ilike could not fold Arabic letter variants
+     and never looked at the phone numbers at all. */
   useEffect(() => {
-    if (!active) return;
-    const id = setTimeout(() => { void loadEmployees(search); }, search ? 250 : 0);
-    return () => clearTimeout(id);
-  }, [active, search, loadEmployees]);
+    if (active) void loadEmployees("");
+  }, [active, loadEmployees]);
+
+  const matchesSearch = (e: Employee) => {
+    const q = normSearch(search);
+    if (!q) return true;
+    return normSearch(
+      [e.full_name, e.employee_number, e.job_title, e.email, e.phone, e.phone2, e.notes]
+        .filter(Boolean)
+        .join(" "),
+    ).includes(q);
+  };
 
   const cycles = useMemo(() => {
     const map = new Map<string, ReturnType<typeof empCycle>>();
@@ -99,16 +111,18 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
   };
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { "": employees.length, pending: 0, paid: 0 };
-    employees.forEach((e) => {
+    const searched = employees.filter(matchesSearch);
+    const c: Record<string, number> = { "": searched.length, pending: 0, paid: 0 };
+    searched.forEach((e) => {
       if (empIsPaid(e, cycles.get(e.id)!)) c.paid++;
       else if (isPending(e)) c.pending++;
     });
     return c;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [employees, cycles]);
+  }, [employees, cycles, search]);
 
   const filtered = employees.filter((e) => {
+    if (!matchesSearch(e)) return false;
     if (filter === "paid") return empIsPaid(e, cycles.get(e.id)!);
     if (filter === "pending") return isPending(e);
     return true;
@@ -125,7 +139,7 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
       await api.admin.payEmployee({
         employee_id: e.id, period_year: cyc.y, period_month: cyc.m, amount,
       });
-      await loadEmployees(search);
+      await loadEmployees("");
       void loadMetrics();
     } catch (err) {
       alert("Failed: " + (err as Error).message);
@@ -230,7 +244,7 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
       <EmployeeFormOverlay
         seed={formFor}
         onClose={() => setFormFor(null)}
-        onSaved={() => { setFormFor(null); void loadEmployees(search); }}
+        onSaved={() => { setFormFor(null); void loadEmployees(""); }}
       />
       <EmployeeHistoryOverlay employee={histFor} onClose={() => setHistFor(null)} />
     </>

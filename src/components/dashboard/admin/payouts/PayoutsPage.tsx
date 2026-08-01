@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { money as marketerMoney, moneyParts } from "@/components/dashboard/marketer/lib/format";
+import { money as marketerMoney, moneyParts, normSearch } from "@/components/dashboard/marketer/lib/format";
 import { useAdminData, usePayoutsOpenRef } from "../AdminDataProvider";
 import { dispPhone, initials, money, whenOrDate } from "../lib/format";
 import type { PayoutRequest } from "../lib/types";
@@ -155,6 +155,7 @@ export function PayoutsPage({ active }: { active: boolean }) {
   const openRef = usePayoutsOpenRef();
   const [receipts, setReceipts] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [search, setSearch] = useState("");
 
   // Only poll while this page is on screen.
   useEffect(() => {
@@ -200,15 +201,32 @@ export function PayoutsPage({ active }: { active: boolean }) {
     }
   };
 
+  /* Name, email or phone, through the same normaliser the rest of the admin
+     uses — so an Arabic name types the same way it reads. */
+  const list = useMemo(() => {
+    const q = normSearch(search);
+    if (!q) return payouts;
+    return payouts.filter((p) => {
+      const u = p.user || {};
+      return normSearch(
+        [u.full_name, u.business_name, u.email, u.phone].filter(Boolean).join(" "),
+      ).includes(q);
+    });
+  }, [payouts, search]);
+
   let body: React.ReactNode;
   if (loading.payouts) {
     body = <div className="adm-empty">Loading…</div>;
   } else if (failed.payouts) {
     body = <div className="adm-empty">Failed to load.</div>;
-  } else if (!payouts.length) {
-    body = <div className="adm-empty">No payout requests pending.</div>;
+  } else if (!list.length) {
+    body = (
+      <div className="adm-empty">
+        {payouts.length ? "No payouts match your search." : "No payout requests pending."}
+      </div>
+    );
   } else {
-    body = payouts.map((p) => (
+    body = list.map((p) => (
       <PayoutCard
         key={p.id}
         p={p}
@@ -232,6 +250,12 @@ export function PayoutsPage({ active }: { active: boolean }) {
   return (
     <>
       <div className="adm-h1">Payout Manager</div>
+      <input
+        className="adm-search"
+        placeholder="Search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <div>{body}</div>
     </>
   );
