@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
+import { PickerChevron } from "@/components/auth/CountryCodePicker";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { dispPhone, isAr, stripCC } from "../lib/format";
@@ -196,12 +197,6 @@ export function ProfileOverlay({
                 {newEmail || p.email || "—"}
               </span>
             </div>
-            <AdminEmailEditor
-              current={newEmail || p.email}
-              currentPhone={newPhone || p.phone}
-              onChanged={setNewEmail}
-              onPhoneChanged={setNewPhone}
-            />
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }} data-i18n="Country">
                 Country
@@ -210,6 +205,12 @@ export function ProfileOverlay({
                 🇱🇾 {isAr() ? "ليبيا" : "Libya"}
               </span>
             </div>
+            <AdminEmailEditor
+              current={newEmail || p.email}
+              currentPhone={newPhone || p.phone}
+              onChanged={setNewEmail}
+              onPhoneChanged={setNewPhone}
+            />
           </div>
 
           <button
@@ -239,7 +240,7 @@ export function ProfileOverlay({
                   dir="ltr"
                 >
                   <span>{waCc}</span>
-                  <span style={{ opacity: 0.5, fontSize: 11 }}>▾</span>
+                  <PickerChevron />
                 </button>
                 <div
                   className="pd-picker-list"

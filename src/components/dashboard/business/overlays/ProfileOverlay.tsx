@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
+import { PickerChevron } from "@/components/auth/CountryCodePicker";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr, splitCC, stripCC, dispPhone } from "../lib/format";
@@ -180,16 +181,16 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Email", "البريد الإلكتروني")}</span>
                 <span dir="ltr" style={{ fontSize: 13, color: "var(--color-text-primary)", textAlign: "end", wordBreak: "break-all" }} data-no-i18n="">{newEmail || (profile?.email as string) || ""}</span>
               </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Country", "الدولة")}</span>
+                <span style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">🇱🇾 Libya</span>
+              </div>
               <AdminEmailEditor
                 current={newEmail || (profile?.email as string)}
                 currentPhone={newPhone || (profile?.phone as string)}
                 onChanged={setNewEmail}
                 onPhoneChanged={setNewPhone}
               />
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Country", "الدولة")}</span>
-                <span style={{ fontSize: 13, color: "var(--color-text-primary)" }} data-no-i18n="">🇱🇾 Libya</span>
-              </div>
             </div>
             <button type="button" onClick={() => { setCrPhone(false); setCrEmail(false); setCrCountry(false); setCrNote(""); setCrOpen(true); }} style={{ width: "100%", background: "transparent", border: "1px solid #3a3a3a", color: "var(--color-text-primary)", borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
               {t("Change", "تغيير")}
@@ -203,7 +204,7 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
                 <div style={{ position: "relative", flexShrink: 0 }}>
                   <button type="button" className="pd-inp pd-picker-btn" onClick={() => setPickerOpen((v) => !v)} style={{ display: "flex", alignItems: "center", gap: 4, width: 82 }} dir="ltr">
                     <span data-no-i18n="">{waCc}</span>
-                    <span style={{ opacity: 0.5, fontSize: 11 }}>▾</span>
+                    <PickerChevron />
                   </button>
                   {pickerOpen ? (
                     <div className="pd-picker-list" style={{ display: "block", position: "absolute", zIndex: 5, width: 190, top: "calc(100% + 4px)" }}>

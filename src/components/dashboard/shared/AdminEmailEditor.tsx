@@ -161,7 +161,7 @@ export function AdminEmailEditor({
 
           <label className="aee-lbl">{t("Phone number", "رقم الهاتف")}</label>
           <div className="aee-row">
-            <CountryCodePicker className="aee-cc" width={78} />
+            <CountryCodePicker variant="sheet" width={84} />
             <input
               type="tel"
               inputMode="numeric"
@@ -180,7 +180,7 @@ export function AdminEmailEditor({
               request dialog offers it, and a box that cannot answer one of the
               three things it is asked is a box with a hole in it. */}
           <label className="aee-lbl">{t("Country", "الدولة")}</label>
-          <CountryPicker className="aee-cc aee-country" />
+          <CountryPicker variant="sheet" />
 
           {/* Said plainly, because it is the part that surprises people. */}
           {emailMoved && (

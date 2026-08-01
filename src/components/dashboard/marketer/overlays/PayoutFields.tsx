@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PickerChevron } from "@/components/auth/CountryCodePicker";
 
 import { PAYOUT_BANKS, PAYOUT_METHODS } from "../lib/constants";
 import { isAr } from "../lib/format";
@@ -27,7 +28,7 @@ function Picker({
         style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
       >
         <span data-no-i18n>{payoutLabel(value || "Select…")}</span>
-        <span style={{ opacity: 0.5, fontSize: 11 }}>▾</span>
+        <PickerChevron />
       </button>
       <div className="pd-picker-list" style={{ display: open ? "block" : "none" }}>
         {options.map((o) => (

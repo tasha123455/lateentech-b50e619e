@@ -787,6 +787,22 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
  .aee-err { font-size:11px; line-height:1.5; color:#e07070; }
  .aee-ok { font-size:11px; color:#34c77b; }
  .aee-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--color-text-secondary); }
- .aee-cc { display:flex; align-items:center; justify-content:center; gap:4px; height:38px; padding:0 8px; font-size:13px; font-family:var(--font-sans); border:0.5px solid var(--color-border-secondary); border-radius:10px; background:var(--color-background-secondary); color:var(--color-text-primary); cursor:pointer; }
  .aee-warn { font-size:11px; line-height:1.55; color:#c9923a; background:#3a2a10; border-radius:9px; padding:9px 11px; }
- .aee-country { width:100%; justify-content:space-between; }
+/* Country and dialling-code pickers, dashboard skin. Same control as the
+   register form; these are the classes that let it sit in a sheet without the
+   seam showing — the sheet's own borders and surfaces, and a drawn chevron
+   rather than a ▾ typed as a character. */
+ .cpk { position: relative; }
+ .cpk-full { width: 100%; }
+ .cpk-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 38px; padding: 0 10px; font-size: 13px; font-family: var(--font-sans); border: 0.5px solid var(--color-border-secondary); border-radius: 10px; background: var(--color-background-secondary); color: var(--color-text-primary); cursor: pointer; }
+ .cpk-btn:hover { border-color: var(--color-border-primary, var(--color-border-secondary)); }
+ .cpk-btn-wide { justify-content: space-between; padding: 0 12px; }
+ .cpk-val { display: inline-flex; align-items: center; gap: 6px; }
+ .cpk-chev { flex-shrink: 0; color: var(--color-text-tertiary); }
+ .cpk-menu { position: absolute; z-index: 30; inset-inline-start: 0; top: calc(100% + 4px); min-width: 100%; overflow: hidden; border: 0.5px solid var(--color-border-secondary); border-radius: 12px; background: var(--color-background-primary); box-shadow: 0 12px 28px rgba(0,0,0,.45); }
+ .cpk-menu-wide { min-width: 180px; }
+ .cpk-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; font-size: 13px; color: var(--color-text-primary); white-space: nowrap; cursor: default; }
+ .cpk-row + .cpk-row { border-top: 0.5px solid var(--color-border-tertiary); }
+ .cpk-row-soon { color: var(--color-text-tertiary); cursor: not-allowed; }
+ .cpk-soon { flex-shrink: 0; padding: 2px 7px; border-radius: 7px; background: #3a2a10; color: #c9923a; font-size: 10px; font-weight: 600; }
+ .cpk-chev { flex-shrink: 0; color: var(--color-text-tertiary); }
