@@ -29,9 +29,6 @@ export function EmployeeHistoryOverlay({
           <>
             <div style={{ padding: "18px 18px 8px" }}>
               <div style={{ fontSize: 16, fontWeight: 600 }} data-no-i18n>{employee.full_name}</div>
-              <div style={{ fontSize: 12, color: "#9e9b97", marginTop: 2 }} data-no-i18n>
-                {employee.employee_number} · {employee.job_title || "—"}
-              </div>
               {/* Two separate lines rather than one sentence with the amount
                   spliced into the middle of it: in Arabic that ran the label,
                   an LTR amount and an untranslated "across N payments" into a

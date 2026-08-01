@@ -16,8 +16,9 @@ import { PayoutOverlay } from "./overlays/PayoutOverlay";
 import { BottomNav, type BizTab } from "./ui/BottomNav";
 import type { Product } from "./lib/types";
 
-function Shell() {
-  const [tab, setTab] = useState<BizTab>("home");
+function Shell({ focusProductId }: { focusProductId?: string }) {
+  // Arriving from an admin report: open the product that was reported.
+  const [tab, setTab] = useState<BizTab>(focusProductId ? "products" : "home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
@@ -42,6 +43,7 @@ function Shell() {
             onAddProduct={() => openForm(null)}
             onEditProduct={(p) => openForm(p)}
             onOpenNotifications={() => setTab("notif")}
+            focusProductId={focusProductId}
           />
         </div>
         <div className={"page" + (tab === "orders" ? " active" : "")} id="pg-orders">
@@ -68,12 +70,12 @@ function Shell() {
   );
 }
 
-export function BusinessDashboardApp({ userId }: { userId: string }) {
+export function BusinessDashboardApp({ userId, focusProductId }: { userId: string; focusProductId?: string }) {
   return (
     <div className="lateen-business">
       <BusinessDataProvider userId={userId}>
         <LightboxProvider>
-          <Shell />
+          <Shell focusProductId={focusProductId} />
         </LightboxProvider>
       </BusinessDataProvider>
     </div>

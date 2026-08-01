@@ -21,7 +21,7 @@ function countryLbl(code: string): string {
 }
 
 export function ProductCard({
-  p, orders, pendingActiveStubs, reviews, onEdit, onToggleStatus, onDelete,
+  p, orders, pendingActiveStubs, reviews, onEdit, onToggleStatus, onDelete, focused = false,
 }: {
   p: Product;
   orders: Order[];
@@ -30,9 +30,11 @@ export function ProductCard({
   onEdit: (p: Product) => void;
   onToggleStatus: (p: Product) => void;
   onDelete: (p: Product) => void;
+  /** Opened and scrolled to on mount — an admin followed a report here. */
+  focused?: boolean;
 }) {
   const ar = isAr();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(focused);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [openFolds, setOpenFolds] = useState<Record<string, boolean>>({});
   const { open: openLightbox } = useLightbox();
@@ -77,8 +79,15 @@ export function ProductCard({
 
   const zoneCodes = Object.keys(p.delivery || {});
 
+  // Scroll the reported product into view once, on arrival.
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!focused || !cardRef.current) return;
+    cardRef.current.scrollIntoView({ block: "center" });
+  }, [focused]);
+
   return (
-    <div className={"mp-product-card" + (expanded ? " expanded" : "")} data-id={p.id}>
+    <div className={"mp-product-card" + (expanded ? " expanded" : "")} data-id={p.id} ref={cardRef}>
       <div className="mp-p-head" onClick={() => setExpanded((v) => !v)}>
         <div
           className="mp-p-thumb-wrap"
