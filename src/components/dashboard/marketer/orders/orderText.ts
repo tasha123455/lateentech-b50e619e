@@ -14,7 +14,7 @@ export const orderT = () => {
         uploadedAt: "تم رفع الإيصال", reviewedAt: "تمت المراجعة", createdAt: "أُنشئ",
         adminNoteLbl: "ملاحظات الأدمن", bizNoteLbl: "ملاحظات التاجر", prodChanged: "⚠ تغيّر المنتج",
         prodChangedNote: "قد يكون اسم أو تفاصيل هذا المنتج قد تغيّرت منذ حفظ هذه المسودة. يرجى المراجعة قبل الإرسال.",
-        noProduct: "لا يوجد منتج",
+        noProduct: "لا يوجد منتج", collapse: "طيّ الطلب",
       }
     : {
         orderCode: "Order code", summary: "Order summary", price: "Product price", qty: "Quantity",
@@ -28,7 +28,7 @@ export const orderT = () => {
         adminNoteLbl: "Admin notes", bizNoteLbl: "Business owner notes", prodChanged: "⚠ Product changed",
         prodChangedNote:
           "This product's name or details may have changed since this draft was saved. Please review before sending.",
-        noProduct: "No product",
+        noProduct: "No product", collapse: "Collapse",
       };
 };
 
