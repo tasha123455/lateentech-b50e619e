@@ -500,3 +500,36 @@
 .lateen-admin .adm-chart-chips { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; }
 .lateen-admin .adm-chart-chips::-webkit-scrollbar { display: none; }
 .lateen-admin .adm-chart-body { position: relative; height: 200px; }
+
+/* ===== Verify: receipt card =====
+   Collapsed it is one row — the receipt, where it stands, what the platform
+   earns and what the marketer owes. Who the customer is and what they bought
+   are a fold inside a fold, because neither decides anything. */
+.lateen-admin .adm-recpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+.lateen-admin .rcpt-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: transparent; border: none; font-family: var(--font); text-align: start; cursor: pointer; }
+.lateen-admin .rcpt-head-thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; cursor: zoom-in; }
+.lateen-admin .rcpt-head-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lateen-admin .rcpt-head-thumb-empty { font-size: 20px; }
+.lateen-admin .rcpt-head-mid { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.lateen-admin .rcpt-head-money { display: flex; align-items: baseline; gap: 6px; font-size: 12px; flex-wrap: wrap; }
+.lateen-admin .rcpt-head-fee { color: var(--accent); font-weight: 500; }
+.lateen-admin .rcpt-head-total { color: var(--txt-1); font-weight: 600; }
+.lateen-admin .rcpt-head-chev { color: var(--txt-2); transition: transform .2s ease; flex-shrink: 0; }
+.lateen-admin .rcpt-head-chev.open { transform: rotate(180deg); }
+.lateen-admin .rcpt-body { padding: 0 12px 12px; border-top: 0.5px solid var(--border-2); padding-top: 10px; }
+.lateen-admin .rcpt-kv { display: flex; align-items: baseline; gap: 6px; font-size: 12.5px; flex-wrap: wrap; }
+.lateen-admin .rcpt-kv-k { color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .rcpt-kv-k::after { content: ":"; }
+.lateen-admin .rcpt-kv-v { color: var(--txt-1); overflow-wrap: anywhere; }
+.lateen-admin .rcpt-info { border: 0.5px solid var(--border-2); border-radius: 10px; overflow: hidden; background: var(--surface); margin-bottom: 10px; }
+.lateen-admin .rcpt-info-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; background: transparent; border: none; color: #c9c6c1; font-size: 12px; font-weight: 500; font-family: var(--font); cursor: pointer; }
+.lateen-admin .rcpt-info-chev { transition: transform .2s ease; opacity: .7; flex-shrink: 0; }
+.lateen-admin .rcpt-info-chev.open { transform: rotate(180deg); }
+.lateen-admin .rcpt-info-body { border-top: 0.5px solid var(--border-2); padding: 10px 11px; display: grid; gap: 5px; }
+.lateen-admin .rcpt-info-photo { margin-bottom: 4px; }
+.lateen-admin .rcpt-info-photo img { width: 76px; height: 76px; border-radius: 10px; object-fit: cover; display: block; cursor: zoom-in; background: var(--surface-2); }
+.lateen-admin .rcpt-info-photo-empty { width: 76px; height: 76px; border-radius: 10px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+/* Timestamps pinned in the corner of the fullscreen receipt. */
+.lateen-admin .adm-lightbox-caption { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); inset-inline-start: 16px; max-width: calc(100% - 32px); background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.18); border-radius: 12px; padding: 9px 12px; font-size: 11.5px; line-height: 1.7; color: #e8e6e2; font-family: var(--font); pointer-events: auto; }
+.lateen-admin .adm-lightbox-caption span:first-child { color: rgba(255,255,255,0.55); }
+.lateen-admin .adm-lightbox-caption span:first-child::after { content: ":"; }
