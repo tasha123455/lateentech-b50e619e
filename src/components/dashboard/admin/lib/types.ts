@@ -16,6 +16,8 @@ export type Person = {
   email?: string | null;
   phone?: string | null;
   created_at?: string | null;
+  /** Signed URL for the profile photo — avatars sit in a private bucket. */
+  avatar_signed_url?: string | null;
 };
 
 export type ReceiptOrder = {

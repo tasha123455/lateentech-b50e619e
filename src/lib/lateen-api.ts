@@ -1050,9 +1050,47 @@ export function createLateenApi(userId: string) {
         ];
         const { data: profiles } = await supabase
           .from("profiles")
-          .select("id, full_name, business_name, phone")
+          .select("id, full_name, business_name, phone, avatar_url")
           .in("id", peopleIds);
-        const pmap = new Map((profiles ?? []).map((p: { id: string }) => [p.id, p]));
+        const people = (profiles ?? []) as Array<{ id: string; avatar_url?: string | null }>;
+        /* Emails live on auth.users, not profiles, and avatars live in a
+           private bucket — both need the same resolution the Users page does,
+           which is why the report card showed neither. */
+        let emap = new Map<string, string | null>();
+        try {
+          const { data: emailRows } = await supabase.rpc("admin_list_user_emails", {
+            _user_ids: people.map((p) => p.id),
+          });
+          emap = new Map(
+            ((emailRows ?? []) as Array<{ id: string; email: string | null }>).map((r) => [r.id, r.email]),
+          );
+        } catch {
+          /* ignore — the card falls back to "—" */
+        }
+        const avatarMap = new Map<string, string>();
+        const avatarPaths = people.map((p) => p.avatar_url).filter((v): v is string => !!v);
+        if (avatarPaths.length) {
+          try {
+            const { data: signed } = await supabase.storage
+              .from("avatars")
+              .createSignedUrls(avatarPaths, 60 * 60 * 24 * 365 * 5);
+            (signed ?? []).forEach((x: { path?: string | null; signedUrl?: string | null }) => {
+              if (x.path && x.signedUrl) avatarMap.set(x.path, x.signedUrl);
+            });
+          } catch {
+            /* ignore — the card falls back to initials */
+          }
+        }
+        const pmap = new Map(
+          people.map((p) => [
+            p.id,
+            {
+              ...p,
+              email: emap.get(p.id) ?? null,
+              avatar_signed_url: (p.avatar_url && avatarMap.get(p.avatar_url)) || null,
+            },
+          ]),
+        );
         const productIds = [...new Set(reports.map((r) => r.product_id).filter(Boolean) as string[])];
         let products: Array<{ id: string; name: string; price: number; code: string; photos: string[] }> = [];
         if (productIds.length) {
