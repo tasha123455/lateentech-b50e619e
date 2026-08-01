@@ -279,6 +279,104 @@
 .lateen-admin .adm-btn-refund { width: 100%; margin-top: 8px; height: 34px; border-radius: 17px; background: transparent; border: 0.5px solid #7c9cf0; color: #7c9cf0; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font); }
 .lateen-admin .adm-btn-refund:hover { background: rgba(124,156,240,0.12); }
 .lateen-admin .adm-btn-refund:disabled { opacity: 0.5; cursor: not-allowed; }
+/* ---- Reports ---- */
+.lateen-admin .adm-h1-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 1rem; }
+.lateen-admin .adm-reports-btn { display: flex; align-items: center; gap: 6px; background: var(--danger-tint); color: var(--danger); border: 0.5px solid var(--danger); border-radius: 14px; font-size: 12px; font-weight: 600; padding: 7px 12px; cursor: pointer; font-family: var(--font); }
+.lateen-admin .adm-reports-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 700; padding: 1px 6px; min-width: 16px; text-align: center; line-height: 1.4; }
+/* The role / report-type badge. Still rendered by both the report head and
+   the deletion card; it lost its rule when the reports CSS was rewritten. */
+.lateen-admin .rpt-type-pill { font-size: 9px; padding: 3px 8px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; background: var(--accent-tint); color: var(--accent); }
+.lateen-admin .rpt-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+/* Collapsed, the head row is the whole card: who reported it, what about,
+   what type and when. Everything else waits behind the chevron. */
+.lateen-admin .rpt-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: transparent; border: none; font-family: var(--font); text-align: start; cursor: pointer; }
+.lateen-admin .rpt-head-mid { flex: 1; min-width: 0; }
+.lateen-admin .rpt-head-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lateen-admin .rpt-head-end { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+.lateen-admin .rpt-head-chev { color: var(--txt-2); transition: transform .2s ease; flex-shrink: 0; }
+.lateen-admin .rpt-head-chev.open { transform: rotate(180deg); }
+.lateen-admin .rpt-body { padding: 0 12px 12px; border-top: 0.5px solid var(--border-2); padding-top: 10px; }
+.lateen-admin .rpt-date { font-size: 10px; color: var(--txt-3); white-space: nowrap; }
+/* The bell rides on the same row as More info / Go to Account, so it never
+   adds a line of its own. */
+.lateen-admin .rpt-more-row-wrap { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.lateen-admin .rpt-more-row-wrap > .rpt-more { flex: 1; min-width: 0; margin-bottom: 0; }
+.lateen-admin .rpt-more-row-wrap > .rpt-go-btn { flex: 1; min-width: 0; }
+.lateen-admin .rpt-party-ttl { font-size: 13px; font-weight: 700; color: var(--txt-1); margin-bottom: 6px; }
+.lateen-admin .rpt-party-ttl::after { content: ":-"; }
+.lateen-admin .rpt-party { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.lateen-admin .rpt-name { font-size: 13px; font-weight: 600; color: var(--txt-1); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lateen-admin .rpt-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
+/* Phone, email and the way into the account, folded away. */
+.lateen-admin .rpt-more { border: 0.5px solid var(--border-2); border-radius: 10px; overflow: hidden; background: var(--surface); margin-bottom: 8px; }
+.lateen-admin .rpt-more-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; background: transparent; border: none; color: #c9c6c1; font-size: 12px; font-weight: 500; font-family: var(--font); cursor: pointer; }
+.lateen-admin .rpt-more-chev { transition: transform .2s ease; opacity: .7; flex-shrink: 0; }
+.lateen-admin .rpt-more-chev.open { transform: rotate(180deg); }
+.lateen-admin .rpt-more-body { border-top: 0.5px solid var(--border-2); padding: 4px 11px 10px; display: grid; gap: 4px; }
+.lateen-admin .rpt-more-row { display: flex; align-items: baseline; gap: 6px; font-size: 12px; padding-top: 5px; flex-wrap: wrap; }
+.lateen-admin .rpt-more-k { color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .rpt-more-k::after { content: ":"; }
+.lateen-admin .rpt-more-v { color: var(--txt-1); overflow-wrap: anywhere; }
+.lateen-admin .rpt-kv { display: flex; align-items: baseline; gap: 6px; font-size: 12.5px; margin-bottom: 5px; flex-wrap: wrap; }
+.lateen-admin .rpt-kv-k { color: var(--txt-2); flex-shrink: 0; }
+.lateen-admin .rpt-kv-k::after { content: ":"; }
+.lateen-admin .rpt-kv-v { color: var(--txt-1); font-weight: 500; overflow-wrap: anywhere; }
+.lateen-admin .rpt-comment-lbl { display: block; margin-bottom: 5px; }
+.lateen-admin .rpt-msg { font-size: 13px; color: var(--txt-1); line-height: 1.5; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; white-space: pre-wrap; word-break: break-word; }
+.lateen-admin .rpt-divider { height: 0.5px; background: var(--border-2); margin: 12px 0; }
+.lateen-admin .rpt-prod { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 12px; padding: 10px; margin-bottom: 8px; }
+.lateen-admin .rpt-prod-rows { flex: 1; min-width: 0; }
+.lateen-admin .rpt-prod-rows .rpt-kv:last-child { margin-bottom: 0; }
+.lateen-admin .rpt-mini-thumb { width: 54px; height: 54px; border-radius: 8px; object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
+.lateen-admin .rpt-mini-thumb-empty { width: 54px; height: 54px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.lateen-admin .rpt-go-btn { width: 100%; height: 38px; border-radius: 19px; font-size: 13px; }
+/* One bell per party: a reply to the marketer is never confused with a note to
+   the business. */
+.lateen-admin .rpt-bell { width: 38px; height: 38px; align-self: stretch; min-height: 34px; border-radius: 50%; border: 0.5px solid var(--border); background: var(--surface); color: var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; }
+.lateen-admin .rpt-bell svg { width: 17px; height: 17px; }
+.lateen-admin .rpt-bell { border-radius: 10px; }
+.lateen-admin .rpt-bell.on { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+.lateen-admin .rpt-feedback { width: 100%; margin-bottom: 8px; }
+.lateen-admin .rpt-comment-ta { width: 100%; min-height: 64px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; color: var(--txt-1); padding: 9px 10px; font-size: 12.5px; font-family: var(--font); resize: vertical; box-sizing: border-box; margin-bottom: 8px; }
+.lateen-admin .rpt-view-prod { width: 100%; margin-top: 10px; height: 34px; border-radius: 17px; background: transparent; border: 0.5px solid var(--border); color: var(--txt-2); font-size: 12px; font-family: var(--font); cursor: pointer; }
+.lateen-admin #adm-reports-ov { z-index: 109; }
+.lateen-admin #adm-pdetail { z-index: 110; }
+/* ── Menu drawer (last slot of the bottom nav) ──
+   Full-height slide-in from the side, same shape as the business and marketer
+   menus, rather than a short bottom sheet. */
+.lateen-admin .adm-menu-overlay { display: none; position: fixed; inset: 0; z-index: 130; }
+.lateen-admin .adm-menu-overlay.open { display: block; }
+.lateen-admin .adm-menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+.lateen-admin .adm-menu-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(80%, 340px); height: 100dvh; background: var(--surface); padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; border-radius: 20px 0 0 0; border-left: 0.5px solid var(--border); overflow-y: auto; overscroll-behavior: contain; font-family: var(--font); }
+.lateen-admin .adm-menu-close { align-self: flex-end; background: none; border: none; cursor: pointer; color: var(--txt-2); padding: 0; margin-bottom: 1rem; }
+.lateen-admin .adm-menu-head { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; margin-bottom: 0.85rem; border-bottom: 0.5px solid var(--border-2); }
+.lateen-admin .adm-menu-head-name { font-size: 15px; font-weight: 600; color: var(--txt-1); }
+.lateen-admin .adm-menu-head-sub { font-size: 11px; color: var(--txt-2); margin-top: 1px; }
+.lateen-admin .adm-menu-item { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: none; border-bottom: 0.5px solid var(--border-2); padding: 14px 0; cursor: pointer; font-family: var(--font); text-align: left; }
+.lateen-admin .adm-menu-item:last-of-type { border-bottom: none; }
+.lateen-admin .adm-menu-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-tint); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.lateen-admin .adm-menu-icon svg { width: 17px; height: 17px; }
+.lateen-admin .adm-menu-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.lateen-admin .adm-menu-label { font-size: 14px; font-weight: 500; color: var(--txt-1); }
+.lateen-admin .adm-menu-sub { font-size: 11px; color: var(--txt-2); }
+.lateen-admin .adm-menu-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 700; padding: 2px 7px; min-width: 18px; text-align: center; flex-shrink: 0; }
+.lateen-admin .adm-menu-chev { width: 16px; height: 16px; color: var(--txt-3); flex-shrink: 0; }
+.lateen-admin .adm-joined-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; margin-bottom: 10px; border-top: 0.5px solid var(--border-2); border-bottom: 0.5px solid var(--border-2); font-size: 12px; }
+.lateen-admin .adm-joined-lbl { color: var(--txt-2); }
+.lateen-admin .adm-joined-val { color: var(--txt-1); font-weight: 600; }
+
+.lateen-admin .adm-wipe-box { background: var(--danger-tint); border: 0.5px solid var(--danger); border-radius: 12px; padding: 12px; margin: 0 0 10px; display: grid; gap: 8px; }
+.lateen-admin .adm-wipe-warn { font-size: 11px; line-height: 1.55; color: var(--danger); }
+.lateen-admin .adm-wipe-msg { font-size: 11px; color: var(--txt-1); }
+
+.lateen-admin .adm-menu-signout { margin-top: auto; border-top: 0.5px solid var(--border-2); border-bottom: none; }
+.lateen-admin .adm-menu-signout .adm-menu-icon { background: var(--danger-tint); color: var(--danger); }
+.lateen-admin .adm-menu-signout .adm-menu-label { color: var(--danger); }
+
+/* Header for the pages the menu opens. */
+.lateen-admin .adm-page-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.lateen-admin .adm-back-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--surface); color: var(--txt-1); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; }
+.lateen-admin .adm-back-btn svg { width: 17px; height: 17px; }
 
 /* ===== Browse chrome, shared with the marketer's browse page =====
    The admin product page renders the marketer's BrowseFilters component, so it
@@ -362,6 +460,16 @@
 .lateen-admin .del-btn-reject { background: #fdeeee; color: #c0392b; }
 .lateen-admin .del-btn-approve { background: var(--accent); color: #1a1a1a; }
 .lateen-admin .del-btn:active { filter: brightness(0.95); }
+
+/* One card per row on the home page. The two-up grid the other pages use
+   squeezed a long label like "Total Platform Fees Collected" onto three
+   lines beside a number. */
+.lateen-admin .adm-stat-stack { grid-template-columns: 1fr; }
+.lateen-admin .adm-stat-stack .adm-stat { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lateen-admin .adm-stat-stack .adm-stat-label { margin-bottom: 0; }
+.lateen-admin .adm-stat-stack .adm-stat-value { font-size: 20px; text-align: end; white-space: nowrap; }
+.lateen-admin .adm-stat-stack .adm-stat.full .adm-stat-value { font-size: 24px; }
+.lateen-admin .adm-stat-stack .adm-stat-sub { flex-basis: 100%; margin-top: 0; }
 
 /* ===== Admin home =====
    Built from the same stat cards and chips every other admin page uses; it
