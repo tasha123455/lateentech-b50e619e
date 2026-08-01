@@ -385,6 +385,13 @@
 .lateen-marketer .order .stale-tag { font-size: 10px; color: #c9923a; display: flex; align-items: center; gap: 3px; }
 .lateen-marketer .order .chev { color: #5e5c58; flex-shrink: 0; transition: transform .25s, opacity .2s ease; display: flex; margin-left: 4px; }
 .lateen-marketer .order.open .chev { transform: rotate(180deg); color: #8f8c88; opacity: 0; pointer-events: none; }
+/* The open card's way out. The header chevron fades under the grown photo, so
+   this takes its place over the corner of that photo — dark and blurred so it
+   reads against whatever the product happens to be. */
+.lateen-marketer .order .ord-collapse { position: absolute; top: 8px; inset-inline-end: 8px; z-index: 3; width: 32px; height: 32px; border-radius: 50%; border: 0.5px solid rgba(255,255,255,0.28); background: rgba(0,0,0,0.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: #f0eeeb; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; -webkit-tap-highlight-color: transparent; }
+.lateen-marketer .order .ord-collapse:active { background: rgba(0,0,0,0.75); }
+.lateen-marketer .order .ord-collapse-foot { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 12px; padding: 9px 0; border-radius: 10px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); font-family: var(--font-sans); font-size: 12px; font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.lateen-marketer .order .ord-collapse-foot:active { background: var(--color-background-secondary); color: var(--color-text-primary); }
 .lateen-marketer .order .body-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .28s ease; }
 .lateen-marketer .order.open .body-wrap { grid-template-rows: 1fr; }
 .lateen-marketer .order .body-inner { overflow: hidden; }

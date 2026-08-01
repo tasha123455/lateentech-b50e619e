@@ -172,13 +172,17 @@ export function OrderCard({
             {photos.length ? (
               photos.map((u, i) => (
                 <div className="photo-slide" key={u + i}>
+                  {/* Only the open card's photo opens the viewer. Shut, it is a
+                      40px thumbnail sitting in a row whose whole job is to open
+                      the card — taking that tap away from it would be taking it
+                      from the row. */}
                   <img
                     src={u}
                     alt=""
                     loading="lazy"
-                    onPointerDown={onPressStart}
-                    onClick={(e) => openPhotos(e, viewable.indexOf(u))}
-                    style={isSafeUrl(u) ? { cursor: "zoom-in" } : undefined}
+                    onPointerDown={open ? onPressStart : undefined}
+                    onClick={open ? (e) => openPhotos(e, viewable.indexOf(u)) : undefined}
+                    style={open && isSafeUrl(u) ? { cursor: "zoom-in" } : undefined}
                   />
                 </div>
               ))
@@ -192,6 +196,23 @@ export function OrderCard({
                 <span key={u + i} className={"photo-dot" + (i === photoIdx ? " active" : "")} />
               ))}
             </div>
+          )}
+          {/* Open, the photo grows to fill the top of the card and the header
+              chevron fades out under it, so there was nothing left to press to
+              shut it again. This is that button, sitting over the corner people
+              were already reaching for. */}
+          {open && (
+            <button
+              type="button"
+              className="ord-collapse"
+              aria-label={T.collapse}
+              title={T.collapse}
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </button>
           )}
         </div>
         <div className="row-main">
@@ -397,6 +418,19 @@ export function OrderCard({
                 </svg>
               </div>
             </div>
+
+            {/* An open card is long enough to scroll the photo off the top, so
+                shutting it should not mean scrolling back up to find the way. */}
+            <button
+              type="button"
+              className="ord-collapse-foot"
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+              <span>{T.collapse}</span>
+            </button>
           </div>
         </div>
       </div>
