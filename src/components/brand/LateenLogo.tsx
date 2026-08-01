@@ -25,8 +25,17 @@ type Props = {
 const MARK_H = 0.80282;
 const WORD_H = { en: 0.37624, ar: 0.33554 };
 const TAG_H = { en: 0.08886, ar: 0.1088 };
-const MARK_TO_WORD = { en: 0.37958, ar: 0.31862 };
-const WORD_TO_TAG = { en: 0.50862, ar: 0.34192 };
+/* The gaps are not measured off the old canvases like the heights are. Those
+ * canvases were padded, so the space between the parts was baked into the art
+ * and these numbers only reproduced it — which read as three things stacked
+ * near each other rather than one lockup. They are set by eye instead, tight
+ * enough that the ascender of the "l" comes up under the mark.
+ *
+ * Arabic gets a little more room than English at the same job: وصله has no
+ * ascender, so its whole top edge sits level under the mark's two lower tips
+ * and closes the distance faster than a single riser does. */
+const MARK_TO_WORD = { en: 0.06, ar: 0.09 };
+const WORD_TO_TAG = { en: 0.194, ar: 0.15 };
 
 const GLOW =
   "radial-gradient(closest-side at 22% 45%, rgba(232,32,86,0.35), transparent 70%), " +
