@@ -8,6 +8,7 @@ import {
 import { dbToBrowse } from "@/components/dashboard/marketer/lib/mappers";
 
 import { useAdminData } from "../AdminDataProvider";
+import { PageHeader } from "../ui/PageHeader";
 import { ProductDetailOverlay } from "./ProductDetailOverlay";
 
 /** Admins have no favourites, so nothing is ever saved. */
@@ -23,7 +24,7 @@ function activeMarketerWarning(n: number, action: string): string {
   );
 }
 
-export function ProductsPage({ active }: { active: boolean }) {
+export function ProductsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { products, loadProducts, loading, failed, api } = useAdminData();
   const [state, setState] = useState<BrowseFilterState>(EMPTY_BROWSE_FILTERS);
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -161,9 +162,7 @@ export function ProductsPage({ active }: { active: boolean }) {
 
   return (
     <>
-      <div className="adm-h1-row">
-        <div className="adm-h1" style={{ marginBottom: 0 }}>Product Review</div>
-      </div>
+      <PageHeader title="Product Review" onBack={onBack} />
 
       <BrowseFilters
         products={all.map((c) => c.bp)}

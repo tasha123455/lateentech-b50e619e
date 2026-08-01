@@ -6,7 +6,7 @@ import "@/styles/admin-dashboard.css";
 
 import { AdminDataProvider, useAdminData } from "./AdminDataProvider";
 import { EmployeesPage } from "./employees/EmployeesPage";
-import { MenuDrawer, useMenuCounts } from "./overlays/MenuDrawer";
+import { MenuDrawer, useAdminCounts } from "./overlays/MenuDrawer";
 import { NotificationsPage } from "./overlays/NotificationsPage";
 import { HomePage } from "./home/HomePage";
 import { readPage, readScroll, writePage, writeScroll } from "./lib/storage";
@@ -19,11 +19,12 @@ import { BottomNav } from "./ui/BottomNav";
 import { LightboxProvider } from "./ui/Lightbox";
 import { UsersPage } from "./users/UsersPage";
 
-const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-requests", "adm-notify"]);
+/* Reached from the drawer, or — for notifications — from the Users page. */
+const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-products", "adm-notify"]);
 
 function Shell() {
   const { userId, loadMetrics } = useAdminData();
-  const menuCounts = useMenuCounts();
+  const counts = useAdminCounts();
   const { signOut } = useAuth();
 
   const [page, setPage] = useState<AdminPageId>(() => readPage(userId) || "adm-home");
@@ -134,7 +135,7 @@ function Shell() {
       </section>
 
       <section className={"adm-page" + (page === "adm-products" ? " active" : "")} id="adm-products">
-        <ProductsPage active={page === "adm-products"} />
+        <ProductsPage active={page === "adm-products"} onBack={() => goTo(returnTo)} />
       </section>
 
       <section className={"adm-page" + (page === "adm-employees" ? " active" : "")} id="adm-employees">
@@ -142,7 +143,7 @@ function Shell() {
       </section>
 
       <section className={"adm-page" + (page === "adm-requests" ? " active" : "")} id="adm-requests">
-        <RequestsPage active={page === "adm-requests"} onBack={() => goTo(returnTo)} onOpenProduct={setDetailFromReport} />
+        <RequestsPage active={page === "adm-requests"} onOpenProduct={setDetailFromReport} />
         <ProductDetailOverlay productId={detailFromReport} onClose={() => setDetailFromReport(null)} />
       </section>
 
@@ -155,7 +156,8 @@ function Shell() {
         onGo={goTo}
         onMenu={() => setMenuOpen((v) => !v)}
         menuOpen={menuOpen || MENU_PAGES.has(page)}
-        menuCount={menuCounts.total}
+        menuCount={counts.menuTotal}
+        counts={{ "adm-requests": counts.requests }}
       />
 
       <MenuDrawer
@@ -163,9 +165,8 @@ function Shell() {
         signingOut={signingOut}
         onSignOut={onSignOut}
         onClose={() => setMenuOpen(false)}
-        onRequests={() => openFromMenu("adm-requests")}
+        onProducts={() => openFromMenu("adm-products")}
         onEmployees={() => openFromMenu("adm-employees")}
-        onNotifications={() => openFromMenu("adm-notify")}
       />
     </div>
   );

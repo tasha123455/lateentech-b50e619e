@@ -13,10 +13,9 @@ type TabKey = "reports" | "deletions";
  *  carries its own waiting count, so the one you are not looking at can still
  *  tell you it needs you. */
 export function RequestsPage({
-  active, onBack, onOpenProduct,
+  active, onOpenProduct,
 }: {
   active: boolean;
-  onBack: () => void;
   onOpenProduct: (id: string) => void;
 }) {
   const { reports, deletionRequests } = useAdminData();
@@ -32,7 +31,6 @@ export function RequestsPage({
       <TabBar
         tab={tab}
         onTab={setTab}
-        onBack={onBack}
         tabs={[
           { key: "reports", label: "Reports", count: counts.reports },
           { key: "deletions", label: "Deletions", count: counts.deletions },

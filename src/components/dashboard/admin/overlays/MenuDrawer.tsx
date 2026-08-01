@@ -1,14 +1,22 @@
 import { useAdminData } from "../AdminDataProvider";
 import { empPayableCount } from "../lib/employees";
 
-/** The numbers the menu entries carry, so the nav's Menu slot can badge their
- *  total without the drawer being open. */
-export function useMenuCounts() {
+/** Everything waiting anywhere in the admin, in one place: the Requests slot
+ *  in the nav badges its own two lists, and the Menu slot badges the total of
+ *  the pages hidden behind it. */
+export function useAdminCounts() {
   const { deletionRequests, reports, employees } = useAdminData();
   const deletions = deletionRequests.filter((r) => r.status === "wallet_review").length;
   const openReports = reports.filter((r) => r.status === "open").length;
   const payable = empPayableCount(employees);
-  return { deletions, reports: openReports, employees: payable, total: deletions + openReports + payable };
+  return {
+    deletions,
+    reports: openReports,
+    requests: deletions + openReports,
+    employees: payable,
+    /* Products carries no number — nothing on it is waiting on the admin. */
+    menuTotal: payable,
+  };
 }
 
 /** Bottom-sheet menu behind the last slot of the nav bar.
@@ -17,33 +25,32 @@ export function useMenuCounts() {
  *  and Products headers (plus the Employees tab), so each one now lives in a
  *  single place. */
 export function MenuDrawer({
-  open, onClose, onRequests, onEmployees, onNotifications,
+  open, onClose, onProducts, onEmployees,
   onSignOut, signingOut,
 }: {
   open: boolean;
   onClose: () => void;
-  onRequests: () => void;
+  onProducts: () => void;
   onEmployees: () => void;
-  onNotifications: () => void;
   onSignOut: () => void;
   signingOut: boolean;
 }) {
-  const counts = useMenuCounts();
+  const counts = useAdminCounts();
   const ar = typeof document !== "undefined" && document.documentElement.lang === "ar";
 
   const items = [
-    /* One entry for both: reports and deletion requests are the same job —
-       somebody asking the admin to decide — and they open as two tabs of the
-       same page, so the menu shows one door with both their numbers on it. */
+    /* Browsing the catalogue is something the admin chooses to do, not
+       something waiting on them, so it moved off the nav bar and in here. */
     {
-      key: "requests",
-      label: "Requests & Reports",
-      count: counts.deletions + counts.reports,
-      onClick: onRequests,
+      key: "products",
+      label: "Product Review",
+      count: 0,
+      onClick: onProducts,
       icon: (
         <>
-          <path d="M22 12h-6l-2 3h-4l-2-3H2" />
-          <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+          <path d="M3 7l9-4 9 4-9 4-9-4z" />
+          <path d="M3 7v10l9 4 9-4V7" />
+          <line x1="12" y1="11" x2="12" y2="21" />
         </>
       ),
     },
@@ -56,18 +63,6 @@ export function MenuDrawer({
         <>
           <circle cx="12" cy="8" r="3.2" />
           <path d="M5 21c1-4 4-6 7-6s6 2 7 6" />
-        </>
-      ),
-    },
-    {
-      key: "notifications",
-      label: "Send Notification",
-      count: 0,
-      onClick: onNotifications,
-      icon: (
-        <>
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </>
       ),
     },

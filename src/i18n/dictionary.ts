@@ -321,6 +321,7 @@ export const DICT: Record<string, string> = {
   "Payout": "السحب",
   "Payouts": "السحوبات",
   "Money": "المالية",
+  "Requests": "الطلبات",
   "Receipts": "الإيصالات",
   "Notify": "إشعار",
   "Confirm your payout details below": "أكّد تفاصيل السحب أسفله",

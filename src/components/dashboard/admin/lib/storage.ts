@@ -35,7 +35,7 @@ const pageKey = (userId?: string) => "lateen_adm_page" + sfx(userId);
 const scrollKey = (userId?: string) => "lateen_adm_scroll" + sfx(userId);
 
 const PAGE_IDS: AdminPageId[] = [
-  "adm-home", "adm-money", "adm-users", "adm-products", "adm-employees",
+  "adm-home", "adm-money", "adm-users", "adm-requests", "adm-products", "adm-employees",
 ];
 
 export function readPage(userId?: string): AdminPageId | null {

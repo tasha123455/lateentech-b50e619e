@@ -17,13 +17,24 @@ const ITEMS: Array<{ id: AdminPageId; label: string; path: React.ReactNode }> = 
     label: "Users",
     path: <><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 11h5M18.5 8.5v5" /></>,
   },
-  { id: "adm-products", label: "Products", path: <path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7" /> },
+  /* Reports and deletion requests: the only pages where somebody is waiting
+     on the admin to decide something, so they get the slot the catalogue had. */
+  {
+    id: "adm-requests",
+    label: "Requests",
+    path: (
+      <>
+        <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+        <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+      </>
+    ),
+  },
 ];
 
 /** Employees moved into the menu, so the last slot opens the menu instead of
  *  being a sixth page. `menuOpen` keeps it lit while the sheet is up. */
 export function BottomNav({
-  page, onGo, onMenu, menuOpen, menuCount = 0,
+  page, onGo, onMenu, menuOpen, menuCount = 0, counts = {},
 }: {
   page: AdminPageId;
   onGo: (id: AdminPageId) => void;
@@ -32,6 +43,8 @@ export function BottomNav({
   /** Everything waiting behind the menu, added up — the pages themselves are
    *  out of sight, so the slot that opens them carries their total. */
   menuCount?: number;
+  /** What is waiting on a slot that is in plain sight. */
+  counts?: Partial<Record<AdminPageId, number>>;
 }) {
   return (
     <nav className="adm-bottom-nav">
@@ -43,6 +56,7 @@ export function BottomNav({
         >
           <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5">{it.path}</svg>
           <span className="adm-nav-label">{it.label}</span>
+          {!!counts[it.id] && <span className="adm-nav-count" data-no-i18n>{counts[it.id]}</span>}
         </div>
       ))}
       <div
