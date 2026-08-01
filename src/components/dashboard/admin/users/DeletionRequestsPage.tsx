@@ -25,6 +25,112 @@ function searchText(r: DeletionRequest): string {
   );
 }
 
+/** Collapsed, the head row is the whole card: who, which role, how long ago.
+ *  Contact details, the wallet and the decision open on tap. */
+function DeletionCard({
+  r, comment, onComment, onResolve,
+}: {
+  r: DeletionRequest;
+  comment: string;
+  onComment: (v: string) => void;
+  onResolve: (id: string, action: "approve" | "reject") => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const person = r.person || {};
+  const name = person.business_name || person.full_name || "Unknown user";
+  const wallet = r.live_wallet || {};
+  const bal = Number(wallet.balance != null ? wallet.balance : r.wallet_balance) || 0;
+  const pending = Number(wallet.pending != null ? wallet.pending : r.wallet_pending) || 0;
+  const hasFunds = bal > 0 || pending > 0;
+  const needsReview = r.status === "wallet_review";
+
+  return (
+    <div className={"del-card" + (open ? " open" : "")}>
+      <button className="del-head" onClick={() => setOpen((v) => !v)}>
+        <div className="adm-user-av" data-no-i18n>
+          {person.avatar_signed_url
+            ? <img src={person.avatar_signed_url} alt="" loading="lazy" decoding="async" />
+            : initials(name)}
+        </div>
+        <div className="del-head-mid">
+          <div className="del-head-name" data-no-i18n>{name}</div>
+          <div className="del-head-sub">
+            <span className="rpt-type-pill">{r.role === "business" ? "Business" : "Marketer"}</span>
+            {hasFunds && <span className="del-funds-dot" title="Wallet still has money">●</span>}
+          </div>
+        </div>
+        <span className="del-ago" data-no-i18n>{when(r.requested_at)}</span>
+        <svg
+          className={"rpt-head-chev" + (open ? " open" : "")}
+          width="13" height="13" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="del-body">
+          <div className="del-top">
+            <button className="adm-go-btn" onClick={() => goToAccount(r.user_id, r.role || "marketer", name)}>
+              Go to Account
+            </button>
+          </div>
+
+          <div className="del-rows">
+            <div className="del-row">
+              <span className="del-k">Name</span>
+              <span className="del-v" data-no-i18n>{name}</span>
+            </div>
+            <div className="del-row">
+              <span className="del-k">Phone number</span>
+              <span className="del-v" data-no-i18n>{dispPhone(person.phone) || "—"}</span>
+            </div>
+            <div className="del-row">
+              <span className="del-k">Email</span>
+              <span className="del-v" data-no-i18n>{person.email || "—"}</span>
+            </div>
+          </div>
+
+          {hasFunds ? (
+            <div className="del-wallet has-funds">
+              <span>Wallet balance</span>
+              <b data-no-i18n>{money(bal)}</b>
+              {pending > 0 ? <span className="del-wallet-pending">· Pending: <b data-no-i18n>{money(pending)}</b></span> : null}
+            </div>
+          ) : (
+            <div className="del-wallet">Wallet is empty.</div>
+          )}
+
+          {needsReview ? (
+            <>
+              <textarea
+                className="rpt-comment-ta del-note"
+                placeholder="Optional note for approval, or the reason if you're rejecting this request"
+                value={comment}
+                onChange={(e) => onComment(e.target.value)}
+              />
+              <div className="del-actions">
+                <button className="del-btn del-btn-reject" onClick={() => void onResolve(r.id, "reject")}>
+                  Reject
+                </button>
+                <button className="del-btn del-btn-approve" onClick={() => void onResolve(r.id, "approve")}>
+                  Approve &amp; schedule deletion
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="del-wallet">
+              <span>Scheduled for</span>
+              <b data-no-i18n>{whenFull(r.scheduled_for)}</b>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { deletionRequests, loadDeletionRequests, api } = useAdminData();
   const [filter, setFilter] = useState("wallet_review");
@@ -75,84 +181,9 @@ export function DeletionRequestsPage({ active, onBack }: { active: boolean; onBa
   } else if (!list.length) {
     body = <div className="adm-empty">{search ? "No requests match your search." : "No requests here."}</div>;
   } else {
-    body = list.map((r) => {
-      const person = r.person || {};
-      const name = person.business_name || person.full_name || "Unknown user";
-      const wallet = r.live_wallet || {};
-      const bal = Number(wallet.balance != null ? wallet.balance : r.wallet_balance) || 0;
-      const pending = Number(wallet.pending != null ? wallet.pending : r.wallet_pending) || 0;
-      const hasFunds = bal > 0 || pending > 0;
-      const needsReview = r.status === "wallet_review";
-
-      return (
-        <div className="del-card" key={r.id}>
-          {/* Role on one side, the way into the account on the other. */}
-          <div className="del-top">
-            <span className="rpt-type-pill">{r.role === "business" ? "Business" : "Marketer"}</span>
-            <button className="adm-go-btn" onClick={() => goToAccount(r.user_id, r.role || "marketer", name)}>
-              Go to Account
-            </button>
-          </div>
-
-          <div className="del-who">
-            <div className="adm-user-av" data-no-i18n>
-              {person.avatar_signed_url
-                ? <img src={person.avatar_signed_url} alt="" loading="lazy" decoding="async" />
-                : initials(name)}
-            </div>
-            <div className="del-rows">
-              <div className="del-row">
-                <span className="del-k">Name</span>
-                <span className="del-v" data-no-i18n>{name}</span>
-              </div>
-              <div className="del-row">
-                <span className="del-k">Phone number</span>
-                <span className="del-v" data-no-i18n>{dispPhone(person.phone) || "—"}</span>
-              </div>
-              <div className="del-row">
-                <span className="del-k">Email</span>
-                <span className="del-v" data-no-i18n>{person.email || "—"}</span>
-                <span className="del-ago" data-no-i18n>{when(r.requested_at)}</span>
-              </div>
-            </div>
-          </div>
-
-          {hasFunds ? (
-            <div className="del-wallet has-funds">
-              <span>Wallet balance</span>
-              <b data-no-i18n>{money(bal)}</b>
-              {pending > 0 ? <span className="del-wallet-pending">· Pending: <b data-no-i18n>{money(pending)}</b></span> : null}
-            </div>
-          ) : (
-            <div className="del-wallet">Wallet is empty.</div>
-          )}
-
-          {needsReview ? (
-            <>
-              <textarea
-                className="rpt-comment-ta del-note"
-                placeholder="Optional note for approval, or the reason if you're rejecting this request"
-                value={comments[r.id] || ""}
-                onChange={(e) => setComments((prev) => ({ ...prev, [r.id]: e.target.value }))}
-              />
-              <div className="del-actions">
-                <button className="del-btn del-btn-reject" onClick={() => void resolve(r.id, "reject")}>
-                  Reject
-                </button>
-                <button className="del-btn del-btn-approve" onClick={() => void resolve(r.id, "approve")}>
-                  Approve &amp; schedule deletion
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="del-wallet">
-              <span>Scheduled for</span>
-              <b data-no-i18n>{whenFull(r.scheduled_for)}</b>
-            </div>
-          )}
-        </div>
-      );
-    });
+    body = list.map((r) => <DeletionCard key={r.id} r={r} comment={comments[r.id] || ""}
+      onComment={(v) => setComments((prev) => ({ ...prev, [r.id]: v }))}
+      onResolve={resolve} />);
   }
 
   return (

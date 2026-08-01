@@ -168,13 +168,14 @@ function ReportCard({
         </div>
         <div className="rpt-head-mid">
           <div className="rpt-name" data-no-i18n>{reporterName}</div>
-          {/* The business, not the product — the product belongs inside. */}
-          <div className="rpt-head-sub" data-no-i18n>{businessName}</div>
+          <div className="rpt-head-sub" data-no-i18n>
+            {product.name || businessName}
+            {product.code ? " · " + product.code : ""}
+          </div>
         </div>
-        <div className="rpt-head-end">
-          <span className="rpt-type-pill">{typeLabel(r.report_type)}</span>
-          <span className="rpt-date" data-no-i18n>{whenFull(r.created_at)}</span>
-        </div>
+        {/* The type is a row inside — on the outside it was a pill of jargon
+            next to the one thing you actually scan for, the product. */}
+        <span className="rpt-date" data-no-i18n>{whenFull(r.created_at)}</span>
         <Chev open={open} cls="rpt-head-chev" />
       </button>
 

@@ -36,7 +36,6 @@ export function MenuDrawer({
     {
       key: "deletions",
       label: "Deletion Requests",
-      sub: "Accounts asking to be removed",
       count: counts.deletions,
       onClick: onDeletionRequests,
       icon: (
@@ -52,7 +51,6 @@ export function MenuDrawer({
     {
       key: "reports",
       label: "Reports",
-      sub: "Products flagged by marketers",
       count: counts.reports,
       onClick: onReports,
       icon: (
@@ -66,7 +64,6 @@ export function MenuDrawer({
     {
       key: "employees",
       label: "Employees",
-      sub: "Staff, pay cycles and history",
       count: counts.employees,
       onClick: onEmployees,
       icon: (
@@ -79,7 +76,6 @@ export function MenuDrawer({
     {
       key: "notifications",
       label: "Send Notification",
-      sub: "Broadcast to all users",
       count: 0,
       onClick: onNotifications,
       icon: (
@@ -116,8 +112,7 @@ export function MenuDrawer({
             </span>
             <span className="adm-menu-text">
               <span className="adm-menu-label">{it.label}</span>
-              <span className="adm-menu-sub">{it.sub}</span>
-            </span>
+              </span>
             {it.count > 0 && <span className="adm-menu-count">{it.count}</span>}
             <svg className="adm-menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
