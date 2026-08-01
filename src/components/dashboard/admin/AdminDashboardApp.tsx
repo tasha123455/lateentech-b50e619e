@@ -157,7 +157,7 @@ function Shell() {
         onMenu={() => setMenuOpen((v) => !v)}
         menuOpen={menuOpen || MENU_PAGES.has(page)}
         menuCount={counts.menuTotal}
-        counts={{ "adm-requests": counts.requests }}
+        counts={{ "adm-money": counts.money, "adm-requests": counts.requests }}
       />
 
       <MenuDrawer

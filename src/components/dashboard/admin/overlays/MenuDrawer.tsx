@@ -5,14 +5,18 @@ import { empPayableCount } from "../lib/employees";
  *  in the nav badges its own two lists, and the Menu slot badges the total of
  *  the pages hidden behind it. */
 export function useAdminCounts() {
-  const { deletionRequests, reports, employees } = useAdminData();
+  const { deletionRequests, reports, employees, verifyMarketers, payouts } = useAdminData();
   const deletions = deletionRequests.filter((r) => r.status === "wallet_review").length;
   const openReports = reports.filter((r) => r.status === "open").length;
   const payable = empPayableCount(employees);
+  const receipts = verifyMarketers.reduce((n, m) => n + (m.pending ? m.pending.length : 0), 0);
   return {
     deletions,
     reports: openReports,
     requests: deletions + openReports,
+    receipts,
+    /* Both halves of the Money page: receipts to check and payouts to send. */
+    money: receipts + payouts.length,
     employees: payable,
     /* Products carries no number — nothing on it is waiting on the admin. */
     menuTotal: payable,

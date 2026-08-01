@@ -197,7 +197,9 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     void loadReports();
     void loadDeletionRequests();
     void loadEmployees("");
-  }, [loadMetrics, loadReports, loadDeletionRequests, loadEmployees]);
+    void loadVerify();
+    void loadPayouts();
+  }, [loadMetrics, loadReports, loadDeletionRequests, loadEmployees, loadVerify, loadPayouts]);
 
   /* ── Realtime + payout polling ──
      Payouts move without any action on this screen (a marketer requesting,
@@ -206,9 +208,10 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
   useEffect(() => {
     if (!api.subscribe) return;
     const unsubs: Array<() => void> = [];
-    const refreshPayouts = () => {
-      if (payoutsOpenRef.current) void loadPayouts();
-    };
+    /* Not gated on the page being open any more: the nav slot badges this
+       number from launch, so a stale one is visibly wrong. The gate stays on
+       the ten-second poll below, which is the expensive half. */
+    const refreshPayouts = () => { void loadPayouts(); };
     unsubs.push(api.subscribe("admin-wallets", refreshPayouts));
     unsubs.push(api.subscribe("admin-payouts", refreshPayouts));
     unsubs.push(api.subscribe("admin-reports", () => { void loadReports(); }));
