@@ -768,26 +768,31 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                     <input type="number" min={0} step="0.01" value={z.shipping === "" || z.shipping == null ? "" : z.shipping} placeholder="0.00" onChange={(e) => updateZoneShipping(code, e.target.value)} />
                     {isFreeVal(z.shipping) && <span style={{ marginInlineStart: 8, fontSize: 11, fontWeight: 700, color: "#34c77b" }}>{freeLbl()}</span>}
                   </div>
-                  {/* How long it takes, sitting with the cost it belongs to.
-                      Both boxes are optional; "to" on its own means nothing. */}
-                  <div className="lp-cost-row lp-eta-row">
-                    <span className="cost-label">{ar ? `مدة التوصيل لـ ${cname} (اختياري)` : `Delivery time for ${cname} (optional)`}</span>
-                    <input
-                      type="number" min={0} max={365} step="1" inputMode="numeric"
-                      className="lp-eta-inp"
-                      value={z.eta?.min === "" || z.eta?.min == null ? "" : z.eta.min}
-                      placeholder={ar ? "من" : "from"}
-                      onChange={(e) => updateZoneEta(code, "min", e.target.value)}
-                    />
-                    <span className="lp-eta-sep">{ar ? "إلى" : "to"}</span>
-                    <input
-                      type="number" min={0} max={365} step="1" inputMode="numeric"
-                      className="lp-eta-inp"
-                      value={z.eta?.max === "" || z.eta?.max == null ? "" : z.eta.max}
-                      placeholder={ar ? "إلى" : "to"}
-                      onChange={(e) => updateZoneEta(code, "max", e.target.value)}
-                    />
-                    <span className="lp-eta-unit">{ar ? "يوم" : "days"}</span>
+                  {/* One field rather than words floating in a row: the two
+                      boxes, the dash between them and the unit live inside a
+                      single frame, so it reads as one duration control.
+                      The country is not repeated — the card is titled with it
+                      two lines above. */}
+                  <div className="lp-eta-field">
+                    <label className="lp-field-label">{ar ? "مدة التوصيل (اختياري)" : "Delivery time (optional)"}</label>
+                    <div className="lp-eta-box">
+                      <input
+                        type="number" min={0} max={365} step="1" inputMode="numeric"
+                        className="lp-eta-inp"
+                        value={z.eta?.min === "" || z.eta?.min == null ? "" : z.eta.min}
+                        placeholder={ar ? "من" : "from"}
+                        onChange={(e) => updateZoneEta(code, "min", e.target.value)}
+                      />
+                      <span className="lp-eta-dash" aria-hidden>–</span>
+                      <input
+                        type="number" min={0} max={365} step="1" inputMode="numeric"
+                        className="lp-eta-inp"
+                        value={z.eta?.max === "" || z.eta?.max == null ? "" : z.eta.max}
+                        placeholder={ar ? "إلى" : "to"}
+                        onChange={(e) => updateZoneEta(code, "max", e.target.value)}
+                      />
+                      <span className="lp-eta-unit">{ar ? "يوم" : "days"}</span>
+                    </div>
                   </div>
 
                   {!!ck.length && (
