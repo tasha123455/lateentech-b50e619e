@@ -3,7 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { GoogleButton } from "./GoogleButton";
 import { AuthError, Field } from "./SignInForm";
-import { CountryCodePicker, SoonBadge, useOutsideClose } from "./CountryCodePicker";
+import { CountryCodePicker, CountryPicker } from "./CountryCodePicker";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -16,32 +16,6 @@ const styles = (role: Role) =>
     : { link: "text-business" };
 
 const PHONE_RE = /^09[1-4]\d{7}$/;
-
-function CountryPicker() {
-  const [open, setOpen] = useState(false);
-  const ref = useOutsideClose(open, () => setOpen(false));
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="auth-input flex w-full items-center justify-between text-start"
-      >
-        <span>🇱🇾 <span>Libya</span></span>
-        <span className="text-text-3">▾</span>
-      </button>
-      {open && (
-        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
-          <div className="cursor-default px-3 py-2 text-sm text-text-1 hover:bg-surface-2">🇱🇾 <span>Libya</span></div>
-          <div className="flex cursor-not-allowed items-center justify-between px-3 py-2 text-sm text-text-3 opacity-70">
-            <span>More countries</span>
-            <SoonBadge />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function RegisterForm({ role }: { role: Role }) {
   const s = styles(role);

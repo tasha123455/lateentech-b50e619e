@@ -65,3 +65,32 @@ export function CountryCodePicker({
     </div>
   );
 }
+
+/** The country field itself, as opposed to the dialling code beside the phone.
+ *  Also lifted out of the register form so the admin's support screen offers
+ *  the same control the person used when they signed up. */
+export function CountryPicker({
+  className = "auth-input flex w-full items-center justify-between text-start",
+}: {
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useOutsideClose(open, () => setOpen(false));
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen((v) => !v)} className={className}>
+        <span>🇱🇾 <span>Libya</span></span>
+        <span className="text-text-3">▾</span>
+      </button>
+      {open && (
+        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
+          <div className="cursor-default px-3 py-2 text-sm text-text-1 hover:bg-surface-2">🇱🇾 <span>Libya</span></div>
+          <div className="flex cursor-not-allowed items-center justify-between px-3 py-2 text-sm text-text-3 opacity-70">
+            <span>More countries</span>
+            <SoonBadge />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

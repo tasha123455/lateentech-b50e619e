@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { changedTitle } from "@/lib/changedFields";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { ago, isSafeUrl, parseData, t } from "../lib/format";
+import { ago, isAr, isSafeUrl, parseData, t } from "../lib/format";
 import type { NotificationRow } from "../lib/types";
 import { usePhotoLightbox } from "../ui/PhotoLightbox";
 import { DetailRow, NoteBlock, OrderDetailRows } from "./detailBits";
@@ -82,6 +83,14 @@ function localize(n: NotificationRow): { t: string; b: string } {
   }
   if (n.kind === "account_deletion_rejected" || title === "Account deletion request declined") {
     return { t: t("Account deletion request declined", "تم رفض طلب حذف حسابك"), b: body };
+  }
+  /* Named rather than vague: "Your email was updated" says which detail moved,
+     which is the whole thing somebody wants to know when their sign-in
+     suddenly works differently. The fields ride along in the notification's
+     data, so the wording is built here and reads in whichever language the
+     person has the app in. */
+  if (n.kind === "change_request_done") {
+    return { t: changedTitle(d.fields, isAr()), b: body };
   }
   if (n.kind === "admin_message" || n.kind === "admin_broadcast") {
     return { t: title, b: "" };

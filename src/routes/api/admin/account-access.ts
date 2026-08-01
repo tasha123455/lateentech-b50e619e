@@ -56,7 +56,7 @@ export const Route = createFileRoute("/api/admin/account-access")({
         const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
         if (!token) return json({ error: "unauthorized" }, 401);
 
-        let body: { code?: string; userId?: string; email?: string; phone?: string; cc?: string };
+        let body: { code?: string; userId?: string; email?: string; phone?: string; cc?: string; country?: string };
         try {
           body = await request.json();
         } catch {
@@ -87,7 +87,8 @@ export const Route = createFileRoute("/api/admin/account-access")({
            good, so the box may open. Nothing has changed yet. */
         const wantsEmail = body.email !== undefined;
         const wantsPhone = body.phone !== undefined;
-        if (!wantsEmail && !wantsPhone) return json({ ok: true, unlocked: true });
+        const wantsCountry = body.country !== undefined;
+        if (!wantsEmail && !wantsPhone && !wantsCountry) return json({ ok: true, unlocked: true });
 
         const userId = String(body.userId ?? "");
         if (!userId) return json({ error: "bad_request", message: "Missing account." }, 400);
@@ -112,6 +113,13 @@ export const Route = createFileRoute("/api/admin/account-access")({
           );
         }
         const cc = String(body.cc ?? "+218").trim();
+
+        /* Two letters, the shape of an ISO country code — the picker only
+           offers Libya today, so this is a guard rather than a menu. */
+        const country = wantsCountry ? String(body.country).trim().toUpperCase() : null;
+        if (country !== null && !/^[A-Z]{2}$/.test(country)) {
+          return json({ error: "bad_country", message: "That is not a country code." }, 400);
+        }
 
         const { data: target, error: targetErr } = await supabaseAdmin.auth.admin.getUserById(userId);
         if (targetErr || !target?.user) return json({ error: "not_found", message: "No such account." }, 404);
@@ -149,14 +157,14 @@ export const Route = createFileRoute("/api/admin/account-access")({
           result.email = email;
         }
 
-        // ── The phone on their profile ─────────────────────────────────────
-        if (digits !== null) {
-          const { error: pErr } = await supabaseAdmin
-            .from("profiles")
-            .update({ phone: cc + digits })
-            .eq("id", userId);
+        // ── What lives on their profile ────────────────────────────────────
+        const patch: { phone?: string; country?: string } = {};
+        if (digits !== null) patch.phone = cc + digits;
+        if (country !== null) patch.country = country;
+        if (Object.keys(patch).length) {
+          const { error: pErr } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
           if (pErr) return json({ error: "server_error", message: pErr.message }, 500);
-          result.phone = cc + digits;
+          Object.assign(result, patch);
         }
 
         /* ── Shutting the old door ──
@@ -194,6 +202,7 @@ export const Route = createFileRoute("/api/admin/account-access")({
           user: userId,
           email: email !== null,
           phone: digits !== null,
+          country: country !== null,
           revoked: result.revoked,
         });
         return json(result);

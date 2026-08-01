@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { changedTitle } from "@/lib/changedFields";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr, splitCC } from "../lib/format";
@@ -122,6 +123,12 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
             }
             if (kind === "account_deletion_rejected" || t === "Account deletion request declined") {
               t = tr("Account deletion request declined", "تم رفض طلب حذف حسابك");
+            }
+            /* Says which detail moved rather than "your details", which is
+               the whole thing somebody wants to know when their sign-in
+               suddenly works differently. */
+            if (kind === "change_request_done") {
+              t = changedTitle(d ? (d as { fields?: unknown }).fields : null, isAr());
             }
             const isAdminMsg = kind === "admin_message" || kind === "admin_broadcast";
             if (isAdminMsg) b = "";

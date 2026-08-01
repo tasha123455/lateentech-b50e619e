@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { CountryCodePicker } from "@/components/auth/CountryCodePicker";
+import { CountryCodePicker, CountryPicker } from "@/components/auth/CountryCodePicker";
 import { supabase } from "@/integrations/supabase/client";
 import { readImpersonation } from "@/lib/impersonation";
 
@@ -173,6 +173,14 @@ export function AdminEmailEditor({
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
             />
           </div>
+
+          {/* The third thing somebody can ask to have changed, so it belongs
+              here with the other two. Libya is the only country the platform
+              runs in, so today this confirms rather than switches — but the
+              request dialog offers it, and a box that cannot answer one of the
+              three things it is asked is a box with a hole in it. */}
+          <label className="aee-lbl">{t("Country", "الدولة")}</label>
+          <CountryPicker className="aee-cc aee-country" />
 
           {/* Said plainly, because it is the part that surprises people. */}
           {emailMoved && (
