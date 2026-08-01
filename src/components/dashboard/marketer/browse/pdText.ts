@@ -18,6 +18,22 @@ export const pdT = () => {
     code: ar ? "كود المنتج" : "Product code",
     ship: ar ? "الشحن" : "Shipping fee",
     deliv: ar ? "التوصيل" : "Delivery fee",
+    etaLbl: ar ? "مدة التوصيل" : "Delivery time",
+    /* "Same day", "1 day", "2–4 days" — and their Arabic, which changes the
+       noun for one and two rather than the number.
+       The digits are wrapped in an isolate so a range keeps its order on an
+       Arabic line, the same guard the phone country code uses. */
+    eta: (min: number, max: number | null) => {
+      if (max != null && max !== min) {
+        const range = "\u2066" + min + "\u2013" + max + "\u2069";
+        return ar ? range + " أيام" : range + " days";
+      }
+      if (min === 0) return ar ? "نفس اليوم" : "Same day";
+      if (!ar) return min + (min === 1 ? " day" : " days");
+      if (min === 1) return "يوم واحد";
+      if (min === 2) return "يومين";
+      return min + (min > 10 ? " يوم" : " أيام");
+    },
     oneCity: ar ? "مدينة واحدة" : "1 city",
     cities: (n: number) => (ar ? n + " مدن" : n + " cities"),
     pieces: (n: number) =>

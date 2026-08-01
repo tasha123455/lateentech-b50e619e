@@ -74,17 +74,26 @@ export function dbToBrowse(r: Record<string, unknown>, favIds: Set<string>): Bro
   const cfy = r.cover_focus_y != null && !isNaN(Number(r.cover_focus_y)) ? Number(r.cover_focus_y) : 50;
 
   const d: Record<string, Zone> = {};
-  Object.entries((r.delivery as Record<string, { cities?: Record<string, { shipping?: number; delivery?: number }> }>) || {}).forEach(
-    ([code, z]) => {
-      d[code] = { cities: [], c: {}, shipping: 0, delivery: 0 };
-      Object.entries(z.cities || {}).forEach(([city, v]) => {
-        d[code].c[city] = { s: Number(v.shipping) || 0, d: Number(v.delivery) || 0 };
-        d[code].cities.push(city);
-        d[code].shipping = Number(v.shipping) || 0;
-        d[code].delivery = Number(v.delivery) || 0;
-      });
-    },
-  );
+  type DbZone = {
+    cities?: Record<string, { shipping?: number; delivery?: number }>;
+    eta?: { min?: unknown; max?: unknown } | null;
+  };
+  Object.entries((r.delivery as Record<string, DbZone>) || {}).forEach(([code, z]) => {
+    d[code] = { cities: [], c: {}, shipping: 0, delivery: 0 };
+    Object.entries(z.cities || {}).forEach(([city, v]) => {
+      d[code].c[city] = { s: Number(v.shipping) || 0, d: Number(v.delivery) || 0 };
+      d[code].cities.push(city);
+      d[code].shipping = Number(v.shipping) || 0;
+      d[code].delivery = Number(v.delivery) || 0;
+    });
+    /* Older products were saved before delivery times existed, so a zone
+       without one is normal — it just carries no eta. */
+    const min = z.eta && z.eta.min != null ? Number(z.eta.min) : NaN;
+    if (!isNaN(min)) {
+      const max = z.eta && z.eta.max != null ? Number(z.eta.max) : NaN;
+      d[code].eta = { min, max: !isNaN(max) && max > min ? max : null };
+    }
+  });
 
   const rawGroups = (r.variant_groups as Array<{ name?: string; items?: unknown[] }>) || [];
   const sizes = (r.sizes as string[]) || [];

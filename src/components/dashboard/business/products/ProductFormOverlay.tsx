@@ -15,7 +15,12 @@ import {
 type VItem = { id: number; val: string; qty: string | number; photo: string };
 type VGroup = { id: number; name: string; placeholder: string; valPlaceholder: string; items: VItem[] };
 type ZoneCity = { delivery: number | string };
-type Zone = { cities: Record<string, ZoneCity>; shipping: number | string };
+/** `eta` is how long delivery takes in that country, in days — a minimum and an
+ *  optional maximum, so a shop can say "3 days" or "2 to 4 days". It rides
+ *  inside the existing delivery JSON rather than in its own column, next to the
+ *  country it belongs to. */
+type ZoneEta = { min: number | string; max: number | string };
+type Zone = { cities: Record<string, ZoneCity>; shipping: number | string; eta?: ZoneEta };
 
 let vIdCounter = 0;
 let gIdCounter = 0;
@@ -370,6 +375,18 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   const clampNum = (val: string) => { const n = parseFloat(val); return val === "" || val == null || isNaN(n) ? "" : (n < 0 ? 0 : n); };
   const updateCityCost = (code: string, city: string, val: string) => setZones((z) => (!z[code]?.cities[city] ? z : { ...z, [code]: { ...z[code], cities: { ...z[code].cities, [city]: { delivery: clampNum(val) } } } }));
   const updateZoneShipping = (code: string, val: string) => setZones((z) => (!z[code] ? z : { ...z, [code]: { ...z[code], shipping: clampNum(val) } }));
+  /** Whole days only, and nothing past a year — a delivery time is a small
+   *  number and a stray keystroke should not be able to say 4000. */
+  const clampDays = (val: string) => {
+    const n = parseInt(val, 10);
+    return val === "" || isNaN(n) ? "" : Math.min(365, Math.max(0, n));
+  };
+  const updateZoneEta = (code: string, key: "min" | "max", val: string) =>
+    setZones((z) => {
+      if (!z[code]) return z;
+      const eta = { min: "", max: "", ...(z[code].eta || {}), [key]: clampDays(val) };
+      return { ...z, [code]: { ...z[code], eta } };
+    });
 
   // ---- submit ----
   const frozenBlock = () => {
@@ -415,7 +432,12 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     }
     if (!Object.keys(zones).length) { alert(ar ? "أضف منطقة توصيل واحدة على الأقل." : "Please add at least one delivery zone."); return; }
 
-    const validZones: Record<string, { cities: Record<string, { shipping: number; delivery: number }>; shipping: number }> = {};
+    type SavedZone = {
+      cities: Record<string, { shipping: number; delivery: number }>;
+      shipping: number;
+      eta?: { min: number; max: number | null };
+    };
+    const validZones: Record<string, SavedZone> = {};
     for (const [code, z] of Object.entries(zones)) {
       const zShip = Number(z.shipping) || 0;
       const vc: Record<string, { shipping: number; delivery: number }> = {};
@@ -424,7 +446,20 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
         if (raw === "" || raw == null || isNaN(Number(raw))) continue;
         vc[city] = { shipping: zShip, delivery: Math.max(0, Number(raw)) };
       }
-      if (Object.keys(vc).length) validZones[code] = { cities: vc, shipping: zShip };
+      if (!Object.keys(vc).length) continue;
+      const saved: SavedZone = { cities: vc, shipping: zShip };
+      /* The delivery time is optional: left blank, the zone simply carries no
+         eta and nothing about it shows to marketers. A max below the min is
+         the two boxes filled in the wrong order, so they swap rather than
+         saving a range that reads backwards. */
+      const emin = z.eta && z.eta.min !== "" && z.eta.min != null ? Number(z.eta.min) : null;
+      const emaxRaw = z.eta && z.eta.max !== "" && z.eta.max != null ? Number(z.eta.max) : null;
+      if (emin != null && !isNaN(emin)) {
+        const emax = emaxRaw != null && !isNaN(emaxRaw) ? emaxRaw : null;
+        saved.eta =
+          emax != null && emax < emin ? { min: emax, max: emin } : { min: emin, max: emax };
+      }
+      validZones[code] = saved;
     }
     if (!Object.keys(validZones).length) { alert(ar ? "أضف مدينة واحدة على الأقل مع سعر التوصيل." : "Please add at least one city with a delivery price."); return; }
 
@@ -733,6 +768,28 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                     <input type="number" min={0} step="0.01" value={z.shipping === "" || z.shipping == null ? "" : z.shipping} placeholder="0.00" onChange={(e) => updateZoneShipping(code, e.target.value)} />
                     {isFreeVal(z.shipping) && <span style={{ marginInlineStart: 8, fontSize: 11, fontWeight: 700, color: "#34c77b" }}>{freeLbl()}</span>}
                   </div>
+                  {/* How long it takes, sitting with the cost it belongs to.
+                      Both boxes are optional; "to" on its own means nothing. */}
+                  <div className="lp-cost-row lp-eta-row">
+                    <span className="cost-label">{ar ? `مدة التوصيل لـ ${cname} (اختياري)` : `Delivery time for ${cname} (optional)`}</span>
+                    <input
+                      type="number" min={0} max={365} step="1" inputMode="numeric"
+                      className="lp-eta-inp"
+                      value={z.eta?.min === "" || z.eta?.min == null ? "" : z.eta.min}
+                      placeholder={ar ? "من" : "from"}
+                      onChange={(e) => updateZoneEta(code, "min", e.target.value)}
+                    />
+                    <span className="lp-eta-sep">{ar ? "إلى" : "to"}</span>
+                    <input
+                      type="number" min={0} max={365} step="1" inputMode="numeric"
+                      className="lp-eta-inp"
+                      value={z.eta?.max === "" || z.eta?.max == null ? "" : z.eta.max}
+                      placeholder={ar ? "إلى" : "to"}
+                      onChange={(e) => updateZoneEta(code, "max", e.target.value)}
+                    />
+                    <span className="lp-eta-unit">{ar ? "يوم" : "days"}</span>
+                  </div>
+
                   {!!ck.length && (
                     <>
                       <div className="lp-city-values-label"><span>{ar ? "المدينة" : "City"}</span><span>{ar ? "تكلفة التوصيل" : "Delivery cost"}</span></div>

@@ -44,6 +44,17 @@ export function ZonesSection({
   const [openZone, setOpenZone] = useState<string | null>(null);
   const zoneCodes = Object.keys(d || {});
 
+  /* One line for the whole product, so a marketer sees how long delivery takes
+     without opening anything. With several countries it is the span across all
+     of them — the exact figure per country is inside each card below. */
+  const etas = zoneCodes.map((c) => d[c].eta).filter(Boolean) as Array<{ min: number; max: number | null }>;
+  const overall = etas.length
+    ? {
+        min: Math.min(...etas.map((e) => e.min)),
+        max: Math.max(...etas.map((e) => (e.max != null ? e.max : e.min))),
+      }
+    : null;
+
   return (
     <>
       <div className="pd-row pd-row-tap" onClick={() => { onToggle(); setOpenZone(null); }}>
@@ -56,6 +67,19 @@ export function ZonesSection({
         <div className="pd-row-lbl">{t.shipsTo}</div>
         <div className="pd-row-val"><Chevron open={open} /></div>
       </div>
+
+      {!!overall && (
+        <div className="pd-row">
+          <div className="pd-row-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <polyline points="12 7 12 12 15.5 14" />
+            </svg>
+          </div>
+          <div className="pd-row-lbl">{t.etaLbl}</div>
+          <div className="pd-row-val" data-no-i18n>{t.eta(overall.min, overall.max)}</div>
+        </div>
+      )}
 
       {open && (
         <div className="pd-zones">
@@ -83,6 +107,12 @@ export function ZonesSection({
                   </div>
                   {isOpen && (
                     <div className="pd-zone-cities">
+                      {!!z.eta && (
+                        <div className="pd-zone-city pd-zone-eta">
+                          <div className="pd-zone-city-name">{t.etaLbl}</div>
+                          <div className="pd-zone-city-val" data-no-i18n>{t.eta(z.eta.min, z.eta.max)}</div>
+                        </div>
+                      )}
                       {cities.length ? (
                         cities.map((x) => (
                           <div className="pd-zone-city" key={x.city}>

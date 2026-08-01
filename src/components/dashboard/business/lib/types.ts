@@ -23,6 +23,8 @@ export type VariantGroup = {
 export type DeliveryZone = {
   shipping?: number | string;
   cities?: Record<string, { delivery?: number | string; [k: string]: unknown }>;
+  /** Delivery time for the country, in whole days. Absent when unset. */
+  eta?: { min?: number | string; max?: number | string | null } | null;
   [k: string]: unknown;
 };
 
