@@ -42,7 +42,7 @@ export function AuthCard({ role, children, backTo, logoSize = 100 }: Props) {
           </svg>
         </Link>
 
-        <div className="w-full rounded-3xl border border-border bg-surface px-6 pb-7 pt-5 shadow-2xl">
+        <div className="w-full rounded-3xl border border-border bg-surface px-6 pb-6 pt-5 shadow-2xl">
           <div className="mb-2 flex items-center justify-between gap-3">
             <Link
               data-no-i18n
@@ -56,10 +56,10 @@ export function AuthCard({ role, children, backTo, logoSize = 100 }: Props) {
             <span className={`rounded-full px-3.5 py-1.5 text-[11px] font-semibold ${tint}`}>{label}</span>
           </div>
 
-          {/* Big, because it is the only thing on the page that says whose app
-              this is. The tagline stays off — the heading below it already says
-              what the page is for. */}
-          <div className="flex flex-col items-center py-4">
+          {/* Big, because with the heading gone it is the only thing on the
+              page that says whose app this is — and it is vector now, so size
+              costs nothing in sharpness. */}
+          <div className="flex flex-col items-center pb-5 pt-3">
             <LateenLogo variant="wordmark" lang={lang === "ar" ? "ar" : "en"} size={logoSize} showTagline={false} />
           </div>
 

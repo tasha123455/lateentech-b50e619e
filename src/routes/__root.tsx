@@ -90,14 +90,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.json" },
       { rel: "icon", href: "/wasla-icon-192.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/wasla-icon-192.png" },
-      // Preload the brand art used at large sizes — the splash mark and the
-      // landing lockup. The small lockup on the auth pages is inlined in the
-      // bundle and never asks the network for anything.
-      { rel: "preload", as: "image", href: "/wasla-mark-tight.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-wordmark-en-tight.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-wordmark-ar-tight.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-tagline-en-tight.png", fetchpriority: "high" } as any,
-      { rel: "preload", as: "image", href: "/wasla-tagline-ar-tight.png", fetchpriority: "high" } as any,
     ],
 
   }),

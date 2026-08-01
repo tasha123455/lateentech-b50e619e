@@ -1,12 +1,44 @@
 // Wasla service worker — handles push notifications.
 // Self-hosted (VAPID) — no third-party script imported here anymore.
 
-self.addEventListener("install", () => {
+/* Offline fallback.
+   Without one the browser draws its own offline screen: the app icon in a
+   frame, and "You're offline" in the browser's language rather than the app's.
+   Caching one page lets us answer with our own — same logo, no box, and in
+   Arabic for somebody who reads Arabic. */
+const OFFLINE_CACHE = "wasla-offline-v1";
+const OFFLINE_URL = "/offline.html";
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(OFFLINE_CACHE).then((c) => c.add(new Request(OFFLINE_URL, { cache: "reload" }))).catch(() => {}),
+  );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((keys) =>
+        Promise.all(keys.filter((k) => k !== OFFLINE_CACHE).map((k) => caches.delete(k))),
+      ),
+    ]),
+  );
+});
+
+/* Only page loads are intercepted, and only to answer one that has already
+   failed — everything else goes to the network untouched, so nothing here can
+   serve a stale asset. */
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.method !== "GET" || req.mode !== "navigate") return;
+  event.respondWith(
+    fetch(req).catch(async () => {
+      const hit = await caches.match(OFFLINE_URL);
+      return hit || new Response("Offline", { status: 503, headers: { "content-type": "text/plain" } });
+    }),
+  );
 });
 
 self.addEventListener("push", (event) => {

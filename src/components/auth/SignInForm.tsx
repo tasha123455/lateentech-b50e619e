@@ -77,10 +77,7 @@ export function SignInForm({ role }: { role: Role }) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Start-aligned, and no subtitle: the badge at the top of the card
-          already says which side of the platform this is. */}
-      <h1 className="text-start text-xl font-medium text-text-1">Sign in</h1>
+    <div className="space-y-3">
       <AuthError>{error}</AuthError>
       <GoogleButton onClick={signInGoogle}>Sign in with Google</GoogleButton>
       <p className="text-center text-xs text-text-2">

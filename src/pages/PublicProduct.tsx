@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { WordmarkSvg } from "@/components/brand/logoArt";
 
 type VariantItem = { val?: string; photo?: string; qty?: number | string | null } | string;
 type VariantGroup = { name?: string; items?: VariantItem[] };
@@ -260,7 +261,7 @@ export function PublicProduct({ id }: { id: string }) {
       <header className="flex items-center justify-between px-4 py-3">
         <Link to={withLang("/")} aria-label="Wasla" className="flex items-center gap-2">
           <img src="/wasla-mark-64.png" alt="Wasla" width={28} height={28} className="h-7 w-auto" />
-          <img src={lang === "ar" ? "/wasla-wordmark-ar-tight.png" : "/wasla-wordmark-en-tight.png"} alt="" aria-hidden className="h-4 w-auto" />
+          <WordmarkSvg lang={lang === "ar" ? "ar" : "en"} height={16} style={{ color: "var(--color-text-1, #f0eeeb)" }} />
         </Link>
       </header>
       <div
