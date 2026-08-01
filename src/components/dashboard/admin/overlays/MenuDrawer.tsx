@@ -30,6 +30,7 @@ export function MenuDrawer({
   signingOut: boolean;
 }) {
   const counts = useMenuCounts();
+  const ar = typeof document !== "undefined" && document.documentElement.lang === "ar";
 
   const items = [
     {
@@ -123,6 +124,32 @@ export function MenuDrawer({
             </svg>
           </button>
         ))}
+
+        {/* Same switch the business and marketer menus carry, driven by the
+            same global toggle the language layout installs. */}
+        <button
+          className="adm-menu-item"
+          data-no-i18n
+          onClick={() => {
+            const w = window as unknown as { __lateenToggleLang?: () => void };
+            w.__lateenToggleLang?.();
+          }}
+        >
+          <span className="adm-menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+          </span>
+          <span className="adm-menu-text">
+            <span className="adm-menu-label">{ar ? "اللغة" : "Language"}</span>
+            <span className="adm-menu-sub">{ar ? "Language" : "اللغة"}</span>
+          </span>
+          <svg className="adm-menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
 
         {/* Sits at the bottom of the drawer, the way the business and marketer
             menus do — it used to be a button in the header of every page. */}

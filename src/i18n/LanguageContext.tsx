@@ -110,7 +110,9 @@ function shouldSkipAttrs(el: Element): boolean {
   return false;
 }
 
-function walkAndTranslate(root: Node, lang: Lang) {
+/** Exported so the parity harness can run the real translator over a
+ *  rendered tree without standing up a router. */
+export function walkAndTranslate(root: Node, lang: Lang) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const parent = (node as Text).parentElement;
