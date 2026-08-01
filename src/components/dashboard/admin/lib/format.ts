@@ -62,6 +62,23 @@ export function whenFull(iso?: string | null): string {
   return `${month} ${day}, ${year}, ${h}:${mins} ${ampm}`;
 }
 
+/** "Aug 1, 2026" — month, day, year, no clock. */
+export function dateFull(iso?: string | Date | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.toLocaleString("en-US", { month: "short" })} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+/** Relative while it is still today's problem, a real date once it is not.
+ *  A payout sitting for "27h ago" tells you less than the day it came in. */
+export function whenOrDate(iso?: string | null): string {
+  if (!iso) return "";
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return "";
+  return Date.now() - t >= 86400000 ? dateFull(iso) : when(iso);
+}
+
 export const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
