@@ -853,7 +853,13 @@ export function createLateenApi(userId: string) {
         const { data: wallets } = ids.length
           ? await supabase.from("wallets").select("user_id, balance, pending, currency").in("user_id", ids)
           : { data: [] as Array<Record<string, unknown> & { user_id: string }> };
-        const m = new Map((profs ?? []).map((p) => [p.id as string, p]));
+        // The payout columns only exist on this query, but the card also wants
+        // the email and a signed avatar — merge in the shared resolution rather
+        // than let this be the one list that shows neither.
+        const people = await loadAdminPeople(ids);
+        const m = new Map(
+          (profs ?? []).map((p) => [p.id as string, { ...(people.get(p.id as string) ?? {}), ...p }]),
+        );
         const w = new Map((wallets ?? []).map((row) => [row.user_id as string, row]));
         return rows.map((r) => ({ ...r, user: m.get(r.user_id) ?? null, wallet: w.get(r.user_id) ?? null }));
       },

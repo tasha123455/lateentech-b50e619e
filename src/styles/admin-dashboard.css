@@ -541,3 +541,21 @@
 .lateen-admin .adm-lightbox-caption { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); inset-inline-start: 16px; max-width: calc(100% - 32px); background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.18); border-radius: 12px; padding: 9px 12px; font-size: 11.5px; line-height: 1.7; color: #e8e6e2; font-family: var(--font); pointer-events: auto; }
 .lateen-admin .adm-lightbox-caption span:first-child { color: rgba(255,255,255,0.55); }
 .lateen-admin .adm-lightbox-caption span:first-child::after { content: ":"; }
+
+/* ===== Payouts =====
+   Collapsed: who is owed what, and the button that settles it. The receipt
+   sits beside that button because the button will not fire without one. */
+.lateen-admin .adm-payout-card { background: var(--card); border: 0.5px solid var(--border-2); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+.lateen-admin .pay-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: transparent; border: none; font-family: var(--font); text-align: start; cursor: pointer; }
+.lateen-admin .pay-head .adm-user-av img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block; }
+.lateen-admin .pay-head-mid { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.lateen-admin .pay-settle { display: flex; align-items: center; gap: 10px; padding: 0 12px 11px; }
+.lateen-admin .pay-settle .adm-notif-photo-row { flex: 1; min-width: 0; margin: 0; }
+.lateen-admin .pay-paid-btn { flex: 0 0 auto; min-width: 92px; padding: 0 16px; }
+.lateen-admin .pay-paid-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.lateen-admin .pay-body { padding: 10px 12px 12px; border-top: 0.5px solid var(--border-2); }
+.lateen-admin .pay-fail { border: 0.5px solid var(--border-2); border-radius: 10px; overflow: hidden; background: var(--surface); margin-top: 10px; }
+.lateen-admin .pay-fail-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; background: transparent; border: none; color: var(--danger); font-size: 12px; font-weight: 600; font-family: var(--font); cursor: pointer; }
+.lateen-admin .pay-fail-body { border-top: 0.5px solid var(--border-2); padding: 10px 11px; display: grid; gap: 8px; }
+.lateen-admin .pay-fail-inp { width: 100%; height: 36px; padding: 0 10px; border-radius: 8px; border: 0.5px solid var(--border-2); background: #0f0f0f; color: #fff; font-size: 12px; font-family: var(--font); outline: none; }
+.lateen-admin .pay-fail-inp:focus { border-color: var(--border); }

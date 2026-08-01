@@ -722,6 +722,11 @@ export const DICT: Record<string, string> = {
   "Write your review of this report — the marketer will see it as 'Report reviewed'": "اكتب مراجعتك للبلاغ — المسوّق بيشوفها كـ \u2018تمت مراجعة البلاغ\u2019",
 
   // ----- Admin: verify & payouts -----
+  "Account #": "رقم الحساب",
+  "Attach transfer receipt": "أرفق إيصال التحويل",
+  "Receipt attached": "تم إرفاق الإيصال",
+  "Attach the transfer receipt first": "أرفق إيصال التحويل أول",
+  "Paid": "مدفوع",
   "Order details": "تفاصيل الطلبية",
   "Order value": "قيمة الطلبية",
   "Customer": "الزبون",
@@ -782,7 +787,6 @@ export const DICT: Record<string, string> = {
   "Total Platform Fees Collected": "إجمالي رسوم المنصة المحصّلة",
   "Paid This Month": "المدفوع هذا الشهر",
   "Pending This Month": "قيد الانتظار هذا الشهر",
-  "Paid": "مدفوع",
   "Global Analytics": "تحليلات شاملة",
   "Payout Manager": "إدارة السحوبات",
   "Order Verification Hub": "مركز التحقق من الطلبيات",
