@@ -12,6 +12,6 @@
     // Second lock on the box that changes somebody's sign-in email, inside
     // their profile in support mode. The first lock is being a signed-in
     // admin; this one is so that being one is not enough on its own.
-    "ADMIN_EMAIL_UNLOCK_CODE": "1234512345",
+    "ADMIN_EMAIL_UNLOCK_CODE": "5050505050",
   },
 }
