@@ -104,24 +104,49 @@ function buildChartDates(n: number): string[] {
 
 /** Chart buckets for the current selection, with the real end-of-bucket
     timestamp for each point so metricValueAsOf() gives a true snapshot. */
-export function getChartConfig(selected: DateSelection): { labels: string[]; len: number; ends: number[] } {
+/** The earliest timestamp anywhere in the data — where "all time" starts. */
+function firstEventTime(raw: HomeRaw | null): number {
+  const times: number[] = [];
+  const push = (v: unknown) => {
+    const t = v ? new Date(v as string).getTime() : NaN;
+    if (Number.isFinite(t)) times.push(t);
+  };
+  (raw?.orders || []).forEach((o) => push(o.created_at));
+  (raw?.profiles || []).forEach((p) => push(p.created_at));
+  (raw?.products || []).forEach((p) => push(p.created_at));
+  return times.length ? Math.min(...times) : Date.now();
+}
+
+export function getChartConfig(raw: HomeRaw | null, selected: DateSelection): { labels: string[]; len: number; ends: number[] } {
   const anySel = selected.day || selected.month || selected.year;
   const today = new Date();
 
   if (!anySel) {
-    // Last 14 days, one point per day. "Today" uses the current instant so the
-    // final point is truly live.
-    const ends: number[] = [];
-    for (let i = CHART_LEN - 1; i >= 0; i--) {
-      if (i === 0) {
-        ends.push(Date.now());
-        continue;
-      }
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      ends.push(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime());
+    /* All time: month by month from the first thing that ever happened to
+       now, so the default view is the whole history rather than an arbitrary
+       fortnight. Falls back to the current month for an empty platform, and
+       caps the number of buckets so a long-running platform stays readable.
+       The last point uses the current instant so it is truly live. */
+    const first = firstEventTime(raw);
+    const start = new Date(first);
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+    const months: Date[] = [];
+    const cursor = new Date(start);
+    while (cursor <= today && months.length < 400) {
+      months.push(new Date(cursor));
+      cursor.setMonth(cursor.getMonth() + 1);
     }
-    return { labels: buildChartDates(CHART_LEN), len: CHART_LEN, ends };
+    if (!months.length) months.push(new Date(today.getFullYear(), today.getMonth(), 1));
+    // Keep at most 24 buckets so the labels stay legible on a phone.
+    const kept = months.slice(-24);
+    const labels = kept.map((d) => MON_ABBR[d.getMonth()] + " " + String(d.getFullYear()).slice(2));
+    const ends = kept.map((d, i) =>
+      i === kept.length - 1
+        ? Date.now()
+        : new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999).getTime(),
+    );
+    return { labels, len: labels.length, ends };
   }
 
   // Year-only selection keeps the monthly view.
@@ -155,11 +180,13 @@ export function getChartConfig(selected: DateSelection): { labels: string[]; len
   return { labels, len: labels.length, ends };
 }
 
+/* English labels so the shared dictionary can translate them, like the rest
+   of the dashboard — these used to be hardcoded Arabic and stayed Arabic in
+   the English build. */
 export const CHART_METRICS: Array<{ key: MetricKey; label: string; color: string }> = [
-  { key: "activeUsers", label: "المستخدمون النشطون", color: "#7fa8d9" },
-  { key: "totalUsers", label: "إجمالي المستخدمين", color: "#9d8fd9" },
-  { key: "totalProducts", label: "إجمالي المنتجات", color: "#d98fa0" },
-  { key: "platformFee", label: "رسوم المنصة", color: "#7fd9a8" },
+  { key: "totalUsers", label: "Total Users", color: "#9d8fd9" },
+  { key: "totalProducts", label: "Total Products", color: "#d98fa0" },
+  { key: "platformFee", label: "Platform Fees", color: "#7fd9a8" },
   { key: "succeeded", label: "Succeeded Upfronts", color: "#caa05a" },
   { key: "succeededPieces", label: "Succeeded Pieces Sold", color: "#5ec9c4" },
 ];

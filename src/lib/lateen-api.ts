@@ -126,6 +126,13 @@ export function createLateenApi(userId: string) {
   return {
     userId,
 
+    /** Heartbeat: marks this account as here now, and rolls today's peak
+     *  forward. Called on a timer by whichever dashboard is open. */
+    async touchPresence() {
+      const { error } = await supabase.rpc("touch_presence" as never, {} as never);
+      if (error) throw error;
+    },
+
     async listMyProducts(): Promise<LateenProduct[]> {
       const { data, error } = await supabase
         .from("products")
@@ -964,6 +971,14 @@ export function createLateenApi(userId: string) {
           email: emap.get(p.id) ?? null,
           avatar_signed_url: (p.avatar_url && avatarMap.get(p.avatar_url)) || null,
         }));
+      },
+      /** Live users right now, or the day's peak when a day is given. */
+      async presenceStats(day?: string | null): Promise<number> {
+        const { data, error } = await supabase.rpc("admin_presence_stats" as never, {
+          _day: day ?? null,
+        } as never);
+        if (error) throw error;
+        return Number(data ?? 0);
       },
       // Wipes operational data across every admin page (orders, products,
       // payouts, reports, notifications, employees, reviews, favourites,
