@@ -671,6 +671,7 @@ export const DICT: Record<string, string> = {
   "e.g. New update available": "مثال: فمّا تحديث جديد",
 
   // ----- Admin: menu & pages -----
+  "No reports match your search.": "ما فماش بلاغات مطابقة لبحثك.",
   "Report Type": "نوع البلاغ",
   "Comment": "التعليق",
   "Phone Number": "رقم الهاتف",
