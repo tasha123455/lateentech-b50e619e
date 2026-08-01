@@ -6,7 +6,7 @@ import { BusinessDashboardApp } from "@/components/dashboard/business/BusinessDa
 import { MarketerDashboardApp } from "@/components/dashboard/marketer/MarketerDashboardApp";
 import { AdminDashboardApp } from "@/components/dashboard/admin/AdminDashboardApp";
 
-type Impersonation = { userId: string; role: "marketer" | "business"; name: string };
+type Impersonation = { userId: string; role: "marketer" | "business"; name: string; productId?: string };
 
 function readImpersonation(): Impersonation | null {
   if (typeof window === "undefined") return null;
@@ -100,7 +100,7 @@ export function Dashboard({ prod }: { prod?: string }) {
           </button>
         </div>
         {impersonation.role === "business" ? (
-          <BusinessDashboardApp userId={impersonation.userId} />
+          <BusinessDashboardApp userId={impersonation.userId} focusProductId={impersonation.productId} />
         ) : (
           <MarketerDashboardApp userId={impersonation.userId} />
         )}

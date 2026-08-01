@@ -36,10 +36,13 @@ export function ProductsPage({
   onAddProduct,
   onEditProduct,
   onOpenNotifications: _onOpenNotifications,
+  focusProductId,
 }: {
   onAddProduct: () => void;
   onEditProduct: (p: Product) => void;
   onOpenNotifications: () => void;
+  /** Set when an admin arrived here from a report about this product. */
+  focusProductId?: string;
 }) {
   const { products, orders, pendingActiveStubs, reviews, frozen, api, reloadProducts } = useBusinessData();
   const ar = isAr();
@@ -252,6 +255,7 @@ export function ProductsPage({
               onEdit={handleEdit}
               onToggleStatus={handleToggleStatus}
               onDelete={handleDelete}
+              focused={p.id === focusProductId}
             />
           ))
         )}
