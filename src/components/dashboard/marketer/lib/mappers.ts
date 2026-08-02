@@ -122,6 +122,7 @@ export function dbToBrowse(r: Record<string, unknown>, favIds: Set<string>): Bro
     desc: (r.description as string) || "",
     pr: Number(r.price) || 0,
     cur: { s: symbol || "$", code: curRaw.code || "USD" },
+    market: (r.market as string) || "LY",
     pct: Number(r.comm_pct) || 0,
     commUnit: Number(r.comm_fixed) || 0,
     platformFee: Number(r.platform_fee) || 0,
@@ -153,6 +154,7 @@ export function buildProductsMap(list: BrowseProduct[]): Record<string, FormProd
       bid: p.bid,
       name: p.n,
       price: p.pr,
+      market: p.market,
       pct: p.pct / 100,
       commUnit: Number(p.commUnit) || 0,
       q: Number(p.q) || 0,
@@ -241,7 +243,9 @@ export function calcFee(prod: FormProduct, qty: number) {
   const commPerUnit = parseFloat(
     (Number(prod.commUnit) > 0 ? Number(prod.commUnit) : prod.price * prod.pct).toFixed(2),
   );
-  const platformPerUnit = platformFeeForPrice(prod.price);
+  // The product's market, not the reader's: a marketer in one country
+  // selling into another is charged that country's rule.
+  const platformPerUnit = platformFeeForPrice(prod.price, prod.market);
   const feePerUnit = parseFloat((commPerUnit + platformPerUnit).toFixed(2));
   const totalFee = parseFloat((feePerUnit * qty).toFixed(2));
   return { commPerUnit, platformPerUnit, feePerUnit, totalFee };
@@ -383,6 +387,7 @@ export function dbToOrder(r: Record<string, unknown>, products: Record<string, F
     bizPhone: p.bizPhone || "",
     hasReceipt: !!r.receipt_url,
     receiptUrl: (r.receipt_url as string) || "",
+    market: (r.market as string) || "LY",
     depositConfirmed: confirmed ? true : null,
     payDate: mc ? mc.getDate() + "/" + (mc.getMonth() + 1) + "/" + mc.getFullYear() : null,
     _status: r.status as string,

@@ -118,14 +118,16 @@ export function ordFrac(n: number): string {
   return n + " طلبيات";
 }
 
-/* Platform fee: 5% of unit price above 100, else flat 5 — identical to source. */
-export const PLATFORM_FEE_RATE = 0.05;
-export const PLATFORM_FEE_FIXED = 5;
-export const PLATFORM_FEE_THRESHOLD = 100;
-export function platformFeeForPrice(price: unknown): number {
-  const pr = Number(price) || 0;
-  return pr > PLATFORM_FEE_THRESHOLD ? parseFloat((pr * PLATFORM_FEE_RATE).toFixed(2)) : PLATFORM_FEE_FIXED;
-}
+/* The fee rule is the market's, not this module's — it was duplicated here
+   and in the marketer's constants, and both copies hardcoded Libya's numbers.
+   These names stay so the screens do not have to change. */
+export {
+  platformFeeForPrice,
+  platThreshold,
+  PLAT as PLATFORM_FEE_RATE,
+  PLAT_FIXED as PLATFORM_FEE_FIXED,
+  PLAT_THRESHOLD as PLATFORM_FEE_THRESHOLD,
+} from "@/components/dashboard/marketer/lib/constants";
 export const pctOf = (price: number, pct: number): number => parseFloat((price * (pct / 100)).toFixed(2));
 
 export const genCode = (len?: number): string => {

@@ -102,6 +102,7 @@ export function dbToOrder(r: Row, products: Product[]): Order {
     adminNotes: r.refund_note || r.admin_notes || "",
     refundedAt: r.refunded_at || null,
     receiptUrl: r.receipt_url || "",
+    market: (r.market as string) || "LY",
     marketerConfirmed: !!r.marketer_confirmed_at,
     marketerConfirmedDate: mcDate,
     _createdAt: dt,

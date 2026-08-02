@@ -1,7 +1,7 @@
 /* Static data ported verbatim from marketer.script.js / marketer.body.html. */
 
 import { LIBYA } from "@/lib/markets/libya";
-import { platformFee } from "@/lib/markets";
+import { marketOf, platformFee } from "@/lib/markets";
 
 /* Libya's numbers now live in src/lib/markets/libya.ts, with every other
    value that is true of Libya and not of anywhere else. These names stay so
@@ -14,7 +14,19 @@ export const PLAT = LIBYA.money.fee.pct;
 export const PLAT_FIXED = LIBYA.money.fee.fixed;
 export const PLAT_THRESHOLD = LIBYA.money.fee.threshold;
 
-export const platformFeeForPrice = (price: unknown): number => platformFee(price, LIBYA);
+/** What the platform keeps on one unit at this price.
+ *
+ *  The market decides, because the flat fee and the threshold are amounts in
+ *  that market's currency — applying Libya's 5-and-100 to a price quoted in
+ *  euros charges roughly five times what was meant. Callers that know the
+ *  product pass its market; the default is only for the ones that cannot. */
+export const platformFeeForPrice = (price: unknown, market?: string | null): number =>
+  platformFee(price, marketOf(market ?? LIBYA.code));
+
+/** The price above which the fee becomes a percentage, in the market's own
+ *  currency. Screens show "5%" above it and a flat amount at or below. */
+export const platThreshold = (market?: string | null): number =>
+  marketOf(market ?? LIBYA.code).money.fee.threshold;
 
 export const PAYOUT_PERIOD_MS = LIBYA.money.payoutCycleDays * 86400000;
 export const MIN_WITHDRAW = LIBYA.money.minWithdraw;

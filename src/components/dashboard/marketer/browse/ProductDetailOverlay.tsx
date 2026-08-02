@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ClampedText } from "../ui/ClampedText";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { PLAT_THRESHOLD, platformFeeForPrice } from "../lib/constants";
+import { platThreshold, platformFeeForPrice } from "../lib/constants";
 import { isAr, moneyS, pctTxt } from "../lib/format";
 import { detailVariantGroups } from "../lib/mappers";
 import type { BrowseProduct, ProductReview } from "../lib/types";
@@ -125,7 +125,7 @@ export function ProductDetailOverlay({
   const s = p.cur.s;
   const cc = p.cur.code;
   const earn = Number(p.commUnit) > 0 ? Number(p.commUnit) : (p.pr * p.pct) / 100;
-  const plat = platformFeeForPrice(p.pr);
+  const plat = platformFeeForPrice(p.pr, p.market);
   const fee = earn + plat;
   const platPct = p.pr > 0 ? Math.round((plat / p.pr) * 100) : 0;
   const photos = (p.ph || []).filter(Boolean);
@@ -235,7 +235,7 @@ export function ProductDetailOverlay({
             <div className="pd-earn-row">
               <span className="pd-earn-row-lbl">{t.platFee}</span>
               <span className="pd-earn-row-val">
-                {p.pr > PLAT_THRESHOLD ? platPct + "%" : <Money n={plat} sym={s} code={cc} short />}
+                {p.pr > platThreshold(p.market) ? platPct + "%" : <Money n={plat} sym={s} code={cc} short />}
               </span>
             </div>
             <div className="pd-earn-row">

@@ -2,11 +2,13 @@ import type { ReactElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { pickFile } from "@/lib/filePicker";
 
+import { DEFAULT_MARKET_CODE, marketOf } from "@/lib/markets";
+
 import { useBusinessData } from "../BusinessDataProvider";
 import type { Product } from "../lib/types";
 import {
   isAr, priceSym, freeLbl, isFreeVal, pctOf, genCode, platformFeeForPrice,
-  PLATFORM_FEE_THRESHOLD, moneyParts, searchMatcher,
+  platThreshold, moneyParts, searchMatcher,
 } from "../lib/format";
 import {
   CURRENCIES, COUNTRIES, COUNTRY_CUR_MAP, CATEGORY_DATA, CATEGORY_GROUP_AR,
@@ -39,9 +41,9 @@ function moneyH(n: number, sym: string, code?: string | null): ReactElement {
   return <>{p.amount}{p.spaced ? " " : ""}{symSpan}</>;
 }
 
-function calcFees(price: number, pct: number, fixedComm: number, mode: string) {
+function calcFees(price: number, pct: number, fixedComm: number, mode: string, market: string) {
   const comm = mode === "pct" ? pctOf(price, pct) : (parseFloat(String(fixedComm || 0)) || 0);
-  const platform = platformFeeForPrice(price);
+  const platform = platformFeeForPrice(price, market);
   const total = parseFloat((comm + platform).toFixed(2));
   const commPct = mode === "pct" ? pct : (price ? parseFloat(((comm / price) * 100).toFixed(1)) : 0);
   return { comm, platform, total, commPct };
@@ -218,15 +220,24 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
 
   if (!open) return null;
 
+  /* The market this business lists into, and the one currency it prices in.
+     A product already saved keeps whatever it was stored with, so nothing
+     that exists is re-denominated behind anybody's back. */
+  const marketCode = (profile?.market as string) || DEFAULT_MARKET_CODE;
+  const market = marketOf(marketCode);
+  const marketCurrency =
+    CURRENCIES.find((c) => c.code === market.money.currencyCode)
+    || { code: market.money.currencyCode, name: market.money.currencyCode, symbol: "", flag: market.flag };
+
   const priceNum = parseFloat(price) || 0;
   const commPctNum = parseFloat(commPct) || 0;
   const commFixedNum = parseFloat(commFixed) || 0;
-  const { comm, platform, commPct: finalPct } = calcFees(priceNum, commPctNum, commFixedNum, commMode);
+  const { comm, platform, commPct: finalPct } = calcFees(priceNum, commPctNum, commFixedNum, commMode, marketCode);
   const total = priceNum - comm - platform;
-  const curCode = selectedCurrency ? selectedCurrency.code : "LYD";
+  const curCode = selectedCurrency ? selectedCurrency.code : marketCurrency.code;
   const sumSym = ar && curCode === "LYD" ? "د.ل" : curCode;
   const fmtSum = (n: number) => (ar && curCode === "LYD" ? moneyH(n, "د.ل", "LYD") : <>{n.toFixed(2)} <span className="cur-sym">{sumSym}</span></>);
-  const platformFixed = priceNum <= PLATFORM_FEE_THRESHOLD;
+  const platformFixed = priceNum <= platThreshold(marketCode);
   const platformPct = priceNum > 0 ? Math.round((platform / priceNum) * 100) : 0;
 
   // ---- photos ----
@@ -491,7 +502,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     try {
       const jobs = [...uploadJobsRef.current];
       if (jobs.length) await Promise.allSettled(jobs);
-      const { comm: finalComm, platform: finalPlatform, total: finalTotal, commPct: finalCommPct } = calcFees(p, cPct, cFixed, commMode);
+      const { comm: finalComm, platform: finalPlatform, total: finalTotal, commPct: finalCommPct } = calcFees(p, cPct, cFixed, commMode, marketCode);
       const cleanGroups = variantMode === "variants"
         ? variantGroups.map((g) => ({
             name: (g.name || "Variant").trim() || "Variant",
@@ -633,32 +644,19 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           <textarea className="lp-input lp-textarea" value={desc} disabled={editLocked} onChange={(e) => setDesc(e.target.value)} placeholder="What makes this product worth selling? Materials, fit, use case…" data-no-i18n="" />
 
           <label className="lp-field-label">Currency <span className="lp-req">*</span></label>
-          <div className="lp-currency-static" onClick={() => !editLocked && setCurrDropdownOpen((v) => !v)} style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
-            <span style={{ fontSize: 18, lineHeight: 1 }}>{selectedCurrency ? selectedCurrency.flag : "🌐"}</span>
-            <span style={{ color: "var(--color-text-primary)" }} {...(selectedCurrency ? { "data-no-i18n": "" } : {})}>
-              {selectedCurrency ? curChoice(selectedCurrency.code).label : "Select a currency"}
+          {/* Not a choice any more. The price, the platform fee, the wallet it
+              lands in and the cash the customer hands over are all one
+              currency, and that currency belongs to the market — so this
+              states the answer instead of asking a question whose other
+              options were never selectable anyway. */}
+          <div className="lp-currency-static" style={{ pointerEvents: "none" }}>
+            <span style={{ fontSize: 18, lineHeight: 1 }}>{marketCurrency.flag}</span>
+            <span style={{ color: "var(--color-text-primary)" }} data-no-i18n>
+              {curChoice(marketCurrency.code).label}
             </span>
             <span style={{ fontSize: 11, color: "var(--color-text-secondary)", marginInlineStart: 4 }} data-no-i18n>
-              {selectedCurrency ? curChoice(selectedCurrency.code).sym : ""}
+              {curChoice(marketCurrency.code).sym}
             </span>
-          </div>
-          <div style={{ position: "relative" }}>
-            {currDropdownOpen && (
-              <div className="currency-search-wrap" style={{ display: "block" }}>
-                <svg className="currency-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <input className="currency-search" type="text" placeholder="Search currencies…" readOnly />
-              </div>
-            )}
-            <div className={`currency-dropdown${currDropdownOpen ? " open" : ""}`}>
-              {currDropdownOpen && (
-                <>
-                  {lyd && <div className="currency-option" onClick={() => selectCurrency("LYD")}>{curRow(lyd)}</div>}
-                  {eur && <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}>{curRow(eur)}<span style={{ marginInlineStart: "auto" }}>{soonBadge}</span></div>}
-                  {usd && <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}>{curRow(usd)}<span style={{ marginInlineStart: "auto" }}>{soonBadge}</span></div>}
-                  <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}><span className="curr-label" style={{ color: "var(--color-text-tertiary)" }}>{ar ? "عملات أخرى" : "More currencies"}</span><span style={{ marginLeft: "auto" }}>{soonBadge}</span></div>
-                </>
-              )}
-            </div>
           </div>
 
           <label className="lp-field-label">Category <span className="lp-req">*</span></label>

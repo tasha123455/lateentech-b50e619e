@@ -1,4 +1,4 @@
-import { PLAT_THRESHOLD } from "../lib/constants";
+import { platThreshold } from "../lib/constants";
 import type { MarketerOrder } from "../lib/types";
 import { Money } from "../ui/Money";
 import { DepositAccountRows } from "./PayDetailsOverlay";
@@ -20,7 +20,7 @@ export function InstructionsOverlay({
   const sym = order?._sym || "$";
   const code = order?._curCode || "";
   const yourPct = Math.round((order?.pct || 0) * 100);
-  const platFixed = (order?.price || 0) <= PLAT_THRESHOLD;
+  const platFixed = (order?.price || 0) <= platThreshold(order?.market);
   const platPct = order && order.price > 0 ? Math.round(((order.platformPerUnit || 0) / order.price) * 100) : 0;
 
   return (

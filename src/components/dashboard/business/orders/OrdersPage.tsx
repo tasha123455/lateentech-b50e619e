@@ -7,7 +7,7 @@ import { MoneyH } from "../ui/Money";
 import { locSearchText } from "../lib/constants";
 import {
   isAr, escH, freeLbl, isFreeVal, searchMatcher, splitCC,
-  PLATFORM_FEE_THRESHOLD,
+  platThreshold,
 } from "../lib/format";
 import type { Order, OrderUiStatus } from "../lib/types";
 
@@ -32,7 +32,7 @@ function computeOrdFin(o: Order) {
   const base = o.price * o.qty;
   const commissionPct = base > 0 ? Math.round((o.commission / base) * 100) : 0;
   const platformPct = o.price > 0 && o.qty > 0 ? Math.round((o.platformFee / o.qty / o.price) * 100) : 0;
-  const platformFixed = (o.price || 0) <= PLATFORM_FEE_THRESHOLD;
+  const platformFixed = (o.price || 0) <= platThreshold(o.market);
   const net = base - o.commission - o.platformFee;
   const hasDelivery = Number(o.delivery) > 0;
   const hasShipping = Number(o.shipping) > 0;

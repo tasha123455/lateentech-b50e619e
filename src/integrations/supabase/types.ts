@@ -693,6 +693,7 @@ export type Database = {
           description: string | null
           frozen_paused: boolean
           id: string
+          market: string
           name: string
           pause_requested: boolean
           photos: string[]
@@ -728,6 +729,7 @@ export type Database = {
           description?: string | null
           frozen_paused?: boolean
           id?: string
+          market?: string
           name: string
           pause_requested?: boolean
           photos?: string[]
@@ -763,6 +765,7 @@ export type Database = {
           description?: string | null
           frozen_paused?: boolean
           id?: string
+          market?: string
           name?: string
           pause_requested?: boolean
           photos?: string[]

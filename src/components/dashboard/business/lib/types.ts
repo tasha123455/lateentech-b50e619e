@@ -97,6 +97,8 @@ export type Order = {
   adminNotes: string;
   refundedAt: string | null;
   receiptUrl: string;
+  /** Market this order was priced under. */
+  market?: string | null;
   marketerConfirmed: boolean;
   marketerConfirmedDate: string;
   _createdAt: Date;

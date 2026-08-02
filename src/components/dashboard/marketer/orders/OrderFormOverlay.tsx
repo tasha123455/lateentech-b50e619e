@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { COUNTRY_NAMES, PHONE_RE_LOCAL, PLAT_THRESHOLD } from "../lib/constants";
+import { COUNTRY_NAMES, PHONE_RE_LOCAL, platThreshold } from "../lib/constants";
 import { codPaysParts, genCode, isAr, pctTxt, stripCC, today2 } from "../lib/format";
 import {
   buildSelectedVariantsPayload, calcFee, cityLabel, currentDeliveryFor, formVariantGroups,
@@ -169,7 +169,7 @@ export function OrderFormOverlay({
   const codParts = codPaysParts(deliv > 0, ship > 0);
 
   const price = currentProduct?.price || 0;
-  const platFixed = price <= PLAT_THRESHOLD;
+  const platFixed = price <= platThreshold(currentProduct?.market);
   const platPct = price > 0 && fee ? Math.round((fee.platformPerUnit / price) * 100) : 0;
   const commAmt = fee ? parseFloat((fee.commPerUnit * qty).toFixed(2)) : 0;
   const platAmt = fee ? parseFloat((fee.platformPerUnit * qty).toFixed(2)) : 0;

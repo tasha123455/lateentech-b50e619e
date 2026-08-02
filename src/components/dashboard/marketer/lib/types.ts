@@ -39,6 +39,8 @@ export type BrowseProduct = {
   desc: string;
   pr: number;
   cur: Currency;
+  /** Market this product is sold into — decides its fee rule. */
+  market: string;
   pct: number;
   commUnit: number;
   platformFee: number;
@@ -64,6 +66,8 @@ export type FormProduct = {
   bid: string;
   name: string;
   price: number;
+  /** Market this product is sold into — decides its fee rule. */
+  market?: string | null;
   /** Fractional commission rate (pct/100), matching the original PRODUCTS map. */
   pct: number;
   commUnit: number;
@@ -132,6 +136,8 @@ export type MarketerOrder = {
   bizPhone?: string;
   hasReceipt: boolean;
   receiptUrl: string;
+  /** Market this order was priced under. */
+  market?: string | null;
   depositConfirmed: boolean | null;
   payDate: string | null;
   _status: OrderStatus | string;

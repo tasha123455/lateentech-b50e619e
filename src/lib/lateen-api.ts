@@ -64,6 +64,8 @@ export type LateenProduct = {
   biz_name: string | null;
   require_additional_phone: boolean;
   deleted_at: string | null;
+  /** Market this product is sold into. Sets its currency and its fee rule. */
+  market: string;
 };
 
 /** Profiles for a set of user ids, with the two fields that are not on the
