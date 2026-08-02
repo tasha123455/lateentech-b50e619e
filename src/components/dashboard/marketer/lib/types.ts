@@ -150,6 +150,7 @@ export type MarketerOrder = {
 
 export type MarketerProfile = {
   full_name?: string | null;
+  city?: string | null;
   phone?: string | null;
   email?: string | null;
   whatsapp?: string | null;

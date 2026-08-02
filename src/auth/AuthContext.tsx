@@ -111,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               phone?: string;
               whatsapp?: string;
               country?: string;
+              city?: string;
               business_name?: string;
             };
             sessionStorage.removeItem("pending_signup");
@@ -159,11 +160,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               _role: p.role,
               _business_name: p.role === "business" ? p.business_name : undefined,
             });
-            const patch: { full_name?: string; phone?: string; whatsapp?: string; country?: string; business_name?: string } = {};
+            const patch: { full_name?: string; phone?: string; whatsapp?: string; country?: string; city?: string; business_name?: string } = {};
             if (p.full_name) patch.full_name = p.full_name;
             if (p.phone) patch.phone = p.phone;
             if (p.whatsapp) patch.whatsapp = p.whatsapp;
             if (p.country) patch.country = p.country;
+            if (p.city) patch.city = p.city;
             if (p.role === "business" && p.business_name) patch.business_name = p.business_name;
             if (Object.keys(patch).length) {
               await supabase.from("profiles").update(patch).eq("id", nextSession.user.id);

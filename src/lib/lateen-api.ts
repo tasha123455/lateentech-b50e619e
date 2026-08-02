@@ -556,7 +556,7 @@ export function createLateenApi(userId: string) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "full_name, business_name, phone, whatsapp, avatar_url, created_at, country, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes, banned_at, frozen_at",
+          "full_name, business_name, phone, whatsapp, avatar_url, created_at, country, city, payout_method, payout_bank_name, payout_account_holder, payout_account_number, payout_iban, payout_swift, payout_notes, banned_at, frozen_at",
         )
         .eq("id", userId)
         .maybeSingle();

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
 import { PickerChevron } from "@/components/auth/CountryCodePicker";
+import { CityPicker } from "@/components/shared/CityPicker";
 import { pickFile } from "@/lib/filePicker";
 
 import { useMarketerData } from "../MarketerDataProvider";
@@ -30,6 +31,7 @@ export function ProfileOverlay({
   // Shown straight away after an admin changes it, so the row is not stale.
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [city, setCity] = useState("");
   const [avatarHint, setAvatarHint] = useState("");
   const [changeOpen, setChangeOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -45,6 +47,7 @@ export function ProfileOverlay({
     const w = stripCC(p.whatsapp);
     setWhatsapp(w.num || "");
     setWaCc(w.cc || "‎+218‎");
+    setCity((p.city as string) || "");
     setSaveState("idle");
     setAvatarHint("");
   }, [open, profile]);
@@ -100,6 +103,7 @@ export function ProfileOverlay({
       await api.updateProfile({
         full_name: name.trim() || null,
         whatsapp: waDigits ? "+218" + waDigits : null,
+        city: city || null,
         payout_method: fields.method.trim() || null,
         payout_bank_name: isPhoneMethod ? null : fields.bank.trim() || null,
         payout_account_holder: isPhoneMethod ? null : fields.holder.trim() || null,
@@ -172,6 +176,13 @@ export function ProfileOverlay({
             <span className="pd-lbl-head">{t.name}</span>
             <input className="pd-inp" placeholder={t.namePh} value={name} onChange={(e) => setName(e.target.value)} />
           </label>
+
+          {/* Editable, unlike the country below it: where somebody lives is
+              ordinary information, not the identity the account is pinned to. */}
+          <div className="pd-lbl">
+            <span className="pd-lbl-head">{t.city}</span>
+            <CityPicker value={city} onChange={setCity} className="pd-inp" />
+          </div>
 
           <div style={{ border: "1px solid #2a2a2a", borderRadius: 14, padding: 14, display: "grid", gap: 12, background: "#181818" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>

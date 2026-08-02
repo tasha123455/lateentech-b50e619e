@@ -7,6 +7,7 @@ import { CountryCodePicker, CountryPicker } from "./CountryCodePicker";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CityPicker } from "@/components/shared/CityPicker";
 
 type Role = "marketer" | "business";
 
@@ -46,6 +47,7 @@ export function RegisterForm({ role }: { role: Role }) {
   const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
   const [altPhone, setAltPhone] = useState("");
+  const [city, setCity] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -66,9 +68,10 @@ export function RegisterForm({ role }: { role: Role }) {
     if (!fullName.trim()) return false;
     if (role === "business" && !businessName.trim()) return false;
     if (!phoneValid) return false;
+    if (!city) return false;
     if (altPhone.length > 0 && (!altPhoneValid || altPhoneDuplicate)) return false;
     return true;
-  }, [fullName, businessName, phone, role, phoneValid, altPhone, altPhoneValid, altPhoneDuplicate]);
+  }, [fullName, businessName, phone, city, role, phoneValid, altPhone, altPhoneValid, altPhoneDuplicate]);
 
   const addRoleAndGo = async () => {
     const { error: rpcErr } = await supabase.rpc("add_self_role", {
@@ -80,10 +83,11 @@ export function RegisterForm({ role }: { role: Role }) {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (uid) {
-        const patch: { full_name?: string; phone?: string; country?: string; business_name?: string } = {
+        const patch: { full_name?: string; phone?: string; country?: string; city?: string; business_name?: string } = {
           full_name: fullName.trim(),
           phone: "+218" + phone,
           country: "LY",
+          city,
         };
         if (role === "business") patch.business_name = businessName.trim();
         await supabase.from("profiles").update(patch).eq("id", uid);
@@ -109,6 +113,7 @@ export function RegisterForm({ role }: { role: Role }) {
           phone: "+218" + phone,
           whatsapp: altPhone ? "+218" + altPhone : undefined,
           country: "LY",
+          city,
           business_name: role === "business" ? businessName.trim() : undefined,
         }),
       );
@@ -199,6 +204,12 @@ export function RegisterForm({ role }: { role: Role }) {
 
       <Field label="Country" required>
         <CountryPicker />
+      </Field>
+
+      {/* Under the country, because it answers the same question at the next
+          level down — and it is the level that actually varies. */}
+      <Field label={ar ? "المدينة" : "City"} required>
+        <CityPicker value={city} onChange={setCity} className="auth-input" />
       </Field>
 
       <Collapsible className="rounded-xl border border-border bg-surface-2">

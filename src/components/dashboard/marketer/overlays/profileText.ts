@@ -7,6 +7,7 @@ export const profT = () => {
     title: ar ? "الملف الشخصي" : "Profile",
     name: ar ? "الاسم الكامل" : "Full name",
     namePh: ar ? "مثال: هيفاء وهبي" : "Example: Kim Kardashian",
+    city: ar ? "المدينة" : "City",
     phone: ar ? "رقم الهاتف" : "Phone number",
     email: ar ? "البريد الإلكتروني" : "Email",
     wa: ar ? "واتساب او رقم هاتف إضافي" : "WhatsApp or additional phone number",

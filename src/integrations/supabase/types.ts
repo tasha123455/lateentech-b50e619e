@@ -700,6 +700,7 @@ export type Database = {
           avatar_url: string | null
           banned_at: string | null
           business_name: string | null
+          city: string | null
           country: string | null
           created_at: string
           frozen_at: string | null
@@ -722,6 +723,7 @@ export type Database = {
           avatar_url?: string | null
           banned_at?: string | null
           business_name?: string | null
+          city?: string | null
           country?: string | null
           created_at?: string
           frozen_at?: string | null
@@ -744,6 +746,7 @@ export type Database = {
           avatar_url?: string | null
           banned_at?: string | null
           business_name?: string | null
+          city?: string | null
           country?: string | null
           created_at?: string
           frozen_at?: string | null

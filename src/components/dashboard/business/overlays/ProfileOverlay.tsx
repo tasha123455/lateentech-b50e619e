@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
 import { PickerChevron } from "@/components/auth/CountryCodePicker";
+import { CityPicker } from "@/components/shared/CityPicker";
 import { pickFile } from "@/lib/filePicker";
 
 import { useBusinessData } from "../BusinessDataProvider";
@@ -14,6 +15,7 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
 
   const [name, setName] = useState("");
   const [biz, setBiz] = useState("");
+  const [city, setCity] = useState("");
   const [waNum, setWaNum] = useState("");
   const [waCc, setWaCc] = useState("\u200E+218\u200E");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
@@ -35,6 +37,7 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
     if (!open) return;
     setName(profile?.full_name || "");
     setBiz(profile?.business_name || "");
+    setCity((profile?.city as string) || "");
     const wa = stripCC(profile?.whatsapp);
     setWaNum(wa.num || "");
     setWaCc(wa.cc || "\u200E+218\u200E");
@@ -77,7 +80,7 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
       return;
     }
     const wa = waDigits ? "+218" + waDigits : "";
-    const patch = { full_name: name.trim() || null, business_name: biz.trim() || null, whatsapp: wa.trim() || null };
+    const patch = { full_name: name.trim() || null, business_name: biz.trim() || null, whatsapp: wa.trim() || null, city: city || null };
     setSaveState("saving");
     try {
       await api.updateProfile(patch);
@@ -172,6 +175,13 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
               <span className="pd-lbl-head">{t("Business name", "اسم المشروع")}</span>
               <input className="pd-inp" value={biz} onChange={(e) => setBiz(e.target.value)} placeholder="Business name" />
             </label>
+            {/* Editable, unlike the country in the card below: where somebody
+                is based is ordinary information, not the identity the account
+                is pinned to. */}
+            <div className="pd-lbl">
+              <span className="pd-lbl-head">{t("City", "المدينة")}</span>
+              <CityPicker value={city} onChange={setCity} className="pd-inp" />
+            </div>
             <div style={{ border: "1px solid #2a2a2a", borderRadius: 14, padding: 14, display: "grid", gap: 12, background: "#181818" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 11, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t("Phone number", "رقم الهاتف")}</span>
