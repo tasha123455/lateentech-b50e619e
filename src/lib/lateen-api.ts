@@ -979,7 +979,7 @@ export function createLateenApi(userId: string) {
       async listAllUsers(search?: string) {
         let q = supabase
           .from("profiles")
-          .select("id, full_name, phone, business_name, created_at, banned_at, frozen_at, avatar_url")
+          .select("id, full_name, phone, business_name, created_at, banned_at, frozen_at, avatar_url, market")
           // Deleted accounts keep their profile row so historical analytics stay
           // intact, but they must not show up as live users.
           .is("account_deleted_at", null);
@@ -998,6 +998,7 @@ export function createLateenApi(userId: string) {
           banned_at: string | null;
           frozen_at: string | null;
           avatar_url: string | null;
+          market: string | null;
         }>;
         if (!profiles.length) return [];
         const { data: roles } = await supabase
@@ -1389,12 +1390,26 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
         return data;
       },
-      async getMetrics() {
+      /**
+       * Platform numbers, optionally for one market only.
+       *
+       * A row belongs to a market through the account behind it: a user by
+       * their own profile, an order and a product by the business selling it.
+       * The business rather than the marketer, because the seller's market is
+       * what sets the fee — a Libyan marketer selling a US product is US
+       * revenue.
+       *
+       * Salaries are not split: employees are paid by the platform, not by a
+       * market, so they stay whole in every view. That means a per-market
+       * profit is revenue minus that market's costs and not minus a share of
+       * the wage bill, which is the honest way round.
+       */
+      async getMetrics(market?: string | null) {
         const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at, delivered_at";
         const [ordersAttempt, profilesRes, productsRes, empPaymentsRes] = await Promise.all([
           supabase.from("orders").select(`${orderColumns}, refunded_at`),
-          supabase.from("profiles").select("id, created_at, full_name, business_name"),
-          supabase.from("products").select("id, created_at").is("deleted_at", null),
+          supabase.from("profiles").select("id, created_at, full_name, business_name, market"),
+          supabase.from("products").select("id, created_at, business_id").is("deleted_at", null),
           // amount + paid_at only — these rows survive employee deletion (see
           // employee_payments_keep_history_on_delete migration) so historical
           // paid salaries keep counting against total profit even after the
@@ -1416,7 +1431,7 @@ export function createLateenApi(userId: string) {
         }
 
         const feeEligibleStatuses = new Set(["approved", "confirmed", "delivered", "cancelled"]);
-        const orders = (ordersRes.data ?? []) as Array<{
+        const ordersRaw = (ordersRes.data ?? []) as Array<{
           qty: number;
           platform_fee: number;
           status: string;
@@ -1428,12 +1443,25 @@ export function createLateenApi(userId: string) {
           refunded_at?: string | null;
           delivered_at: string | null;
         }>;
-        const allProfiles = (profilesRes.data ?? []) as Array<{
+        const orders = market ? ordersRaw.filter((o) => inMarket.has(o.business_id)) : ordersRaw;
+        const allProfilesRaw = (profilesRes.data ?? []) as Array<{
           id: string;
           created_at: string;
           full_name: string | null;
           business_name: string | null;
+          market: string | null;
         }>;
+        // Who is inside the chosen market. Rows with no market are treated as
+        // the default one, which is where every account created before markets
+        // existed actually belongs.
+        const inMarket = new Set(
+          allProfilesRaw
+            .filter((p) => !market || (p.market || "LY") === market)
+            .map((p) => p.id),
+        );
+        const allProfiles = market
+          ? allProfilesRaw.filter((p) => inMarket.has(p.id))
+          : allProfilesRaw;
         // Same "completed registration" rule as the Users page: bare auth
         // stubs (no role, no name) are not real users and must not be counted.
         const { data: allRoleRows } = await supabase.from("user_roles").select("user_id");
@@ -1441,7 +1469,8 @@ export function createLateenApi(userId: string) {
         const profiles = allProfiles.filter(
           (p) => roledIds.has(p.id) && !!((p.full_name || "").trim() || (p.business_name || "").trim()),
         );
-        const products = (productsRes.data ?? []) as Array<{ id: string; created_at: string }>;
+        const productsRaw = (productsRes.data ?? []) as Array<{ id: string; created_at: string; business_id: string }>;
+        const products = market ? productsRaw.filter((p) => inMarket.has(p.business_id)) : productsRaw;
 
         // A refunded order's platform fee is no longer counted as revenue,
         // even though the order itself keeps whatever status it already had

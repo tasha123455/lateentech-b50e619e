@@ -22,6 +22,9 @@ type Ctx = {
   api: LateenApi;
   userId: string;
   access: AdminAccess;
+  /** Which market the Analytics page is showing. Null is every market. */
+  metricsMarket: string | null;
+  setMetricsMarket: (code: string | null) => void;
   /** True until the answer has come back, so nothing flashes into view and
    *  then disappears once the real permissions arrive. */
   accessLoading: boolean;
@@ -95,9 +98,13 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     });
   }, []);
 
+  /* Which market the Analytics page is showing. Null is every market, and is
+     what a single-country platform always sees. */
+  const [metricsMarket, setMetricsMarket] = useState<string | null>(null);
+
   const loadMetrics = useCallback(async () => {
     try {
-      const m = (await admin.getMetrics()) as AdminMetrics;
+      const m = (await admin.getMetrics(metricsMarket)) as AdminMetrics;
       setMetrics(m);
       setHomeRaw({
         orders: m.orders || [],
@@ -110,7 +117,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
       console.error("[admin] metrics", e);
       setMetricsError("Failed to load: " + ((e as Error)?.message || "unknown error"));
     }
-  }, [admin]);
+  }, [admin, metricsMarket]);
 
   const loadVerify = useCallback(async () => {
     try {
@@ -281,6 +288,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
   const value = useMemo<Ctx>(
     () => ({
       api, userId, access, accessLoading,
+      metricsMarket, setMetricsMarket,
       metrics, homeRaw, metricsError,
       verifyMarketers, payouts, users, products, reports, deletionRequests, changeRequests, employees,
       loading, failed,
@@ -288,7 +296,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
       loadDeletionRequests, loadEmployees,
     }),
     [
-      api, userId, access, accessLoading, metrics, homeRaw, metricsError, verifyMarketers, payouts, users, products,
+      api, userId, access, accessLoading, metricsMarket, metrics, homeRaw, metricsError, verifyMarketers, payouts, users, products,
       reports, deletionRequests, changeRequests, employees, loading, failed,
       loadMetrics, loadVerify, loadPayouts, loadUsers, loadProducts, loadReports, loadChangeRequests,
       loadDeletionRequests, loadEmployees,

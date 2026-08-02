@@ -639,3 +639,9 @@
 .lateen-admin .adm-check { display: flex; align-items: center; gap: 9px; padding: 8px 2px; font-size: 13px; color: var(--txt-1); cursor: pointer; }
 .lateen-admin .adm-check input { width: 17px; height: 17px; accent-color: var(--accent); flex-shrink: 0; }
 .lateen-admin .adm-sheet-actions { display: flex; gap: 10px; margin-top: 18px; }
+/* Market badge on a user row. Only drawn when the account is not in the
+   default market, so a single-country console stays uncluttered. */
+.lateen-admin .adm-market-pill { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--surface-2); color: var(--txt-2); border-radius: 6px; padding: 3px 6px 2px; flex-shrink: 0; }
+/* Country filter above the analytics. Only rendered when there is more than
+   one country to choose between. */
+.lateen-admin .adm-market-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }

@@ -77,6 +77,8 @@ export type PayoutRequest = {
 export type AdminUser = Person & {
   id: string;
   role?: string | null;
+  /** Which market this account trades in. Not the same as where they live. */
+  market?: string | null;
   banned_at?: string | null;
   frozen_at?: string | null;
   /** Signed URL for the profile photo, resolved by listAllUsers. */

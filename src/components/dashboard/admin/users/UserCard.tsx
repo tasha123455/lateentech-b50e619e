@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { IMPERSONATION_KEY } from "@/lib/impersonation";
 
+import { DEFAULT_MARKET_CODE, marketOf } from "@/lib/markets";
+
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, whenFull } from "../lib/format";
 import type { AdminUser } from "../lib/types";
 import { PhotoPicker } from "../ui/PhotoPicker";
+
+/** The market's own name, so the row reads "Libya" rather than "LY". An
+ *  unknown code is shown as it was stored rather than guessed at. */
+function marketLabel(code: string | null | undefined): string {
+  const c = code || DEFAULT_MARKET_CODE;
+  const m = marketOf(c);
+  return m.code === c ? m.nameEn : c;
+}
 
 /** Impersonation hands the target account off to the dashboard on reload.
  *  `productId` lands straight on that product instead of the dashboard's home
@@ -148,6 +158,12 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
             </div>
           )}
         </div>
+        {/* Which market this account trades in. Silent while there is only
+            one, so today's console looks exactly as it did — it appears the
+            moment a second country exists and the answer starts to matter. */}
+        {!!u.market && u.market !== DEFAULT_MARKET_CODE && (
+          <span className="adm-market-pill" data-no-i18n>{u.market}</span>
+        )}
         <span className={"adm-role-pill " + pillClass}>{role}</span>
         <span className={"adm-user-chev" + (open ? " open" : "")}>▾</span>
       </div>
@@ -197,6 +213,14 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
               Delete data
             </button>
           )}
+        </div>
+
+        {/* Which market this account trades in — the data set it belongs to,
+            not where the person lives. Always shown, because "which country's
+            books is this on" is the question this row exists to answer. */}
+        <div className="adm-joined-row">
+          <span className="adm-joined-lbl">Country</span>
+          <span className="adm-joined-val" data-no-i18n>{marketLabel(u.market)}</span>
         </div>
 
         <div className="adm-joined-row">

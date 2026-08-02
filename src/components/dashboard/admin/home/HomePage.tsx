@@ -5,6 +5,7 @@ import { CHART_METRICS, getEmployeeSalaryPaid, getFees } from "../lib/analytics"
 import { MON_ABBR, WDAYS } from "../lib/format";
 import type { DateSelection, MetricKey } from "../lib/types";
 import { DateFilterTabs, EN_LABELS, USERS_CLASSES, buildYearItems } from "../ui/DateFilterTabs";
+import { MarketFilter } from "./MarketFilter";
 import { Money } from "../ui/Money";
 import { AnalyticsChart } from "./AnalyticsChart";
 
@@ -66,6 +67,8 @@ export function HomePage() {
       <div className="adm-h1-row">
         <div className="adm-h1" style={{ marginBottom: 0 }}>Global Analytics</div>
       </div>
+
+      <MarketFilter />
 
       <DateFilterTabs
         selected={selected}
