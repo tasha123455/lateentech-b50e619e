@@ -30,7 +30,11 @@ export function payoutLabel(v: string): string {
     Libya: "ليبيا", "One pay": "وان باي", "Bank of Unity": "مصرف الوحده",
     "Libyana Credit": "رصيد ليبيانا", "Madar Credit": "رصيد مدار", "Select…": "اختر…",
   };
-  const enMap: Record<string, string> = { "Bank of Unity": "Wahda bank" };
+  /* "Bank of Unity" is the stored value and cannot move without rewriting
+     every profile that already carries it. The bank's own English name is
+     Wahda Bank — الوحدة transliterated, not translated — so it is fixed here,
+     at the label. */
+  const enMap: Record<string, string> = { "Bank of Unity": "Wahda Bank" };
   if (isAr()) return arMap[v] || v;
   return enMap[v] || v;
 }

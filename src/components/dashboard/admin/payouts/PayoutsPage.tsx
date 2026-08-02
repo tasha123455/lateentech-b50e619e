@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { money as marketerMoney, moneyParts, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { bankLabel } from "@/components/dashboard/marketer/lib/constants";
 import { useAdminData, usePayoutsOpenRef } from "../AdminDataProvider";
 import { dispPhone, initials, money, whenOrDate } from "../lib/format";
 import type { PayoutRequest } from "../lib/types";
@@ -99,8 +100,9 @@ function PayoutCard({
         <div className="pay-body">
           {hasAny ? (
             <div className="adm-pay-details">
-              {detail("Method", u.payout_method)}
-              {detail("Bank", u.payout_bank_name)}
+              {detail("Method", u.payout_method === "Bank of Unity" ? "Wahda Bank" : u.payout_method)}
+              {/* Stored in Arabic; the admin panel is English throughout. */}
+              {detail("Bank", bankLabel(u.payout_bank_name, false))}
               {detail("Account holder", u.payout_account_holder)}
               {detail("Account #", u.payout_account_number)}
               {detail("IBAN", u.payout_iban)}

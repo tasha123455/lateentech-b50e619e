@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PickerChevron } from "@/components/auth/CountryCodePicker";
 
-import { PAYOUT_BANKS, PAYOUT_METHODS } from "../lib/constants";
+import { PAYOUT_BANKS, PAYOUT_METHODS, bankLabel } from "../lib/constants";
 import { isAr } from "../lib/format";
 import { bankLocked, payoutLabel, phoneMeta, sanitizePayoutPhone, type PayoutFields as Fields } from "./usePayoutForm";
 
@@ -96,8 +96,11 @@ export function PayoutFieldsBlock({
           onChange={(e) => set({ bank: e.target.value })}
         >
           <option value="">Select…</option>
+          {/* The Arabic name is the value in every language: it is what the
+              profile already stores, so switching language must not rewrite
+              somebody's saved bank. */}
           {PAYOUT_BANKS.map((b) => (
-            <option key={b}>{b}</option>
+            <option key={b} value={b}>{bankLabel(b, ar)}</option>
           ))}
         </select>
       </label>
