@@ -10,6 +10,7 @@ import { ProductFormOverlay } from "./products/ProductFormOverlay";
 import { OrdersPage } from "./orders/OrdersPage";
 import { NotificationsPage } from "./notifications/NotificationsPage";
 import { MenuDrawer } from "./overlays/MenuDrawer";
+import { ProductListerOverlay } from "./overlays/ProductListerOverlay";
 import { ProfileOverlay } from "./overlays/ProfileOverlay";
 import { SupportOverlay } from "./overlays/SupportOverlay";
 import { PayoutOverlay } from "./overlays/PayoutOverlay";
@@ -24,6 +25,7 @@ function Shell({ focusProductId }: { focusProductId?: string }) {
   const [supportOpen, setSupportOpen] = useState(false);
   const [payoutOpen, setPayoutOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [listerOpen, setListerOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
 
   const openForm = (p: Product | null) => { setEditing(p); setFormOpen(true); };
@@ -61,11 +63,13 @@ function Shell({ focusProductId }: { focusProductId?: string }) {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         onOpenProfile={() => setProfileOpen(true)}
+        onOpenLister={() => { setMenuOpen(false); setListerOpen(true); }}
       />
       <ProfileOverlay open={profileOpen} onClose={() => setProfileOpen(false)} />
       <SupportOverlay open={supportOpen} onClose={() => setSupportOpen(false)} />
       <PayoutOverlay open={payoutOpen} onClose={() => setPayoutOpen(false)} />
       <ProductFormOverlay open={formOpen} editing={editing} onClose={() => setFormOpen(false)} />
+      <ProductListerOverlay open={listerOpen} onClose={() => setListerOpen(false)} />
     </>
   );
 }

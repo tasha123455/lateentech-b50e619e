@@ -4,15 +4,18 @@ import { useAuth } from "@/auth/AuthContext";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr } from "../lib/format";
+import { ListerIcon } from "./ProductListerOverlay";
 
 export function MenuDrawer({
   open,
   onClose,
   onOpenProfile,
+  onOpenLister,
 }: {
   open: boolean;
   onClose: () => void;
   onOpenProfile: () => void;
+  onOpenLister: () => void;
 }) {
   const { profile } = useBusinessData();
   const { signOut } = useAuth();
@@ -89,6 +92,30 @@ export function MenuDrawer({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="menu-item-label" id="lang-row-primary">{ar ? "اللغة" : "Language"}</div>
             <div className="menu-item-sub" id="lang-row-secondary">{ar ? "Language" : "اللغة"}</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>
+
+        {/* Not built yet, so it sits between the language row and sign-out and
+            says so on its face. The subtitle is what the service does, not what
+            it is called, because the name alone does not tell a shop owner why
+            they would want it. */}
+        <div className="menu-item" onClick={onOpenLister} role="button" tabIndex={0}>
+          <div className="menu-icon-wrap mi-rose">
+            <ListerIcon size={18} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="menu-item-label" data-no-i18n>
+              {ar ? "مُدرِج المنتجات" : "Product Lister"}
+              <span className="soon-badge" style={{ marginInlineStart: 6 }} data-no-i18n>
+                {ar ? "قريباً" : "Soon"}
+              </span>
+            </div>
+            <div className="menu-item-sub" data-no-i18n>
+              {ar ? "ارتاح واحنا ندخّل بضاعتك نيابةً عنك" : "We list your products for you"}
+            </div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
             <polyline points="9 18 15 12 9 6" />
