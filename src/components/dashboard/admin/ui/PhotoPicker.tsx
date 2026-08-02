@@ -1,4 +1,6 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
+
+import { isPdfUrl, pickFile } from "@/lib/filePicker";
 
 import { useAdminData } from "../AdminDataProvider";
 import { useLightbox } from "./Lightbox";
@@ -31,16 +33,18 @@ export async function decodableImage(file: File): Promise<boolean> {
     notifications and payout receipts. */
 export function PhotoPicker({
   url, onChange, idleHint = "Attach photo (optional)", attachedHint = "", verifyDecodable = true,
+  documents = false,
 }: {
   url: string | null;
   onChange: (url: string | null) => void;
   idleHint?: string;
   attachedHint?: string;
   verifyDecodable?: boolean;
+  /** Offer the file browser and accept a PDF — for receipts, not for photos. */
+  documents?: boolean;
 }) {
   const { api } = useAdminData();
   const lightbox = useLightbox();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [hint, setHint] = useState("");
 
   const pick = async (file: File | undefined) => {
@@ -48,7 +52,9 @@ export function PhotoPicker({
     setHint("Uploading…");
     try {
       if (!api.uploadPhoto) throw new Error("uploader unavailable, reload the page");
-      if (verifyDecodable && !(await decodableImage(file))) {
+      // A PDF is a legitimate receipt, and it is not meant to decode as an image.
+      const isDoc = documents && /pdf/i.test(file.type || "");
+      if (verifyDecodable && !isDoc && !(await decodableImage(file))) {
         throw new Error("unsupported image format — pick a JPG or PNG");
       }
       const uploaded = await api.uploadPhoto(file);
@@ -58,13 +64,12 @@ export function PhotoPicker({
       console.error("[admin] photo upload", e);
       setHint("Upload failed: " + ((e as Error)?.message || "try again"));
     }
-    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
     <div className="adm-notif-photo-row">
       {!url && (
-        <div className="adm-notif-photo-add" onClick={() => inputRef.current?.click()}>
+        <div className="adm-notif-photo-add" onClick={() => pickFile({ documents, onFiles: (files) => void pick(files[0]) })}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -73,7 +78,12 @@ export function PhotoPicker({
       )}
       {!!url && (
         <div className="adm-notif-photo-preview">
-          <img src={url} onClick={() => lightbox.open(url)} alt="" />
+          {/* A PDF has no preview; the tile names it and still opens full screen. */}
+          {isPdfUrl(url) ? (
+            <span className="adm-notif-photo-pdf" onClick={() => lightbox.open(url)}>PDF</span>
+          ) : (
+            <img src={url} onClick={() => lightbox.open(url)} alt="" />
+          )}
           <button
             type="button"
             className="adm-notif-photo-x"
@@ -83,13 +93,6 @@ export function PhotoPicker({
           </button>
         </div>
       )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        onChange={(e) => void pick(e.target.files?.[0])}
-      />
       <span className="adm-notif-hint">{hint || (url ? attachedHint : idleHint)}</span>
     </div>
   );

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { pickFile } from "@/lib/filePicker";
+
 import { useMarketerData } from "../MarketerDataProvider";
 import { isAr } from "../lib/format";
 import type { ProductReview } from "../lib/types";
@@ -214,7 +216,6 @@ function ReviewForm({ productId, onSubmitted }: { productId: string; onSubmitted
   const [photo, setPhoto] = useState("");
   const [hint, setHint] = useState("");
   const [sending, setSending] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const lightbox = usePhotoLightbox();
 
   // A fresh product resets the form.
@@ -229,7 +230,6 @@ function ReviewForm({ productId, onSubmitted }: { productId: string; onSubmitted
     if (!f) return;
     if (!/^image\//.test(f.type) || f.size > 5 * 1024 * 1024) {
       alert(t.photoErr);
-      if (fileRef.current) fileRef.current.value = "";
       return;
     }
     setHint(t.uploadingPhoto);
@@ -242,8 +242,6 @@ function ReviewForm({ productId, onSubmitted }: { productId: string; onSubmitted
       console.error("[Lateen] pickRevPhoto", e);
       alert(t.photoErr);
       setHint(t.addPhoto);
-    } finally {
-      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
@@ -302,7 +300,7 @@ function ReviewForm({ productId, onSubmitted }: { productId: string; onSubmitted
       <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 10px" }}>
         {!photo ? (
           <div
-            onClick={() => fileRef.current?.click()}
+            onClick={() => pickFile({ onFiles: (files) => void pickPhoto(files[0]) })}
             style={{
               width: 44, height: 44, borderRadius: 10, border: "1px dashed var(--color-border-secondary)",
               display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
@@ -335,13 +333,6 @@ function ReviewForm({ productId, onSubmitted }: { productId: string; onSubmitted
             </button>
           </div>
         )}
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          style={{ display: "none" }}
-          onChange={(e) => void pickPhoto(e.target.files?.[0])}
-        />
         <span style={{ fontSize: 11.5, color: "var(--color-text-tertiary)" }}>{hint || (photo ? "" : t.addPhoto)}</span>
       </div>
       <button className="pd-rev-submit" disabled={sending} onClick={() => void submit()}>

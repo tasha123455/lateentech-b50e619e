@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
+import { isPdfUrl } from "@/lib/filePicker";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { ago, isAr, isSafeUrl, parseData, t } from "../lib/format";
@@ -188,7 +189,9 @@ export function NotifItem({
           : "#7f77dd";
 
   const iconRaw = (d.product_photo || d.photo) as string | undefined;
-  const iconPhotoUrl = isSafeUrl(iconRaw) ? (iconRaw as string) : "";
+  // A PDF attachment has no thumbnail to put in the row, so the row keeps its
+  // coloured dot and the document shows in the body instead.
+  const iconPhotoUrl = isSafeUrl(iconRaw) && !isPdfUrl(iconRaw) ? (iconRaw as string) : "";
   const hasPhoto = !!iconPhotoUrl;
 
   const icon = hasPhoto ? (
@@ -226,15 +229,23 @@ export function NotifItem({
   const bodyPhoto =
     !hasPhoto && isSafeUrl(photoUrl) ? (
       <div style={{ margin: "-2px 0 10px 0" }}>
-        <img
-          src={photoUrl}
-          alt=""
-          onClick={isPaid ? (e) => { e.stopPropagation(); onPhoto(photoUrl!); } : undefined}
-          style={{
-            width: "100%", maxHeight: 220, objectFit: "contain", background: "#0d0d0d",
-            borderRadius: 10, display: "block", ...(isPaid ? { cursor: "zoom-in" } : null),
-          }}
-        />
+        {isPdfUrl(photoUrl) ? (
+          <iframe
+            src={photoUrl}
+            title={t("Attachment", "المرفق")}
+            style={{ width: "100%", height: 220, border: "none", borderRadius: 10, display: "block", background: "#fff" }}
+          />
+        ) : (
+          <img
+            src={photoUrl}
+            alt=""
+            onClick={isPaid ? (e) => { e.stopPropagation(); onPhoto(photoUrl!); } : undefined}
+            style={{
+              width: "100%", maxHeight: 220, objectFit: "contain", background: "#0d0d0d",
+              borderRadius: 10, display: "block", ...(isPaid ? { cursor: "zoom-in" } : null),
+            }}
+          />
+        )}
       </div>
     ) : null;
 
@@ -244,11 +255,22 @@ export function NotifItem({
         <div style={{ fontSize: 11, color: "var(--color-text-secondary)", marginBottom: 4 }}>
           {t("Receipt", "الإيصال")}
         </div>
-        <img
-          src={d.receipt_url as string}
-          alt=""
-          style={{ width: "100%", maxHeight: 240, objectFit: "contain", borderRadius: 10, display: "block", background: "#0f0f0f" }}
-        />
+        {/* The rejected receipt may be the PDF they uploaded. Inline it the
+            same way, in the browser's own viewer, so they can see what the
+            admin saw without leaving the notification. */}
+        {isPdfUrl(d.receipt_url as string) ? (
+          <iframe
+            src={d.receipt_url as string}
+            title={t("Receipt", "الإيصال")}
+            style={{ width: "100%", height: 240, border: "none", borderRadius: 10, display: "block", background: "#fff" }}
+          />
+        ) : (
+          <img
+            src={d.receipt_url as string}
+            alt=""
+            style={{ width: "100%", maxHeight: 240, objectFit: "contain", borderRadius: 10, display: "block", background: "#0f0f0f" }}
+          />
+        )}
       </div>
     ) : null;
 

@@ -103,6 +103,8 @@
 .lateen-admin .adm-notif-photo-add { width: 40px; height: 40px; border-radius: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--txt-2); flex-shrink: 0; }
 .lateen-admin .adm-notif-photo-preview { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
 .lateen-admin .adm-notif-photo-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; cursor: zoom-in; }
+/* An attached PDF stands in for the thumbnail it does not have. */
+.lateen-admin .adm-notif-photo-pdf { width: 100%; height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: zoom-in; background: var(--surface-2); color: #e07070; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
 .lateen-admin .adm-notif-photo-x { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #000; color: #fff; border: none; font-size: 12px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
 .lateen-admin .adm-notif-hint { font-size: 11px; color: var(--txt-3); }
 .lateen-admin .adm-notif-send-btn { background: var(--accent); color: #1a1a1a; border: none; border-radius: 12px; padding: 10px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: var(--font); }
@@ -550,6 +552,8 @@
 .lateen-admin .rcpt-head-thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; cursor: zoom-in; }
 .lateen-admin .rcpt-head-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .lateen-admin .rcpt-head-thumb-empty { font-size: 20px; }
+/* A PDF receipt has no preview to show; the tile names the format instead. */
+.lateen-admin .rcpt-head-thumb-pdf { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #e07070; }
 /* Platform fee and Total side by side, not stacked. They wrap on a narrow
    phone rather than squeezing. */
 .lateen-admin .rcpt-head-mid { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding-top: 12px; }

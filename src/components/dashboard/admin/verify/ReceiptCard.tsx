@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { isPdfUrl } from "@/lib/filePicker";
+
 import { dispPhone, whenFull } from "../lib/format";
 import type { ReceiptOrder } from "../lib/types";
 import { Money } from "../ui/Money";
@@ -129,8 +131,15 @@ export function ReceiptCard({
           tabIndex={-1}
           aria-label="Receipt"
         >
+          {/* A PDF receipt has no thumbnail to show, so the tile says what it
+              is rather than sitting there as a broken image. Tapping it opens
+              the same fullscreen view a photo gets. */}
           {o.receipt_url ? (
-            <img src={o.receipt_url} alt="receipt" data-no-i18n />
+            isPdfUrl(o.receipt_url) ? (
+              <span className="rcpt-head-thumb-pdf" data-no-i18n>PDF</span>
+            ) : (
+              <img src={o.receipt_url} alt="receipt" data-no-i18n />
+            )
           ) : (
             <span className="rcpt-head-thumb-empty">📄</span>
           )}

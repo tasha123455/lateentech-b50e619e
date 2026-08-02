@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
 import { PickerChevron } from "@/components/auth/CountryCodePicker";
+import { pickFile } from "@/lib/filePicker";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { dispPhone, isAr, stripCC } from "../lib/format";
@@ -32,7 +33,6 @@ export function ProfileOverlay({
   const [avatarHint, setAvatarHint] = useState("");
   const [changeOpen, setChangeOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const t = profT();
   const deletion = useDeletionStatus(open);
@@ -49,11 +49,12 @@ export function ProfileOverlay({
     setAvatarHint("");
   }, [open, profile]);
 
+  // pickFile() builds and discards its own input, so there is no stale
+  // selection left behind to clear between attempts.
   const pickAvatar = async (f: File | undefined) => {
     if (!f) return;
     if (f.size > 5 * 1024 * 1024) {
       alert(t.tooBig);
-      if (fileRef.current) fileRef.current.value = "";
       return;
     }
     setAvatarHint(t.uploading);
@@ -65,8 +66,6 @@ export function ProfileOverlay({
       console.error(e);
       alert(isAr() ? "فشل رفع الصورة" : "Upload failed");
       setAvatarHint("");
-    } finally {
-      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
@@ -149,27 +148,21 @@ export function ProfileOverlay({
                 fontWeight: 500, overflow: "hidden",
               }}
             />
-            <label
-              htmlFor="prof-avatar-file"
+            <button
+              type="button"
+              aria-label={t.hint}
+              onClick={() => pickFile({ onFiles: (files) => void pickAvatar(files[0]) })}
               style={{
                 position: "absolute", bottom: -2, right: -2, width: 30, height: 30, borderRadius: "50%",
                 background: "#8b83e8", display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", border: "2px solid #1e1e1e",
+                cursor: "pointer", border: "2px solid #1e1e1e", padding: 0,
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                 <circle cx="12" cy="13" r="4" />
               </svg>
-            </label>
-            <input
-              id="prof-avatar-file"
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={(e) => void pickAvatar(e.target.files?.[0])}
-            />
+            </button>
           </div>
           <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>{avatarHint || t.hint}</div>
         </div>

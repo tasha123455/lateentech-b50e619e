@@ -85,6 +85,7 @@ function PayoutCard({
           idleHint="Attach transfer receipt"
           attachedHint="Receipt attached"
           verifyDecodable={false}
+          documents
         />
         <button
           className="adm-btn adm-btn-acc pay-paid-btn"

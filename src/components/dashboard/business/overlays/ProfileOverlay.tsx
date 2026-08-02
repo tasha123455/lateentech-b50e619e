@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AdminEmailEditor } from "@/components/dashboard/shared/AdminEmailEditor";
 import { PickerChevron } from "@/components/auth/CountryCodePicker";
+import { pickFile } from "@/lib/filePicker";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr, splitCC, stripCC, dispPhone } from "../lib/format";
@@ -154,12 +155,11 @@ export function ProfileOverlay({ open, onClose }: { open: boolean; onClose: () =
                 id="prof-avatar"
                 style={{ width: 88, height: 88, borderRadius: "50%", background: "#0A3C2A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, color: "#34c77b", fontWeight: 500, backgroundSize: "cover", backgroundPosition: "center", overflow: "hidden", backgroundImage: avatarUrl ? `url('${avatarUrl}')` : undefined }}
               />
-              <label htmlFor="prof-avatar-file" style={{ position: "absolute", bottom: -2, right: -2, width: 30, height: 30, borderRadius: "50%", background: "#34c77b", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", border: "2px solid #1e1e1e" }}>
+              <button type="button" aria-label={t("Change photo", "\u062a\u063a\u064a\u064a\u0631 \u0627\u0644\u0635\u0648\u0631\u0629")} onClick={() => pickFile({ onFiles: (files) => void pickAvatar(files[0]) })} style={{ position: "absolute", bottom: -2, right: -2, width: 30, height: 30, borderRadius: "50%", background: "#34c77b", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", border: "2px solid #1e1e1e", padding: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" />
                 </svg>
-              </label>
-              <input id="prof-avatar-file" type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { void pickAvatar(e.target.files?.[0]); e.target.value = ""; }} />
+              </button>
             </div>
             <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>{avatarHint}</div>
           </div>

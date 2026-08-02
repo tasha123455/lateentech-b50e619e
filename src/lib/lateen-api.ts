@@ -452,11 +452,20 @@ export function createLateenApi(userId: string) {
     },
 
     async uploadReceipt(file: File): Promise<string> {
+      // compressImage() only re-encodes rasters, so a PDF comes back untouched.
       const compressed = await compressImage(file, IMAGE_PRESETS.receipt);
-      const path = `${userId}/${crypto.randomUUID()}.jpg`;
+      // The stored name has to match what we actually uploaded: a PDF filed
+      // under ".jpg" reaches the viewer as an image that will never render.
+      const type = compressed.type || "image/jpeg";
+      const ext = /pdf/i.test(type)
+        ? "pdf"
+        : /jpe?g/i.test(type)
+          ? "jpg"
+          : (type.split("/")[1] || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
         .from("receipts")
-        .upload(path, compressed, { upsert: false, contentType: compressed.type, cacheControl: "31536000" });
+        .upload(path, compressed, { upsert: false, contentType: type, cacheControl: "31536000" });
       if (error) throw error;
       // Store an opaque marker; consumers resolve to a short-lived signed URL at read time.
       return `receipts:${path}`;

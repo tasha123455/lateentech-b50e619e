@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
 import { PhotoDownloadButton } from "@/components/shared/PhotoDownloadButton";
+import { isPdfUrl } from "@/lib/filePicker";
 
 type Ctx = { open: (url: string, caption?: ReactNode) => void; close: () => void };
 
@@ -39,7 +40,22 @@ export function LightboxProvider({ children }: { children: ReactNode }) {
             style={{ top: "calc(16px + env(safe-area-inset-top,0px))", insetInlineEnd: "auto", right: 72 }}
           />
         )}
-        {!!url && <img src={url} alt="Receipt" />}
+        {/* A receipt can be the PDF the bank app produced. It gets the same
+            fullscreen slot as a photo, rendered by the browser's own viewer,
+            so verifying one is the same gesture either way. */}
+        {!!url && (isPdfUrl(url) ? (
+          <iframe
+            src={url}
+            title="Receipt"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(96vw, 900px)", height: "82vh", border: "none",
+              borderRadius: 8, background: "#fff",
+            }}
+          />
+        ) : (
+          <img src={url} alt="Receipt" />
+        ))}
         {!!url && !!caption && (
           <div className="adm-lightbox-caption" onClick={(e) => e.stopPropagation()}>{caption}</div>
         )}

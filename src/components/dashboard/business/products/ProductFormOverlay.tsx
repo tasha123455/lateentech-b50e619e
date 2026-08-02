@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { pickFile } from "@/lib/filePicker";
+
 import { useBusinessData } from "../BusinessDataProvider";
 import type { Product } from "../lib/types";
 import {
@@ -115,7 +117,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   const [submitLabel, setSubmitLabel] = useState<string | null>(null);
   const [reqPhoneInfoOpen, setReqPhoneInfoOpen] = useState(false);
 
-  const photoInputRef = useRef<HTMLInputElement>(null);
   const uploadJobsRef = useRef<Promise<unknown>[]>([]);
   const lastCoverUrlRef = useRef<string | null>(null);
   const coverFrameRef = useRef<HTMLDivElement>(null);
@@ -584,7 +585,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           <label className="lp-field-label">Product photos <span className="lp-req">*</span></label>
           <div className="lp-cover-frame" id="lp-cover-frame" ref={coverFrameRef} style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
             {!coverUrl ? (
-              <div className="lp-cover-placeholder" onClick={() => photoInputRef.current?.click()}>
+              <div className="lp-cover-placeholder" onClick={() => pickFile({ multiple: true, onFiles: onPhotosSelected })}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 Tap to upload photos
                 <div className="lp-sub">First photo becomes the cover image</div>
@@ -605,13 +606,12 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
               </div>
             ))}
             {photos.length < 6 && (
-              <div className="add-photo-btn" onClick={() => photoInputRef.current?.click()}>
+              <div className="add-photo-btn" onClick={() => pickFile({ multiple: true, onFiles: onPhotosSelected })}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                 <div className="add-photo-label">Add photo</div>
               </div>
             )}
           </div>
-          <input ref={photoInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { const files = Array.from(e.target.files || []); e.target.value = ""; if (files.length) onPhotosSelected(files); }} />
 
           <label className="lp-field-label">Product name <span className="lp-req">*</span></label>
           <input className="lp-input" type="text" value={name} disabled={editLocked} onChange={(e) => setName(e.target.value)} placeholder="e.g. Running shoes" data-no-i18n="" />
@@ -739,10 +739,10 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                             {it.photo ? (
                               <div className="vb-thumb"><img src={it.photo} /><button className="vb-thumb-x" onClick={() => updateVariantPhoto(g.id, it.id, "")}>×</button></div>
                             ) : (
-                              <label className="vb-thumb vb-thumb-add" title={ar ? "صورة" : "Photo"}>
-                                <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void onVariantPhotoSelected(g.id, it.id, f); }} />
+                              <button type="button" className="vb-thumb vb-thumb-add" title={ar ? "صورة" : "Photo"}
+                                onClick={() => pickFile({ onFiles: (files) => { if (files[0]) void onVariantPhotoSelected(g.id, it.id, files[0]); } })}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.8" strokeLinecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                              </label>
+                              </button>
                             )}
                           </div>
                         );

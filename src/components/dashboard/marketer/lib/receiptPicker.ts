@@ -1,31 +1,17 @@
-/* Receipt upload (gallery only).
-   Both entry points — the new-order form's upload box and the Orders list
-   re-upload button — come through here.
+import { pickFile } from "@/lib/filePicker";
 
-   A fresh <input> is built on every tap: reusing a hidden node left stale
-   state behind, and display:none / aria-hidden nodes are unreliable targets
-   for .click() on some mobile browsers. It is created and clicked
-   synchronously inside the tap so the user activation needed to open the
-   gallery picker is still valid. */
+/* Receipt upload. Both entry points — the new-order form's upload box and the
+   Orders list re-upload button — come through here.
+
+   A receipt is whatever the bank app produced: a screenshot in the gallery, a
+   photo of a paper slip, or a PDF sitting in Downloads. So this picker offers
+   the camera and the file browser alongside the photo library, and accepts
+   PDFs. See src/lib/filePicker.ts for why asking first is necessary. */
 export function pickReceiptFile(onFile: (file: File) => void): void {
-  let el: HTMLInputElement | null = null;
-  try {
-    el = document.createElement("input");
-    el.type = "file";
-    el.accept = "image/*";
-    el.style.cssText = "position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;";
-    const input = el;
-    input.addEventListener("change", () => {
-      const f = input.files && input.files[0];
-      if (f) onFile(f);
-      try { input.remove(); } catch { /* ignore */ }
-    });
-    document.body.appendChild(input);
-    input.click();
-  } catch (e) {
-    console.warn("[Lateen] receipt picker", e);
-    try { el?.remove(); } catch { /* ignore */ }
-  }
+  pickFile({
+    documents: true,
+    onFiles: (files) => { if (files[0]) onFile(files[0]); },
+  });
 }
 
 /** Waits for the upload endpoint to come online (it can lag a cold start). */
