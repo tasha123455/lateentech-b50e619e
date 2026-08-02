@@ -27,14 +27,15 @@ export const bankLocked = (method: string) => method === "Bank of Unity";
 
 export function payoutLabel(v: string): string {
   const arMap: Record<string, string> = {
-    Libya: "ليبيا", "One pay": "وان باي", "Bank of Unity": "مصرف الوحده",
+    Libya: "ليبيا", "One pay": "وان باي", "Bank of Unity": "مصرف الوحده | وان باي",
     "Libyana Credit": "رصيد ليبيانا", "Madar Credit": "رصيد مدار", "Select…": "اختر…",
   };
   /* "Bank of Unity" is the stored value and cannot move without rewriting
-     every profile that already carries it. The bank's own English name is
-     Wahda Bank — الوحدة transliterated, not translated — so it is fixed here,
-     at the label. */
-  const enMap: Record<string, string> = { "Bank of Unity": "Wahda Bank" };
+     every profile that already carries it, so both corrections happen here at
+     the label: the bank's own English name is Wahda Bank — الوحدة
+     transliterated, not translated — and the choice names One Pay alongside
+     it, that being the service the money actually arrives through. */
+  const enMap: Record<string, string> = { "Bank of Unity": "Wahda Bank | One Pay" };
   if (isAr()) return arMap[v] || v;
   return enMap[v] || v;
 }

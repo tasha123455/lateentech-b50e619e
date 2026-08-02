@@ -107,7 +107,7 @@ export const LIBYA_CITIES: Array<{ en: string; ar: string }> = [
   { en: "Kikla", ar: "ككله" }, { en: "Ar Rayaynah", ar: "الريانيه" }, { en: "Ar Rajban", ar: "الرجبان" },
   { en: "Ar Ruhaybat", ar: "الرحيبات" }, { en: "Al Josh", ar: "الجوش" }, { en: "Samnu", ar: "سمنه" },
   { en: "Ghudwah", ar: "غدوة" }, { en: "Tmassah", ar: "تمسه" }, { en: "Al Awaynat", ar: "العوينات" },
-  { en: "Traghen", ar: "تراغن" }, { en: "Riqdalin", ar: "راقده لين" }, { en: "Zaltan", ar: "زلطن" },
+  { en: "Traghen", ar: "تراغن" }, { en: "Riqdalin", ar: "رقدالين" }, { en: "Zaltan", ar: "زلطن" },
   { en: "Badr", ar: "بدر" }, { en: "Tiji", ar: "تيجي" }, { en: "Tamzin", ar: "طمزين" },
   { en: "Kabo", ar: "كابو" }, { en: "Wazzan", ar: "وزان" }, { en: "Al Qal'ah", ar: "القلعه" },
   { en: "Al Sa'diyah", ar: "الساعديه" }, { en: "Espiaa", ar: "السبيعة" }, { en: "Al Maya", ar: "الماية" },
@@ -115,6 +115,11 @@ export const LIBYA_CITIES: Array<{ en: string; ar: string }> = [
   { en: "Zillah", ar: "زلة" }, { en: "Al Fuqaha", ar: "الفقهاء" }, { en: "Umm al Aranib", ar: "أم الأرانب" },
   { en: "Zuwaylah", ar: "زويلة" }, { en: "Ashkidah", ar: "أشكدة" }, { en: "Wadi Utbah", ar: "وادي عتبة" },
   { en: "Bint Bayya", ar: "بنت بية" },
+  /* Towns the list had never carried, found by diffing it against the Arabic
+     and English registers of Libyan settlements. */
+  { en: "Benina", ar: "بنينة" }, { en: "Nofaliya", ar: "النوفلية" }, { en: "Tolmeita", ar: "طلميثة" },
+  { en: "Tazirbu", ar: "تازربو" }, { en: "Rebiana", ar: "ربيانة" }, { en: "Al Urban", ar: "العربان" },
+  { en: "Qayqab", ar: "قيقب" }, { en: "Al Barkat", ar: "البركت" },
 ];
 
 /** Banks offered in the payout / withdrawal forms.
