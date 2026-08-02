@@ -2,9 +2,10 @@ import { useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { dateMatches, type BreakdownSelection } from "../lib/analytics";
-import { fmtDT, isAr, isSafeUrl, parseData, t } from "../lib/format";
+import { fmtDT, isSafeUrl, parseData, t } from "../lib/format";
 import type { NotificationRow } from "../lib/types";
 import { DetailRow, NoteBlock, OrderDetailRows } from "../notifications/detailBits";
+import { Money } from "../ui/Money";
 import { usePhotoLightbox } from "../ui/PhotoLightbox";
 
 /** Wallet movements, derived from the marketer's own notifications feed. */
@@ -32,7 +33,6 @@ export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const rawSymbol = (analytics.earnByCur[walletCur] && analytics.earnByCur[walletCur].sym) || "د.ل";
-  const sym = isAr() ? rawSymbol : walletCur || rawSymbol;
 
   const toggle = (id: string) =>
     setExpanded((prev) => {
@@ -75,7 +75,8 @@ export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
                   <TxnItem
                     key={n.id}
                     n={n}
-                    sym={sym}
+                    sym={rawSymbol}
+                    code={walletCur}
                     expanded={expanded.has(n.id)}
                     onToggle={() => toggle(n.id)}
                     onPhoto={lightbox.openOne}
@@ -95,10 +96,11 @@ export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
 }
 
 function TxnItem({
-  n, sym, expanded, onToggle, onPhoto, findOrderAmount,
+  n, sym, code, expanded, onToggle, onPhoto, findOrderAmount,
 }: {
   n: NotificationRow;
   sym: string;
+  code: string;
   expanded: boolean;
   onToggle: () => void;
   onPhoto: (url: string) => void;
@@ -156,7 +158,7 @@ function TxnItem({
     detailRows = (
       <>
         {!hasIconPhoto && bigPhoto}
-        <DetailRow k={t("Amount", "المبلغ")} v={(amtStr || "0.00") + " " + sym} />
+        <DetailRow k={t("Amount", "المبلغ")} v={<Money n={amount ?? 0} sym={sym} code={code} />} />
         <DetailRow k={t("Status", "الحالة")} v={t("Failed", "فشل")} />
         <NoteBlock
           label={t("Note", "ملاحظة")}
@@ -170,7 +172,7 @@ function TxnItem({
     detailRows = (
       <>
         {bigPhoto}
-        <DetailRow k={t("Amount", "المبلغ")} v={(amtStr || "0.00") + " " + sym} />
+        <DetailRow k={t("Amount", "المبلغ")} v={<Money n={amount ?? 0} sym={sym} code={code} />} />
         <DetailRow k={t("Status", "الحالة")} v={t("Paid", "مدفوع")} />
       </>
     );
@@ -214,7 +216,7 @@ function TxnItem({
             {amtStr && (
               <div className="notif-body" style={{ color, fontWeight: 600, fontSize: 13 }}>
                 {sign}
-                {amtStr} {sym}
+                <Money n={amount ?? 0} sym={sym} code={code} />
               </div>
             )}
             <div className="notif-time">{fmtDT(n.created_at)}</div>

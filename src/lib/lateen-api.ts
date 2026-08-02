@@ -1019,7 +1019,12 @@ export function createLateenApi(userId: string) {
         if (error) throw error;
         return (data ?? 0) as number;
       },
-      async listAllProducts(search?: string) {
+      /* `people` are account ids the caller has already matched against the
+         term — by name, email or phone. Email is not a column on profiles (it
+         lives in auth.users and is resolved separately), so the admin screen
+         matches it against the user list it has already loaded and passes the
+         ids down rather than this query trying to reach for it. */
+      async listAllProducts(search?: string, people?: string[]) {
         const term = search && search.trim();
         let q = supabase.from("products").select("*").is("deleted_at", null);
         if (term) {
@@ -1033,8 +1038,22 @@ export function createLateenApi(userId: string) {
             .from("profiles")
             .select("id")
             .or(`business_name.ilike.${s},full_name.ilike.${s}`);
-          const ownerIds = (owners ?? []).map((o) => o.id).filter(Boolean);
-          if (ownerIds.length) filters.push(`business_id.in.(${ownerIds.join(",")})`);
+          const ownerIds = new Set((owners ?? []).map((o) => o.id).filter(Boolean));
+          (people ?? []).forEach((id) => id && ownerIds.add(id));
+          const ids = [...ownerIds];
+          if (ids.length) {
+            filters.push(`business_id.in.(${ids.join(",")})`);
+            /* An address may belong to a marketer rather than a shop, and a
+               marketer owns no products — they order them. So the search also
+               reaches the products they have ordered, which is what an admin
+               holding a marketer's email is actually looking for. */
+            const { data: ordered } = await supabase
+              .from("orders")
+              .select("product_id")
+              .in("marketer_id", ids);
+            const productIds = [...new Set((ordered ?? []).map((o) => o.product_id).filter(Boolean))];
+            if (productIds.length) filters.push(`id.in.(${productIds.join(",")})`);
+          }
           q = q.or(filters.join(","));
         }
         const { data, error } = await q.order("created_at", { ascending: false });

@@ -1,3 +1,5 @@
+import { useEffect as useReactEffect, useState as useReactState } from "react";
+
 /* Formatting helpers ported from marketer.script.js.
    Language is still read off <html lang> so these stay usable from plain
    functions (mappers, sorting) as well as from components. */
@@ -12,6 +14,20 @@ export const isArLang = (): boolean => {
     return false;
   }
 };
+
+/** Re-renders the caller whenever the app's language changes.
+ *
+ *  The page-wide translator walks text nodes and skips anything marked
+ *  data-no-i18n. Text a component builds itself — a picker's placeholder, a
+ *  label chosen by isAr() — sits inside those, so it needs telling. */
+export function useLangTick(): void {
+  const [, bump] = useReactState(0);
+  useReactEffect(() => {
+    const onLang = () => bump((v) => v + 1);
+    window.addEventListener("lateen-lang", onLang);
+    return () => window.removeEventListener("lateen-lang", onLang);
+  }, []);
+}
 
 /** Pick the English or Arabic string for the current language. */
 export const t = (en: string, ar: string): string => (isArLang() ? ar : en);
@@ -309,6 +325,18 @@ export function searchMatcher(query: unknown): (hay: unknown) => boolean {
     }
     return true;
   };
+}
+
+/** "3 pcs" / "3 قطع".
+ *
+ *  Arabic counts its pieces differently at one, at two, and above ten, so the
+ *  unit is not a word that can be swapped for "pcs" and left there. One rule,
+ *  shared by both dashboards' charts and by the product detail sheet. */
+export function piecesLabel(n: number): string {
+  if (!isAr()) return n + " pcs";
+  if (n === 1) return "قطعه واحده";
+  if (n === 2) return "قطعتين";
+  return n + (n > 10 ? " قطعه" : " قطع");
 }
 
 export const pad2 = (n: number): string => (n < 10 ? "0" + n : "" + n);

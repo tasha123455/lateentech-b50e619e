@@ -224,9 +224,13 @@ function OrderCard({
       <div className="r variant-combo" key={i}>
         <span className="k" data-no-i18n="">{String(sv.name || "")}</span>
         <div className="v variant-combo-val">
-          {/* The value is a bare text node in the original, not its own span. */}
+          {/* The value is a bare text node in the original, not its own span.
+              The quantity used to be repeated here beside every variant, which
+              said the same number once per option and read as though each
+              option had its own count. It is still on the card twice, as its
+              own row and in the money breakdown. */}
           <div className="variant-combo-text" data-no-i18n="">
-            {String(sv.value || "")} <span style={{ opacity: 0.65, fontWeight: 600 }}>×{o.qty}</span>
+            {String(sv.value || "")}
           </div>
           {thumb ? (
             <div className="variant-thumb" onClick={(e) => { e.stopPropagation(); open([thumb], 0); }}>

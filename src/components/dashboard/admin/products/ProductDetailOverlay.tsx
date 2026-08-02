@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 
 import { ReviewsList } from "@/components/dashboard/marketer/browse/Reviews";
 import { ZonesSection } from "@/components/dashboard/marketer/browse/ZonesSection";
@@ -254,7 +255,7 @@ export function ProductDetailOverlay({
         {!!p.description && (
           <>
             <div className="pd-sec-ttl">Description</div>
-            <div className="pd-desc" data-no-i18n>{p.description}</div>
+            <ClampedText className="pd-desc" text={String(p.description)} />
           </>
         )}
 

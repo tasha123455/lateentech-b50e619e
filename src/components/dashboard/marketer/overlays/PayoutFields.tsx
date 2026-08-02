@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PickerChevron } from "@/components/auth/CountryCodePicker";
 
 import { PAYOUT_BANKS, PAYOUT_METHODS, bankLabel } from "../lib/constants";
-import { isAr } from "../lib/format";
+import { isAr, useLangTick } from "../lib/format";
 import { bankLocked, payoutLabel, phoneMeta, sanitizePayoutPhone, type PayoutFields as Fields } from "./usePayoutForm";
 
 /** Country / method dropdown built out of buttons, matching the original markup. */
@@ -16,6 +16,12 @@ function Picker({
   onPick: (v: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  /* This button's text is built in JS and marked data-no-i18n, so the walker
+     that translates the rest of the page steps over it. That is right — a bank
+     name must not be translated — but it also means the button keeps whatever
+     language it was first rendered in. Re-rendering on the language event puts
+     "Select…" into Arabic at the moment the rest of the page turns. */
+  useLangTick();
   return (
     <label className="pd-lbl">
       <span className="pd-lbl-head">
@@ -60,6 +66,9 @@ export function PayoutFieldsBlock({
   set: (patch: Partial<Fields>) => void;
   required?: boolean;
 }) {
+  // The bank names and the phone hint are chosen here rather than translated
+  // in the DOM, so this block has to hear the language change too.
+  useLangTick();
   const meta = phoneMeta(fields.method);
   const isPhoneMethod = !!meta;
   const locked = bankLocked(fields.method);

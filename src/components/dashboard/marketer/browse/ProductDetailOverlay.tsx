@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ClampedText } from "../ui/ClampedText";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { PLAT_THRESHOLD, platformFeeForPrice } from "../lib/constants";
@@ -218,7 +219,7 @@ export function ProductDetailOverlay({
         {!!p.desc && (
           <>
             <div className="pd-sec-ttl">{t.desc}</div>
-            <div className="pd-desc" data-no-i18n>{p.desc}</div>
+            <ClampedText className="pd-desc" text={p.desc} />
           </>
         )}
 

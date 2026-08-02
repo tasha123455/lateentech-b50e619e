@@ -89,3 +89,9 @@
 .lateen-marketer .notif-list .notif-detail-body{ max-height:0; opacity:0; overflow:hidden; padding:0 14px; transition:max-height .5s cubic-bezier(.4,0,.2,1), opacity .3s ease .12s, padding .45s cubic-bezier(.4,0,.2,1); }
 .lateen-marketer .notif-list .notif-item.expanded .notif-detail-body{ max-height:1200px; opacity:1; padding:14px; }
 .lateen-marketer .notif-list .notif-details-box{ padding:10px 12px; border-radius:10px; background:#181818; border:0.5px solid #232323; }
+
+/* The "more…" under a clamped product description. A link, not a button —
+   it reveals text that is already on the page rather than doing anything. */
+.pd-desc-more { display: inline-block; margin-top: 4px; padding: 0; border: 0; background: none;
+  color: #8b83e8; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+.pd-desc-more:hover { text-decoration: underline; }

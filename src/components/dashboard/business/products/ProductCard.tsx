@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 import { isAr, freeLbl, isFreeVal, moneyParts } from "../lib/format";
 import { cityLbl, categoryLabel, COUNTRY_FLAGS, COUNTRY_NAMES, COUNTRY_NAMES_AR } from "../lib/constants";
 import type { Order, PendingActiveStub, Product } from "../lib/types";
@@ -142,7 +143,7 @@ export function ProductCard({
               <p className="mp-p-name-exp" data-no-i18n="">{p.name}</p>
               <span className="mp-p-price-exp"><Money p={p} n={p.price} /></span>
             </div>
-            {p.desc ? <p className="mp-p-desc-exp" data-no-i18n="">{p.desc}</p> : null}
+            {p.desc ? <ClampedText className="mp-p-desc-exp" text={p.desc} /> : null}
           </div>
         </div>
       </div>
