@@ -119,6 +119,7 @@ export type BusinessProfile = {
   whatsapp?: string | null;
   country?: string | null;
   city?: string | null;
+  market?: string | null;
   avatar_url?: string | null;
   avatar_signed_url?: string | null;
   frozen_at?: string | null;

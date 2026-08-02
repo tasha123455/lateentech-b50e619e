@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { LIBYA } from "@/lib/markets/libya";
+import { payoutMethod, payoutPhonePrefixes } from "@/lib/markets";
+
 import { isAr } from "../lib/format";
 import { loadPayoutDraft, savePayoutDraft, type PayoutDraft } from "../lib/storage";
 import type { MarketerProfile } from "../lib/types";
@@ -13,36 +16,32 @@ const EMPTY: PayoutFields = {
   country: "", method: "", bank: "", holder: "", acct: "", phone: "", iban: "", swift: "", notes: "",
 };
 
-/** Credit methods take a phone number instead of bank/account details. */
+/** Credit methods take a phone number instead of bank/account details.
+ *  Which methods those are, and which prefixes they accept, is the market's
+ *  answer — see src/lib/markets/libya.ts. */
 export function phoneMeta(method: string): { prefixes: string[]; hintEn: string; hintAr: string } | null {
-  if (method === "Libyana Credit")
-    return { prefixes: ["092", "094"], hintEn: "Number starts with 092 or 094", hintAr: "الرقم يبدا من 092 او 094" };
-  if (method === "Madar Credit")
-    return { prefixes: ["091", "093"], hintEn: "Number starts with 091 or 093", hintAr: "الرقم يبدا من 091 او 093" };
-  return null;
+  const m = payoutMethod(method, LIBYA);
+  if (!m?.phonePrefixes) return null;
+  return { prefixes: m.phonePrefixes, hintEn: m.phoneHintEn ?? "", hintAr: m.phoneHintAr ?? "" };
 }
 
-/** Bank of Unity has a single fixed bank, so the picker is locked out. */
-export const bankLocked = (method: string) => method === "Bank of Unity";
+/** Some methods are tied to a single institution, so the picker is locked out. */
+export const bankLocked = (method: string) => !!payoutMethod(method, LIBYA)?.fixedBank;
 
 export function payoutLabel(v: string): string {
-  const arMap: Record<string, string> = {
-    Libya: "ليبيا", "One pay": "وان باي", "Bank of Unity": "مصرف الوحده",
-    "Libyana Credit": "رصيد ليبيانا", "Madar Credit": "رصيد مدار", "Select…": "اختر…",
-  };
-  /* "Bank of Unity" is the stored value and cannot move without rewriting
-     every profile that already carries it. The bank's own English name is
-     Wahda Bank — الوحدة transliterated, not translated — so it is fixed here,
-     at the label. */
-  const enMap: Record<string, string> = { "Bank of Unity": "Wahda Bank" };
-  if (isAr()) return arMap[v] || v;
-  return enMap[v] || v;
+  const ar = isAr();
+  const m = payoutMethod(v, LIBYA);
+  if (m) return ar ? m.labelAr : m.labelEn;
+  // Not a payout method: the country name and the empty-state placeholder
+  // share this label helper.
+  const arMap: Record<string, string> = { Libya: LIBYA.nameAr, "Select…": "اختر…" };
+  return ar ? arMap[v] || v : v;
 }
 
 /** Keeps only digits, and only those that can still form an allowed prefix. */
 export function sanitizePayoutPhone(value: string, method: string): string {
   const meta = phoneMeta(method);
-  const allowed = meta ? meta.prefixes : ["092", "094", "091", "093"];
+  const allowed = meta ? meta.prefixes : payoutPhonePrefixes(LIBYA);
   const digits = (value || "").replace(/\D/g, "");
   let result = "";
   for (let i = 0; i < digits.length && result.length < 10; i++) {

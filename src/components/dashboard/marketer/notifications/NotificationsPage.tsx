@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
 import { isPdfUrl } from "@/lib/filePicker";
+import { marketOf } from "@/lib/markets";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { ago, isAr, isSafeUrl, parseData, t } from "../lib/format";
@@ -20,7 +21,12 @@ function localize(n: NotificationRow): { t: string; b: string } {
       : null;
 
   if (n.kind === "payout_paid" || title === "Withdrawal successful") {
-    const amtLine = amtStr ? t("Amount: " + amtStr + " LYD", "المبلغ: " + amtStr + " د.ل") : "";
+    // The payout carries the currency it was paid in. Notifications written
+    // before markets existed do not, and those are all Libyan, so the default
+    // market answers for them.
+    const cur = (d.currency as string) || marketOf(null).money.currencyCode;
+    const curAr = cur === "LYD" ? "د.ل" : cur;
+    const amtLine = amtStr ? t("Amount: " + amtStr + " " + cur, "المبلغ: " + amtStr + " " + curAr) : "";
     const doneLine = t("Your withdrawal has been paid successfully.", "تم تحويل مبلغ السحب إلى حسابك بنجاح.");
     return {
       t: t("Withdrawal Completed", "تم تحويل المبلغ"),
