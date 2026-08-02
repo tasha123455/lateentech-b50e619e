@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_accounts: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string | null
+          is_master: boolean
+          markets: string[] | null
+          pages: string[]
+          phone: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email: string
+          full_name?: string | null
+          is_master?: boolean
+          markets?: string[] | null
+          pages?: string[]
+          phone?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          full_name?: string | null
+          is_master?: boolean
+          markets?: string[] | null
+          pages?: string[]
+          phone?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_pages: {
+        Row: { id: string; label: string; sort: number }
+        Insert: { id: string; label: string; sort?: number }
+        Update: { id?: string; label?: string; sort?: number }
+        Relationships: []
+      }
+      markets: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          currency_code: string
+          fee_fixed: number
+          fee_pct: number
+          fee_threshold: number
+          min_withdraw: number
+          name_ar: string
+          name_en: string
+          payout_cycle_days: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          currency_code: string
+          fee_fixed: number
+          fee_pct: number
+          fee_threshold: number
+          min_withdraw: number
+          name_ar: string
+          name_en: string
+          payout_cycle_days: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          currency_code?: string
+          fee_fixed?: number
+          fee_pct?: number
+          fee_threshold?: number
+          min_withdraw?: number
+          name_ar?: string
+          name_en?: string
+          payout_cycle_days?: number
+        }
+        Relationships: []
+      }
       account_deletion_requests: {
         Row: {
           admin_comment: string | null
@@ -1116,6 +1203,37 @@ export type Database = {
       }
     }
     Functions: {
+      admin_can: { Args: { _page: string }; Returns: boolean }
+      admin_can_market: { Args: { _market: string }; Returns: boolean }
+      admin_claim_invite: { Args: Record<string, never>; Returns: boolean }
+      admin_is_master: { Args: Record<string, never>; Returns: boolean }
+      admin_list_admins: {
+        Args: Record<string, never>
+        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"][]
+      }
+      admin_market_codes: { Args: Record<string, never>; Returns: string[] }
+      admin_set_admin_active: {
+        Args: { _active: boolean; _email: string }
+        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"]
+      }
+      admin_set_master: {
+        Args: { _email: string; _is_master: boolean }
+        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"]
+      }
+      admin_upsert: {
+        Args: {
+          _email: string
+          _full_name?: string | null
+          _markets?: string[] | null
+          _pages?: string[]
+          _phone?: string | null
+        }
+        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"]
+      }
+      market_for_user: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Tables"]["markets"]["Row"]
+      }
       _adjust_variant_qty: {
         Args: { _delta: number; _match: string; _product_id: string }
         Returns: undefined

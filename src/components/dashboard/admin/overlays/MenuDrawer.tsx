@@ -1,4 +1,5 @@
 import { useAdminData } from "../AdminDataProvider";
+import { canOpen } from "../lib/access";
 import { empPayableCount } from "../lib/employees";
 
 /** Everything waiting anywhere in the admin, in one place: the Requests slot
@@ -31,17 +32,20 @@ export function useAdminCounts() {
  *  and Products headers (plus the Employees tab), so each one now lives in a
  *  single place. */
 export function MenuDrawer({
-  open, onClose, onProducts, onEmployees,
+  open, onClose, onProducts, onEmployees, onAdmins,
   onSignOut, signingOut,
 }: {
   open: boolean;
   onClose: () => void;
   onProducts: () => void;
   onEmployees: () => void;
+  /** Only handed in for a master admin, so the row only exists for one. */
+  onAdmins?: () => void;
   onSignOut: () => void;
   signingOut: boolean;
 }) {
   const counts = useAdminCounts();
+  const { access } = useAdminData();
   const ar = typeof document !== "undefined" && document.documentElement.lang === "ar";
 
   const items = [
@@ -74,6 +78,29 @@ export function MenuDrawer({
     },
   ];
 
+  /* Master only, and it is the last row because it is about the console
+     rather than about the platform. */
+  if (access.isMaster && onAdmins) {
+    items.push({
+      key: "admins",
+      label: "Admins",
+      count: 0,
+      onClick: onAdmins,
+      icon: (
+        <>
+          <circle cx="9" cy="8" r="3.2" />
+          <path d="M2.5 20c.8-3.4 3.3-5 6.5-5s5.7 1.6 6.5 5" />
+          <path d="M17 7.5h5M19.5 5v5" />
+        </>
+      ),
+    });
+  }
+
+  const visible = items.filter((it) =>
+    it.key === "admins" ? true
+    : it.key === "products" ? canOpen(access, "adm-products")
+    : canOpen(access, "adm-employees"));
+
   return (
     <div className={"adm-menu-overlay" + (open ? " open" : "")}>
       <div className="adm-menu-backdrop" onClick={onClose} />
@@ -90,7 +117,7 @@ export function MenuDrawer({
             <div className="adm-menu-head-sub">Wasla platform control</div>
           </div>
         </div>
-        {items.map((it) => (
+        {visible.map((it) => (
           <button key={it.key} className="adm-menu-item" onClick={it.onClick}>
             <span className="adm-menu-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

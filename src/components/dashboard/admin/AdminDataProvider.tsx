@@ -9,9 +9,22 @@ import type {
   LateenApi, PayoutRequest, ReceiptOrder, VerifyMarketer,
 } from "./lib/types";
 
+/** What this admin is allowed to see. Loaded once, from the database, which
+ *  is also where it is enforced — this copy only decides what to draw. */
+export type AdminAccess = {
+  isMaster: boolean;
+  pages: string[];
+  /** null means every market. */
+  markets: string[] | null;
+};
+
 type Ctx = {
   api: LateenApi;
   userId: string;
+  access: AdminAccess;
+  /** True until the answer has come back, so nothing flashes into view and
+   *  then disappears once the real permissions arrive. */
+  accessLoading: boolean;
 
   metrics: AdminMetrics | null;
   homeRaw: HomeRaw | null;
@@ -244,10 +257,30 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     return () => clearInterval(iv);
   }, [loadPayouts]);
 
+  /* Assume nothing until the database answers. Starting from "master" would
+     flash the whole console at somebody who is only allowed one page of it. */
+  const [access, setAccess] = useState<AdminAccess>({ isMaster: false, pages: [], markets: null });
+  const [accessLoading, setAccessLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const a = await api.admin.myAdminAccess();
+        if (alive) setAccess({ isMaster: a.isMaster, pages: a.pages, markets: a.markets });
+      } catch (e) {
+        console.error("[admin] access", e);
+      } finally {
+        if (alive) setAccessLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [api]);
+
   // The payouts page flips this so the poll and realtime handlers stay cheap.
   const value = useMemo<Ctx>(
     () => ({
-      api, userId,
+      api, userId, access, accessLoading,
       metrics, homeRaw, metricsError,
       verifyMarketers, payouts, users, products, reports, deletionRequests, changeRequests, employees,
       loading, failed,
@@ -255,7 +288,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
       loadDeletionRequests, loadEmployees,
     }),
     [
-      api, userId, metrics, homeRaw, metricsError, verifyMarketers, payouts, users, products,
+      api, userId, access, accessLoading, metrics, homeRaw, metricsError, verifyMarketers, payouts, users, products,
       reports, deletionRequests, changeRequests, employees, loading, failed,
       loadMetrics, loadVerify, loadPayouts, loadUsers, loadProducts, loadReports, loadChangeRequests,
       loadDeletionRequests, loadEmployees,

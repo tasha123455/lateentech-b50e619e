@@ -757,6 +757,85 @@ export function createLateenApi(userId: string) {
     },
 
     admin: {
+      /* ---- who this admin is, and what they may do -----------------------
+         The answers come from the database, which is also where they are
+         enforced. Nothing here is a permission — it only decides what to
+         bother drawing. */
+      async myAdminAccess(): Promise<{
+        isAdmin: boolean; isMaster: boolean; pages: string[]; markets: string[] | null;
+      }> {
+        // Binds this sign-in to any invite left for its email. Safe to call
+        // every load: it no-ops once claimed, and returns false for everyone
+        // who was never invited.
+        try { await supabase.rpc("admin_claim_invite" as never); } catch { /* not invited */ }
+
+        const [{ data: master }, { data: pages }] = await Promise.all([
+          supabase.rpc("admin_is_master" as never),
+          supabase.from("admin_pages").select("id").order("sort"),
+        ]);
+        const all = (pages ?? []).map((p: { id: string }) => p.id);
+        if (master) return { isAdmin: true, isMaster: true, pages: all, markets: null };
+
+        // Ask the database page by page rather than reading the permission
+        // row: an admin cannot see the list they are subject to.
+        const answers = await Promise.all(
+          all.map(async (id) => {
+            const { data } = await supabase.rpc("admin_can" as never, { _page: id } as never);
+            return data ? id : null;
+          }),
+        );
+        const mine = answers.filter(Boolean) as string[];
+        // Null here is the "every market" answer, not an empty list, so it
+        // has to survive the round trip rather than collapsing to [].
+        const { data: markets } = await supabase.rpc("admin_market_codes" as never);
+        const scope = (markets as unknown as string[] | null) ?? null;
+        return { isAdmin: mine.length > 0, isMaster: false, pages: mine, markets: scope };
+      },
+
+      async listAdminPages(): Promise<Array<{ id: string; label: string }>> {
+        const { data, error } = await supabase.from("admin_pages").select("id, label").order("sort");
+        if (error) throw error;
+        return (data ?? []) as Array<{ id: string; label: string }>;
+      },
+
+      /* ---- managing admins: every one of these is master-only in the
+         database, so a non-master calling them gets an error rather than a
+         result. ---------------------------------------------------------- */
+      async listAdmins() {
+        const { data, error } = await supabase.rpc("admin_list_admins" as never);
+        if (error) throw error;
+        return (data ?? []) as Array<Record<string, unknown>>;
+      },
+
+      async upsertAdmin(a: {
+        email: string; fullName?: string; phone?: string;
+        markets: string[] | null; pages: string[];
+      }) {
+        const { error } = await supabase.rpc("admin_upsert" as never, {
+          _email: a.email,
+          _full_name: a.fullName ?? null,
+          _phone: a.phone ?? null,
+          // null is the "every market" choice, not an empty list.
+          _markets: a.markets && a.markets.length ? a.markets : null,
+          _pages: a.pages,
+        } as never);
+        if (error) throw error;
+      },
+
+      async setAdminActive(email: string, active: boolean) {
+        const { error } = await supabase.rpc("admin_set_admin_active" as never, {
+          _email: email, _active: active,
+        } as never);
+        if (error) throw error;
+      },
+
+      async listMarkets(): Promise<Array<{ code: string; name_en: string; name_ar: string }>> {
+        const { data, error } = await supabase
+          .from("markets").select("code, name_en, name_ar").eq("active", true).order("code");
+        if (error) throw error;
+        return (data ?? []) as Array<{ code: string; name_en: string; name_ar: string }>;
+      },
+
       async listPendingReceipts() {
         const { data: orders, error } = await supabase
           .from("orders")

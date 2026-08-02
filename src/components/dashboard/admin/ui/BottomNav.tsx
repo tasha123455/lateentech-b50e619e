@@ -34,7 +34,7 @@ const ITEMS: Array<{ id: AdminPageId; label: string; path: React.ReactNode }> = 
 /** Employees moved into the menu, so the last slot opens the menu instead of
  *  being a sixth page. `menuOpen` keeps it lit while the sheet is up. */
 export function BottomNav({
-  page, onGo, onMenu, menuOpen, menuCount = 0, counts = {},
+  page, onGo, onMenu, menuOpen, menuCount = 0, counts = {}, allow,
 }: {
   page: AdminPageId;
   onGo: (id: AdminPageId) => void;
@@ -45,10 +45,15 @@ export function BottomNav({
   menuCount?: number;
   /** What is waiting on a slot that is in plain sight. */
   counts?: Partial<Record<AdminPageId, number>>;
+  /** Whether this admin may open a slot. A slot they cannot open is left out
+   *  rather than shown greyed: a door that opens onto an error is worse than
+   *  no door. */
+  allow?: (id: AdminPageId) => boolean;
 }) {
+  const shown = allow ? ITEMS.filter((it) => allow(it.id)) : ITEMS;
   return (
     <nav className="adm-bottom-nav">
-      {ITEMS.map((it) => (
+      {shown.map((it) => (
         <div
           key={it.id}
           className={"adm-nav-item" + (page === it.id && !menuOpen ? " active" : "")}

@@ -6,7 +6,10 @@ export type AdminApi = LateenApi["admin"];
 export type AdminPageId =
   | "adm-home" | "adm-money" | "adm-users" | "adm-products"
   // reached from the menu rather than the nav bar
-  | "adm-employees" | "adm-requests" | "adm-notify";
+  | "adm-employees" | "adm-requests" | "adm-notify"
+  // Master admin only. Not in admin_pages, because it is not a permission
+  // that can be handed out — being master is the permission.
+  | "adm-admins";
 
 /** A person attached to an order / report / request. */
 export type Person = {

@@ -18,12 +18,14 @@ import { ProductsPage } from "./products/ProductsPage";
 import { BottomNav } from "./ui/BottomNav";
 import { LightboxProvider } from "./ui/Lightbox";
 import { UsersPage } from "./users/UsersPage";
+import { AdminsPage } from "./admins/AdminsPage";
+import { canOpen, firstAllowed } from "./lib/access";
 
 /* Reached from the drawer, or — for notifications — from the Users page. */
-const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-products", "adm-notify"]);
+const MENU_PAGES = new Set<AdminPageId>(["adm-employees", "adm-products", "adm-notify", "adm-admins"]);
 
 function Shell() {
-  const { userId, loadMetrics } = useAdminData();
+  const { userId, loadMetrics, access, accessLoading } = useAdminData();
   const counts = useAdminCounts();
   const { signOut } = useAuth();
 
@@ -48,6 +50,16 @@ function Shell() {
     },
     [userId],
   );
+
+  /* A page is remembered across sessions, so an admin whose permissions were
+     narrowed can come back to one they may no longer open. Move them to the
+     first page they are allowed — the data behind the old one would not load
+     for them anyway, because the database refuses it. */
+  useEffect(() => {
+    if (accessLoading) return;
+    const allowed = firstAllowed(access, page);
+    if (allowed !== page) goTo(allowed);
+  }, [accessLoading, access, page, goTo]);
 
   // Home re-pulls its metrics whenever it becomes the active page, matching
   // the old admGo() dispatch.
@@ -151,6 +163,10 @@ function Shell() {
         {page === "adm-notify" && <NotificationsPage onBack={() => goTo(returnTo)} />}
       </section>
 
+      <section className={"adm-page" + (page === "adm-admins" ? " active" : "")} id="adm-admins">
+        {page === "adm-admins" && access.isMaster && <AdminsPage onBack={() => goTo(returnTo)} />}
+      </section>
+
       <BottomNav
         page={page}
         onGo={goTo}
@@ -158,6 +174,7 @@ function Shell() {
         menuOpen={menuOpen || MENU_PAGES.has(page)}
         menuCount={counts.menuTotal}
         counts={{ "adm-money": counts.money, "adm-requests": counts.requests }}
+        allow={(id) => canOpen(access, id)}
       />
 
       <MenuDrawer
@@ -167,6 +184,7 @@ function Shell() {
         onClose={() => setMenuOpen(false)}
         onProducts={() => openFromMenu("adm-products")}
         onEmployees={() => openFromMenu("adm-employees")}
+        onAdmins={access.isMaster ? () => openFromMenu("adm-admins") : undefined}
       />
     </div>
   );
