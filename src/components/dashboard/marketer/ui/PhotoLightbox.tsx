@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
+import { PhotoDownloadButton } from "@/components/shared/PhotoDownloadButton";
+
 type Ctx = {
   /** Opens the fullscreen viewer on `photos`, starting at `idx`. */
   open: (photos: string[], idx?: number) => void;
@@ -137,6 +139,11 @@ function Viewer({
       >
         ×
       </button>
+      {/* Beside the close button, on the same side it is pinned to. */}
+      <PhotoDownloadButton
+        url={photos[idx] || ""}
+        style={{ top: "calc(14px + env(safe-area-inset-top,0px))", insetInlineEnd: "auto", right: 72 }}
+      />
       <div ref={trackRef} style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", touchAction: "pan-y" }}>
         {photos.map((u, i) => (
           <div

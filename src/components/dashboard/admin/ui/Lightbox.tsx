@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
+import { PhotoDownloadButton } from "@/components/shared/PhotoDownloadButton";
+
 type Ctx = { open: (url: string, caption?: ReactNode) => void; close: () => void };
 
 const LightboxCtx = createContext<Ctx | null>(null);
@@ -31,6 +33,12 @@ export function LightboxProvider({ children }: { children: ReactNode }) {
         >
           ×
         </button>
+        {!!url && (
+          <PhotoDownloadButton
+            url={url}
+            style={{ top: "calc(16px + env(safe-area-inset-top,0px))", insetInlineEnd: "auto", right: 72 }}
+          />
+        )}
         {!!url && <img src={url} alt="Receipt" />}
         {!!url && !!caption && (
           <div className="adm-lightbox-caption" onClick={(e) => e.stopPropagation()}>{caption}</div>

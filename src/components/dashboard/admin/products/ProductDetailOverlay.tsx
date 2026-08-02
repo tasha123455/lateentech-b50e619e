@@ -6,7 +6,7 @@ import { ZonesSection } from "@/components/dashboard/marketer/browse/ZonesSectio
 import type { ProductReview, Zone } from "@/components/dashboard/marketer/lib/types";
 
 import { useAdminData } from "../AdminDataProvider";
-import { dispPhone, when } from "../lib/format";
+import { dateFull, dispPhone } from "../lib/format";
 import { effectiveQty } from "../lib/employees";
 import type { ProductDetail, VariantGroup } from "../lib/types";
 import { CurMoney } from "../ui/Money";
@@ -423,7 +423,10 @@ export function ProductDetailOverlay({
             )}
             <div className="adm-pd-owner-row">Phone: <span>{dispPhone(owner.phone) || "—"}</span></div>
             {!!owner.email && <div className="adm-pd-owner-row">Email: <span>{owner.email}</span></div>}
-            <div className="adm-pd-owner-row">Joined: <span>{owner.created_at ? when(owner.created_at) : "—"}</span></div>
+            {/* The day itself, not "412d ago". How long a shop has been here is a
+                fact an admin compares against other dates — a claim, a report,
+                an order — and a relative figure cannot be compared to anything. */}
+            <div className="adm-pd-owner-row">Joined: <span>{owner.created_at ? dateFull(owner.created_at) : "—"}</span></div>
             <div className="adm-pd-owner-row" style={{ marginTop: 8 }}>
               <button className="adm-go-btn" onClick={() => goToAccount(p.business_id, "business", ownerName)}>
                 Go to Account

@@ -141,4 +141,4 @@ export const genId = (): string => "p" + Math.random().toString(36).slice(2, 7);
    This file used to carry its own character-for-character duplicate of
    normSearch, which was fine while the two only folded letters and would not
    have survived one of them learning to forgive a typo. */
-export { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+export { bidiIsolate, normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";

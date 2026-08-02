@@ -78,6 +78,10 @@ export function OrderCard({
     parseFloat((((o.total || 0) - ((o.commPerUnit || 0) + (o.platformPerUnit || 0)) * (o.qty || 0))).toFixed(2)),
   );
   const codParts = codPaysParts(Number(o.delivery) > 0, Number(o.shipping) > 0);
+  /* A zone is picked as a country and a city together, and the city is what
+     the order records. Without one there are no delivery figures yet, only
+     zeroes standing in for them. */
+  const zoned = !!String(o.city || "").trim();
   const qtyN = o.qty || 1;
   const lineTotal = (o.price || 0) * qtyN;
 
@@ -332,11 +336,11 @@ export function OrderCard({
               </div>
               <div className="summary-row">
                 <span className="summary-label">{T.ship}</span>
-                <span className="summary-value"><FreeOrMoney n={o.shipping} sym={o._sym} code={o._curCode} /></span>
+                <span className="summary-value"><FreeOrMoney n={o.shipping} sym={o._sym} code={o._curCode} free={zoned} /></span>
               </div>
               <div className="summary-row">
                 <span className="summary-label">{T.dlv}</span>
-                <span className="summary-value"><FreeOrMoney n={o.delivery} sym={o._sym} code={o._curCode} /></span>
+                <span className="summary-value"><FreeOrMoney n={o.delivery} sym={o._sym} code={o._curCode} free={zoned} /></span>
               </div>
               <div className="summary-divider" />
               <div className="summary-total-row">

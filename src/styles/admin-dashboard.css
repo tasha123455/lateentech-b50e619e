@@ -161,6 +161,15 @@
 .lateen-admin .bd-dropdown-list.open { display: flex; }
 .lateen-admin .bd-dd-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 9px 13px; font-size: 12.5px; cursor: pointer; color: var(--txt-2); }
 .lateen-admin .bd-dd-item.clear { color: #c0392b; font-weight: 600; }
+/* The Status chip on the Users page: a filter chip that opens the shared
+   dropdown, so it sits in the same row as the role chips but reads as a
+   control with more behind it. */
+.lateen-admin .adm-status-chip { display: inline-flex; align-items: center; gap: 5px; }
+.lateen-admin .adm-status-chev { font-size: 9px; transition: transform .2s; }
+.lateen-admin .adm-status-chip.open .adm-status-chev { transform: rotate(180deg); }
+.lateen-admin .bd-dd-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.lateen-admin .bd-dd-item.on { border-color: var(--accent); color: var(--txt-1); }
+.lateen-admin .adm-status-count { font-size: 11px; opacity: 0.6; font-variant-numeric: tabular-nums; }
 .lateen-admin .adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; align-items: flex-end; justify-content: center; }
 .lateen-admin .adm-pdetail.open { display: flex; }
 .lateen-admin .adm-pdetail-card { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; position: relative; padding: 18px 16px 32px; border-top: 0.5px solid var(--border); }

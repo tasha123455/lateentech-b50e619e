@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
 
 import { useBusinessData } from "../BusinessDataProvider";
-import { isAr, splitCC } from "../lib/format";
+import { bidiIsolate, isAr, splitCC } from "../lib/format";
 import { useLightbox } from "../ui/Lightbox";
 
 function tr(en: string, ar: string): string {
@@ -145,9 +145,17 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               const pname = d ? str(d.product_name) : "";
               rating = d ? Number(d.rating) || 0 : 0;
               t = tr("New product review", "تقييم جديد للمنتج");
+              /* Every part that is a name or a count is isolated. A product
+                 called "clothes" sitting in an Arabic line would otherwise
+                 swallow the digit that follows it — a European number takes the
+                 direction of the Latin word before it — and "3 نجوم" would
+                 render with its 3 stranded on the far side of the word it
+                 counts. The same happens the other way with an Arabic product
+                 name in the English line. */
+              const iso = bidiIsolate;
               b = isAr()
-                ? `${author} قيّم المنتج ${pname} ${arStarsPhrase(rating)}`
-                : `${author} rated ${pname} ${rating} ${rating === 1 ? "star" : "stars"}`;
+                ? `${iso(author)} قيّم المنتج ${iso(pname)} ${iso(arStarsPhrase(rating))}`
+                : `${iso(author)} rated ${iso(pname)} ${iso(rating + " " + (rating === 1 ? "star" : "stars"))}`;
               const photoUrl = d ? str(d.photo) : "";
               const text = d ? str(d.text) : "";
               if (text) {

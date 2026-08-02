@@ -339,6 +339,23 @@ export function piecesLabel(n: number): string {
   return n + (n > 10 ? " قطعه" : " قطع");
 }
 
+/** Wraps a run so the text around it cannot reorder its insides, and it
+ *  cannot reorder theirs.
+ *
+ *  U+2068 FIRST STRONG ISOLATE … U+2069 POP DIRECTIONAL ISOLATE. The run takes
+ *  its direction from its own first strong character and is treated as a single
+ *  neutral object by everything outside it.
+ *
+ *  This is what a sentence needs when it mixes scripts. "3 نجوم" written after
+ *  a Latin word in an Arabic line loses its number: a European digit picks up
+ *  the direction of the Latin run before it, so the 3 is dragged out of the
+ *  Arabic phrase it belongs to and lands on the far side of it. Isolating the
+ *  phrase keeps the number where it was written — immediately before نجوم. */
+export const bidiIsolate = (s: unknown): string => {
+  const v = String(s ?? "");
+  return v ? "\u2068" + v + "\u2069" : v;
+};
+
 export const pad2 = (n: number): string => (n < 10 ? "0" + n : "" + n);
 export const ddmmyyyy = (d: Date): string => pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1) + "/" + d.getFullYear();
 export const today2 = (): string => {

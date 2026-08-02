@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { PhotoDownloadButton } from "@/components/shared/PhotoDownloadButton";
+
 type LightboxCtx = { open: (photos: string[], idx?: number) => void; close: () => void };
 
 const Ctx = createContext<LightboxCtx | null>(null);
@@ -98,6 +100,9 @@ export function LightboxProvider({ children }: { children: ReactNode }) {
               : null}
           </div>
         </div>
+        {isOpen && !!photos[idx] && (
+          <PhotoDownloadButton url={photos[idx]} style={{ top: "calc(16px + env(safe-area-inset-top,0px))" }} />
+        )}
         <div className="mp-lightbox-close" role="button" aria-label="Close" onClick={(e) => { e.stopPropagation(); close(); }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
         </div>

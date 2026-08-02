@@ -764,11 +764,11 @@ export function OrderFormOverlay({
             </div>
             <div className="ord-summary-row">
               <span data-i18n="Shipping">Shipping</span>
-              <span className="v"><FreeOrMoney n={ship} sym={sym} code={curCode} /></span>
+              <span className="v"><FreeOrMoney n={ship} sym={sym} code={curCode} free={!!currentDelivery} /></span>
             </div>
             <div className="ord-summary-row">
               <span data-i18n="Delivery fee">Delivery fee</span>
-              <span className="v"><FreeOrMoney n={deliv} sym={sym} code={curCode} /></span>
+              <span className="v"><FreeOrMoney n={deliv} sym={sym} code={curCode} free={!!currentDelivery} /></span>
             </div>
             <div className="ord-summary-total">
               <span data-i18n="Total">Total</span>
