@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr, tlbl, money, rawSym, ddmmyyyy } from "../lib/format";
+import { piecesLabel } from "@/components/dashboard/marketer/lib/format";
 import type { Order, PendingActiveStub } from "../lib/types";
 import { MoneyH } from "../ui/Money";
 import { computeEarnByCur, pickWalletCur, type CurEarn } from "./currency";
@@ -368,7 +369,7 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
                 const s = subs[i] || "";
                 return s ? lab + " · " + s : lab;
               },
-              label: (ctx: AnyChart) => currentMetric === "revenue" ? " " + money(ctx.raw, sel.sym || "£", walletCur) : " " + ctx.raw + " pcs",
+              label: (ctx: AnyChart) => currentMetric === "revenue" ? " " + money(ctx.raw, sel.sym || "£", walletCur) : " " + piecesLabel(Number(ctx.raw)),
             },
           },
         }, zoomOpts),

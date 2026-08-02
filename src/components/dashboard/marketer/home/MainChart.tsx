@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { CHART_VISIBLE } from "../lib/constants";
-import { money, tlbl } from "../lib/format";
+import { money, piecesLabel, tlbl } from "../lib/format";
 import type { ChartSeries, Metric, Period } from "../lib/types";
 import { useChartJs } from "../ui/useChartJs";
 
@@ -198,7 +198,7 @@ export function MainChart({
                   return s ? lab + " · " + s : lab;
                 },
                 label: (ctx: { raw: number }) =>
-                  metric === "earnings" ? " " + money(ctx.raw, selSym, walletCur) : " " + ctx.raw + " pcs",
+                  metric === "earnings" ? " " + money(ctx.raw, selSym, walletCur) : " " + piecesLabel(ctx.raw),
               },
             },
           },

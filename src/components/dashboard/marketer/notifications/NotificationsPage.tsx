@@ -153,7 +153,7 @@ export function NotificationsPage({ onBack }: { onBack: () => void }) {
   );
 }
 
-function NotifItem({
+export function NotifItem({
   n, isNew, expanded, onToggle, onPhoto,
 }: {
   n: NotificationRow;
@@ -304,8 +304,11 @@ function NotifItem({
           )}
           <DetailRow k={t("Order Code", "كود الطلبيه")} v={d.order_code} />
           {isReportReviewed && <DetailRow k={t("Report type", "نوع البلاغ")} v={reportTypeLbl} />}
+          {/* The marketer's own words, read back to them beside the admin's
+              answer, so the reply has something to be a reply to. Italic
+              because it is a quotation of what they wrote, not app copy. */}
           {isReportReviewed && (
-            <NoteBlock label={t("Your report", "بلاغك")} text={d.report_message as string} />
+            <NoteBlock label={t("Your report", "بلاغك")} text={d.report_message as string} italic />
           )}
           <OrderDetailRowsWithoutCode d={d} />
           <NoteBlock label={t("Notes", "ملاحظات")} text={d.customer_notes as string} />

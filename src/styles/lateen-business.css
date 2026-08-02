@@ -191,3 +191,9 @@
 
 /* Notification groups: admin-to-business notices sit in their own box. */
 .lateen-business .notif-list{ background: transparent; border: none; border-radius: 0; gap: 12px; overflow: visible; }
+
+/* The "more…" under a clamped product description. A link, not a button —
+   it reveals text that is already on the page rather than doing anything. */
+.pd-desc-more { display: inline-block; margin-top: 4px; padding: 0; border: 0; background: none;
+  color: #8b83e8; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+.pd-desc-more:hover { text-decoration: underline; }

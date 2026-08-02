@@ -1,4 +1,4 @@
-import { isAr } from "../lib/format";
+import { isAr, piecesLabel } from "../lib/format";
 
 /** Bilingual labels for the product-detail sheet (the old __pdT()). */
 export const pdT = () => {
@@ -36,8 +36,7 @@ export const pdT = () => {
     },
     oneCity: ar ? "مدينة واحدة" : "1 city",
     cities: (n: number) => (ar ? n + " مدن" : n + " cities"),
-    pieces: (n: number) =>
-      ar ? (n === 1 ? "قطعه واحده" : n === 2 ? "قطعتين" : n > 10 ? n + " قطعه" : n + " قطع") : n + " pcs",
+    pieces: piecesLabel,
     desc: ar ? "الوصف" : "Description",
     sizes: ar ? "المقاسات" : "Sizes",
     colors: ar ? "الألوان" : "Colours",

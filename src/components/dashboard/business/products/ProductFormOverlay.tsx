@@ -304,6 +304,27 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   const lyd = CURRENCIES.find((c) => c.code === "LYD");
   const eur = CURRENCIES.find((c) => c.code === "EUR");
   const usd = CURRENCIES.find((c) => c.code === "USD");
+
+  /* The picker names each currency the shortest way that is still unambiguous:
+     the flag, then what somebody would actually write. The full English name
+     alongside the code and the symbol said the same thing three times.
+     The dinar needs no symbol beside it — د.ل is the symbol — while the euro
+     and the dollar are named in Arabic and carry theirs. Name and symbol are
+     separate elements rather than one string, so the reading direction puts
+     them in the right order without a second set of labels for RTL. */
+  const CUR_CHOICE: Record<string, { label: string; sym: string }> = {
+    LYD: { label: ar ? "د.ل" : "LYD", sym: "" },
+    EUR: { label: ar ? "يورو" : "EUR", sym: "€" },
+    USD: { label: ar ? "دولار" : "USD", sym: "$" },
+  };
+  const curChoice = (code: string) => CUR_CHOICE[code] || { label: code, sym: "" };
+  const curRow = (c: { code: string; flag: string }) => (
+    <>
+      <span className="curr-flag">{c.flag}</span>
+      <span className="curr-label" data-no-i18n>{curChoice(c.code).label}</span>
+      {!!curChoice(c.code).sym && <span className="curr-sub" data-no-i18n>{curChoice(c.code).sym}</span>}
+    </>
+  );
   const ly = COUNTRIES.find((c) => c.code === "LY");
 
   const selectCountry = (code: string) => {
@@ -614,8 +635,12 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           <label className="lp-field-label">Currency <span className="lp-req">*</span></label>
           <div className="lp-currency-static" onClick={() => !editLocked && setCurrDropdownOpen((v) => !v)} style={editLocked ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
             <span style={{ fontSize: 18, lineHeight: 1 }}>{selectedCurrency ? selectedCurrency.flag : "🌐"}</span>
-            <span style={{ color: "var(--color-text-primary)" }}>{selectedCurrency ? `${selectedCurrency.name} (${selectedCurrency.code})` : "Select a currency"}</span>
-            <span style={{ fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 4 }}>{selectedCurrency ? selectedCurrency.symbol : ""}</span>
+            <span style={{ color: "var(--color-text-primary)" }} {...(selectedCurrency ? { "data-no-i18n": "" } : {})}>
+              {selectedCurrency ? curChoice(selectedCurrency.code).label : "Select a currency"}
+            </span>
+            <span style={{ fontSize: 11, color: "var(--color-text-secondary)", marginInlineStart: 4 }} data-no-i18n>
+              {selectedCurrency ? curChoice(selectedCurrency.code).sym : ""}
+            </span>
           </div>
           <div style={{ position: "relative" }}>
             {currDropdownOpen && (
@@ -627,9 +652,9 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
             <div className={`currency-dropdown${currDropdownOpen ? " open" : ""}`}>
               {currDropdownOpen && (
                 <>
-                  {lyd && <div className="currency-option" onClick={() => selectCurrency("LYD")}><span className="curr-flag">{lyd.flag}</span><span className="curr-label">{lyd.name}</span><span className="curr-sub">{lyd.code} · {lyd.symbol}</span></div>}
-                  {eur && <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}><span className="curr-flag">{eur.flag}</span><span className="curr-label">{eur.name}</span><span className="curr-sub">{eur.code} · {eur.symbol}</span><span style={{ marginLeft: "auto" }}>{soonBadge}</span></div>}
-                  {usd && <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}><span className="curr-flag">{usd.flag}</span><span className="curr-label">{usd.name}</span><span className="curr-sub">{usd.code} · {usd.symbol}</span><span style={{ marginLeft: "auto" }}>{soonBadge}</span></div>}
+                  {lyd && <div className="currency-option" onClick={() => selectCurrency("LYD")}>{curRow(lyd)}</div>}
+                  {eur && <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}>{curRow(eur)}<span style={{ marginInlineStart: "auto" }}>{soonBadge}</span></div>}
+                  {usd && <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}>{curRow(usd)}<span style={{ marginInlineStart: "auto" }}>{soonBadge}</span></div>}
                   <div className="currency-option disabled" onClick={(e) => e.stopPropagation()}><span className="curr-label" style={{ color: "var(--color-text-tertiary)" }}>{ar ? "عملات أخرى" : "More currencies"}</span><span style={{ marginLeft: "auto" }}>{soonBadge}</span></div>
                 </>
               )}

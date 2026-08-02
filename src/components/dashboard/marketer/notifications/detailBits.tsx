@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { isValidElement, type ReactNode } from "react";
 
 import { splitCC, t } from "../lib/format";
 
@@ -9,7 +9,10 @@ export function DetailRow({ k, v, noTranslate }: { k: string; v: unknown; noTran
     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "4px 0", fontSize: 12 }}>
       <span style={{ color: "var(--color-text-secondary)" }}>{k}</span>
       <span {...(noTranslate ? { "data-no-i18n": "" } : {})} style={{ color: "var(--color-text-primary)", textAlign: "right" }}>
-        {String(v)}
+        {/* An element passes through as itself, so a caller can hand over a
+            money amount with its symbol in the smaller `.cur-sym` span rather
+            than a flat string that draws the symbol at full size. */}
+        {isValidElement(v) ? v : String(v)}
       </span>
     </div>
   );
@@ -47,18 +50,22 @@ export function VariantRows({ d }: { d: Record<string, unknown> }) {
 
 /** Free-text block (customer notes, admin notes, report body…). */
 export function NoteBlock({
-  label, text, background = "#0f0f0f", color = "var(--color-text-secondary)", marginTop = 6,
+  label, text, background = "#0f0f0f", color = "var(--color-text-secondary)", marginTop = 6, italic,
 }: {
   label: string;
   text: ReactNode;
   background?: string;
   color?: string;
   marginTop?: number;
+  /** Set where the text is something the reader wrote themselves, so it reads
+   *  back as a quotation rather than as more of the app's own prose. */
+  italic?: boolean;
 }) {
   if (!text) return null;
   return (
     <div style={{ marginTop, padding: "8px 10px", borderRadius: 8, background, color, fontSize: 11 }}>
-      <b>{label}:</b> <span data-no-i18n>{text}</span>
+      <b>{label}:</b>{" "}
+      <span data-no-i18n style={italic ? { fontStyle: "italic" } : undefined}>{text}</span>
     </div>
   );
 }

@@ -2,7 +2,10 @@
 import { isAr, moneyParts } from "../lib/format";
 import type { Order, PendingActiveStub, Product } from "../lib/types";
 
-export const LOW_STOCK_THRESHOLD = 20;
+/** Five or fewer left counts as low. It drives the badge on the card, the
+ *  "Low stock" filter and its count, and the warning colour in the analytics
+ *  sheet — one number so those cannot disagree about what "low" means. */
+export const LOW_STOCK_THRESHOLD = 5;
 export const ACTIVE_MKT_STATUSES = new Set(["pending", "approved", "confirmed"]);
 
 /** __mpEffectiveQty */

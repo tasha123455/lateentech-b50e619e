@@ -6,6 +6,7 @@ import {
   applyBrowseFilters, EMPTY_BROWSE_FILTERS, type BrowseFilterState,
 } from "@/components/dashboard/marketer/browse/browseFilter";
 import { dbToBrowse } from "@/components/dashboard/marketer/lib/mappers";
+import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
@@ -25,7 +26,7 @@ function activeMarketerWarning(n: number, action: string): string {
 }
 
 export function ProductsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
-  const { products, loadProducts, loading, failed, api } = useAdminData();
+  const { products, loadProducts, loading, failed, api, users, loadUsers } = useAdminData();
   const [state, setState] = useState<BrowseFilterState>(EMPTY_BROWSE_FILTERS);
   const [detailId, setDetailId] = useState<string | null>(null);
   /* Products the *server* matched for the current term. The client-side filter
@@ -42,12 +43,34 @@ export function ProductsPage({ active, onBack }: { active: boolean; onBack: () =
     if (active) void loadProducts("");
   }, [active, loadProducts]);
 
+  /* The user list is what carries email addresses — they live in auth, not on
+     the profile row, and are resolved when that list loads. So this page needs
+     it before it can answer "whose products are these?" for somebody who typed
+     an address. It is loaded once, in the background; the search works on
+     names and phone numbers meanwhile. */
+  useEffect(() => {
+    if (active && !users.length) void loadUsers();
+  }, [active, users.length, loadUsers]);
+
+  /* Accounts the term points at, matched through the same forgiving matcher as
+     every other search box — so a half-remembered address still lands. Their
+     ids go to the server, which turns them into products: the ones they list
+     if they are a shop, the ones they have ordered if they are a marketer. */
+  const peopleIds = useMemo(() => {
+    const q = query.trim();
+    if (!q) return [];
+    const match = searchMatcher(q);
+    return users
+      .filter((u) => match([u.full_name, u.business_name, u.email, u.phone].filter(Boolean).join(" ")))
+      .map((u) => u.id);
+  }, [users, query]);
+
   useEffect(() => {
     if (!active || !query.trim()) { setServerHits(null); return; }
     let cancelled = false;
     const id = setTimeout(async () => {
       try {
-        const rows = (await api.admin.listAllProducts(query)) as Array<{ id: string }>;
+        const rows = (await api.admin.listAllProducts(query, peopleIds)) as Array<{ id: string }>;
         if (!cancelled) setServerHits(new Set(rows.map((r) => r.id)));
       } catch (e) {
         console.error("[admin] product search", e);
@@ -55,7 +78,7 @@ export function ProductsPage({ active, onBack }: { active: boolean; onBack: () =
       }
     }, 250);
     return () => { cancelled = true; clearTimeout(id); };
-  }, [active, query, api]);
+  }, [active, query, api, peopleIds]);
 
   const activeMarketers = async (id: string): Promise<number> => {
     try {
