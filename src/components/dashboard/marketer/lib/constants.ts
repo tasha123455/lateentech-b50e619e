@@ -123,11 +123,11 @@ export const LIBYA_CITIES: Array<{ en: string; ar: string }> = [
  *  every profile's payout_bank_name — so it stays the key and only the label
  *  changes with the language. */
 export const PAYOUT_BANKS = [
-  "مصرف الجمهورية", "مصرف الامان", "مصرف التجارة والتنمية", "مصرف ليبيا المركزي - بنغازي",
-  "مصرف الضمان الاسلامي", "محفظة GPAY", "مصرف التمويل الإسلامي", "مصرف الاسلامي الليبي",
-  "مصرف المتوسط", "مصرف شمال افريقيا", "مصرف التجاري الوطني", "مصرف الاتحاد الوطني",
   "محفظة paynow", "محفظة RUNPAY", "مصرف الصحاري", "مصرف السراج الاسلامي", "تطبيق التداول",
-  "مصرف التضامن",
+  "مصرف التضامن", "مصرف المتحد", "مصرف الجمهورية", "مصرف الواحة", "مصرف الامان",
+  "مصرف التجارة والتنمية", "مصرف ليبيا المركزي - بنغازي", "مصرف الضمان الاسلامي", "محفظة GPAY",
+  "Hawelli حولي", "مصرف التمويل الإسلامي", "مصرف الاسلامي الليبي", "Libo Pay", "مصرف المتوسط",
+  "مصرف شمال افريقيا", "مصرف التجاري الوطني", "مصرف الاتحاد الوطني",
 ];
 
 /* The name each of these banks trades under in English, taken from the Central
@@ -158,6 +158,11 @@ export const PAYOUT_BANK_EN: Record<string, string> = {
   "مصرف السراج الاسلامي": "Al Seraj Islamic Bank",
   "تطبيق التداول": "Tadawul App",
   "مصرف التضامن": "Tadhamon Bank",
+  "مصرف المتحد": "United Bank for Commerce & Investment",
+  "مصرف الواحة": "Alwaha Bank",
+  // Already Latin in the Arabic list — these two write themselves this way.
+  "Hawelli حولي": "Hawelli",
+  "Libo Pay": "Libo Pay",
 };
 
 /** The bank as it should read in the language on screen. Anything not in the
