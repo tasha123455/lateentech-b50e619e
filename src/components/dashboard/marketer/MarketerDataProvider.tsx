@@ -7,7 +7,7 @@ import { computeAnalytics, type Analytics } from "./lib/analytics";
 import { MIN_WITHDRAW, PAYOUT_PERIOD_MS } from "./lib/constants";
 import { isAr, t } from "./lib/format";
 import { buildProductsMap, dbToBrowse, dbToOrder } from "./lib/mappers";
-import { cacheAvatar, loadDrafts, readAvatar } from "./lib/storage";
+import { cacheAvatar, loadDrafts, readAvatar, saveDrafts } from "./lib/storage";
 import type {
   BrowseProduct, FormProduct, LateenApi, MarketerOrder, MarketerProfile, NotificationRow,
 } from "./lib/types";
@@ -140,8 +140,20 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
       const rows = await api.listMyOrders();
       const mine = (rows as Array<Record<string, unknown>>).filter((r) => r.marketer_id === userId);
       const sentDbIds = new Set(mine.map((r) => r.id as string));
+      /* A receipt's storage path is a fresh uuid per upload, so a draft holding
+         one that a sent order also holds *is* that order — a leftover from the
+         duplicate-draft bug, still on the phone of anyone who hit it. Dropping
+         it here clears those without needing a migration, and cannot catch a
+         real draft: no two uploads ever share a path. */
+      const sentReceipts = new Set(
+        mine.map((r) => r.receipt_url as string).filter((u): u is string => !!u),
+      );
+      const kept = drafts.filter(
+        (d) => (!d.dbId || !sentDbIds.has(d.dbId)) && !(d.receiptUrl && sentReceipts.has(d.receiptUrl)),
+      );
+      if (kept.length !== drafts.length) saveDrafts(kept, userId);
       const merged = [
-        ...drafts.filter((d) => !d.dbId || !sentDbIds.has(d.dbId)),
+        ...kept,
         ...mine.map((r) => dbToOrder(r, productsMapRef.current)),
       ];
       merged.sort((a, b) => {

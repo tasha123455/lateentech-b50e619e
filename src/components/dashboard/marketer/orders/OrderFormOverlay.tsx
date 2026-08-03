@@ -58,6 +58,9 @@ export function OrderFormOverlay({
   const [submitting, setSubmitting] = useState(false);
 
   const seededRef = useRef<OrderFormSeed | null>(null);
+  /** Which seed the fields below currently hold. The autosave effect waits for
+   *  this to catch up with `seed` — see the comment on that effect. */
+  const [seededFor, setSeededFor] = useState<OrderFormSeed | null>(null);
 
   const currentProduct = productKey ? productsMap[productKey] || null : null;
   const vgList = useMemo(() => formVariantGroups(currentProduct), [currentProduct]);
@@ -75,6 +78,7 @@ export function OrderFormOverlay({
 
     const o = seed?.order || null;
     setStaleBanner("");
+    setSeededFor(seed);
     if (!o) {
       setEditingId(null);
       setName(""); setCcode("+218"); setPhone(""); setWcode("+218"); setWhatsapp(""); setWaOpen(false);
@@ -232,14 +236,29 @@ export function OrderFormOverlay({
 
   // Keep a local draft in step with what has been typed, so a reload or an OS
   // tab-discard while the gallery picker is open doesn't lose the order.
+  //
+  // `seededFor !== seed` is the guard that stops this saving someone else's
+  // order. Opening the sheet re-runs this effect on the very same commit as
+  // the seeding effect above, and on that commit the fields still hold the
+  // *previous* order — the seeding effect only queued the reset, it has not
+  // been applied yet. Without the guard the sheet quietly wrote that previous
+  // order back to localStorage under its old local id, and if it had just been
+  // sent, its draft had already been deleted and its list entry had already
+  // been replaced by the database row under a different id. The resurrected
+  // draft therefore matched nothing, carried no dbId, and survived every
+  // reload — the order appeared twice, once pending and once as a draft.
+  //
+  // The seeding effect sets seededFor in the same batch as the reset, so this
+  // effect runs for real on the next commit, when the fields are the ones the
+  // person is actually looking at.
   useEffect(() => {
-    if (!open) return;
+    if (!open || seededFor !== seed) return;
     const o = buildLocalOrder("draft");
     if (!o.customerName && !o.phone && !o.productKey && !o.hasReceipt && !o.notes) return;
     if (!editingId) setEditingId(o.id);
     upsertDraft(o, userId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, name, phone, whatsapp, productKey, selectedVariants, qty, countryCode, city, address, notes, hasReceipt, receiptUrl]);
+  }, [open, seededFor, seed, name, phone, whatsapp, productKey, selectedVariants, qty, countryCode, city, address, notes, hasReceipt, receiptUrl]);
 
   /* ── Handlers ── */
 
