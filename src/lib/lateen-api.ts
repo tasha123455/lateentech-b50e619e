@@ -1482,7 +1482,6 @@ export function createLateenApi(userId: string) {
           refunded_at?: string | null;
           delivered_at: string | null;
         }>;
-        const orders = market ? ordersRaw.filter((o) => inMarket.has(o.business_id)) : ordersRaw;
         const allProfilesRaw = (profilesRes.data ?? []) as Array<{
           id: string;
           created_at: string;
@@ -1490,9 +1489,15 @@ export function createLateenApi(userId: string) {
           business_name: string | null;
           market: string | null;
         }>;
-        // Who is inside the chosen market. Rows with no market are treated as
-        // the default one, which is where every account created before markets
-        // existed actually belongs.
+        /* Who is inside the chosen market. Rows with no market are treated as
+           the default one, which is where every account created before markets
+           existed actually belongs.
+
+           This has to be built before anything filters on it. It used to sit
+           below the orders filter that reads it, which threw a ReferenceError
+           the moment a country was picked — invisible while there was one
+           market, because the filter is not drawn and `market` is always null,
+           so the branch that touches this was never taken. */
         const inMarket = new Set(
           allProfilesRaw
             .filter((p) => !market || (p.market || "LY") === market)
@@ -1501,6 +1506,7 @@ export function createLateenApi(userId: string) {
         const allProfiles = market
           ? allProfilesRaw.filter((p) => inMarket.has(p.id))
           : allProfilesRaw;
+        const orders = market ? ordersRaw.filter((o) => inMarket.has(o.business_id)) : ordersRaw;
         // Same "completed registration" rule as the Users page: bare auth
         // stubs (no role, no name) are not real users and must not be counted.
         const { data: allRoleRows } = await supabase.from("user_roles").select("user_id");
