@@ -208,8 +208,10 @@ export type MetricsDay = {
   products_created: number;
   fee_earned: number;
   fee_refunded: number;
-  reviewed_added: number;
-  reviewed_removed: number;
+  /** Receipts the admin *accepted* — a rejected one is reviewed but not
+   *  approved, and must not count as a success. */
+  approved_added: number;
+  approved_removed: number;
   pieces_added: number;
   pieces_removed: number;
   pieces_confirmed: number;

@@ -1217,8 +1217,8 @@ export type Database = {
           pieces_confirmed: number
           pieces_removed: number
           products_created: number
-          reviewed_added: number
-          reviewed_removed: number
+          approved_added: number
+          approved_removed: number
           salary_paid: number
           users_created: number
         }[]

@@ -79,7 +79,7 @@ export function metricValueAsOf(raw: HomeRaw | null, key: MetricKey, ts: number)
     if (key === "totalUsers") sum += b.users_created;
     else if (key === "totalProducts") sum += b.products_created;
     else if (key === "platformFee") sum += Number(b.fee_earned || 0) - Number(b.fee_refunded || 0);
-    else if (key === "succeeded") sum += b.reviewed_added - b.reviewed_removed;
+    else if (key === "succeeded") sum += b.approved_added - b.approved_removed;
     else if (key === "succeededPieces") sum += b.pieces_added - b.pieces_removed;
   }
   return key === "platformFee" ? Math.round(sum * 100) / 100 : sum;
