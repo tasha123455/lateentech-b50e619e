@@ -122,6 +122,31 @@ async function loadAdminPeople(ids: string[]) {
   return map;
 }
 
+/* Ceilings on how many rows one screen may pull.
+ *
+ * Every list below already asks for the newest rows first, so a ceiling means
+ * "the most recent N" rather than an arbitrary slice. These are not page sizes
+ * somebody can advance through — they are a floor under how bad it can get. A
+ * screen may end up missing old rows; it can never download the whole platform
+ * onto a phone.
+ *
+ * Where a list is a queue of work waiting on an admin, the ceiling is lower:
+ * if it is ever reached, the answer is to clear the queue, not to raise it.
+ *
+ * Deliberately not applied to getMetrics. That page filters by date in the
+ * browser, so a ceiling there would quietly drop orders out of a total and
+ * report less money than was earned. Slow and right beats fast and wrong. */
+const CAP = {
+  /** The marketer's catalogue and the admin's product table. */
+  catalogue: 1000,
+  /** One account's own order history. */
+  ownHistory: 500,
+  /** Admin tables people scroll and search. */
+  adminList: 500,
+  /** Work waiting to be actioned. */
+  queue: 300,
+} as const;
+
 export type LateenAPI = ReturnType<typeof createLateenApi>;
 
 export function createLateenApi(userId: string) {
@@ -153,7 +178,8 @@ export function createLateenApi(userId: string) {
         .select("*")
         .eq("business_id", userId)
         .is("deleted_at", null)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(CAP.catalogue);
       if (error) throw error;
       return (data ?? []) as unknown as LateenProduct[];
     },
@@ -241,13 +267,15 @@ export function createLateenApi(userId: string) {
       const { data, error } = await supabase
         .from("products_marketer_view" as never)
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(CAP.catalogue);
       if (error) throw error;
       return (data ?? []) as unknown as LateenProduct[];
     },
 
     async listFavorites(): Promise<LateenProduct[]> {
-      const { data: favs, error } = await supabase.from("favorites").select("product_id").eq("marketer_id", userId);
+      const { data: favs, error } = await supabase
+        .from("favorites").select("product_id").eq("marketer_id", userId).limit(CAP.ownHistory);
       if (error) throw error;
       const ids = (favs ?? []).map((r: { product_id: string }) => r.product_id);
       if (!ids.length) return [];
@@ -260,7 +288,8 @@ export function createLateenApi(userId: string) {
     },
 
     async listFavoriteIds(): Promise<Set<string>> {
-      const { data, error } = await supabase.from("favorites").select("product_id").eq("marketer_id", userId);
+      const { data, error } = await supabase
+        .from("favorites").select("product_id").eq("marketer_id", userId).limit(CAP.ownHistory);
       if (error) throw error;
       return new Set((data ?? []).map((r: { product_id: string }) => r.product_id));
     },
@@ -270,7 +299,8 @@ export function createLateenApi(userId: string) {
         .from("favorites")
         .select("product_id, created_at")
         .eq("marketer_id", userId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(CAP.ownHistory);
       if (error) throw error;
       return (data ?? []).map((r: { product_id: string }) => r.product_id);
     },
@@ -520,7 +550,8 @@ export function createLateenApi(userId: string) {
         .from("orders")
         .select("*")
         .or(`marketer_id.eq.${userId},business_id.eq.${userId}`)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(CAP.ownHistory);
       if (error) throw error;
       const rows = (data ?? []) as Array<{ receipt_url?: string | null } & Record<string, unknown>>;
       // Resolve private receipt paths to short-lived signed URLs for the caller.
@@ -844,7 +875,8 @@ export function createLateenApi(userId: string) {
           .select("*")
           .eq("status", "pending")
           .not("receipt_url", "is", null)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .limit(CAP.queue);
         if (error) throw error;
         const list = (orders ?? []) as Array<
           Record<string, unknown> & { marketer_id: string; product_id: string; receipt_url?: string | null }
@@ -906,7 +938,8 @@ export function createLateenApi(userId: string) {
           .select("*")
           .in("status", ["approved", "rejected", "confirmed", "delivered", "cancelled"])
           .not("receipt_url", "is", null)
-          .order("reviewed_at", { ascending: false });
+          .order("reviewed_at", { ascending: false })
+          .limit(CAP.adminList);
         if (error) throw error;
         const list = (orders ?? []) as Array<
           Record<string, unknown> & { marketer_id: string; product_id: string; receipt_url?: string | null }
@@ -942,7 +975,8 @@ export function createLateenApi(userId: string) {
           .from("payouts")
           .select("*")
           .eq("status", "requested")
-          .order("requested_at", { ascending: false });
+          .order("requested_at", { ascending: false })
+          .limit(CAP.queue);
         if (error) throw error;
         const rows = (data ?? []) as Array<Record<string, unknown> & { user_id: string }>;
         const ids = [...new Set(rows.map((r) => r.user_id))];
@@ -989,7 +1023,7 @@ export function createLateenApi(userId: string) {
           const s = `%${search.trim()}%`;
           q = q.or(`full_name.ilike.${s},phone.ilike.${s},business_name.ilike.${s}`);
         }
-        const { data, error } = await q.order("created_at", { ascending: false });
+        const { data, error } = await q.order("created_at", { ascending: false }).limit(CAP.adminList);
         if (error) throw error;
         const profiles = (data ?? []) as Array<{
           id: string;
@@ -1147,7 +1181,7 @@ export function createLateenApi(userId: string) {
           }
           q = q.or(filters.join(","));
         }
-        const { data, error } = await q.order("created_at", { ascending: false });
+        const { data, error } = await q.order("created_at", { ascending: false }).limit(CAP.adminList);
         if (error) throw error;
         return data ?? [];
       },
@@ -1199,7 +1233,8 @@ export function createLateenApi(userId: string) {
         const { data, error } = await supabase
           .from("reports")
           .select("*")
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .limit(CAP.adminList);
         if (error) throw error;
         const reports = (data ?? []) as Array<{
           id: string;
@@ -1253,7 +1288,8 @@ export function createLateenApi(userId: string) {
           .from("change_requests" as never)
           .select("*")
           .eq("status" as never, "open" as never)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .limit(CAP.queue);
         if (error) throw error;
         const reqs = (data ?? []) as unknown as Array<{
           id: string;
@@ -1289,7 +1325,8 @@ export function createLateenApi(userId: string) {
         const { data, error } = await supabase
           .from("account_deletion_requests")
           .select("*")
-          .order("requested_at", { ascending: false });
+          .order("requested_at", { ascending: false })
+          .limit(CAP.adminList);
         if (error) throw error;
         const reqs = (data ?? []) as Array<{
           id: string;
@@ -1332,7 +1369,7 @@ export function createLateenApi(userId: string) {
           const s = `%${search.trim()}%`;
           q = q.or(`full_name.ilike.${s},employee_number.ilike.${s},job_title.ilike.${s},email.ilike.${s}`);
         }
-        const { data, error } = await q.order("created_at", { ascending: false });
+        const { data, error } = await q.order("created_at", { ascending: false }).limit(CAP.adminList);
         if (error) throw error;
         const emps = (data ?? []) as Array<Record<string, unknown> & { id: string }>;
         if (!emps.length) return [];
