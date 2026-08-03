@@ -102,6 +102,32 @@ export function cacheAvatar(url: string, userId?: string): void {
   }
 }
 
+/* ── Wallet balance cache ──
+   Painted on first render so a cold start shows the balance the server last
+   reported, instead of a locally-guessed figure that then jumps when the real
+   one arrives. Same idea as the avatar cache above. */
+
+const walletKey = (userId?: string) => "lateen_wallet_balance" + sfx(userId);
+
+export function readWalletBalance(userId?: string): number | null {
+  try {
+    const v = localStorage.getItem(walletKey(userId));
+    if (v == null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
+}
+
+export function cacheWalletBalance(n: number, userId?: string): void {
+  try {
+    localStorage.setItem(walletKey(userId), String(n));
+  } catch {
+    /* ignore */
+  }
+}
+
 /* ── Page + scroll persistence ──
    localStorage (not sessionStorage) so state survives a full reload or an OS
    tab discard, falling back to and migrating the older sessionStorage values. */

@@ -7,7 +7,9 @@ import { computeAnalytics, type Analytics } from "./lib/analytics";
 import { MIN_WITHDRAW, PAYOUT_PERIOD_MS } from "./lib/constants";
 import { isAr, t } from "./lib/format";
 import { buildProductsMap, dbToBrowse, dbToOrder } from "./lib/mappers";
-import { cacheAvatar, loadDrafts, readAvatar, saveDrafts } from "./lib/storage";
+import {
+  cacheAvatar, cacheWalletBalance, loadDrafts, readAvatar, readWalletBalance, saveDrafts,
+} from "./lib/storage";
 import type {
   BrowseProduct, FormProduct, LateenApi, MarketerOrder, MarketerProfile, NotificationRow,
 } from "./lib/types";
@@ -80,7 +82,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
   const [newNotifIds, setNewNotifIds] = useState<Set<string>>(new Set());
   const [avatarUrl, setAvatarUrl] = useState<string>(() => readAvatar(userId));
   const [walletCur, setWalletCurState] = useState<string>("");
-  const [dbBalance, setDbBalance] = useState<number | null>(null);
+  const [dbBalance, setDbBalance] = useState<number | null>(() => readWalletBalance(userId));
   const [payout, setPayout] = useState<PayoutState>({
     statusText: "", pending: false, canWithdraw: false, frozen: false, balance: 0,
   });
@@ -97,6 +99,10 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
   const profileRef = useRef(profile);
   profileRef.current = profile;
   const keepClearedRef = useRef(false);
+  const dbBalanceRef = useRef(dbBalance);
+  dbBalanceRef.current = dbBalance;
+  /** Bumped by every wallet refresh, so one that has been overtaken can tell. */
+  const refreshSeqRef = useRef(0);
 
   /* ── Currency selection ──
      Defaults to the first currency the marketer has actually earned in. */
@@ -225,16 +231,38 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
 
   /* ── Wallet + payout ── */
 
+  /* This runs on a timer, on six different realtime channels, and after every
+     order the marketer touches, so several are often in flight at once. Three
+     rules keep the number on screen still:
+
+       · one write per refresh, at the end, so the balance and the line under
+         it always describe the same moment;
+       · a refresh that has been overtaken by a newer one commits nothing,
+         because arriving late does not make an answer fresher;
+       · a fetch that failed writes nothing. The old code fell back to zero,
+         so one dropped request on a weak connection blanked the wallet to
+         0 until the next tick — the flicker people actually saw.
+
+     The caller still gets what this run computed, whether or not it committed;
+     the withdraw sheet reads the return value to decide what to send. */
   const refreshWalletAndPayout = useCallback(async (): Promise<PayoutState> => {
+    const seq = ++refreshSeqRef.current;
+    const latestRun = () => refreshSeqRef.current === seq;
+
     const commit = (next: PayoutState) => {
-      setPayout(next);
+      if (latestRun()) {
+        setPayout(next);
+        setDbBalance(next.balance);
+        cacheWalletBalance(next.balance, userId);
+      }
       return next;
     };
+    /** The balance to show when nothing came back: whatever is already up. */
+    const lastKnown = () => dbBalanceRef.current ?? 0;
 
     let wallet: { balance?: number } | null = null;
     try {
       if (api.getWallet) wallet = (await api.getWallet()) as { balance?: number } | null;
-      if (wallet) setDbBalance(Number(wallet.balance) || 0);
     } catch (e) {
       console.error("[Lateen] wallet", e);
     }
@@ -244,7 +272,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
       return commit({
         statusText: isAr() ? "تم تجميد الحساب مؤقتاً" : "Account temporarily frozen",
         pending: false, canWithdraw: false, frozen: true,
-        balance: Number(wallet?.balance) || 0,
+        balance: wallet ? Number(wallet.balance) || 0 : lastKnown(),
       });
     }
 
@@ -272,8 +300,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
         ? Number(state.balance) || 0
         : wallet
           ? Number(wallet.balance) || 0
-          : 0;
-    setDbBalance(bal);
+          : lastKnown();
 
     if (!state) {
       return commit({
@@ -328,7 +355,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
       statusText: t("Next payout in 0 days", "تقدر تسحب بعد 0 يوم"),
       pending: false, canWithdraw: false, frozen: false, balance: bal,
     });
-  }, [api]);
+  }, [api, userId]);
 
   /* ── Favourites ── */
 
