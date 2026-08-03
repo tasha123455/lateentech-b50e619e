@@ -1206,6 +1206,23 @@ export type Database = {
       }
     }
     Functions: {
+      admin_metrics_active_users: { Args: { _market?: string | null }; Returns: number }
+      admin_metrics_daily: {
+        Args: { _market?: string | null; _tz?: string }
+        Returns: {
+          d: string
+          fee_earned: number
+          fee_refunded: number
+          pieces_added: number
+          pieces_confirmed: number
+          pieces_removed: number
+          products_created: number
+          reviewed_added: number
+          reviewed_removed: number
+          salary_paid: number
+          users_created: number
+        }[]
+      }
       admin_can: { Args: { _page: string }; Returns: boolean }
       admin_can_market: { Args: { _market: string }; Returns: boolean }
       admin_claim_invite: { Args: Record<string, never>; Returns: boolean }

@@ -191,20 +191,33 @@ export type Employee = {
 };
 
 /** Raw rows behind the Home analytics page. */
+/** One calendar day of platform activity, added up in the database.
+ *
+ *  The page used to receive every order, profile and product and add them up
+ *  in the browser. It receives these instead: a few hundred buckets rather
+ *  than a hundred thousand rows, at the finest grain any filter or chart line
+ *  ever asked for.
+ *
+ *  "added" and "removed" are separate on purpose. A refund is its own dated
+ *  event — the fee still counts on the day it was earned, and the reversal
+ *  sits on the day the refund happened, so a refund never rewrites history. */
+export type MetricsDay = {
+  /** YYYY-MM-DD in the market's own timezone. */
+  d: string;
+  users_created: number;
+  products_created: number;
+  fee_earned: number;
+  fee_refunded: number;
+  reviewed_added: number;
+  reviewed_removed: number;
+  pieces_added: number;
+  pieces_removed: number;
+  pieces_confirmed: number;
+  salary_paid: number;
+};
+
 export type HomeRaw = {
-  orders: Array<{
-    marketer_id?: string;
-    business_id?: string;
-    created_at?: string;
-    reviewed_at?: string | null;
-    delivered_at?: string | null;
-    refunded_at?: string | null;
-    fee?: number | null;
-    qty?: number | null;
-  }>;
-  profiles: Array<{ created_at?: string }>;
-  products: Array<{ created_at?: string }>;
-  employeePayments: Array<{ paid_at?: string; amount?: number | null }>;
+  days: MetricsDay[];
 };
 
 export type AdminMetrics = {

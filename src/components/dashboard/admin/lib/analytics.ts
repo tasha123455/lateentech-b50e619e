@@ -1,8 +1,37 @@
 import { AR_MONTHS, MON_ABBR, WDAYS } from "./format";
-import type { DateSelection, HomeRaw, MetricKey } from "./types";
+import type { DateSelection, HomeRaw, MetricKey, MetricsDay } from "./types";
 
-/** Does this timestamp fall inside the selected weekday/month/year combination?
+/** A bucket's date as a local Date at midnight.
+ *
+ *  The string arrives as YYYY-MM-DD, already in the market's own timezone, so
+ *  it is split by hand rather than parsed: `new Date("2026-07-01")` is read as
+ *  UTC midnight and comes back as the previous day for anyone west of London.
+ *  Building it field by field keeps the day the database said it was. */
+function dayDate(d: string): Date {
+  const [y, m, day] = d.split("-").map((n) => parseInt(n, 10));
+  return new Date(y, (m || 1) - 1, day || 1);
+}
+
+/** End of that day, which is the instant a bucket's totals are true as of. */
+function dayEnd(d: string): number {
+  const x = dayDate(d);
+  x.setHours(23, 59, 59, 999);
+  return x.getTime();
+}
+
+/** Does this day fall inside the selected weekday/month/year combination?
     An empty selection matches everything. */
+export function inSelectedDay(d: string, selected: DateSelection): boolean {
+  if (!selected.day && !selected.month && !selected.year) return true;
+  const dt = dayDate(d);
+  if (isNaN(dt.getTime())) return false;
+  if (selected.day && WDAYS[dt.getDay()] !== selected.day) return false;
+  if (selected.month && MON_ABBR[dt.getMonth()] !== selected.month) return false;
+  if (selected.year && String(dt.getFullYear()) !== selected.year) return false;
+  return true;
+}
+
+/** Kept for the timestamp-shaped callers that still exist. */
 export function inSelectedRange(iso: string | null | undefined, selected: DateSelection): boolean {
   if (!iso) return false;
   if (!selected.day && !selected.month && !selected.year) return true;
@@ -14,109 +43,58 @@ export function inSelectedRange(iso: string | null | undefined, selected: DateSe
   return true;
 }
 
+const days = (raw: HomeRaw | null): MetricsDay[] => raw?.days ?? [];
+
 /** Platform fees for the selected range. A refund is its own dated event: the
     fee still counts on the day the order was created, and the refund subtracts
     the same amount back out on the day the refund actually happened. */
 export function getFees(raw: HomeRaw | null, selected: DateSelection): number {
-  if (!raw) return 0;
   let sum = 0;
-  raw.orders.forEach((o) => {
-    if (inSelectedRange(o.created_at, selected)) sum += Number(o.fee || 0);
-    if (o.refunded_at && inSelectedRange(o.refunded_at, selected)) sum -= Number(o.fee || 0);
-  });
+  for (const b of days(raw)) {
+    if (!inSelectedDay(b.d, selected)) continue;
+    sum += Number(b.fee_earned || 0) - Number(b.fee_refunded || 0);
+  }
   return Math.round(sum * 100) / 100;
 }
 
 /** Employee salaries actually marked paid in the selected range. These rows
     survive an employee being deleted, so a deletion never changes this total. */
 export function getEmployeeSalaryPaid(raw: HomeRaw | null, selected: DateSelection): number {
-  if (!raw || !raw.employeePayments) return 0;
-  const rows = raw.employeePayments.filter((p) => inSelectedRange(p.paid_at, selected));
-  const sum = rows.reduce((s, p) => s + Number(p.amount || 0), 0);
+  let sum = 0;
+  for (const b of days(raw)) {
+    if (!inSelectedDay(b.d, selected)) continue;
+    sum += Number(b.salary_paid || 0);
+  }
   return Math.round(sum * 100) / 100;
 }
 
 /** Point-in-time snapshot of a metric "as of" a timestamp — used for both the
-    stat totals and every point on the chart, so the two always agree. */
+    stat totals and every point on the chart, so the two always agree.
+    Every one of these is a running total, so it is the sum of every bucket up
+    to and including the day that timestamp falls in. */
 export function metricValueAsOf(raw: HomeRaw | null, key: MetricKey, ts: number): number {
-  if (!raw) return 0;
-
-  if (key === "totalUsers") {
-    return raw.profiles.filter((p) => new Date(p.created_at as string).getTime() <= ts).length;
+  let sum = 0;
+  for (const b of days(raw)) {
+    if (dayEnd(b.d) > ts) break; // buckets arrive in date order
+    if (key === "totalUsers") sum += b.users_created;
+    else if (key === "totalProducts") sum += b.products_created;
+    else if (key === "platformFee") sum += Number(b.fee_earned || 0) - Number(b.fee_refunded || 0);
+    else if (key === "succeeded") sum += b.reviewed_added - b.reviewed_removed;
+    else if (key === "succeededPieces") sum += b.pieces_added - b.pieces_removed;
   }
-  if (key === "totalProducts") {
-    return raw.products.filter((p) => new Date(p.created_at as string).getTime() <= ts).length;
-  }
-  if (key === "platformFee") {
-    // Cumulative, with the same refund reversal the hero card applies.
-    return raw.orders.reduce((s, o) => {
-      let v = 0;
-      if (new Date(o.created_at as string).getTime() <= ts) v += Number(o.fee || 0);
-      if (o.refunded_at && new Date(o.refunded_at).getTime() <= ts) v -= Number(o.fee || 0);
-      return s + v;
-    }, 0);
-  }
-  if (key === "succeeded") {
-    // Counts once reviewed; a refund reverses it out from the refund's own
-    // timestamp, so the line only dips on the date it actually happened.
-    return raw.orders.reduce((s, o) => {
-      if (!o.reviewed_at || new Date(o.reviewed_at).getTime() > ts) return s;
-      if (o.refunded_at && new Date(o.refunded_at).getTime() <= ts) return s;
-      return s + 1;
-    }, 0);
-  }
-  if (key === "succeededPieces") {
-    return raw.orders.reduce((s, o) => {
-      if (!o.delivered_at) return s;
-      if (new Date(o.delivered_at).getTime() > ts) return s;
-      // A post-delivery refund removes those pieces from the moment it happened.
-      if (o.refunded_at && new Date(o.refunded_at).getTime() <= ts) return s;
-      return s + Number(o.qty || 0);
-    }, 0);
-  }
-  if (key === "activeUsers") {
-    const windowStart = ts - 30 * 86400000;
-    const set = new Set<string>();
-    raw.orders.forEach((o) => {
-      const t = new Date(o.created_at as string).getTime();
-      if (t > windowStart && t <= ts) {
-        if (o.marketer_id) set.add(o.marketer_id);
-        if (o.business_id) set.add(o.business_id);
-      }
-    });
-    return set.size;
-  }
-  return 0;
+  return key === "platformFee" ? Math.round(sum * 100) / 100 : sum;
 }
 
 export const CHART_LEN = 14;
 
-function buildChartDates(n: number): string[] {
-  const arr: string[] = [];
-  const today = new Date();
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    arr.push(d.getDate() + "/" + (d.getMonth() + 1));
-  }
-  return arr;
+/** The earliest day anywhere in the data — where "all time" starts. */
+function firstEventTime(raw: HomeRaw | null): number {
+  const d = days(raw);
+  return d.length ? dayDate(d[0].d).getTime() : Date.now();
 }
 
 /** Chart buckets for the current selection, with the real end-of-bucket
     timestamp for each point so metricValueAsOf() gives a true snapshot. */
-/** The earliest timestamp anywhere in the data — where "all time" starts. */
-function firstEventTime(raw: HomeRaw | null): number {
-  const times: number[] = [];
-  const push = (v: unknown) => {
-    const t = v ? new Date(v as string).getTime() : NaN;
-    if (Number.isFinite(t)) times.push(t);
-  };
-  (raw?.orders || []).forEach((o) => push(o.created_at));
-  (raw?.profiles || []).forEach((p) => push(p.created_at));
-  (raw?.products || []).forEach((p) => push(p.created_at));
-  return times.length ? Math.min(...times) : Date.now();
-}
-
 export function getChartConfig(raw: HomeRaw | null, selected: DateSelection): { labels: string[]; len: number; ends: number[] } {
   const anySel = selected.day || selected.month || selected.year;
   const today = new Date();

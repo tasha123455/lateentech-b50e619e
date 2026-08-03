@@ -106,12 +106,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
     try {
       const m = (await admin.getMetrics(metricsMarket)) as AdminMetrics;
       setMetrics(m);
-      setHomeRaw({
-        orders: m.orders || [],
-        profiles: m.profiles || [],
-        products: m.products || [],
-        employeePayments: m.employeePayments || [],
-      });
+      setHomeRaw({ days: m.days || [] });
       setMetricsError("");
     } catch (e) {
       console.error("[admin] metrics", e);

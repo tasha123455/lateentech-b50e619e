@@ -2,6 +2,7 @@
 // createLateenApi() and held by each dashboard's data provider.
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage, IMAGE_PRESETS } from "@/lib/image-utils";
+import { marketOf } from "@/lib/markets";
 
 // Same charset as product codes (no ambiguous 0/O or 1/I), but with no
 // prefix -- product codes are shown as "LT-XXXXXX" while order numbers are
@@ -1443,149 +1444,60 @@ export function createLateenApi(userId: string) {
        * profit is revenue minus that market's costs and not minus a share of
        * the wage bill, which is the honest way round.
        */
+      /**
+       * Platform numbers, optionally for one market only.
+       *
+       * The rows are added up in the database — one bucket per calendar day —
+       * rather than downloaded and added up here. The page still filters by
+       * date and draws its chart in the browser; a day is the finest grain
+       * either of them ever asked for, so nothing is lost and a hundred
+       * thousand orders arrive as a few hundred buckets.
+       *
+       * A row belongs to a market through the business selling it, because
+       * the seller's market sets the fee — a Libyan marketer selling a US
+       * product is US revenue. Salaries are not split: employees are paid by
+       * the platform, not by a market, so they stay whole in every view.
+       */
       async getMetrics(market?: string | null) {
-        const orderColumns = "qty, platform_fee, status, marketer_id, business_id, created_at, confirmed_at, reviewed_at, delivered_at";
-        const [ordersAttempt, profilesRes, productsRes, empPaymentsRes] = await Promise.all([
-          supabase.from("orders").select(`${orderColumns}, refunded_at`),
-          supabase.from("profiles").select("id, created_at, full_name, business_name, market"),
-          supabase.from("products").select("id, created_at, business_id").is("deleted_at", null),
-          // amount + paid_at only — these rows survive employee deletion (see
-          // employee_payments_keep_history_on_delete migration) so historical
-          // paid salaries keep counting against total profit even after the
-          // employee record itself is gone.
-          supabase.from("employee_payments").select("amount, paid_at"),
+        // Buckets follow the market's own calendar, so an order belongs to
+        // the day it happened where it happened.
+        const tz = marketOf(market ?? null).formats.timeZone;
+        const [daysRes, activeRes] = await Promise.all([
+          supabase.rpc("admin_metrics_daily" as never, { _market: market ?? null, _tz: tz } as never),
+          supabase.rpc("admin_metrics_active_users" as never, { _market: market ?? null } as never),
         ]);
-        if (profilesRes.error) throw profilesRes.error;
-        if (productsRes.error) throw productsRes.error;
+        if (daysRes.error) throw daysRes.error;
 
-        let ordersRes = ordersAttempt;
-        if (ordersRes.error) {
-          // Most likely cause: the refund migration (which adds
-          // orders.refunded_at) hasn't been deployed to this database yet.
-          // Degrade gracefully instead of failing the whole Home page —
-          // refunded orders just won't be excluded from fee totals until
-          // that migration lands, but every other stat still works.
-          ordersRes = await supabase.from("orders").select(orderColumns);
-          if (ordersRes.error) throw ordersRes.error;
-        }
+        const days = ((daysRes.data ?? []) as unknown as Array<Record<string, unknown>>).map((r) => ({
+          d: String(r.d),
+          users_created: Number(r.users_created || 0),
+          products_created: Number(r.products_created || 0),
+          fee_earned: Number(r.fee_earned || 0),
+          fee_refunded: Number(r.fee_refunded || 0),
+          reviewed_added: Number(r.reviewed_added || 0),
+          reviewed_removed: Number(r.reviewed_removed || 0),
+          pieces_added: Number(r.pieces_added || 0),
+          pieces_removed: Number(r.pieces_removed || 0),
+          pieces_confirmed: Number(r.pieces_confirmed || 0),
+          salary_paid: Number(r.salary_paid || 0),
+        }));
 
-        const feeEligibleStatuses = new Set(["approved", "confirmed", "delivered", "cancelled"]);
-        const ordersRaw = (ordersRes.data ?? []) as Array<{
-          qty: number;
-          platform_fee: number;
-          status: string;
-          marketer_id: string;
-          business_id: string;
-          created_at: string;
-          confirmed_at: string | null;
-          reviewed_at: string | null;
-          refunded_at?: string | null;
-          delivered_at: string | null;
-        }>;
-        const allProfilesRaw = (profilesRes.data ?? []) as Array<{
-          id: string;
-          created_at: string;
-          full_name: string | null;
-          business_name: string | null;
-          market: string | null;
-        }>;
-        /* Who is inside the chosen market. Rows with no market are treated as
-           the default one, which is where every account created before markets
-           existed actually belongs.
-
-           This has to be built before anything filters on it. It used to sit
-           below the orders filter that reads it, which threw a ReferenceError
-           the moment a country was picked — invisible while there was one
-           market, because the filter is not drawn and `market` is always null,
-           so the branch that touches this was never taken. */
-        const inMarket = new Set(
-          allProfilesRaw
-            .filter((p) => !market || (p.market || "LY") === market)
-            .map((p) => p.id),
-        );
-        const allProfiles = market
-          ? allProfilesRaw.filter((p) => inMarket.has(p.id))
-          : allProfilesRaw;
-        const orders = market ? ordersRaw.filter((o) => inMarket.has(o.business_id)) : ordersRaw;
-        // Same "completed registration" rule as the Users page: bare auth
-        // stubs (no role, no name) are not real users and must not be counted.
-        const { data: allRoleRows } = await supabase.from("user_roles").select("user_id");
-        const roledIds = new Set(((allRoleRows ?? []) as Array<{ user_id: string }>).map((r) => r.user_id));
-        const profiles = allProfiles.filter(
-          (p) => roledIds.has(p.id) && !!((p.full_name || "").trim() || (p.business_name || "").trim()),
-        );
-        const productsRaw = (productsRes.data ?? []) as Array<{ id: string; created_at: string; business_id: string }>;
-        const products = market ? productsRaw.filter((p) => inMarket.has(p.business_id)) : productsRaw;
-
-        // A refunded order's platform fee is no longer counted as revenue,
-        // even though the order itself keeps whatever status it already had
-        // (approved orders stay "approved" everywhere else in the app).
-        const feeEligible = (o: { status: string; refunded_at?: string | null }) =>
-          feeEligibleStatuses.has(o.status) && !o.refunded_at;
-
-        const totalFees = orders.reduce(
-          (sum, o) => (feeEligible(o) ? sum + Number(o.platform_fee || 0) * Number(o.qty || 0) : sum),
-          0,
-        );
-        // "Pieces Sold" = units on orders that actually reached the confirmed stage (or later).
-        const piecesSold = orders.reduce((sum, o) => (o.confirmed_at ? sum + Number(o.qty || 0) : sum), 0);
-        // "Succeeded Pieces Sold" = units on orders that were actually delivered
-        // (status === 'delivered'), i.e. the same "succeeded" definition used by
-        // the Pieces sold box in the business breakdown and the marketer analytics
-        // page — just totaled across every order on the platform instead of one
-        // business/marketer's own orders.
-        // Refunded orders are excluded so this matches the chart's succeededPieces metric exactly.
-        const succeededPiecesSold = orders.reduce(
-          (sum, o) => (o.status === "delivered" && !o.refunded_at ? sum + Number(o.qty || 0) : sum),
-          0,
-        );
-        // "Succeeded Upfronts" = orders whose payment receipt was approved by an admin
-        // (reviewed_at is only ever set by admin_approve_order), minus any that were
-        // later refunded — a refunded receipt no longer counts as a successful upfront.
-        const succeededUpfronts = orders.filter((o) => !!o.reviewed_at && !o.refunded_at).length;
-
-        const monthAgo = Date.now() - 30 * 86400000;
-        const activeUsers = new Set<string>();
-        for (const o of orders) {
-          if (new Date(o.created_at).getTime() >= monthAgo) {
-            activeUsers.add(o.marketer_id);
-            activeUsers.add(o.business_id);
-          }
-        }
+        const sum = (f: (b: (typeof days)[number]) => number) => days.reduce((n, b) => n + f(b), 0);
+        const round2 = (n: number) => Math.round(n * 100) / 100;
 
         return {
-          totalFees,
-          activeUsers: activeUsers.size,
-          totalUsers: profiles.length,
-          totalProducts: products.length,
-          piecesSold,
-          succeededUpfronts,
-          succeededPiecesSold,
-          // Raw, lightweight rows so the Home dashboard can compute accurate
-          // historical breakdowns for every date filter (day / month / year /
-          // all-time) client-side, without extra round-trips per filter click.
-          orders: orders.map((o) => ({
-            qty: Number(o.qty || 0),
-            // Fee "as earned" on the day the order reached a fee-eligible status,
-            // regardless of any later refund. The client applies the refund's
-            // reversal separately, dated to when the refund actually happened
-            // (see getFees() in admin.script.js) — so a refund shows up as its
-            // own negative entry on its own date instead of erasing the
-            // original day's history.
-            fee: feeEligibleStatuses.has(o.status) ? Number(o.platform_fee || 0) * Number(o.qty || 0) : 0,
-            marketer_id: o.marketer_id,
-            business_id: o.business_id,
-            created_at: o.created_at,
-            confirmed_at: o.confirmed_at,
-            reviewed_at: o.reviewed_at,
-            delivered_at: o.delivered_at,
-            refunded_at: o.refunded_at ?? null,
-          })),
-          profiles: profiles.map((p) => ({ created_at: p.created_at })),
-          products: products.map((p) => ({ created_at: p.created_at })),
-          employeePayments: (
-            (empPaymentsRes.data ?? []) as Array<{ amount: number; paid_at: string }>
-          ).map((p) => ({ amount: Number(p.amount || 0), paid_at: p.paid_at })),
+          /* Earned minus refunded. The two series cancel to exactly the orders
+             that were fee-eligible and never refunded, which is what the old
+             total counted — but they stay separate in the buckets so a refund
+             lands on its own date rather than erasing the day it was earned. */
+          totalFees: round2(sum((b) => b.fee_earned - b.fee_refunded)),
+          activeUsers: Number(activeRes.data || 0),
+          totalUsers: sum((b) => b.users_created),
+          totalProducts: sum((b) => b.products_created),
+          piecesSold: sum((b) => b.pieces_confirmed),
+          succeededUpfronts: sum((b) => b.reviewed_added - b.reviewed_removed),
+          succeededPiecesSold: sum((b) => b.pieces_added - b.pieces_removed),
+          days,
         };
       },
     },
