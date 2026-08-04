@@ -96,6 +96,7 @@ export type Order = {
   notes: string;
   adminNotes: string;
   refundedAt: string | null;
+  deliveredAt: string | null;
   receiptUrl: string;
   /** Market this order was priced under. */
   market?: string | null;

@@ -137,14 +137,30 @@ function buildAnalytics(orders: Order[], stubs: PendingActiveStub[]): AnalyticsR
     const commission = Number(full.commission) || 0;
     const platformFee = Number(full.platformFee) || 0;
     const net = price * qty - commission - platformFee;
-    const isOk = st === "delivered";
-    const isFail = st === "cancelled";
+    /* A refund leaves the status as 'cancelled' — the same status a failed
+       delivery uses. Going by status alone deleted a refunded sale from the
+       day it sold and counted it as a delivery that had failed. delivered_at
+       says whether it ever reached the customer, and refunded_at dates the
+       reversal below, so the chart shows both events on their own days. */
+    const isOk = !!full.deliveredAt;
+    const isFail = st === "cancelled" && !full.deliveredAt;
     const di = Math.floor((new Date(c.getFullYear(), c.getMonth(), c.getDate()).getTime() - dayStart.getTime()) / 86400000);
     if (di >= 0 && di < dayCount) { if (isOk) { revD[di] += net; pcsD[di] += qty; ringD.ok++; } if (isFail) ringD.fail++; }
     const mi = (c.getFullYear() - startYear) * 12 + c.getMonth();
     if (mi >= 0 && mi < monthCount) { if (isOk) { revM[mi] += net; pcsM[mi] += qty; ringM.ok++; } if (isFail) ringM.fail++; }
     const yi = c.getFullYear() - startYear;
     if (yi >= 0 && yi < yearCount) { if (isOk) { revY[yi] += net; pcsY[yi] += qty; ringY.ok++; } if (isFail) ringY.fail++; }
+
+    // The reversal, on the day the money actually went back.
+    const rf = isOk && full.refundedAt ? new Date(full.refundedAt) : null;
+    if (rf && !Number.isNaN(rf.getTime())) {
+      const rdi = Math.floor((new Date(rf.getFullYear(), rf.getMonth(), rf.getDate()).getTime() - dayStart.getTime()) / 86400000);
+      if (rdi >= 0 && rdi < dayCount) { revD[rdi] -= net; pcsD[rdi] -= qty; }
+      const rmi = (rf.getFullYear() - startYear) * 12 + rf.getMonth();
+      if (rmi >= 0 && rmi < monthCount) { revM[rmi] -= net; pcsM[rmi] -= qty; }
+      const ryi = rf.getFullYear() - startYear;
+      if (ryi >= 0 && ryi < yearCount) { revY[ryi] -= net; pcsY[ryi] -= qty; }
+    }
   });
 
   const chartData: ChartData = {

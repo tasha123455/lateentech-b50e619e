@@ -40,6 +40,10 @@ export function AnalyticsBreakdown({
   const total = data.succeeded + data.failed;
   const succPct = total > 0 ? Math.round((data.succeeded / total) * 100) : 0;
   const failPct = total > 0 ? Math.round((data.failed / total) * 100) : 0;
+  /* Filtered to a day when a sale was refunded, these read as a reversal —
+     "−1 succeeded". A share of a reversal is not a quantity, so the "x% of N
+     orders" subtext is left off rather than printed as nonsense. */
+  const showShare = total > 0 && data.succeeded >= 0 && data.failed >= 0;
   const ar = isAr();
   const succLbl = ar ? "الطلبات تم تسليمها" : "Succeeded";
   const failLbl = ar ? "الطلبات لم يتم تسليمها" : "Failed";
@@ -131,22 +135,28 @@ export function AnalyticsBreakdown({
                 <div className="mkbd-box-label" data-no-i18n>{netLbl}</div>
                 <div className="mkbd-box-value"><Money n={data.earnings} sym={selSym} code={walletCur} /></div>
               </div>
+              {/* <bdi> keeps a negative reading as a negative: on the Arabic
+                  page a bare "-3" is reordered to "3-". */}
               <div className="mkbd-box">
                 <div className="mkbd-box-label" data-no-i18n>{piecesLbl}</div>
-                <div className="mkbd-box-value">{data.pieces}</div>
+                <div className="mkbd-box-value"><bdi>{data.pieces}</bdi></div>
               </div>
               <div className="mkbd-box">
                 <div className="mkbd-box-label" data-no-i18n>{succLbl}</div>
                 <div className="mkbd-box-value green" data-no-i18n>
-                  {data.succeeded}{" "}
-                  <span style={{ fontSize: 12, color: "var(--color-text-tertiary)", fontWeight: 500 }}>({succSub})</span>
+                  <bdi>{data.succeeded}</bdi>{showShare && " "}
+                  {showShare && (
+                    <span style={{ fontSize: 12, color: "var(--color-text-tertiary)", fontWeight: 500 }}>({succSub})</span>
+                  )}
                 </div>
               </div>
               <div className="mkbd-box">
                 <div className="mkbd-box-label" data-no-i18n>{failLbl}</div>
                 <div className="mkbd-box-value red" data-no-i18n>
-                  {data.failed}{" "}
-                  <span style={{ fontSize: 12, color: "var(--color-text-tertiary)", fontWeight: 500 }}>({failSub})</span>
+                  <bdi>{data.failed}</bdi>{showShare && " "}
+                  {showShare && (
+                    <span style={{ fontSize: 12, color: "var(--color-text-tertiary)", fontWeight: 500 }}>({failSub})</span>
+                  )}
                 </div>
               </div>
             </div>

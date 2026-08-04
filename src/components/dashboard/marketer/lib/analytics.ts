@@ -7,6 +7,24 @@ import type { ChartData, EarnByCur, MarketerOrder, RingData } from "./types";
 const isEarnStatus = (s: string) =>
   s === "approved" || s === "confirmed" || s === "delivered" || s === "cancelled";
 
+/* A refund is a dated event, not an erasure.
+ *
+ * Refunding sets the status to 'cancelled', which is also what a failed
+ * delivery uses. Reading "did this sell?" off the status therefore made a
+ * refunded sale disappear from the day it happened, and made it look like a
+ * delivery that had failed. Neither is true: it sold, and then it was
+ * reversed, on two different days.
+ *
+ * delivered_at answers the first question and refunded_at dates the second.
+ * They can be trusted: mark_failed refuses to touch a delivered order, and
+ * nothing ever clears delivered_at. */
+
+/** Did this order actually reach the customer, whatever happened after? */
+const wasDelivered = (o: MarketerOrder) => !!o._deliveredAt;
+
+/** A delivery that failed — as opposed to one that was reversed afterwards. */
+const isFailedDelivery = (o: MarketerOrder) => (o._status || "pending") === "cancelled" && !o._deliveredAt;
+
 type Series = {
   dayStart: Date; dayCount: number;
   monthsStart: Date; monthCount: number;
@@ -104,8 +122,8 @@ export function computeAnalytics(orders: MarketerOrder[]): Analytics {
     const c = o._createdAt;
     if (!c) return;
     const isEarn = isEarnStatus(status);
-    const isOk = status === "delivered";
-    const isFail = status === "cancelled";
+    const isOk = wasDelivered(o);
+    const isFail = isFailedDelivery(o);
     const earn = (o.commPerUnit || 0) * (o.qty || 0);
 
     if (isEarn) {
@@ -141,18 +159,24 @@ export function computeAnalytics(orders: MarketerOrder[]): Analytics {
       if (isFail) ringY.fail++;
     }
 
-    // A refund claws the commission back out of every bucket it landed in.
+    // A refund claws the commission back out on the day it happened, and the
+    // pieces with it when the order had already been delivered.
     if (o._refundedAt) {
       const rc = o._refundedAt;
+      const qty = isOk ? o.qty || 0 : 0;
       totEarn -= earn;
+      totPieces -= qty;
+      // totProducts is "how many distinct products you have sold", and one
+      // refund does not un-sell a product the marketer moved ten of.
+      if (isOk) totOk--;
       const rcc = o._curCode || "USD";
       if (earnByCur[rcc]) earnByCur[rcc].amount -= earn;
       const rdi = Math.floor((new Date(rc.getFullYear(), rc.getMonth(), rc.getDate()).getTime() - s.dayStart.getTime()) / 86400000);
-      if (rdi >= 0 && rdi < s.dayCount) earnD[rdi] -= earn;
+      if (rdi >= 0 && rdi < s.dayCount) { earnD[rdi] -= earn; pcsD[rdi] -= qty; }
       const rmi = (rc.getFullYear() - s.startYear) * 12 + rc.getMonth();
-      if (rmi >= 0 && rmi < s.monthCount) earnM[rmi] -= earn;
+      if (rmi >= 0 && rmi < s.monthCount) { earnM[rmi] -= earn; pcsM[rmi] -= qty; }
       const ryi = rc.getFullYear() - s.startYear;
-      if (ryi >= 0 && ryi < s.yearCount) earnY[ryi] -= earn;
+      if (ryi >= 0 && ryi < s.yearCount) { earnY[ryi] -= earn; pcsY[ryi] -= qty; }
     }
   });
 
@@ -209,17 +233,25 @@ export function breakdownData(orders: MarketerOrder[], sel: BreakdownSelection, 
     if (isEarnStatus(status)) {
       if (!cur || (o._curCode || "USD") === cur) earnings += (o.commPerUnit || 0) * (o.qty || 0);
     }
-    if (status === "delivered") {
+    if (wasDelivered(o)) {
       pieces += o.qty || 0;
       succeeded++;
     }
-    if (status === "cancelled") failed++;
+    if (isFailedDelivery(o)) failed++;
   });
 
+  /* The reversal, on the day the refund happened. Filter to that day and the
+     three figures read negative, which is the honest answer: nothing was
+     earned or sold that day, something was given back. */
   (orders || []).forEach((o) => {
     if (!o._refundedAt) return;
     if (cur && (o._curCode || "USD") !== cur) return;
-    if (noFilter || dateMatches(o._refundedAt, sel)) earnings -= (o.commPerUnit || 0) * (o.qty || 0);
+    if (!noFilter && !dateMatches(o._refundedAt, sel)) return;
+    earnings -= (o.commPerUnit || 0) * (o.qty || 0);
+    if (wasDelivered(o)) {
+      pieces -= o.qty || 0;
+      succeeded--;
+    }
   });
 
   return { earnings, pieces, succeeded, failed };

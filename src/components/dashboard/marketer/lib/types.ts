@@ -150,6 +150,9 @@ export type MarketerOrder = {
   _curCode: string;
   _createdAt?: Date;
   _updatedAt: Date;
+  /** Set once the business marked it delivered, and never cleared — so it
+   *  survives the 'cancelled' status a refund leaves behind. */
+  _deliveredAt?: Date | null;
   _refundedAt?: Date | null;
   refundNote?: string;
 };

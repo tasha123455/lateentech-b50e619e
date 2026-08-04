@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useAdminData } from "../AdminDataProvider";
-import { CHART_METRICS, getEmployeeSalaryPaid, getFees } from "../lib/analytics";
+import {
+  CHART_METRICS, getApprovedReceipts, getDeliveredPieces, getEmployeeSalaryPaid, getFees,
+} from "../lib/analytics";
 import { MON_ABBR, WDAYS } from "../lib/format";
 import type { DateSelection, MetricKey } from "../lib/types";
 import { DateFilterTabs, EN_LABELS, USERS_CLASSES, buildYearItems } from "../ui/DateFilterTabs";
@@ -41,6 +43,8 @@ export function HomePage() {
 
   const fees = useMemo(() => getFees(homeRaw, selected), [homeRaw, selected]);
   const salaries = useMemo(() => getEmployeeSalaryPaid(homeRaw, selected), [homeRaw, selected]);
+  const receipts = useMemo(() => getApprovedReceipts(homeRaw, selected), [homeRaw, selected]);
+  const piecesSold = useMemo(() => getDeliveredPieces(homeRaw, selected), [homeRaw, selected]);
   const profit = Math.round((fees - salaries) * 100) / 100;
   const day = useMemo(() => selectedDay(selected), [selected]);
 
@@ -60,7 +64,10 @@ export function HomePage() {
   }, [api, day]);
 
   const anySel = !!(selected.day || selected.month || selected.year);
-  const stat = (v: unknown) => (metricsError ? "…" : Number(v || 0).toLocaleString());
+  /* <bdi> keeps a negative reading as one: on the Arabic page a bare "-1" is
+     reordered to "1-", which looks like a footnote rather than a reversal. */
+  const stat = (v: unknown) =>
+    metricsError ? "…" : <bdi>{Number(v || 0).toLocaleString()}</bdi>;
 
   return (
     <>
@@ -133,14 +140,18 @@ export function HomePage() {
           <div className="adm-stat-value">{stat(metrics?.totalProducts)}</div>
         </div>
 
+        {/* These two follow the date filter. A refund is dated to the day it
+            happened, so filtering to a day that only gave money back shows a
+            negative rather than nothing at all. Unfiltered they are the same
+            all-time totals as before. */}
         <div className="adm-stat">
           <div className="adm-stat-label">Succeeded Upfronts</div>
-          <div className="adm-stat-value">{stat(metrics?.succeededUpfronts)}</div>
+          <div className="adm-stat-value">{stat(receipts)}</div>
         </div>
 
         <div className="adm-stat">
           <div className="adm-stat-label">Succeeded Pieces Sold</div>
-          <div className="adm-stat-value">{stat(metrics?.succeededPiecesSold)}</div>
+          <div className="adm-stat-value">{stat(piecesSold)}</div>
         </div>
       </div>
 

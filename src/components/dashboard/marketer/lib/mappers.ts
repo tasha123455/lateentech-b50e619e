@@ -399,6 +399,12 @@ export function dbToOrder(r: Record<string, unknown>, products: Record<string, F
     receiptUploadedAt: (r.receipt_uploaded_at as string) || null,
     reviewedAt: (r.reviewed_at as string) || null,
     _updatedAt: r.updated_at ? new Date(r.updated_at as string) : created,
+    /* A refund flips the status to 'cancelled', which a failed delivery also
+       uses. delivered_at is what tells them apart: mark_failed refuses to run
+       on a delivered order, and nothing ever clears delivered_at, so a row
+       carrying both dates was delivered and then refunded. The analytics need
+       that to date the reversal instead of erasing the sale. */
+    _deliveredAt: r.delivered_at ? new Date(r.delivered_at as string) : null,
     _refundedAt: r.refunded_at ? new Date(r.refunded_at as string) : null,
     refundNote: (r.refund_note as string) || "",
   };

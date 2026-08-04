@@ -101,6 +101,10 @@ export function dbToOrder(r: Row, products: Product[]): Order {
     notes: r.customer_notes || "",
     adminNotes: r.refund_note || r.admin_notes || "",
     refundedAt: r.refunded_at || null,
+    /* Tells a refunded delivery apart from a failed one: both end up
+       'cancelled', but mark_failed refuses to touch a delivered order and
+       nothing ever clears delivered_at. */
+    deliveredAt: (r.delivered_at as string) || null,
     receiptUrl: r.receipt_url || "",
     market: (r.market as string) || "LY",
     marketerConfirmed: !!r.marketer_confirmed_at,

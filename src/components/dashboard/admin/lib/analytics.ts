@@ -68,6 +68,32 @@ export function getEmployeeSalaryPaid(raw: HomeRaw | null, selected: DateSelecti
   return Math.round(sum * 100) / 100;
 }
 
+/** Approved receipts, and pieces delivered, for the selected range.
+ *
+ *  Both are net of reversals dated to the day the reversal happened, so
+ *  filtering to a day on which a sale was refunded and nothing else happened
+ *  reads as a negative — that day gave money back, it did not take any.
+ *
+ *  With nothing selected this sums every bucket, which is the all-time total
+ *  these cards showed before they learned about the filter. */
+export function getApprovedReceipts(raw: HomeRaw | null, selected: DateSelection): number {
+  let n = 0;
+  for (const b of days(raw)) {
+    if (!inSelectedDay(b.d, selected)) continue;
+    n += b.approved_added - b.approved_removed;
+  }
+  return n;
+}
+
+export function getDeliveredPieces(raw: HomeRaw | null, selected: DateSelection): number {
+  let n = 0;
+  for (const b of days(raw)) {
+    if (!inSelectedDay(b.d, selected)) continue;
+    n += b.pieces_added - b.pieces_removed;
+  }
+  return n;
+}
+
 /** Point-in-time snapshot of a metric "as of" a timestamp — used for both the
     stat totals and every point on the chart, so the two always agree.
     Every one of these is a running total, so it is the sum of every bucket up

@@ -32,10 +32,32 @@ function inSel(createdAt: Date | null | undefined, sel: Sel): boolean {
   return true;
 }
 
-/** mpProductOrders */
-function productOrders(p: Product, orders: Order[], sel: Sel): Order[] {
+/** Was this order actually delivered, whatever happened to it afterwards?
+ *
+ *  A refund leaves the status as 'cancelled', which is also what a failed
+ *  delivery uses, so reading the status alone made a refunded sale vanish from
+ *  the day it sold. delivered_at is the reliable answer: mark_failed refuses
+ *  to touch a delivered order and nothing ever clears the date. */
+const wasDelivered = (o: Order) => !!o.deliveredAt;
+
+/** mpProductOrders, now signed.
+ *
+ *  A sale counts on the day it was made; a refund counts *against* the day the
+ *  refund happened, rather than quietly deleting the sale from the day it was
+ *  made. Filter to a day on which something was refunded and the totals read
+ *  negative, which is what actually happened that day. Over all time the two
+ *  cancel, so a refunded sale nets to nothing — as it should. */
+type SignedOrder = { o: Order; sign: 1 | -1 };
+
+function productOrders(p: Product, orders: Order[], sel: Sel): SignedOrder[] {
   try {
-    return orders.filter((o) => o.productId === p.id && o._status === "delivered" && inSel(o._createdAt, sel));
+    const out: SignedOrder[] = [];
+    orders.forEach((o) => {
+      if (o.productId !== p.id || !wasDelivered(o)) return;
+      if (inSel(o._createdAt, sel)) out.push({ o, sign: 1 });
+      if (o.refundedAt && inSel(new Date(o.refundedAt), sel)) out.push({ o, sign: -1 });
+    });
+    return out;
   } catch {
     return [];
   }
@@ -116,7 +138,7 @@ function RangeTabs({
   );
 }
 
-function VariantBoxes({ p, list }: { p: Product; list: Order[] }) {
+function VariantBoxes({ p, list }: { p: Product; list: SignedOrder[] }) {
   const ar = isAr();
   const { open: openLightbox } = useLightbox();
   const realGroups = (p.variantGroups || []).filter((g) => (g as { items?: unknown[] }).items && (g as { items?: unknown[] }).items!.length);
@@ -138,15 +160,15 @@ function VariantBoxes({ p, list }: { p: Product; list: Order[] }) {
                 const qty = Number(x.qty) || 0;
                 const pct = Math.max(6, Math.round((qty / maxQty) * 100));
                 const low = qty === 0 ? "mp-empty" : qty <= LOW_STOCK_THRESHOLD ? "mp-low" : "";
-                const vList = list.filter((o) => {
+                const vList = list.filter(({ o }) => {
                   const sv = Array.isArray(o.selectedVariants) ? o.selectedVariants : null;
                   if (sv && sv.length) {
                     return sv.some((s) => String((s as { name?: string })?.name || "").trim().toLowerCase() === String(g.name || "").trim().toLowerCase() && String((s as { value?: string })?.value || "") === String(x.val));
                   }
                   return o.size === x.val || o.color === x.val;
                 });
-                const vSold = vList.reduce((s, o) => s + (Number(o.qty) || 0), 0);
-                const vRevenue = vList.reduce((s, o) => s + orderNet(o), 0);
+                const vSold = vList.reduce((s, { o, sign }) => s + sign * (Number(o.qty) || 0), 0);
+                const vRevenue = vList.reduce((s, { o, sign }) => s + sign * orderNet(o), 0);
                 return (
                   <div className="mp-vg-value-row" key={xi}>
                     <div className="mp-vg-value-top">
@@ -192,14 +214,15 @@ function VariantBoxes({ p, list }: { p: Product; list: Order[] }) {
 function AnalyticsBody({ p, orders, sel }: { p: Product; orders: Order[]; sel: Sel }) {
   const ar = isAr();
   const list = useMemo(() => productOrders(p, orders, sel), [p, orders, sel]);
-  const sold = list.reduce((s, o) => s + (Number(o.qty) || 0), 0);
-  const revenue = list.reduce((s, o) => s + orderNet(o), 0);
+  const sold = list.reduce((s, { o, sign }) => s + sign * (Number(o.qty) || 0), 0);
+  const revenue = list.reduce((s, { o, sign }) => s + sign * orderNet(o), 0);
   const eq = effectiveQty(p);
   const stockClass = eq === 0 ? "warn" : eq <= LOW_STOCK_THRESHOLD ? "warn" : "accent";
   return (
     <>
       <div className="mp-stat-grid">
-        <div className="mp-stat-tile"><div className="mp-stat-label">{ar ? "إجمالي المباع" : "Total sold"}</div><div className="mp-stat-val">{sold.toLocaleString()}</div></div>
+        {/* <bdi> so a refunded day's "-3" is not reordered to "3-" in Arabic. */}
+        <div className="mp-stat-tile"><div className="mp-stat-label">{ar ? "إجمالي المباع" : "Total sold"}</div><div className="mp-stat-val"><bdi>{sold.toLocaleString()}</bdi></div></div>
         <div className={"mp-stat-tile " + stockClass}><div className="mp-stat-label">{ar ? "إجمالي المخزون" : "Total stock"}</div><div className="mp-stat-val">{eq || 0}</div></div>
         <div className="mp-stat-tile"><div className="mp-stat-label">{ar ? "إجمالي الإيرادات" : "Total revenue"}</div><div className="mp-stat-val"><Money p={p} n={revenue} /></div></div>
       </div>
