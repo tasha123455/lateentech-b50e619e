@@ -348,6 +348,7 @@ export const DICT: Record<string, string> = {
   "Food & nutrition": "أغذية وتغذية",
   "Home & living": "مستلزمات المنزل",
   "Recommended for you": "مقترح ليك",
+  "Good places to start": "ابدأ من هنا",
   "All products": "كل المنتجات",
   "Live Products": "المنتجات النشطة",
   "Highest commission first": "أعلى عمولة أولاً",

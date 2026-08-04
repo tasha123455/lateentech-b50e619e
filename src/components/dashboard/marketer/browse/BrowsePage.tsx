@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { CATEGORY_DATA } from "../lib/constants";
 import { isAr } from "../lib/format";
-import { productHasStock } from "../lib/mappers";
 import type { BrowseProduct } from "../lib/types";
 import { BrowseFilters } from "./BrowseFilters";
 import { ProductCard } from "./ProductCard";
 import { applyBrowseFilters, browseFiltersIdle, EMPTY_BROWSE_FILTERS, type BrowseFilterState } from "./browseFilter";
+import { recommendProducts } from "./recommend";
 
 export function BrowsePage({
   onOpenProduct, onOpenSoon,
@@ -15,7 +14,7 @@ export function BrowsePage({
   onOpenProduct: (id: string) => void;
   onOpenSoon: () => void;
 }) {
-  const { products, toggleFavorite } = useMarketerData();
+  const { products, orders, toggleFavorite } = useMarketerData();
 
   const [state, setState] = useState<BrowseFilterState>(EMPTY_BROWSE_FILTERS);
 
@@ -23,21 +22,14 @@ export function BrowsePage({
 
   const list = useMemo(() => applyBrowseFilters(products, state), [products, state]);
 
-  /* "Recommended for you": unsaved, in-stock products sharing a category with
-     something the marketer already saved. Hidden while any filter is active. */
-  const recommended = useMemo(() => {
-    if (!browseFiltersIdle(state)) return [];
-    const saved = products.filter((p) => p.sv);
-    if (!saved.length) return [];
-    const cats = new Set<string>();
-    saved.forEach((p) => {
-      if (!p.cat) return;
-      cats.add(p.cat);
-      const sec = CATEGORY_DATA.find((s) => s.items.includes(p.cat));
-      if (sec) sec.items.forEach((it) => cats.add(it));
-    });
-    return products.filter((p) => !p.sv && productHasStock(p) && cats.has(p.cat)).slice(0, 4);
-  }, [products, state]);
+  /* Ranked on what this marketer has sold and saved, what it pays, what their
+     customers spend, and what is still in stock — see recommend.ts. Hidden
+     while a filter is active: they have told us what they are looking for, and
+     a second opinion in the way is just noise. */
+  const recommended = useMemo(
+    () => (browseFiltersIdle(state) ? recommendProducts(products, orders) : { list: [], personal: false }),
+    [products, orders, state],
+  );
 
   const card = (p: BrowseProduct) => (
     <ProductCard key={p.id} p={p} onOpen={onOpenProduct} onToggleSave={(id) => void toggleFavorite(id)} />
@@ -61,13 +53,16 @@ export function BrowsePage({
         }
       />
 
-      {recommended.length > 0 && (
+      {recommended.list.length > 0 && (
         <div>
+          {/* Two headings, because with no orders and no saves the ranking
+              falls back to what pays well and is in stock — a good list, but
+              the same list for everyone, and not "for you". */}
           <div className="sl">
             <div className="sd" />
-            Recommended for you
+            {recommended.personal ? "Recommended for you" : "Good places to start"}
           </div>
-          <div className="g">{recommended.map(card)}</div>
+          <div className="g">{recommended.list.map(card)}</div>
           <div className="divider" />
           <div className="sl" style={{ marginBottom: 10 }}>All products</div>
         </div>
