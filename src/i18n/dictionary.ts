@@ -642,7 +642,7 @@ export const DICT: Record<string, string> = {
   "Pending This Cycle": "قيد الانتظار هذي الدورة",
   "Mark as Paid": "سجّلها مدفوعة",
   "Paid ✓": "مدفوع ✓",
-  "No employees match.": "ما فماش موظفين مطابقين.",
+  "No employees match.": "ما فيش موظفين مطابقين.",
   "Total paid": "إجمالي المدفوع",
   "Payment": "الدفعة",
   "Payments": "الدفعات",
@@ -681,19 +681,19 @@ export const DICT: Record<string, string> = {
   // ----- Admin: menu & pages -----
   "Wallet balance": "رصيد المحفظة",
   "Scheduled for": "مجدولة ليوم",
-  "No requests here.": "ما فماش طلبات هنا.",
-  "No requests match your search.": "ما فماش طلبات مطابقة لبحثك.",
+  "No requests here.": "ما فيش طلبات هنا.",
+  "No requests match your search.": "ما فيش طلبات مطابقة لبحثك.",
   "Send to All Users": "ابعت لكل المستخدمين",
   "Broadcast to all users": "إرسال لكل المستخدمين",
   "Notification title (what users see first)": "عنوان الإشعار (اللي يشوفوه المستخدمين أول)",
-  "No reports match your search.": "ما فماش بلاغات مطابقة لبحثك.",
+  "No reports match your search.": "ما فيش بلاغات مطابقة لبحثك.",
   "Report Type": "نوع البلاغ",
   "Comment": "التعليق",
   "Phone Number": "رقم الهاتف",
   "Product Code": "كود المنتج",
   "Go to Account": "افتح الحساب",
   "Open product details": "افتح تفاصيل المنتج",
-  "No open reports.": "ما فماش بلاغات مفتوحة.",
+  "No open reports.": "ما فيش بلاغات مفتوحة.",
   "Feedback": "ملاحظات",
   "Send note to business": "ابعت ملاحظة للتاجر",
   "Write a note to the business about this report": "اكتب ملاحظة للتاجر بخصوص هذا البلاغ",
@@ -732,7 +732,7 @@ export const DICT: Record<string, string> = {
   "Write your review of this report — the marketer will see it as 'Report reviewed'": "اكتب مراجعتك للبلاغ — المسوّق بيشوفها كـ \u2018تمت مراجعة البلاغ\u2019",
 
   // ----- Admin: verify & payouts -----
-  "No payouts match your search.": "ما فماش سحوبات مطابقة لبحثك.",
+  "No payouts match your search.": "ما فيش سحوبات مطابقة لبحثك.",
   "Account #": "رقم الحساب",
   "Attach transfer receipt": "أرفق إيصال التحويل",
   "Receipt attached": "تم إرفاق الإيصال",
@@ -1068,6 +1068,33 @@ export const DICT: Record<string, string> = {
   "Platform commission (5%)": "عمولة المنصه (5%)",
   "Your total": "الإجمالي",
   "Publish product": "أنشر المنتج",
+
+  /* Admin console. These were the strings the console still showed in English
+     on an Arabic page: the two report types the picker offers, the value that
+     sits beside "الحالة" on a product, the label on the hide button once a
+     product is already hidden, and the admins page. */
+  "Merchant": "التاجر",
+  "Other": "أخرى",
+  "Hidden by admin": "مخفي من قبل الإدارة",
+  "Paused by owner": "متوقف من قبل صاحبه",
+  "Active": "نشط",
+  "Unhide": "إظهار",
+  "Add admin": "إضافة مسؤول",
+  "Edit admin": "تعديل مسؤول",
+  "No admins yet.": "لا يوجد مسؤولون بعد.",
+  "All countries": "كل الدول",
+  "Countries": "الدول",
+  "Pages": "الصفحات",
+  "Master": "المسؤول الرئيسي",
+  "Invited": "تمت الدعوة",
+  "Suspend": "إيقاف",
+  "Restore": "استعادة",
+  "Freeze": "تجميد",
+  "Unfreeze": "إلغاء التجميد",
+  "Unban": "إلغاء الحظر",
+  "Ban Email": "حظر البريد",
+  "No products match your search.": "لا توجد منتجات مطابقة لبحثك.",
+  "No marketers match your search.": "لا يوجد مسوقون مطابقون لبحثك.",
 };
 
 // Build a case-insensitive lookup map (lowercased key -> Arabic value).

@@ -6,7 +6,7 @@ import {
   applyBrowseFilters, EMPTY_BROWSE_FILTERS, type BrowseFilterState,
 } from "@/components/dashboard/marketer/browse/browseFilter";
 import { dbToBrowse } from "@/components/dashboard/marketer/lib/mappers";
-import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { isAr, searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
@@ -15,8 +15,23 @@ import { ProductDetailOverlay } from "./ProductDetailOverlay";
 /** Admins have no favourites, so nothing is ever saved. */
 const NO_FAVOURITES: Set<string> = new Set();
 
-/** Warns when hiding/deleting a product that marketers are mid-order on. */
-function activeMarketerWarning(n: number, action: string): string {
+/** Warns when hiding/deleting a product that marketers are mid-order on.
+ *
+ *  This goes through window.confirm, so the page-wide text-node translator
+ *  never sees it — a dialog is not part of the document. It has to carry both
+ *  languages itself, which is why it was still English on an Arabic page. */
+function activeMarketerWarning(n: number, action: "hidden" | "deleted"): string {
+  if (isAr()) {
+    // Arabic counts one, two, and three-or-more differently, and a plural that
+    // does not agree with its number reads as broken rather than as a typo.
+    const who = n === 1 ? "مسوّق نشط واحد" : n === 2 ? "مسوّقان نشطان" : `${n} مسوّقين نشطين`;
+    const them = n === 1 ? "هذا المسوّق" : n === 2 ? "هذان المسوّقان" : "هؤلاء المسوّقين";
+    const verb = action === "deleted" ? "حذف" : "إخفاء";
+    return (
+      `تنبيه: هذا المنتج لديه حالياً ${who} مع طلبية قيد التنفيذ.\n\n` +
+      `سيتم ${verb} المنتج فوراً لدى جميع المسوّقين الآخرين، لكن ${them} سيستمر في رؤيته حتى تكتمل طلبياته — ثم يختفي عنه تلقائياً.\n\nهل تريد المتابعة؟`
+    );
+  }
   const label = n + " active marketer" + (n === 1 ? "" : "s");
   return (
     "Heads-up: this product currently has " + label + " with an in-progress order.\n\n" +

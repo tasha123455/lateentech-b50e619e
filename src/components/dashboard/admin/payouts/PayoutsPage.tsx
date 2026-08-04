@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { money as marketerMoney, moneyParts, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { isAr, money as marketerMoney, moneyParts, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { payoutLabel } from "@/components/dashboard/marketer/overlays/usePayoutForm";
 import { bankLabel } from "@/components/dashboard/marketer/lib/constants";
 import { useAdminData, usePayoutsOpenRef } from "../AdminDataProvider";
 import { dispPhone, initials, money, whenOrDate } from "../lib/format";
@@ -101,9 +102,13 @@ function PayoutCard({
         <div className="pay-body">
           {hasAny ? (
             <div className="adm-pay-details">
-              {detail("Method", u.payout_method === "Bank of Unity" ? "Wahda Bank" : u.payout_method)}
-              {/* Stored in Arabic; the admin panel is English throughout. */}
-              {detail("Bank", bankLabel(u.payout_bank_name, false))}
+              {/* The same label the marketer sees on their own request, so
+                  the two sides of one payout are talking about the same
+                  thing — and in the reader's language. It used to print
+                  the stored value, which is English and internal ("Bank of
+                  Unity" is not what the bank is called). */}
+              {detail("Method", payoutLabel(String(u.payout_method || "")))}
+              {detail("Bank", bankLabel(u.payout_bank_name, !isAr()))}
               {detail("Account holder", u.payout_account_holder)}
               {detail("Account #", u.payout_account_number)}
               {detail("IBAN", u.payout_iban)}

@@ -638,7 +638,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           </div>
 
           <label className="lp-field-label">Product name <span className="lp-req">*</span></label>
-          <input className="lp-input" type="text" value={name} disabled={editLocked} onChange={(e) => setName(e.target.value)} placeholder="e.g. Running shoes" data-no-i18n="" />
+          <input className="lp-input" type="text" value={name} disabled={editLocked} onChange={(e) => setName(e.target.value)} placeholder={ar ? "مثال: حذاء رياضي" : "e.g. Running shoes"} data-no-i18n="" />
 
           <div>
             <label className="lp-field-label">Selling price <span className="lp-req">*</span></label>
@@ -654,7 +654,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           </div>
 
           <label className="lp-field-label">Description <span className="lp-req">*</span></label>
-          <textarea className="lp-input lp-textarea" value={desc} disabled={editLocked} onChange={(e) => setDesc(e.target.value)} placeholder="What makes this product worth selling? Materials, fit, use case…" data-no-i18n="" />
+          <textarea className="lp-input lp-textarea" value={desc} disabled={editLocked} onChange={(e) => setDesc(e.target.value)} placeholder={ar ? "ما الذي يميّز هذا المنتج؟ الخامة، المقاس، طريقة الاستخدام…" : "What makes this product worth selling? Materials, fit, use case…"} data-no-i18n="" />
 
           <label className="lp-field-label">Currency <span className="lp-req">*</span></label>
           {/* Not a choice any more. The price, the platform fee, the wallet it
