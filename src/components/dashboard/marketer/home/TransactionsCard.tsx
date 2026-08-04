@@ -130,14 +130,19 @@ function TxnItem({
 
   const isX = type === "reject" || type === "failed";
   const color = type === "add" ? "#35c98f" : type === "withdraw" ? "#7f77dd" : "#e2685f";
+  /* The same green/red edge the notification for this event carries, so one
+     movement looks like one thing wherever it is read. */
+  const borderColor = type === "add" || type === "withdraw" ? "#142a20" : "#2a1a1a";
   const sign = type === "add" ? "+" : isX ? "" : "-";
   const amtStr =
     amount != null ? amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null;
 
   const photoUrl = (d.product_photo || d.photo) as string | undefined;
   const photoValid = isSafeUrl(photoUrl);
-  // Only a completed withdrawal shows its proof photo as the row icon.
-  const hasIconPhoto = !isX && type === "withdraw" && photoValid;
+  /* A paid withdrawal used to show the admin's receipt twice: once as the
+     row's own icon, and again inside the body. One of them stood alone with
+     nothing to say what it was — so the one that keeps the amount and the
+     status beside it is the one that stays. */
 
   const bigPhoto = photoValid ? (
     <div style={{ margin: "-2px 0 10px 0" }}>
@@ -157,13 +162,14 @@ function TxnItem({
   if (type === "failed") {
     detailRows = (
       <>
-        {!hasIconPhoto && bigPhoto}
+        {bigPhoto}
         <DetailRow k={t("Amount", "المبلغ")} v={<Money n={amount ?? 0} sym={sym} code={code} />} />
         <DetailRow k={t("Status", "الحالة")} v={t("Failed", "فشل")} />
         <NoteBlock
           label={t("Note", "ملاحظة")}
           text={(d.admin_comment || d.admin_note) as string}
-          background="#181818"
+          background="#2a1a1a"
+          color="#f0c0c0"
           marginTop={8}
         />
       </>
@@ -179,13 +185,14 @@ function TxnItem({
   } else {
     detailRows = (
       <>
-        {!hasIconPhoto && bigPhoto}
+        {bigPhoto}
         <OrderDetailRows d={d} />
         <NoteBlock label={t("Notes", "ملاحظات")} text={d.customer_notes as string} />
         <NoteBlock
           label={t("Note", "ملاحظة")}
           text={(d.admin_notes || d.admin_comment || d.admin_note) as string}
-          background="#181818"
+          background="#2a1a1a"
+          color="#f0c0c0"
           marginTop={8}
         />
       </>
@@ -195,21 +202,9 @@ function TxnItem({
   return (
     <div className={"notif-item expandable" + (expanded ? " expanded" : "")} data-id={n.id}>
       <div className="notif-top" onClick={onToggle}>
-        {hasIconPhoto ? (
-          <div className="notif-photo-wrap">
-            <img
-              src={photoUrl}
-              alt=""
-              loading="lazy"
-              onClick={(e) => { e.stopPropagation(); onPhoto(photoUrl!); }}
-              style={{ cursor: "zoom-in" }}
-            />
-          </div>
-        ) : (
-          <div className="notif-icon" style={{ background: color + "22", color, fontWeight: 700 }}>
-            {isX ? "✕" : sign}
-          </div>
-        )}
+        <div className="notif-icon" style={{ background: color + "22", color, fontWeight: 700 }}>
+          {isX ? "✕" : sign}
+        </div>
         <div className="notif-row-text">
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="notif-title">{title}</div>
@@ -223,8 +218,15 @@ function TxnItem({
           </div>
         </div>
       </div>
-      <div className="notif-detail-body">
-        <div className="notif-details-box">{detailRows}</div>
+      <div
+        className="notif-detail-body"
+        onClick={expanded ? (e) => {
+          const el = e.target as HTMLElement | null;
+          if (el?.closest("a, button, img, textarea, input, iframe, [role='button']")) return;
+          onToggle();
+        } : undefined}
+      >
+        <div className="notif-details-box" style={{ borderColor }}>{detailRows}</div>
       </div>
     </div>
   );

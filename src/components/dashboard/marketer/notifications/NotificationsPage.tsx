@@ -207,6 +207,13 @@ export function NotifItem({
     <div className="notif-icon" style={{ background: color + "22", color }}>•</div>
   );
 
+  /** Collapses on a tap that was not meant for something inside. */
+  const onInsideTap = (e: React.MouseEvent) => {
+    const el = e.target as HTMLElement | null;
+    if (el?.closest("a, button, img, textarea, input, iframe, [role='button']")) return;
+    onToggle();
+  };
+
   const mainText = L.t;
   const subText = isNote ? "" : L.b;
 
@@ -303,12 +310,22 @@ export function NotifItem({
         {hasPhoto ? (
           <div className="notif-photo-wrap">
             {/* Cropped to a small square, so it is framed the way the owner
-                framed it rather than from the middle. */}
+                framed it rather than from the middle.
+
+                Open, this is the whole point of the notification — the receipt
+                the admin sent, or the product the order was for — so it opens
+                full screen. Shut, it is a 34px thumbnail in a row whose only
+                job is to open the card, and taking that tap away from the row
+                would be taking it from the row. */}
             <img
               src={iconPhotoUrl}
               alt=""
               loading="lazy"
-              style={coverStyle(d.cover_focus_x, d.cover_focus_y)}
+              onClick={expanded ? (e) => { e.stopPropagation(); onPhoto(iconPhotoUrl); } : undefined}
+              style={{
+                ...coverStyle(d.cover_focus_x, d.cover_focus_y),
+                ...(expanded ? { cursor: "zoom-in", objectFit: "contain" as const } : null),
+              }}
             />
           </div>
         ) : (
@@ -323,7 +340,11 @@ export function NotifItem({
           <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>{rightDot}</div>
         </div>
       </div>
-      <div className="notif-detail-body">
+      {/* Open, a tap anywhere shuts it again. It used to be only the header,
+          which is off the top of the screen by the time you have read to the
+          bottom of a long one. Taps on something that does its own job — a
+          photo that opens, a phone number that dials — are left alone. */}
+      <div className="notif-detail-body" onClick={expanded ? onInsideTap : undefined}>
         <div className="notif-details-box" style={{ borderColor }}>
           {bodyPhoto}
           {receiptImg}
