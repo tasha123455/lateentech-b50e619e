@@ -266,6 +266,7 @@ export const DICT: Record<string, string> = {
   "Business Dashboard": "لوحة تحكم تاجر",
   "Marketer Dashboard": "لوحة تحكم المسوّق",
   "WALLET BALANCE": "رصيد المحفظه",
+  "AVAILABLE TO WITHDRAW": "متاح للسحب",
   "Wallet Balance": "رصيد المحفظه",
   "Available after admin receipt approval": "",
   "Wallet": "المحفظة",

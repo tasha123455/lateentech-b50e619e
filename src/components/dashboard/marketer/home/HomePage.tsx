@@ -79,9 +79,21 @@ export function HomePage({
       </div>
 
       <div className="wallet-card">
-        <div className="wallet-label">WALLET BALANCE</div>
+        {/* The big number is what they can actually withdraw. Commission on
+            orders still in progress sits on the line below rather than being
+            added in: a wallet that shows money the Withdraw button will not
+            release is a wallet that has lied to them. */}
+        <div className="wallet-label">{payout.onTheWay > 0 ? "AVAILABLE TO WITHDRAW" : "WALLET BALANCE"}</div>
         <div className="wallet-amount"><Money n={walletBalance} sym={selSym} code={walletCur} /></div>
-        <div className="wallet-pending" />
+        {payout.onTheWay > 0 ? (
+          <div className="wallet-pending" data-no-i18n>
+            {isAr() ? "في الطريق: " : "On the way: "}
+            <Money n={payout.onTheWay} sym={selSym} code={walletCur} />
+            {isAr() ? " — تصبح متاحة عند التسليم" : " — available once delivered"}
+          </div>
+        ) : (
+          <div className="wallet-pending" />
+        )}
         {frozen && (
           <div
             style={{

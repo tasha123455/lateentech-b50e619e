@@ -20,7 +20,12 @@ export type PayoutState = {
   pending: boolean;
   canWithdraw: boolean;
   frozen: boolean;
+  /** Commission on delivered orders — the part that can be withdrawn. */
   balance: number;
+  /** Commission on orders still in progress. Visible to the marketer so the
+   *  wallet still shows everything they have earned, but not withdrawable
+   *  until the order is delivered. */
+  onTheWay: number;
 };
 
 type Ctx = {
@@ -84,7 +89,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
   const [walletCur, setWalletCurState] = useState<string>("");
   const [dbBalance, setDbBalance] = useState<number | null>(() => readWalletBalance(userId));
   const [payout, setPayout] = useState<PayoutState>({
-    statusText: "", pending: false, canWithdraw: false, frozen: false, balance: 0,
+    statusText: "", pending: false, canWithdraw: false, frozen: false, balance: 0, onTheWay: 0,
   });
   const [langTick, setLangTick] = useState(0);
 
@@ -249,7 +254,12 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
     const seq = ++refreshSeqRef.current;
     const latestRun = () => refreshSeqRef.current === seq;
 
-    const commit = (next: PayoutState) => {
+    /* Filled in by commit() rather than by each caller: the seven exits below
+       differ on whether a withdrawal is possible, never on how much is still
+       on the way. */
+    let onWay = 0;
+    const commit = (partial: Omit<PayoutState, "onTheWay">) => {
+      const next: PayoutState = { ...partial, onTheWay: onWay };
       if (latestRun()) {
         setPayout(next);
         setDbBalance(next.balance);
@@ -260,12 +270,13 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
     /** The balance to show when nothing came back: whatever is already up. */
     const lastKnown = () => dbBalanceRef.current ?? 0;
 
-    let wallet: { balance?: number } | null = null;
+    let wallet: { balance?: number; pending?: number } | null = null;
     try {
-      if (api.getWallet) wallet = (await api.getWallet()) as { balance?: number } | null;
+      if (api.getWallet) wallet = (await api.getWallet()) as { balance?: number; pending?: number } | null;
     } catch (e) {
       console.error("[Lateen] wallet", e);
     }
+    if (wallet && wallet.pending != null) onWay = Number(wallet.pending) || 0;
 
     const prof = profileRef.current;
     if (prof && prof.frozen_at) {
@@ -276,7 +287,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
       });
     }
 
-    type PayoutStateRow = { balance?: number; days_left?: number; pending?: boolean; can_withdraw?: boolean } | null;
+    type PayoutStateRow = { balance?: number; pending_amount?: number; days_left?: number; pending?: boolean; can_withdraw?: boolean } | null;
     type PayoutRow = { status?: string } | null;
     type PaidRow = { paid_at?: string } | null;
 
@@ -294,6 +305,8 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
     } catch (e) {
       console.error("[Lateen] payout state", e);
     }
+
+    if (state && state.pending_amount != null) onWay = Number(state.pending_amount) || 0;
 
     const bal =
       state && state.balance != null
