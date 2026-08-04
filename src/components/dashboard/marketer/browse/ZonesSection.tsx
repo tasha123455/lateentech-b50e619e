@@ -68,19 +68,6 @@ export function ZonesSection({
         <div className="pd-row-val"><Chevron open={open} /></div>
       </div>
 
-      {!!overall && (
-        <div className="pd-row">
-          <div className="pd-row-ic">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="9" />
-              <polyline points="12 7 12 12 15.5 14" />
-            </svg>
-          </div>
-          <div className="pd-row-lbl">{t.etaLbl}</div>
-          <div className="pd-row-val" data-no-i18n>{t.eta(overall.min, overall.max)}</div>
-        </div>
-      )}
-
       {open && (
         <div className="pd-zones">
           {!zoneCodes.length ? (
@@ -98,6 +85,13 @@ export function ZonesSection({
                   <div className="pd-zone-hdr" onClick={() => setOpenZone(isOpen ? null : c)}>
                     <div className="pd-zone-name">{countryName(c)}</div>
                     <div className="pd-zone-meta">
+                      {/* The country's delivery time reads on the row itself.
+                          It used to be the first line inside the body, so it
+                          was only there once you had opened the country to
+                          look for something else. */}
+                      {!!z.eta && (
+                        <span className="pd-zone-eta-chip" data-no-i18n>{t.eta(z.eta.min, z.eta.max)}</span>
+                      )}
                       <span className="pd-zone-ship-lbl">{t.ship}</span>{" "}
                       <span className="pd-zone-ship-val">
                         {cities.length ? <FreeOr n={ship} sym={sym} code={code} /> : "—"}
@@ -107,12 +101,6 @@ export function ZonesSection({
                   </div>
                   {isOpen && (
                     <div className="pd-zone-cities">
-                      {!!z.eta && (
-                        <div className="pd-zone-city pd-zone-eta">
-                          <div className="pd-zone-city-name">{t.etaLbl}</div>
-                          <div className="pd-zone-city-val" data-no-i18n>{t.eta(z.eta.min, z.eta.max)}</div>
-                        </div>
-                      )}
                       {cities.length ? (
                         cities.map((x) => (
                           <div className="pd-zone-city" key={x.city}>
@@ -132,6 +120,22 @@ export function ZonesSection({
               );
             })
           )}
+        </div>
+      )}
+
+      {/* Below the zones, not above them. It used to sit between "Ships to"
+          and the list that row opens, so the list appeared to belong to the
+          delivery time rather than to the row that had just been tapped. */}
+      {!!overall && (
+        <div className="pd-row">
+          <div className="pd-row-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <polyline points="12 7 12 12 15.5 14" />
+            </svg>
+          </div>
+          <div className="pd-row-lbl">{t.etaLbl}</div>
+          <div className="pd-row-val" data-no-i18n>{t.eta(overall.min, overall.max)}</div>
         </div>
       )}
     </>

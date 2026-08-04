@@ -45,9 +45,13 @@ const AlertIco = () => (
 );
 
 export function OrderCard({
-  o, product, liveProduct, onEdit, onDelete, onUploadReceipt, onViewReceipt, onHowTo, uploadingId,
+  o, product, liveProduct, open, onToggle,
+  onEdit, onDelete, onUploadReceipt, onViewReceipt, onHowTo, uploadingId,
 }: {
   o: MarketerOrder;
+  /** Held by the page, so opening one card shuts whichever was open. */
+  open: boolean;
+  onToggle: () => void;
   product: BrowseProduct | null;
   liveProduct: FormProduct | null;
   onEdit: (id: string) => void;
@@ -57,7 +61,6 @@ export function OrderCard({
   onHowTo: (id: string) => void;
   uploadingId: string | null;
 }) {
-  const [open, setOpen] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const lightbox = usePhotoLightbox();
@@ -173,7 +176,28 @@ export function OrderCard({
 
   return (
     <div className={"order" + (isApproved ? " approved" : "") + (open ? " open" : "")} data-oid={o.id}>
-      <div className="row" onClick={() => setOpen((v) => !v)}>
+      {/* Open, the photo grows to fill the top of the card and the header
+          chevron fades out under it, so there is nothing left to press to shut
+          it again. This is that button.
+
+          It is anchored to the card, not to the photo. It used to live inside
+          the photo, and the photo animates from a 40px thumbnail to the full
+          width of the card over most of half a second — so the button rode
+          that whole journey across the screen every time a card was opened. */}
+      {open && (
+        <button
+          type="button"
+          className="ord-collapse"
+          aria-label={T.collapse}
+          title={T.collapse}
+          onClick={(e) => { e.stopPropagation(); onToggle(); }}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
+      )}
+      <div className="row" onClick={onToggle}>
         <div className="photo-wrap">
           <div className="hero-scroll" ref={trackRef} onScroll={onPhotoScroll}>
             {photos.length ? (
@@ -209,23 +233,6 @@ export function OrderCard({
                 <span key={u + i} className={"photo-dot" + (i === photoIdx ? " active" : "")} />
               ))}
             </div>
-          )}
-          {/* Open, the photo grows to fill the top of the card and the header
-              chevron fades out under it, so there was nothing left to press to
-              shut it again. This is that button, sitting over the corner people
-              were already reaching for. */}
-          {open && (
-            <button
-              type="button"
-              className="ord-collapse"
-              aria-label={T.collapse}
-              title={T.collapse}
-              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
-            </button>
           )}
         </div>
         <div className="row-main">
@@ -443,19 +450,6 @@ export function OrderCard({
                 </svg>
               </div>
             </div>
-
-            {/* An open card is long enough to scroll the photo off the top, so
-                shutting it should not mean scrolling back up to find the way. */}
-            <button
-              type="button"
-              className="ord-collapse-foot"
-              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
-              <span>{T.collapse}</span>
-            </button>
           </div>
         </div>
       </div>

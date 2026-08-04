@@ -23,6 +23,10 @@ export function OrdersPage({
   const { orders, setOrders, products, productsMap, userId, blockIfFrozen, frozen } = useMarketerData();
 
   const [filter, setFilter] = useState<string>("all");
+  /* One card open at a time. Half a dozen expanded cards at once is a wall
+     of text nobody is reading, and opening one is a clear enough signal that
+     the last one is finished with. */
+  const [openId, setOpenId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
   const q = query.trim();
@@ -173,6 +177,8 @@ export function OrdersPage({
               <OrderCard
                 key={o.id}
                 o={o}
+                open={openId === o.id}
+                onToggle={() => setOpenId((cur) => (cur === o.id ? null : o.id))}
                 product={products.find((p) => p.id === o.productKey) || null}
                 liveProduct={o.productKey ? productsMap[o.productKey] || null : null}
                 onEdit={editOrder}
