@@ -129,6 +129,7 @@ function ReportCard({
   const [mkText, setMkText] = useState("");
   const [bizText, setBizText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [bizOpen, setBizOpen] = useState(false);
 
   const reporter = r.reporter || {};
   const business = r.business || {};
@@ -198,20 +199,36 @@ function ReportCard({
             onSend={() => void send(() => onResolve(r.id, mkText))}
           />
 
-          <div className="rpt-kv">
-            <span className="rpt-kv-k">Report Type</span>
-            <span className="rpt-kv-v">{typeLabel(r.report_type)}</span>
-          </div>
-
-          <div className="rpt-kv-k rpt-comment-lbl">Comment</div>
-          <div className="rpt-msg" data-no-i18n>
-            {r.message ? r.message : <span style={{ opacity: 0.6 }}>No comment</span>}
+          {/* The type and what was written about it are one thought, so they
+              are one box. Split apart, the type read as a stray field above a
+              quotation it belonged to. */}
+          <div className="rpt-msg rpt-msg-box">
+            <div className="rpt-kv rpt-msg-type">
+              <span className="rpt-kv-k">Report Type</span>
+              <span className="rpt-kv-v">{typeLabel(r.report_type)}</span>
+            </div>
+            <div data-no-i18n>
+              {r.message ? r.message : <span style={{ opacity: 0.6 }}>No comment</span>}
+            </div>
           </div>
 
           {!!r.business_id && (
             <>
               <div className="rpt-divider" />
-              <div className="rpt-party-ttl">Business</div>
+              {/* Folded away. The report is about a marketer's complaint; who
+                  they are complaining about is reference material, so it opens
+                  when it is wanted rather than filling the card by default. */}
+              <button
+                type="button"
+                className="rpt-party-ttl rpt-party-toggle"
+                aria-expanded={bizOpen}
+                onClick={() => setBizOpen((v) => !v)}
+              >
+                Business
+                <span className={"rpt-party-chev" + (bizOpen ? " open" : "")}>▾</span>
+              </button>
+              {bizOpen && (
+              <>
               <div className="rpt-name" data-no-i18n style={{ marginBottom: 8 }}>{businessName}</div>
 
               <div className="rpt-prod">
@@ -270,6 +287,8 @@ function ReportCard({
                   setOpenBell("");
                 })}
               />
+              </>
+              )}
             </>
           )}
 

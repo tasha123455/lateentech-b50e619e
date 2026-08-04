@@ -320,7 +320,7 @@
 .lateen-admin .rpt-more-row-wrap > .rpt-more { flex: 1; min-width: 0; margin-bottom: 0; }
 .lateen-admin .rpt-more-row-wrap > .rpt-go-btn { flex: 1; min-width: 0; }
 .lateen-admin .rpt-party-ttl { font-size: 13px; font-weight: 700; color: var(--txt-1); margin-bottom: 6px; }
-.lateen-admin .rpt-party-ttl::after { content: ":-"; }
+.lateen-admin .rpt-party-ttl::after { content: ":"; }
 .lateen-admin .rpt-party { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .lateen-admin .rpt-name { font-size: 13px; font-weight: 600; color: var(--txt-1); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lateen-admin .rpt-sub { font-size: 11px; color: var(--txt-2); margin-top: 2px; }
@@ -339,6 +339,13 @@
 .lateen-admin .rpt-kv-k::after { content: ":"; }
 .lateen-admin .rpt-kv-v { color: var(--txt-1); font-weight: 500; overflow-wrap: anywhere; }
 .lateen-admin .rpt-comment-lbl { display: block; margin-bottom: 5px; }
+/* The report type sits inside the comment box: one thought, one box. */
+.lateen-admin .rpt-msg-box { display: flex; flex-direction: column; gap: 6px; }
+.lateen-admin .rpt-msg-type { padding-bottom: 6px; border-bottom: 0.5px solid var(--bd); }
+/* The business block folds; the title is the control that opens it. */
+.lateen-admin .rpt-party-toggle { display: flex; align-items: center; gap: 6px; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; font-family: inherit; text-align: inherit; }
+.lateen-admin .rpt-party-chev { margin-inline-start: auto; font-size: 11px; opacity: 0.7; transition: transform .15s; }
+.lateen-admin .rpt-party-chev.open { transform: rotate(180deg); }
 .lateen-admin .rpt-msg { font-size: 13px; color: var(--txt-1); line-height: 1.5; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; white-space: pre-wrap; word-break: break-word; }
 .lateen-admin .rpt-divider { height: 0.5px; background: var(--border-2); margin: 12px 0; }
 .lateen-admin .rpt-prod { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 12px; padding: 10px; margin-bottom: 8px; }

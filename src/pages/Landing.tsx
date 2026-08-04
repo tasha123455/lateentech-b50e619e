@@ -50,12 +50,25 @@ export function Landing() {
       {shopperSoonOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/70" onClick={() => setShopperSoonOpen(false)} />
-          <div className="relative z-10 w-full max-w-[300px] rounded-2xl border border-border bg-surface p-6 text-center shadow-xl">
+          <div className="relative z-10 w-full max-w-[340px] rounded-2xl border border-border bg-surface p-6 text-center shadow-xl">
             <p className="text-[15px] text-text-1">
               Where can I find it?{" "}
               <span className="ms-1 inline-block rounded-md bg-destructive/15 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-destructive">
                 Soon
               </span>
+            </p>
+            {/* Says what is coming, rather than only that something is. The
+                copy is written out per language rather than left to the
+                dictionary: it is a paragraph, and the page-wide translator
+                matches whole text nodes. */}
+            <p
+              className="mt-3 text-[12.5px] leading-relaxed text-text-2"
+              data-no-i18n
+              style={{ textAlign: isAr ? "right" : "left" }}
+            >
+              {isAr
+                ? "تعبت وأنت تدور من صفحة لصفحة و من محل لمحل؟ قريباً كل السوق الليبي بين يديك! صوّر أي منتج، قارن الأسعار بين مختلف المحلات، واعرف بالضبط وين تلقاه وفي أي مدينة و في أي محل."
+                : "Tired of searching from page to page and from shop to shop? Soon, the entire Libyan market will be at your fingertips. Photograph any product, compare prices between different shops, and know exactly where to find it, in which city, and in which shop."}
             </p>
             <button
               type="button"
