@@ -633,3 +633,15 @@ to {opacity:1;transform:scale(1);}
 .lateen-marketer .cpk-row-soon { color: var(--color-text-tertiary); cursor: not-allowed; }
 .lateen-marketer .cpk-soon { flex-shrink: 0; padding: 2px 7px; border-radius: 7px; background: #3a2a10; color: #c9923a; font-size: 10px; font-weight: 600; }
 .lateen-marketer .cpk-chev { flex-shrink: 0; color: var(--color-text-tertiary); }
+
+/* The delivery-time row on an order card: says the figure closed, says where
+   it came from open. Optional, so it never occupies more than one line until
+   somebody asks. */
+.eta-row { margin-top: 6px; }
+.eta-row-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: 10px; background: var(--color-background-secondary); color: var(--color-text-secondary); font-family: var(--font-sans); font-size: 12px; cursor: pointer; }
+.eta-row-lbl { flex: 0 0 auto; }
+.eta-row-val { margin-inline-start: auto; font-weight: 600; color: var(--color-text-primary); }
+.eta-row-chev { flex: 0 0 auto; opacity: .65; transition: transform .15s; }
+.eta-row-chev.open { transform: rotate(180deg); }
+.eta-row-body { padding: 7px 10px 0; font-size: 11.5px; color: var(--color-text-tertiary); line-height: 1.6; }
+.eta-row-sub { opacity: .85; }

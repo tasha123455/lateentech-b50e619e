@@ -1,12 +1,13 @@
 import type { ReactElement } from "react";
 import { Fragment, useMemo, useRef, useState } from "react";
 
+import { DeliveryEtaRow } from "@/components/shared/DeliveryEtaRow";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { coverStyle } from "@/lib/coverFocus";
 import { useBusinessData } from "../BusinessDataProvider";
 import { useLightbox } from "../ui/Lightbox";
 import { MoneyH } from "../ui/Money";
-import { locSearchText } from "../lib/constants";
+import { cityLbl, locSearchText } from "../lib/constants";
 import {
   isAr, escH, freeLbl, isFreeVal, searchMatcher, splitCC,
   platThreshold,
@@ -336,6 +337,16 @@ function OrderCard({
               <span className="k">{ar ? "طريقة التسليم" : "Fulfilment"}</span>
               <span className="v"><FulfilmentBadge value={prod.fulfilment} ar={ar} size="sm" /></span>
             </div>
+          )}
+          {/* This order's delivery time, folded — its city's if the shop gave
+              one for that city, otherwise the country's. */}
+          {!!prod && (
+            <DeliveryEtaRow
+              cityEta={(prod.delivery as Record<string, { cities?: Record<string, { eta?: unknown }> }> | undefined)?.[o.country]?.cities?.[o.city]?.eta}
+              zoneEta={(prod.delivery as Record<string, { eta?: unknown }> | undefined)?.[o.country]?.eta}
+              city={cityLbl(o.city)}
+              ar={ar}
+            />
           )}
           <div className="r"><span className="k">Quantity</span><span className="v">{o.qty}</span></div>
           {variantRows}

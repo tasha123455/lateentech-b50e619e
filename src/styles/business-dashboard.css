@@ -714,6 +714,16 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 .lp-segmented button { flex:1; border:none; background:transparent; color:var(--color-text-secondary); font-size:13px; font-weight:700; padding:10px; border-radius:9px; cursor:pointer; font-family:var(--font-sans); }
 .lp-segmented button.active { background:#34c77b; color:#06150e; }
 .lp-comm-row { display:flex; align-items:center; gap:10px; }
+/* Per-city delivery times: optional, one row per city, so folded away. */
+.lp-city-eta-toggle { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; margin-top:10px; padding:10px 12px; border:0.5px solid var(--color-border-secondary); border-radius:12px; background:var(--color-background-secondary); color:var(--color-text-secondary); font-family:var(--font-sans); font-size:12.5px; font-weight:600; cursor:pointer; }
+.lp-city-eta-chev { transition:transform .15s; opacity:.7; }
+.lp-city-eta-chev.open { transform:rotate(180deg); }
+.lp-city-eta-body { margin-top:8px; padding:10px 12px; border:0.5px solid var(--color-border-secondary); border-radius:12px; background:var(--color-background-primary); }
+.lp-city-eta-note { font-size:11.5px; color:var(--color-text-tertiary); margin-bottom:8px; line-height:1.5; }
+.lp-city-eta-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; }
+.lp-city-eta-row + .lp-city-eta-row { border-top:0.5px solid var(--color-border-tertiary); }
+.lp-eta-box-sm { flex:0 0 auto; }
+.lp-eta-box-sm .lp-eta-inp { width:44px; }
 .lp-comm-unit { font-weight:700; color:#34c77b; font-size:14px; white-space:nowrap; }
 .lp-conversion-note { margin-top:12px; font-size:13px; color:var(--color-text-secondary); background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); border-radius:10px; padding:10px 12px; }
 .lp-conversion-note b { color:#34c77b; }
@@ -813,3 +823,15 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
  .cpk-row-soon { color: var(--color-text-tertiary); cursor: not-allowed; }
  .cpk-soon { flex-shrink: 0; padding: 2px 7px; border-radius: 7px; background: #3a2a10; color: #c9923a; font-size: 10px; font-weight: 600; }
  .cpk-chev { flex-shrink: 0; color: var(--color-text-tertiary); }
+
+/* The delivery-time row on an order card: says the figure closed, says where
+   it came from open. Optional, so it never occupies more than one line until
+   somebody asks. */
+.eta-row { margin-top: 6px; }
+.eta-row-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: 10px; background: var(--color-background-secondary); color: var(--color-text-secondary); font-family: var(--font-sans); font-size: 12px; cursor: pointer; }
+.eta-row-lbl { flex: 0 0 auto; }
+.eta-row-val { margin-inline-start: auto; font-weight: 600; color: var(--color-text-primary); }
+.eta-row-chev { flex: 0 0 auto; opacity: .65; transition: transform .15s; }
+.eta-row-chev.open { transform: rotate(180deg); }
+.eta-row-body { padding: 7px 10px 0; font-size: 11.5px; color: var(--color-text-tertiary); line-height: 1.6; }
+.eta-row-sub { opacity: .85; }

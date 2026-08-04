@@ -1,3 +1,4 @@
+import type { ZoneEta } from "@/components/dashboard/marketer/lib/types";
 import type { createLateenApi } from "@/lib/lateen-api";
 
 export type LateenApi = ReturnType<typeof createLateenApi>;
@@ -119,7 +120,12 @@ export type ProductDetail = {
     sizes?: string[] | null;
     colors?: string[] | null;
     variant_groups?: Array<{ name?: string; items?: unknown[] }> | null;
-    delivery?: Record<string, { cities?: Record<string, { shipping?: number; delivery?: number }> }> | null;
+    /** Zones carry a delivery time in whole days: the country's, which every
+     *  product has, and optionally a city's, narrowing it for that one city. */
+    delivery?: Record<string, {
+      cities?: Record<string, { shipping?: number; delivery?: number; eta?: ZoneEta | null }>;
+      eta?: ZoneEta | null;
+    }> | null;
     biz_name?: string | null;
   } | null;
   owner?: Person | null;

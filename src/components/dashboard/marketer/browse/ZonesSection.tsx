@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { etaSpan, etaText } from "@/lib/eta";
 import { freeLbl, isAr } from "../lib/format";
 import { cityLabel, countryName } from "../lib/mappers";
 import type { Zone } from "../lib/types";
@@ -47,13 +48,10 @@ export function ZonesSection({
   /* One line for the whole product, so a marketer sees how long delivery takes
      without opening anything. With several countries it is the span across all
      of them — the exact figure per country is inside each card below. */
-  const etas = zoneCodes.map((c) => d[c].eta).filter(Boolean) as Array<{ min: number; max: number | null }>;
-  const overall = etas.length
-    ? {
-        min: Math.min(...etas.map((e) => e.min)),
-        max: Math.max(...etas.map((e) => (e.max != null ? e.max : e.min))),
-      }
-    : null;
+  const overall = etaSpan([
+    ...zoneCodes.map((c) => d[c].eta),
+    ...zoneCodes.flatMap((c) => Object.values(d[c].c || {}).map((v) => v.eta)),
+  ]);
 
   return (
     <>
@@ -76,7 +74,7 @@ export function ZonesSection({
             zoneCodes.map((c) => {
               const z = d[c];
               const cities = Object.entries(z.c || {}).map(([city, v]) => ({
-                city, d: Number(v.d) || 0, s: Number(v.s) || 0,
+                city, d: Number(v.d) || 0, s: Number(v.s) || 0, eta: v.eta || null,
               }));
               const ship = cities.reduce((a, x) => Math.max(a, x.s), 0);
               const isOpen = openZone === c;
@@ -90,7 +88,7 @@ export function ZonesSection({
                           was only there once you had opened the country to
                           look for something else. */}
                       {!!z.eta && (
-                        <span className="pd-zone-eta-chip" data-no-i18n>{t.eta(z.eta.min, z.eta.max)}</span>
+                        <span className="pd-zone-eta-chip" data-no-i18n>{etaText(z.eta, isAr())}</span>
                       )}
                       <span className="pd-zone-ship-lbl">{t.ship}</span>{" "}
                       <span className="pd-zone-ship-val">
@@ -106,6 +104,12 @@ export function ZonesSection({
                           <div className="pd-zone-city" key={x.city}>
                             <div className="pd-zone-city-name">{cityLabel(x.city)}</div>
                             <div className="pd-zone-city-val">
+                              {/* Only where the shop said this city differs.
+                                  Silence means it takes the country's time,
+                                  shown on the row above. */}
+                              {!!x.eta && (
+                                <span className="pd-zone-eta-chip" data-no-i18n>{etaText(x.eta, isAr())}</span>
+                              )}
                               <span className="pd-zone-city-lbl">{t.deliv}</span>{" "}
                               <FreeOr n={x.d} sym={sym} code={code} />
                             </div>
@@ -135,7 +139,7 @@ export function ZonesSection({
             </svg>
           </div>
           <div className="pd-row-lbl">{t.etaLbl}</div>
-          <div className="pd-row-val" data-no-i18n>{t.eta(overall.min, overall.max)}</div>
+          <div className="pd-row-val" data-no-i18n>{etaText(overall, isAr())}</div>
         </div>
       )}
     </>

@@ -2,6 +2,7 @@ import {
   CATEGORY_DATA, CATEGORY_GROUP_AR, CATEGORY_ITEM_AR, COLOR_GROUP_NAMES, COUNTRY_NAMES,
   COUNTRY_NAMES_AR, LIBYA_CITIES, SIZE_GROUP_NAMES, platformFeeForPrice,
 } from "./constants";
+import { asEta } from "@/lib/eta";
 import { asFulfilment } from "@/lib/fulfilment";
 import { isAr, normSearch, wrapArSym } from "./format";
 import type {
@@ -76,13 +77,16 @@ export function dbToBrowse(r: Record<string, unknown>, favIds: Set<string>): Bro
 
   const d: Record<string, Zone> = {};
   type DbZone = {
-    cities?: Record<string, { shipping?: number; delivery?: number }>;
+    cities?: Record<string, { shipping?: number; delivery?: number; eta?: { min?: unknown; max?: unknown } | null }>;
     eta?: { min?: unknown; max?: unknown } | null;
   };
   Object.entries((r.delivery as Record<string, DbZone>) || {}).forEach(([code, z]) => {
     d[code] = { cities: [], c: {}, shipping: 0, delivery: 0 };
     Object.entries(z.cities || {}).forEach(([city, v]) => {
-      d[code].c[city] = { s: Number(v.shipping) || 0, d: Number(v.delivery) || 0 };
+      /* A city may narrow the country's delivery time. Most do not, and one
+         that does not simply carries none — the country's stands. */
+      const cityEta = asEta(v.eta);
+      d[code].c[city] = { s: Number(v.shipping) || 0, d: Number(v.delivery) || 0, ...(cityEta ? { eta: cityEta } : {}) };
       d[code].cities.push(city);
       d[code].shipping = Number(v.shipping) || 0;
       d[code].delivery = Number(v.delivery) || 0;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { asEta } from "@/lib/eta";
 import { useScrollLock } from "@/lib/useScrollLock";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 
@@ -19,9 +20,13 @@ import { goToAccount } from "../users/UserCard";
 function toZones(delivery: ProductDetail["product"] extends null ? never : NonNullable<ProductDetail["product"]>["delivery"]): Record<string, Zone> {
   const out: Record<string, Zone> = {};
   Object.entries(delivery || {}).forEach(([code, z]) => {
-    out[code] = { cities: [], c: {}, shipping: 0, delivery: 0 };
+    /* The delivery times come across too. Dropping them here was why the
+       admin's sheet was the one place a product's duration went missing. */
+    const zEta = asEta(z && z.eta);
+    out[code] = { cities: [], c: {}, shipping: 0, delivery: 0, ...(zEta ? { eta: zEta } : {}) };
     Object.entries((z && z.cities) || {}).forEach(([city, v]) => {
-      out[code].c[city] = { s: Number(v.shipping) || 0, d: Number(v.delivery) || 0 };
+      const cEta = asEta(v.eta);
+      out[code].c[city] = { s: Number(v.shipping) || 0, d: Number(v.delivery) || 0, ...(cEta ? { eta: cEta } : {}) };
       out[code].cities.push(city);
       out[code].shipping = Number(v.shipping) || 0;
       out[code].delivery = Number(v.delivery) || 0;

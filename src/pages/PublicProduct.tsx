@@ -2,35 +2,23 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { coverPosition } from "@/lib/coverFocus";
+import { etaTextOf } from "@/lib/eta";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { WordmarkSvg } from "@/components/brand/logoArt";
 
 type VariantItem = { val?: string; photo?: string; qty?: number | string | null } | string;
 type VariantGroup = { name?: string; items?: VariantItem[] };
-/** "2–4 days" / "يومين - 4 أيام", or "" when the shop never set one.
- *
- *  Arabic counts one and two differently from the rest, so a range that starts
- *  at two cannot simply have a number dropped in front of a plural. */
-function etaText(eta: DeliveryZone["eta"], lang: string): string {
-  const min = eta && eta.min != null ? Number(eta.min) : NaN;
-  if (!Number.isFinite(min)) return "";
-  const maxRaw = eta && eta.max != null ? Number(eta.max) : NaN;
-  const max = Number.isFinite(maxRaw) && maxRaw > min ? maxRaw : null;
-  if (lang !== "ar") {
-    const n = max ? `${min}–${max}` : String(min);
-    return `${n} ${!max && min === 1 ? "day" : "days"}`;
-  }
-  const one = (n: number) => (n === 1 ? "يوم" : n === 2 ? "يومين" : `${n} أيام`);
-  return max ? `${min} - ${one(max)}` : one(min);
-}
+
+type StoredEta = { min?: number | null; max?: number | null } | null;
 
 type DeliveryZone = {
-  cities?: Record<string, { shipping?: number; delivery?: number }>;
+  cities?: Record<string, { shipping?: number; delivery?: number; eta?: StoredEta }>;
   /** How long delivery takes to this country, in whole days. `max` is null
    *  when the shop gave a single figure rather than a range, and the whole
-   *  object is absent for products listed before delivery times existed. */
-  eta?: { min?: number | null; max?: number | null } | null;
+   *  object is absent for products listed before delivery times existed.
+   *  A city may carry its own, narrowing the country's for that one place. */
+  eta?: StoredEta;
 };
 
 type PublicProduct = {
@@ -446,9 +434,9 @@ export function PublicProduct({ id }: { id: string }) {
                               same place the marketer's sheet shows it, and the
                               first thing a customer following this link wants
                               to know. */}
-                          {etaText(z.eta, lang) && (
+                          {!!etaTextOf(z.eta, lang === "ar") && (
                             <span className="rounded-full border border-border px-2 py-0.5" data-no-i18n>
-                              {etaText(z.eta, lang)}
+                              {etaTextOf(z.eta, lang === "ar")}
                             </span>
                           )}
                           <span>Shipping: {maxShip ? `${maxShip} ${currencyLabel}` : <span data-no-i18n>{lang === "ar" ? "مجاني" : "Free"}</span>}</span>
@@ -466,10 +454,20 @@ export function PublicProduct({ id }: { id: string }) {
                               {cities.map(([city, v]) => (
                                 <div key={city} className="flex items-center justify-between rounded bg-surface-2 px-2 py-1.5 text-xs">
                                   <span className="text-text-1">{city}</span>
-                                  <span className="text-text-2">
-                                    Delivery: {Number(v.delivery) === 0 || !Number(v.delivery)
-                                      ? <span data-no-i18n>{lang === "ar" ? "مجاني" : "Free"}</span>
-                                      : <>{Number(v.delivery)} {currencyLabel}</>}
+                                  <span className="flex items-center gap-2 text-text-2">
+                                    {/* Only where the shop said this city is
+                                        different. Silence means it keeps the
+                                        country's time, on the row above. */}
+                                    {!!etaTextOf(v.eta, lang === "ar") && (
+                                      <span className="rounded-full border border-border px-2 py-0.5" data-no-i18n>
+                                        {etaTextOf(v.eta, lang === "ar")}
+                                      </span>
+                                    )}
+                                    <span>
+                                      Delivery: {Number(v.delivery) === 0 || !Number(v.delivery)
+                                        ? <span data-no-i18n>{lang === "ar" ? "مجاني" : "Free"}</span>
+                                        : <>{Number(v.delivery)} {currencyLabel}</>}
+                                    </span>
                                   </span>
                                 </div>
                               ))}

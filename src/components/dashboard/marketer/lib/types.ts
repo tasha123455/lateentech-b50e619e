@@ -9,7 +9,7 @@ export type VariantItem = { val: string; photo: string; qty: number | null };
 export type VariantGroup = { name: string; items: VariantItem[] };
 
 /** Per-city shipping/delivery costs, keyed by city name. */
-export type ZoneCity = { s: number; d: number };
+export type ZoneCity = { s: number; d: number; eta?: ZoneEta };
 /** How long delivery takes in that country, in whole days. `max` is null when
  *  the shop gave a single figure rather than a range. Absent when they left it
  *  blank, which is why nothing shows for products that have not set one. */

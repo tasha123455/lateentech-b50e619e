@@ -20,11 +20,16 @@ import {
 
 type VItem = { id: number; val: string; qty: string | number; photo: string };
 type VGroup = { id: number; name: string; placeholder: string; valPlaceholder: string; items: VItem[] };
-type ZoneCity = { delivery: number | string };
+type ZoneCity = { delivery: number | string; eta?: ZoneEta };
 /** `eta` is how long delivery takes in that country, in days — a minimum and an
  *  optional maximum, so a shop can say "3 days" or "2 to 4 days". It rides
  *  inside the existing delivery JSON rather than in its own column, next to the
- *  country it belongs to. */
+ *  country it belongs to.
+ *
+ *  A city may carry one too, to narrow the country's figure where a particular
+ *  place is faster or slower. The country's is required; a city's is not —
+ *  most shops ship everywhere on one schedule and should not have to type it
+ *  fourteen times. */
 type ZoneEta = { min: number | string; max: number | string };
 type Zone = { cities: Record<string, ZoneCity>; shipping: number | string; eta?: ZoneEta };
 
@@ -114,6 +119,8 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   const [variantGroups, setVariantGroups] = useState<VGroup[]>([]);
   const [zones, setZones] = useState<Record<string, Zone>>({});
   const [cityPanelOpenFor, setCityPanelOpenFor] = useState<string | null>(null);
+  /** Which country's per-city delivery times are unfolded, if any. */
+  const [cityEtaOpenFor, setCityEtaOpenFor] = useState<string | null>(null);
   const [commMode, setCommMode] = useState<"pct" | "fixed">("pct");
   const [commPct, setCommPct] = useState("");
   const [commFixed, setCommFixed] = useState("");
@@ -419,7 +426,10 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   };
   const removeCity = (code: string, city: string) => setZones((z) => { const cities = { ...z[code].cities }; delete cities[city]; return { ...z, [code]: { ...z[code], cities } }; });
   const clampNum = (val: string) => { const n = parseFloat(val); return val === "" || val == null || isNaN(n) ? "" : (n < 0 ? 0 : n); };
-  const updateCityCost = (code: string, city: string, val: string) => setZones((z) => (!z[code]?.cities[city] ? z : { ...z, [code]: { ...z[code], cities: { ...z[code].cities, [city]: { delivery: clampNum(val) } } } }));
+  /** Spreads the city rather than replacing it: the cost is no longer the only
+   *  thing a city holds, and rebuilding it from scratch would wipe the delivery
+   *  time the moment its price was edited. */
+  const updateCityCost = (code: string, city: string, val: string) => setZones((z) => (!z[code]?.cities[city] ? z : { ...z, [code]: { ...z[code], cities: { ...z[code].cities, [city]: { ...z[code].cities[city], delivery: clampNum(val) } } } }));
   const updateZoneShipping = (code: string, val: string) => setZones((z) => (!z[code] ? z : { ...z, [code]: { ...z[code], shipping: clampNum(val) } }));
   /** Whole days only, and nothing past a year — a delivery time is a small
    *  number and a stray keystroke should not be able to say 4000. */
@@ -432,6 +442,15 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
       if (!z[code]) return z;
       const eta = { min: "", max: "", ...(z[code].eta || {}), [key]: clampDays(val) };
       return { ...z, [code]: { ...z[code], eta } };
+    });
+
+  /** The same, for one city inside a country. */
+  const updateCityEta = (code: string, city: string, key: "min" | "max", val: string) =>
+    setZones((z) => {
+      const cur = z[code]?.cities?.[city];
+      if (!cur) return z;
+      const eta = { min: "", max: "", ...(cur.eta || {}), [key]: clampDays(val) };
+      return { ...z, [code]: { ...z[code], cities: { ...z[code].cities, [city]: { ...cur, eta } } } };
     });
 
   // ---- submit ----
@@ -485,34 +504,52 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     }
     if (!Object.keys(zones).length) { alert(ar ? "أضف منطقة توصيل واحدة على الأقل." : "Please add at least one delivery zone."); return; }
 
+    type SavedEta = { min: number; max: number | null };
+    type SavedCity = { shipping: number; delivery: number; eta?: SavedEta };
     type SavedZone = {
-      cities: Record<string, { shipping: number; delivery: number }>;
+      cities: Record<string, SavedCity>;
       shipping: number;
-      eta?: { min: number; max: number | null };
+      eta?: SavedEta;
     };
+    /* Two boxes filled in the wrong order is a range that reads backwards, so
+       they swap rather than being saved that way. One figure and no second is
+       "3 days" rather than a range, which is what `max: null` means. */
+    const readEta = (e: { min?: number | string; max?: number | string } | undefined): SavedEta | null => {
+      const min = e && e.min !== "" && e.min != null ? Number(e.min) : null;
+      if (min == null || isNaN(min)) return null;
+      const maxRaw = e && e.max !== "" && e.max != null ? Number(e.max) : null;
+      const max = maxRaw != null && !isNaN(maxRaw) ? maxRaw : null;
+      return max != null && max < min ? { min: max, max: min } : { min, max };
+    };
+
     const validZones: Record<string, SavedZone> = {};
+    const missingEta: string[] = [];
     for (const [code, z] of Object.entries(zones)) {
       const zShip = Number(z.shipping) || 0;
-      const vc: Record<string, { shipping: number; delivery: number }> = {};
+      const vc: Record<string, SavedCity> = {};
       for (const [city, costs] of Object.entries(z.cities || {})) {
         const raw = costs ? costs.delivery : "";
         if (raw === "" || raw == null || isNaN(Number(raw))) continue;
-        vc[city] = { shipping: zShip, delivery: Math.max(0, Number(raw)) };
+        const cityEta = readEta(costs?.eta);
+        vc[city] = { shipping: zShip, delivery: Math.max(0, Number(raw)), ...(cityEta ? { eta: cityEta } : {}) };
       }
       if (!Object.keys(vc).length) continue;
       const saved: SavedZone = { cities: vc, shipping: zShip };
-      /* The delivery time is optional: left blank, the zone simply carries no
-         eta and nothing about it shows to marketers. A max below the min is
-         the two boxes filled in the wrong order, so they swap rather than
-         saving a range that reads backwards. */
-      const emin = z.eta && z.eta.min !== "" && z.eta.min != null ? Number(z.eta.min) : null;
-      const emaxRaw = z.eta && z.eta.max !== "" && z.eta.max != null ? Number(z.eta.max) : null;
-      if (emin != null && !isNaN(emin)) {
-        const emax = emaxRaw != null && !isNaN(emaxRaw) ? emaxRaw : null;
-        saved.eta =
-          emax != null && emax < emin ? { min: emax, max: emin } : { min: emin, max: emax };
-      }
+      const zoneEta = readEta(z.eta);
+      /* The country's delivery time is required. A marketer quoting a customer
+         cannot be left guessing, and every product listed from here on can
+         answer "how long?" without anyone having to ask the shop. A city's is
+         optional — it only narrows the country's where somewhere is faster or
+         slower, and most shops ship everywhere on one schedule. */
+      if (!zoneEta) missingEta.push(code);
+      else saved.eta = zoneEta;
       validZones[code] = saved;
+    }
+    if (missingEta.length) {
+      alert(ar
+        ? "يرجى إدخال مدة التوصيل لكل دولة أضفتها."
+        : "Please enter the delivery time for every country you added.");
+      return;
     }
     if (!Object.keys(validZones).length) { alert(ar ? "أضف مدينة واحدة على الأقل مع سعر التوصيل." : "Please add at least one city with a delivery price."); return; }
 
@@ -822,7 +859,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                       The country is not repeated — the card is titled with it
                       two lines above. */}
                   <div className="lp-eta-field">
-                    <label className="lp-field-label">{ar ? "مدة التوصيل (اختياري)" : "Delivery time (optional)"}</label>
+                    <label className="lp-field-label">{ar ? "مدة التوصيل" : "Delivery time"} <span className="lp-req">*</span></label>
                     <div className="lp-eta-box">
                       <input
                         type="number" min={0} max={365} step="1" inputMode="numeric"
@@ -853,6 +890,52 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                           {isFreeVal(z.cities[city].delivery) && <span style={{ marginInlineStart: 8, fontSize: 11, fontWeight: 700, color: "#34c77b" }}>{freeLbl()}</span>}
                         </div>
                       ))}
+
+                      {/* Folded away, because it is optional and it is one row
+                          per city — open by default it would bury the delivery
+                          costs above it under fourteen boxes nobody asked for.
+                          A city left blank simply takes the country's time. */}
+                      <button
+                        type="button"
+                        className="lp-city-eta-toggle"
+                        aria-expanded={cityEtaOpenFor === code}
+                        onClick={() => setCityEtaOpenFor((v) => (v === code ? null : code))}
+                      >
+                        <span>{ar ? "مدة التوصيل لكل مدينة (اختياري)" : "Delivery time per city (optional)"}</span>
+                        <span className={"lp-city-eta-chev" + (cityEtaOpenFor === code ? " open" : "")}>▾</span>
+                      </button>
+                      {cityEtaOpenFor === code && (
+                        <div className="lp-city-eta-body">
+                          <div className="lp-city-eta-note">
+                            {ar
+                              ? "اتركها فارغة وتأخذ المدينة مدة الدولة."
+                              : "Leave a city blank and it takes the country's time."}
+                          </div>
+                          {ck.map((city) => (
+                            <div className="lp-city-eta-row" key={city}>
+                              <span className="city-name">{isLY ? cityLbl(city) : city}</span>
+                              <div className="lp-eta-box lp-eta-box-sm">
+                                <input
+                                  type="number" min={0} max={365} step="1" inputMode="numeric"
+                                  className="lp-eta-inp"
+                                  value={z.cities[city].eta?.min === "" || z.cities[city].eta?.min == null ? "" : z.cities[city].eta!.min}
+                                  placeholder={ar ? "من" : "from"}
+                                  onChange={(e) => updateCityEta(code, city, "min", e.target.value)}
+                                />
+                                <span className="lp-eta-dash" aria-hidden>–</span>
+                                <input
+                                  type="number" min={0} max={365} step="1" inputMode="numeric"
+                                  className="lp-eta-inp"
+                                  value={z.cities[city].eta?.max === "" || z.cities[city].eta?.max == null ? "" : z.cities[city].eta!.max}
+                                  placeholder={ar ? "إلى" : "to"}
+                                  onChange={(e) => updateCityEta(code, city, "max", e.target.value)}
+                                />
+                                <span className="lp-eta-unit">{ar ? "يوم" : "days"}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </>
                   )}
                   {isLY ? (
