@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { asFulfilment } from "@/lib/fulfilment";
+import { coverStyle } from "@/lib/coverFocus";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { bidiIsolate, isAr, splitCC } from "../lib/format";
@@ -171,7 +172,7 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                         style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: "1px solid var(--color-border-secondary)" }}
                         onClick={(e) => { e.stopPropagation(); lightbox.open([photoUrl], 0); }}
                       >
-                        <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", display: "block", ...coverStyle(d?.cover_focus_x, d?.cover_focus_y) }} />
                       </div>
                     ) : null}
                   </div>
@@ -182,7 +183,7 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                     style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: "1px solid var(--color-border-secondary)" }}
                     onClick={(e) => { e.stopPropagation(); lightbox.open([photoUrl], 0); }}
                   >
-                    <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", display: "block", ...coverStyle(d?.cover_focus_x, d?.cover_focus_y) }} />
                   </div>
                 );
               }
@@ -277,7 +278,10 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                 <div className={"notif-item expandable" + (isOpen ? " expanded" : "")} data-id={n.id} key={n.id}>
                   <div className="notif-top" onClick={() => setExpanded((s) => ({ ...s, [n.id]: !s[n.id] }))}>
                     {hasPhoto ? (
-                      <div className="notif-photo-wrap"><img src={iconPhotoUrl} alt="" loading="lazy" /></div>
+                      <div className="notif-photo-wrap">
+                        {/* Cropped small, so it keeps the owner's framing. */}
+                        <img src={iconPhotoUrl} alt="" loading="lazy" style={coverStyle(d?.cover_focus_x, d?.cover_focus_y)} />
+                      </div>
                     ) : iconHtml}
                     <div className="notif-row-text">
                       <div style={{ flex: 1, minWidth: 0 }}>

@@ -1,3 +1,4 @@
+import { coverStyle } from "@/lib/coverFocus";
 import { useState } from "react";
 
 import { isPdfUrl } from "@/lib/filePicker";
@@ -44,7 +45,13 @@ function OrderInfo({ o, onPhoto }: { o: ReceiptOrder; onPhoto: (url: string) => 
         <div className="rcpt-info-body">
           <div className="rcpt-info-photo">
             {prodPhoto ? (
-              <img src={prodPhoto} alt="" data-no-i18n onClick={() => onPhoto(prodPhoto)} />
+              <img
+                src={prodPhoto}
+                alt=""
+                data-no-i18n
+                onClick={() => onPhoto(prodPhoto)}
+                style={coverStyle(o.product?.cover_focus_x, o.product?.cover_focus_y)}
+              />
             ) : (
               <div className="rcpt-info-photo-empty">📦</div>
             )}

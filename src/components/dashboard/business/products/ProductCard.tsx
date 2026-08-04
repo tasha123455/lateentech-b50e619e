@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { coverStyle } from "@/lib/coverFocus";
 import { isAr, freeLbl, isFreeVal, moneyParts } from "../lib/format";
 import { cityLbl, categoryLabel, COUNTRY_FLAGS, COUNTRY_NAMES, COUNTRY_NAMES_AR } from "../lib/constants";
 import type { Order, PendingActiveStub, Product } from "../lib/types";
@@ -101,7 +102,16 @@ export function ProductCard({
               {photos.length ? (
                 photos.map((url, i) => (
                   <div className="mp-p-thumb-slide" key={i}>
-                    <img src={url} alt={p.name} data-no-i18n="" loading="eager" decoding="async" />
+                    {/* The cover keeps the owner's own framing; the
+                        photos behind it were never framed. */}
+                    <img
+                      src={url}
+                      alt={p.name}
+                      data-no-i18n=""
+                      loading="eager"
+                      decoding="async"
+                      style={i === 0 ? coverStyle(p.coverFocusX, p.coverFocusY) : undefined}
+                    />
                   </div>
                 ))
               ) : (

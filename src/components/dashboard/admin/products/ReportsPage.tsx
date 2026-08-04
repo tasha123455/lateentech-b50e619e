@@ -1,3 +1,4 @@
+import { coverStyle } from "@/lib/coverFocus";
 import { useEffect, useMemo, useState } from "react";
 
 import { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
@@ -215,7 +216,13 @@ function ReportCard({
 
               <div className="rpt-prod">
                 {photo ? (
-                  <img className="rpt-mini-thumb" src={photo} alt="" data-no-i18n />
+                  <img
+                    className="rpt-mini-thumb"
+                    src={photo}
+                    alt=""
+                    data-no-i18n
+                    style={coverStyle(product.cover_focus_x, product.cover_focus_y)}
+                  />
                 ) : (
                   <div className="rpt-mini-thumb-empty">📦</div>
                 )}

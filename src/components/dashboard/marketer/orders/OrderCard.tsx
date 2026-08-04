@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { coverStyle } from "@/lib/coverFocus";
 
 import { codPaysParts, dispPhone, fmtDT, isAr, isSafeUrl } from "../lib/format";
 import { orderVariants } from "../lib/mappers";
@@ -188,7 +189,13 @@ export function OrderCard({
                     loading="lazy"
                     onPointerDown={open ? onPressStart : undefined}
                     onClick={open ? (e) => openPhotos(e, viewable.indexOf(u)) : undefined}
-                    style={open && isSafeUrl(u) ? { cursor: "zoom-in" } : undefined}
+                    style={{
+                      /* Only the first photo is the cover, and the owner's
+                         framing is a fact about the cover. The rest were never
+                         dragged, so they stay centred. */
+                      ...(i === 0 && product ? coverStyle(product.coverFocusX, product.coverFocusY) : null),
+                      ...(open && isSafeUrl(u) ? { cursor: "zoom-in" } : null),
+                    }}
                   />
                 </div>
               ))

@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { Fragment, useMemo, useRef, useState } from "react";
 
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { coverStyle } from "@/lib/coverFocus";
 import { useBusinessData } from "../BusinessDataProvider";
 import { useLightbox } from "../ui/Lightbox";
 import { MoneyH } from "../ui/Money";
@@ -82,7 +83,9 @@ function bizOrdCounts(orders: Order[]) {
   return c;
 }
 
-function HeroPhotos({ photos }: { photos: string[] }) {
+/** `focus` is the owner's framing of the *cover*, which is photos[0]. The
+ *  photos behind it were never framed, so they stay centred. */
+function HeroPhotos({ photos, focus }: { photos: string[]; focus?: { x: unknown; y: unknown } }) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [dotIdx, setDotIdx] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -100,7 +103,9 @@ function HeroPhotos({ photos }: { photos: string[] }) {
       <div className="hero-scroll" ref={scrollerRef} onScroll={onScroll}>
         {photos.map((p, i) => (
           <div className="hero-slide" key={i}>
-            {isImgStr(p) ? <img src={p} alt="" loading="eager" decoding="async" /> : p}
+            {isImgStr(p)
+              ? <img src={p} alt="" loading="eager" decoding="async" style={i === 0 && focus ? coverStyle(focus.x, focus.y) : undefined} />
+              : p}
           </div>
         ))}
       </div>
@@ -290,7 +295,7 @@ function OrderCard({
   return (
     <div className={"order-card" + (isExp ? " expanded" : "") + (isNewBucket ? " new" : "")} data-status={o.status} data-id={o.id}>
       <div className="card-top" data-action="toggle" onClick={onToggle}>
-        <HeroPhotos photos={photos} />
+        <HeroPhotos photos={photos} focus={prod ? { x: prod.coverFocusX, y: prod.coverFocusY } : undefined} />
         <div className="row-text">
           <div className="row-info">
             <div className="row-name-line">

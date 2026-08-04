@@ -29,7 +29,8 @@ export type ReceiptOrder = {
   marketer_id: string;
   business_id?: string | null;
   marketer?: Person | null;
-  product?: { name?: string | null; photos?: string[] | null } | null;
+  /** cover_focus_* is the owner's framing of photos[0]. */
+  product?: { name?: string | null; photos?: string[] | null; cover_focus_x?: number | null; cover_focus_y?: number | null } | null;
   qty?: number | null;
   unit_price?: number | null;
   commission?: number | null;
@@ -137,7 +138,7 @@ export type AdminReport = {
   product_id?: string | null;
   reporter?: Person | null;
   business?: Person | null;
-  product?: { name?: string | null; price?: number | null; code?: string | null; photos?: string[] | null } | null;
+  product?: { name?: string | null; price?: number | null; code?: string | null; photos?: string[] | null; cover_focus_x?: number | null; cover_focus_y?: number | null } | null;
 };
 
 export type DeletionRequest = {

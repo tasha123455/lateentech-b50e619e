@@ -905,7 +905,7 @@ export function createLateenApi(userId: string) {
         const [pmap, { data: prods }] = await Promise.all([
           loadAdminPeople(marketerIds),
           productIds.length
-            ? supabase.from("products").select("id, name, photos").in("id", productIds)
+            ? supabase.from("products").select("id, name, photos, cover_focus_x, cover_focus_y").in("id", productIds)
             : Promise.resolve({ data: [] as Array<{ id: string; name: string; photos: string[] }> }),
         ]);
         const prodmap = new Map((prods ?? []).map((p) => [p.id, p]));
@@ -967,7 +967,7 @@ export function createLateenApi(userId: string) {
         const [pmap, { data: prods }] = await Promise.all([
           loadAdminPeople(marketerIds),
           productIds.length
-            ? supabase.from("products").select("id, name, photos").in("id", productIds)
+            ? supabase.from("products").select("id, name, photos, cover_focus_x, cover_focus_y").in("id", productIds)
             : Promise.resolve({ data: [] as Array<{ id: string; name: string; photos: string[] }> }),
         ]);
         const prodmap = new Map((prods ?? []).map((p) => [p.id, p]));

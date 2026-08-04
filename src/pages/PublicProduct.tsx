@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { coverPosition } from "@/lib/coverFocus";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { WordmarkSvg } from "@/components/brand/logoArt";
@@ -28,6 +29,9 @@ type PublicProduct = {
   deleted_at: string | null;
   delivery: Record<string, DeliveryZone> | null;
   biz_name: string | null;
+  /** The owner's framing of the cover photo. */
+  cover_focus_x: number | null;
+  cover_focus_y: number | null;
 };
 
 type Review = {
@@ -130,7 +134,7 @@ export function PublicProduct({ id }: { id: string }) {
       try {
         const { data, error } = await supabase
           .from("products_public_view")
-          .select("id,business_id,name,code,category,description,price,currency,photos,sizes,colors,variant_groups,qty,reserved_qty,status,deleted_at,delivery,biz_name")
+          .select("id,business_id,name,code,category,description,price,currency,photos,sizes,colors,variant_groups,qty,reserved_qty,status,deleted_at,delivery,biz_name,cover_focus_x,cover_focus_y")
           .eq("id", id)
           .maybeSingle();
         if (!alive) return;
@@ -284,6 +288,10 @@ export function PublicProduct({ id }: { id: string }) {
                 decoding="async"
                 fetchPriority={i === 0 ? "high" : "auto"}
                 className="h-full w-full flex-shrink-0 object-cover cursor-zoom-in bg-surface-2"
+                /* The cover keeps the framing the owner chose when listing it,
+                   the same as every other place the product is shown. The
+                   photos behind it were never framed, so they stay centred. */
+                style={i === 0 ? { objectPosition: coverPosition(p.cover_focus_x, p.cover_focus_y) } : undefined}
                 onClick={() => setLightboxIdx(i)}
               />
             ))}

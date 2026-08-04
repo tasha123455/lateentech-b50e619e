@@ -1,4 +1,5 @@
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { coverStyle } from "@/lib/coverFocus";
 import { isAr } from "../lib/format";
 import type { BrowseProduct } from "../lib/types";
 import { Money } from "../ui/Money";
@@ -11,8 +12,8 @@ export function ProductCover({ p }: { p: BrowseProduct }) {
       src={p.cover}
       alt=""
       style={{
-        width: "100%", height: "100%", objectFit: "cover",
-        objectPosition: `${p.coverFocusX}% ${p.coverFocusY}%`, borderRadius: "inherit",
+        width: "100%", height: "100%", borderRadius: "inherit",
+        ...coverStyle(p.coverFocusX, p.coverFocusY),
       }}
     />
   );

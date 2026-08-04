@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
 import { isPdfUrl } from "@/lib/filePicker";
+import { coverStyle } from "@/lib/coverFocus";
 import { marketOf } from "@/lib/markets";
 
 import { useMarketerData } from "../MarketerDataProvider";
@@ -301,7 +302,14 @@ export function NotifItem({
       <div className="notif-top" onClick={onToggle}>
         {hasPhoto ? (
           <div className="notif-photo-wrap">
-            <img src={iconPhotoUrl} alt="" loading="lazy" />
+            {/* Cropped to a small square, so it is framed the way the owner
+                framed it rather than from the middle. */}
+            <img
+              src={iconPhotoUrl}
+              alt=""
+              loading="lazy"
+              style={coverStyle(d.cover_focus_x, d.cover_focus_y)}
+            />
           </div>
         ) : (
           icon

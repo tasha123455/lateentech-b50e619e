@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ClampedText } from "../ui/ClampedText";
+import { coverStyle } from "@/lib/coverFocus";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { platThreshold, platformFeeForPrice } from "../lib/constants";
@@ -198,7 +199,14 @@ export function ProductDetailOverlay({
             <div className="pd-gallery-track" ref={galleryRef} onScroll={onGalleryScroll}>
               {photos.map((u, i) => (
                 <div className="pd-gallery-slide" key={u + i} onClick={() => lightbox.open(photos, i)}>
-                  <img src={u} alt="" loading="eager" />
+                  {/* The cover keeps the framing the owner chose; the photos
+                      behind it were never framed, so they stay centred. */}
+                  <img
+                    src={u}
+                    alt=""
+                    loading="eager"
+                    style={i === 0 ? coverStyle(p.coverFocusX, p.coverFocusY) : undefined}
+                  />
                 </div>
               ))}
             </div>
