@@ -1,5 +1,6 @@
 /* Row → UI mappers, ported 1:1 from business.script.js (dbToProduct / dbToOrder). */
 
+import { asFulfilment } from "@/lib/fulfilment";
 import { wrapArSym } from "./format";
 import type { Order, OrderUiStatus, Product } from "./types";
 
@@ -34,6 +35,7 @@ export function dbToProduct(r: Row): Product {
     status: r.status || "active",
     delivery: r.delivery || {},
     reqPhone: !!r.require_additional_phone,
+    fulfilment: asFulfilment(r.fulfilment),
   };
 }
 

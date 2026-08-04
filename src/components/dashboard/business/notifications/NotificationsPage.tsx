@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { asFulfilment } from "@/lib/fulfilment";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { bidiIsolate, isAr, splitCC } from "../lib/format";
@@ -221,6 +223,14 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                   ) : null}
                   <Row k={tr("Order Code", "كود الطلبيه")} v={str(d.order_code)} />
                   <Row k={tr("Product", "المنتج")} v={str(d.product_name)} noTranslate />
+                  {/* Reserve or instant delivery, as the listing stood when
+                      this notification was sent. */}
+                  {!!asFulfilment(d.fulfilment) && (
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "4px 0", fontSize: 12 }}>
+                      <span style={{ color: "var(--color-text-secondary)" }}>{tr("Fulfilment", "طريقة التسليم")}</span>
+                      <span style={{ textAlign: "right" }}><FulfilmentBadge value={d.fulfilment} ar={isAr()} size="sm" /></span>
+                    </div>
+                  )}
                   <Row k={tr("Qty", "الكمية")} v={str(d.qty)} />
                   <Row k={tr("Customer", "الزبون")} v={str(d.customer_name)} noTranslate />
                   <Row k={tr("Phone", "الهاتف")} v={custPhone.cc ? `${custPhone.cc} | ${custPhone.num}` : custPhone.num} />

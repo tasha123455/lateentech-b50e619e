@@ -1,6 +1,7 @@
 /* Domain types for the business dashboard — mirror the in-memory shapes the
    original business.script.js built via dbToProduct / dbToOrder. */
 
+import type { Fulfilment } from "@/lib/fulfilment";
 import type { Currency } from "./constants";
 
 export type VariantOption = {
@@ -55,6 +56,8 @@ export type Product = {
   status: string;
   delivery: Record<string, DeliveryZone>;
   reqPhone: boolean;
+  /** How it is fulfilled — reserve or instant. NULL before the owner chose. */
+  fulfilment: Fulfilment | null;
 };
 
 export type OrderUiStatus =

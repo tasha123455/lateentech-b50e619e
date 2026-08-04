@@ -1,3 +1,4 @@
+import type { Fulfilment } from "@/lib/fulfilment";
 import type { createLateenApi } from "@/lib/lateen-api";
 
 export type LateenApi = ReturnType<typeof createLateenApi>;
@@ -51,6 +52,8 @@ export type BrowseProduct = {
   vg: VariantGroup[];
   d: Record<string, Zone>;
   reqPhone: boolean;
+  /** How it is fulfilled — reserve or instant. NULL before the owner chose. */
+  fulfilment: Fulfilment | null;
 };
 
 /** The order-form view of a product (the old `PRODUCTS` map). */
@@ -78,6 +81,7 @@ export type FormProduct = {
   biz: string;
   bizPhone?: string;
   reqPhone: boolean;
+  fulfilment: Fulfilment | null;
   sym: string;
   currency: { symbol: string; code: string };
   delivery: Record<string, FormDelivery>;

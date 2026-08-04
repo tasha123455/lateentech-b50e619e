@@ -2,6 +2,7 @@ import {
   CATEGORY_DATA, CATEGORY_GROUP_AR, CATEGORY_ITEM_AR, COLOR_GROUP_NAMES, COUNTRY_NAMES,
   COUNTRY_NAMES_AR, LIBYA_CITIES, SIZE_GROUP_NAMES, platformFeeForPrice,
 } from "./constants";
+import { asFulfilment } from "@/lib/fulfilment";
 import { isAr, normSearch, wrapArSym } from "./format";
 import type {
   BrowseProduct, CurrentDelivery, FormProduct, MarketerOrder, SelectedVariant, VariantGroup, VariantItem, Zone,
@@ -133,6 +134,7 @@ export function dbToBrowse(r: Record<string, unknown>, favIds: Set<string>): Bro
     vg,
     d,
     reqPhone: !!r.require_additional_phone,
+    fulfilment: asFulfilment(r.fulfilment),
   };
 }
 
@@ -164,6 +166,7 @@ export function buildProductsMap(list: BrowseProduct[]): Record<string, FormProd
       biz: p.biz,
       bizPhone: p.bizPhone,
       reqPhone: !!p.reqPhone,
+      fulfilment: p.fulfilment ?? null,
       sym: p.cur.s,
       currency: { symbol: p.cur.s, code: p.cur.code },
       delivery,

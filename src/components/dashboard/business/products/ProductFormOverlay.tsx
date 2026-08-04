@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { pickFile } from "@/lib/filePicker";
+import { FULFILMENTS, fulfilmentHint, fulfilmentLabel, type Fulfilment } from "@/lib/fulfilment";
 
 import { DEFAULT_MARKET_CODE, marketOf } from "@/lib/markets";
 
@@ -114,6 +115,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   const [commPct, setCommPct] = useState("");
   const [commFixed, setCommFixed] = useState("");
   const [reqPhone, setReqPhone] = useState(false);
+  const [fulfilment, setFulfilment] = useState<Fulfilment | null>(null);
   const [currentCode, setCurrentCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitLabel, setSubmitLabel] = useState<string | null>(null);
@@ -178,6 +180,9 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     setCommPct(p?.commPct ? String(p.commPct) : "");
     setCommFixed(p?.commFixed ? String(p.commFixed) : "");
     setReqPhone(!!p?.reqPhone);
+    // Editing a product listed before this choice existed leaves it unset
+    // rather than picking one on the owner's behalf.
+    setFulfilment(p?.fulfilment ?? null);
     setCurrDropdownOpen(false);
     setCountryDropdownOpen(false);
     setCityPanelOpenFor(null);
@@ -444,6 +449,13 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     if (!selectedCategory) { alert(ar ? "يرجى اختيار فئة للمنتج." : "Please select a category."); return; }
     if (!photos.length) { alert(ar ? "يرجى إضافة صورة واحدة على الأقل للمنتج." : "Please add at least one product photo."); return; }
     if (!selectedCurrency) { alert(ar ? "يرجى اختيار عملة." : "Please select a currency."); return; }
+    /* Required when listing something new, so everything from here on has an
+       answer. Not required when editing: a product listed before this choice
+       existed should not be held hostage by it to fix a typo. */
+    if (!editing && !fulfilment) {
+      alert(ar ? "يرجى اختيار طريقة التسليم: حجز أو تسليم فوري." : "Please choose how it is fulfilled: Reserve or Instant delivery.");
+      return;
+    }
     if (variantMode === "none") {
       if (simpleQty === "" || simpleQty == null || isNaN(Number(simpleQty)) || Number(simpleQty) < 0) {
         alert(ar ? "يرجى إدخال كمية صحيحة." : "Please enter a valid quantity.");
@@ -526,6 +538,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
         delivery: validZones, photos: cleanPhotos,
         cover_focus_x: coverFocusX, cover_focus_y: coverFocusY,
         biz_name: null, require_additional_phone: reqPhone,
+        fulfilment,
       };
       if (editing) payload.id = editing.id;
       setSubmitLabel(ar ? "جارٍ الحفظ…" : "Saving…");
@@ -915,6 +928,37 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                 ? (ar ? <>مبلغ ربح المسوق: <b>{moneyH(pctOf(priceNum, commPctNum), "د.ل", "LYD")}</b> لكل قطعه</> : <>Fixed equivalent at current price: <b>{pctOf(priceNum, commPctNum).toFixed(2)} {curCode}</b> per sale</>)
                 : (ar ? <>نسبه ربح المسوق : <b>{(priceNum ? (commFixedNum / priceNum) * 100 : 0).toFixed(1)}%</b> لكل قطعه</> : <>Percentage equivalent at current price: <b>{(priceNum ? (commFixedNum / priceNum) * 100 : 0).toFixed(1)}%</b> per sale</>)}
             </div>
+            {/* Reserve or instant — one or the other, never both. Picking one
+                clears the other by construction: there is a single value, so
+                the two buttons cannot both be on. */}
+            <div style={{ marginTop: 14 }}>
+              <div className="lp-comm-title" data-no-i18n>
+                {ar ? "طريقة التسليم" : "How it is fulfilled"}
+              </div>
+              <div className="lp-segmented" style={{ marginTop: 8, marginBottom: 6 }}>
+                {FULFILMENTS.map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    data-no-i18n
+                    className={fulfilment === f ? "active" : ""}
+                    disabled={editLocked}
+                    aria-pressed={fulfilment === f}
+                    onClick={() => setFulfilment(f)}
+                  >
+                    {fulfilmentLabel(f, ar)}
+                  </button>
+                ))}
+              </div>
+              <div className="lp-conversion-note" data-no-i18n style={{ marginTop: 0 }}>
+                {fulfilment
+                  ? fulfilmentHint(fulfilment, ar)
+                  : ar
+                    ? "اختر واحدة — تظهر للمسوقين مع المنتج."
+                    : "Pick one — marketers see it alongside the product."}
+              </div>
+            </div>
+
             <div className="lp-reqphone-row">
               <div className="lp-reqphone-label-wrap">
                 <span className="lp-reqphone-label">{ar ? "طلب رقم هاتف إضافي من الزبون" : "Require Additional Phone Number from customer"}</span>

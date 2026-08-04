@@ -122,27 +122,30 @@ export function MenuDrawer({
           </svg>
         </div>
 
-        {/* The busy state replaces the row's whole contents — icon included —
-            exactly like the [data-action="sign-out"] handler did. */}
+        {/* Signing out swaps the label and nothing else, the way the
+            marketer's drawer does it. The old version threw away the row's
+            whole contents — icon included — and left a bare line of text where
+            a menu row had been, which is the jolt that read as tacky. */}
         <div
           className="menu-item"
           data-action="sign-out"
           onClick={handleSignOut}
           aria-busy={signingOut || undefined}
-          style={signingOut
-            ? { marginTop: "auto", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 14, pointerEvents: "none", opacity: "0.6" }
-            : { marginTop: "auto", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 14 }}
+          style={{
+            marginTop: "auto", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 14,
+            ...(signingOut ? { pointerEvents: "none" as const, opacity: 0.6 } : null),
+          }}
         >
-          {signingOut ? (ar ? "جارٍ تسجيل الخروج…" : "Signing out…") : (
-            <>
-              <div className="menu-icon-wrap mi-red">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-                </svg>
-              </div>
-              <div className="menu-item-label" style={{ color: "#e07070" }}>Sign out</div>
-            </>
-          )}
+          <div className="menu-icon-wrap mi-red">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e07070" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+            </svg>
+          </div>
+          <div>
+            <div className="menu-item-label" style={{ color: "#e07070" }}>
+              {signingOut ? (ar ? "جارٍ تسجيل الخروج…" : "Signing out…") : "Sign out"}
+            </div>
+          </div>
         </div>
       </div>
     </div>

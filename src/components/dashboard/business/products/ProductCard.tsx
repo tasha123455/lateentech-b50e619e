@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { isAr, freeLbl, isFreeVal, moneyParts } from "../lib/format";
 import { cityLbl, categoryLabel, COUNTRY_FLAGS, COUNTRY_NAMES, COUNTRY_NAMES_AR } from "../lib/constants";
 import type { Order, PendingActiveStub, Product } from "../lib/types";
@@ -158,9 +159,14 @@ export function ProductCard({
         <div className="mp-p-details-inner">
           <div className="mp-divider" />
           <div className="mp-details-top-row">
-            <div className="mp-details-code-pill">
-              <span className="mp-code-label">{ar ? "كود المنتج" : "Product code"}</span>
-              <span className="mp-code-val" data-no-i18n="">{p.code}</span>
+            {/* The code pill and, beside it, what the owner chose when listing
+                the product — the two facts about the listing, read together. */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", minWidth: 0 }}>
+              <div className="mp-details-code-pill">
+                <span className="mp-code-label">{ar ? "كود المنتج" : "Product code"}</span>
+                <span className="mp-code-val" data-no-i18n="">{p.code}</span>
+              </div>
+              <FulfilmentBadge value={p.fulfilment} ar={ar} size="sm" />
             </div>
             <AnalyticsButton pid={p.id} open={an.open} onToggle={() => an.setOpen((v) => !v)} />
           </div>

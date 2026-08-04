@@ -1,3 +1,5 @@
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { isAr } from "../lib/format";
 import type { BrowseProduct } from "../lib/types";
 import { Money } from "../ui/Money";
 
@@ -62,6 +64,13 @@ export function ProductCard({
       </div>
       <div className="cb2">
         <div className="cn" data-no-i18n>{p.n}</div>
+        {/* Reserve / instant delivery. The admin grid renders this same
+            component, so both browse pages show it without a second copy. */}
+        {p.fulfilment && (
+          <div style={{ margin: "2px 0 4px" }}>
+            <FulfilmentBadge value={p.fulfilment} ar={isAr()} size="sm" />
+          </div>
+        )}
         <div className="cr">
           <div className="cpr"><Money n={p.pr} sym={p.cur.s} code={p.cur.code} /></div>
           <div className="cco">{p.pct}%</div>

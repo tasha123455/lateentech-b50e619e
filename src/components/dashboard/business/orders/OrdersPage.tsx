@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Fragment, useMemo, useRef, useState } from "react";
 
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { useBusinessData } from "../BusinessDataProvider";
 import { useLightbox } from "../ui/Lightbox";
 import { MoneyH } from "../ui/Money";
@@ -323,6 +324,14 @@ function OrderCard({
           <div className="r"><span className="k">Order ID</span><span className="v mono">{o.id}</span></div>
           <div className="r"><span className="k">Product</span><span className="v">{o.product}</span></div>
           <div className="r"><span className="k">Product code</span><span className="v mono">{o.productCode || "—"}</span></div>
+          {/* Reserve or instant delivery, read off the listing this order came
+              from. Absent for a product listed before the choice existed. */}
+          {prod?.fulfilment && (
+            <div className="r">
+              <span className="k">{ar ? "طريقة التسليم" : "Fulfilment"}</span>
+              <span className="v"><FulfilmentBadge value={prod.fulfilment} ar={ar} size="sm" /></span>
+            </div>
+          )}
           <div className="r"><span className="k">Quantity</span><span className="v">{o.qty}</span></div>
           {variantRows}
         </div>

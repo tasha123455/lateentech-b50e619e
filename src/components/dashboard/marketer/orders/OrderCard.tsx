@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+
 import { codPaysParts, dispPhone, fmtDT, isAr, isSafeUrl } from "../lib/format";
 import { orderVariants } from "../lib/mappers";
 import type { BrowseProduct, FormProduct, MarketerOrder } from "../lib/types";
@@ -257,6 +259,18 @@ export function OrderCard({
               >
                 {o.productName && o.productName !== "(no product)" ? o.productName : T.noProduct}
               </div>
+              {/* Reserve or instant delivery, read off the live product — the
+                  order does not carry it, and the answer is whatever the
+                  listing says today. */}
+              {(product?.fulfilment || liveProduct?.fulfilment) && (
+                <div style={{ margin: "4px 0 2px" }}>
+                  <FulfilmentBadge
+                    value={product?.fulfilment ?? liveProduct?.fulfilment}
+                    ar={isAr()}
+                    size="sm"
+                  />
+                </div>
+              )}
               {!!variants.length && (
                 <div className="variant-row">
                   {variants.map((v, i) => (

@@ -64,6 +64,8 @@ export type LateenProduct = {
   revenue: number;
   biz_name: string | null;
   require_additional_phone: boolean;
+  /** 'reserve' | 'instant'. NULL for products listed before the choice existed. */
+  fulfilment: string | null;
   deleted_at: string | null;
   /** Market this product is sold into. Sets its currency and its fee rule. */
   market: string;
@@ -212,6 +214,10 @@ export function createLateenApi(userId: string) {
         status: p.status ?? "active",
         biz_name: p.biz_name ?? null,
         require_additional_phone: p.require_additional_phone ?? false,
+        // Left off the row entirely when the caller did not send one, so
+        // saving from a screen that has no fulfilment control cannot blank a
+        // choice the owner already made.
+        ...(p.fulfilment == null ? {} : { fulfilment: p.fulfilment }),
       };
       const { data, error } = await supabase
         .from("products")

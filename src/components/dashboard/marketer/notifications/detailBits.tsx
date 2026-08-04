@@ -1,6 +1,8 @@
 import { isValidElement, type ReactNode } from "react";
 
-import { splitCC, t } from "../lib/format";
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { asFulfilment } from "@/lib/fulfilment";
+import { isAr, splitCC, t } from "../lib/format";
 
 /** One label/value line inside an expanded notification or transaction. */
 export function DetailRow({ k, v, noTranslate }: { k: string; v: unknown; noTranslate?: boolean }) {
@@ -76,6 +78,15 @@ export function OrderDetailRows({ d }: { d: Record<string, unknown> }) {
     <>
       <DetailRow k={t("Order Code", "كود الطلبيه")} v={d.order_code} />
       <DetailRow k={t("Product", "المنتج")} v={d.product_name} noTranslate />
+      {/* Reserve or instant delivery, as the listing stood when this was sent.
+          Absent from notifications about a product listed before the choice
+          existed, and from ones sent before this shipped. */}
+      {!!asFulfilment(d.fulfilment) && (
+        <DetailRow
+          k={t("Fulfilment", "طريقة التسليم")}
+          v={<FulfilmentBadge value={d.fulfilment} ar={isAr()} size="sm" />}
+        />
+      )}
       <DetailRow k={t("Qty", "الكمية")} v={d.qty} />
       <DetailRow k={t("Customer", "الزبون")} v={d.customer_name} noTranslate />
       <PhoneRow label={t("Phone", "الهاتف")} phone={d.customer_phone} />
