@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { IMPERSONATION_KEY } from "@/lib/impersonation";
+import { coverStyle } from "@/lib/coverFocus";
 
 import { DEFAULT_MARKET_CODE, marketOf } from "@/lib/markets";
 
@@ -38,6 +39,11 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
   const [sending, setSending] = useState(false);
   const [wipeOpen, setWipeOpen] = useState(false);
   const [wipeText, setWipeText] = useState("");
+  /* Saved products, fetched the first time the fold is opened rather than for
+     every card in the list — most of them will never be looked at. */
+  const [favOpen, setFavOpen] = useState(false);
+  const [favs, setFavs] = useState<Awaited<ReturnType<typeof api.admin.listFavoritesOf>> | null>(null);
+  const [favErr, setFavErr] = useState("");
   const [wiping, setWiping] = useState(false);
   const [wipeMsg, setWipeMsg] = useState("");
 
@@ -232,6 +238,76 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
           <span className="adm-joined-lbl">Date joined</span>
           <span className="adm-joined-val" data-no-i18n>{whenFull(u.created_at) || "—"}</span>
         </div>
+
+        {/* What this marketer has saved. Their list is private by default and
+            stays that way — this goes through a function that checks the
+            users page and the admin's countries, so a Libya-only admin cannot
+            read a Tunisian marketer's. */}
+        {role === "marketer" && (
+          <>
+            <div
+              className="adm-joined-row"
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                const next = !favOpen;
+                setFavOpen(next);
+                if (next && favs === null) {
+                  api.admin.listFavoritesOf(u.id)
+                    .then((rows) => setFavs(rows))
+                    .catch((e) => { setFavErr((e as Error).message || "Could not load"); setFavs([]); });
+                }
+              }}
+            >
+              <span className="adm-joined-lbl">Saved products</span>
+              <span className="adm-joined-val">
+                {favs === null ? (favOpen ? "…" : "") : String(favs.length)}
+                <span style={{ marginInlineStart: 6, opacity: 0.6 }}>{favOpen ? "▴" : "▾"}</span>
+              </span>
+            </div>
+            {favOpen && (
+              <div style={{ padding: "0 2px 8px" }}>
+                {favErr ? (
+                  <div style={{ fontSize: 12, color: "var(--danger)" }} data-no-i18n>{favErr}</div>
+                ) : favs === null ? (
+                  <div style={{ fontSize: 12, opacity: 0.6 }}>Loading…</div>
+                ) : !favs.length ? (
+                  <div style={{ fontSize: 12, opacity: 0.6 }}>Nothing saved yet.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {favs.map((f) => (
+                      <div
+                        key={f.product_id}
+                        style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}
+                      >
+                        <div style={{ width: 34, height: 34, borderRadius: 8, overflow: "hidden", background: "var(--color-background-secondary)", flexShrink: 0 }}>
+                          {f.photos && f.photos[0] ? (
+                            <img
+                              src={f.photos[0]}
+                              alt=""
+                              loading="lazy"
+                              style={{ width: "100%", height: "100%", ...coverStyle(f.cover_focus_x, f.cover_focus_y) }}
+                            />
+                          ) : null}
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div data-no-i18n style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
+                          <div style={{ opacity: 0.6, fontSize: 11 }} data-no-i18n>
+                            {[f.biz_name, f.code].filter(Boolean).join(" · ")}
+                          </div>
+                        </div>
+                        {f.status !== "active" && (
+                          <span className="adm-status-pill" style={{ flexShrink: 0 }}>
+                            {f.status === "hidden" ? "Hidden" : "Paused"}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
 
         {role === "admin" && wipeOpen && (
           <div className="adm-wipe-box">

@@ -1200,6 +1200,23 @@ export function createLateenApi(userId: string) {
       // Used to warn the admin before hiding/deleting: those marketers keep
       // seeing the product until their orders complete (RLS exception), while
       // everyone else loses access immediately.
+      /** What a marketer has saved. Private to them by default, so this goes
+       *  through a function that checks the users page and the caller's
+       *  countries rather than through a policy that would open the table. */
+      async listFavoritesOf(marketerId: string) {
+        const { data, error } = await supabase.rpc(
+          "admin_list_favorites" as never,
+          { _marketer_id: marketerId, _limit: CAP.adminList } as never,
+        );
+        if (error) throw error;
+        return (data ?? []) as unknown as Array<{
+          product_id: string; saved_at: string; name: string; code: string | null;
+          price: number | null; currency: { symbol?: string; code?: string } | null;
+          photos: string[] | null; cover_focus_x: number | null; cover_focus_y: number | null;
+          status: string | null; biz_name: string | null;
+        }>;
+      },
+
       async activeMarketersCount(id: string): Promise<number> {
         const { data, error } = await supabase.rpc("active_marketers_count", { _product_id: id });
         if (error) throw error;

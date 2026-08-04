@@ -288,7 +288,9 @@ export function ProductDetailOverlay({
           <div className="pd-row-val"><CurMoney sym={cur} code={curCode} n={p.price} /></div>
         </div>
 
-        {vg.map((g, gi) => (
+        {vg.map((g, gi) => {
+          const hasPh = g.items.some((x) => x.photo);
+          return (
           <div className="pd-variant" key={g.name + gi}>
             <div className="pd-variant-lbl" data-no-i18n>{g.name}</div>
             <div className="pd-variant-sel-wrap">
@@ -314,8 +316,35 @@ export function ProductDetailOverlay({
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </div>
+            {/* The swatches the marketer's sheet has shown all along. Without
+                them an admin looking at a reported product could read the
+                variant names but never see what they actually look like,
+                which is usually the thing being complained about. */}
+            {hasPh && (
+              <div className="pd-variant-thumbs">
+                {g.items.map((x, ii) => {
+                  if (!x.photo) return null;
+                  const oos = x.qty === 0;
+                  return (
+                    <div
+                      key={x.val + ii}
+                      className={"pd-vth" + (oos ? " oos" : "") + (variantPick[gi] === x.val ? " on" : "")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setVariantPick((prev) => ({ ...prev, [gi]: x.val }));
+                        lightbox.open(x.photo);
+                      }}
+                    >
+                      <img src={x.photo} alt="" />
+                      <div className="pd-vth-lbl" data-no-i18n>{x.val}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        ))}
+          );
+        })}
 
         <ZonesSection
           d={zones}
