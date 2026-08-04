@@ -266,6 +266,122 @@ function prefixDistance(a: string, b: string, budget: number): number {
    which merely begin with those letters survive. */
 const bareAr = (s: string): string => (s.length > 4 && s.startsWith("\u0627\u0644") ? s.slice(2) : s);
 
+/* \u2500\u2500 Matching across the two scripts \u2500\u2500
+ *
+ * A brand is written both ways and neither spelling is wrong: \u062f\u064a\u0648\u0631, \u062f\u0648\u0631 and
+ * "Dior" are one word. Edit distance cannot see that \u2014 they share no letters
+ * at all \u2014 so a third pass reduces both scripts to the same thing and compares
+ * that instead.
+ *
+ * What it keeps is the consonants. Arabic writes its short vowels only when it
+ * feels like it, which is exactly why \u062f\u064a\u0648\u0631 and \u062f\u0648\u0631 are both current, and it is
+ * the same reason "Mohammed" and "Muhamad" are. Drop the vowels and that whole
+ * class of disagreement disappears:
+ *
+ *     \u062f\u064a\u0648\u0631  \u2192  d r        \u062f\u0648\u0631  \u2192  d r        dior  \u2192  d r
+ *
+ * The consonants themselves are folded coarsely, because the pairs that get
+ * swapped in transliteration are predictable: \u062a \u062b \u0637 all arrive as "t", \u062c is
+ * "j" to one writer and "g" to the next, \u0634 and "sh" and "ch" are one sound,
+ * "kh" is \u062e. Folding them together is what makes \u0634\u0627\u0646\u064a\u0644 and "Chanel" meet.
+ *
+ * It is deliberately the last thing tried. Substring and typo matching both
+ * run first and both are stricter, so this only ever adds rows \u2014 it cannot
+ * take one away or change what a query already found. */
+
+/** Arabic letter \u2192 the sound it shares with its Latin spelling. An empty
+ *  string means the letter carries no consonant of its own: the long vowels,
+ *  and the two glottal letters that transliterate to nothing a typist types. */
+const AR_SOUND: Record<string, string> = {
+  "\u0628": "b", "\u067e": "b",
+  "\u062a": "t", "\u062b": "t", "\u0637": "t",
+  "\u062c": "g", "\u0686": "c",
+  "\u062d": "h", "\u062e": "h", "\u0647": "h",
+  "\u062f": "d", "\u0630": "d", "\u0636": "d",
+  "\u0631": "r",
+  "\u0632": "z", "\u0638": "z",
+  "\u0633": "s", "\u0635": "s",
+  "\u0634": "c",
+  "\u063a": "g",
+  "\u0641": "f", "\u06a4": "f",
+  "\u0642": "k", "\u0643": "k",
+  "\u0644": "l", "\u0645": "m", "\u0646": "n",
+  // Long vowels and the glottals: no consonant of their own.
+  "\u0627": "", "\u0648": "", "\u064a": "", "\u0639": "", "\u0621": "",
+};
+
+/** Latin digraphs that stand for a single Arabic letter, longest first so
+ *  "sch" is not read as "s" followed by "ch". */
+const LATIN_DIGRAPHS: Array<[string, string]> = [
+  ["sch", "c"], ["sh", "c"], ["ch", "c"], ["kh", "h"], ["gh", "g"],
+  ["th", "t"], ["ph", "f"], ["ck", "k"],
+];
+
+const LATIN_SOUND: Record<string, string> = {
+  b: "b", p: "b", v: "f", f: "f",
+  t: "t", d: "d",
+  g: "g", j: "g",
+  k: "k", q: "k",
+  s: "s", z: "z",
+  l: "l", m: "m", n: "n", r: "r", h: "h",
+  // Vowels, and the two letters that behave like vowels in both scripts.
+  a: "", e: "", i: "", o: "", u: "", y: "", w: "",
+};
+
+/** The consonant skeleton of one word, in whichever script it was written.
+ *
+ *  Returns "" for anything with fewer than two consonants \u2014 a one-letter key
+ *  would match half the catalogue, and a digit-only word has no sound at all. */
+export function soundKey(word: string): string {
+  if (!word || /^\p{N}+$/u.test(word)) return "";
+  let out = "";
+  for (let i = 0; i < word.length; ) {
+    const ch = word[i];
+    const ar = AR_SOUND[ch];
+    if (ar !== undefined) { out += ar; i += 1; continue; }
+    /* Digraphs are read before single letters, or "ch" is eaten as a "c" and
+       Chanel never reaches شانيل. */
+    let matched = false;
+    for (const [d, s] of LATIN_DIGRAPHS) {
+      if (word.startsWith(d, i)) { out += s; i += d.length; matched = true; break; }
+    }
+    if (matched) continue;
+    // "c" is read from what follows it: soft before e/i/y, hard otherwise.
+    if (ch === "c") {
+      const next = word[i + 1];
+      out += next === "e" || next === "i" || next === "y" ? "s" : "k";
+      i += 1;
+      continue;
+    }
+    if (ch === "x") { out += "ks"; i += 1; continue; }
+    const lat = LATIN_SOUND[ch];
+    if (lat !== undefined) { out += lat; i += 1; continue; }
+    // Anything else \u2014 a digit inside a code, a letter from a third script \u2014
+    // is kept as itself so it still has to agree.
+    out += ch;
+    i += 1;
+  }
+  // "Mohammed" and "Mohamed" differ only in a doubled letter.
+  out = out.replace(/(.)\1+/g, "$1");
+  return out.length >= 2 ? out : "";
+}
+
+/** How far two sound keys may drift and still be the same word. Nothing at
+ *  three or fewer, where the keys are too short to be telling them apart; one
+ *  beyond that, which is what lets \u0633\u0627\u0645\u0633\u0648\u0646\u062c meet "Samsung". */
+const soundBudget = (len: number): number => (len <= 3 ? 0 : 1);
+
+/** Do these two keys agree on the sound the word starts with?
+ *
+ *  Transliteration argues about the middle of a word and never about its
+ *  first consonant: Dior and \u062f\u064a\u0648\u0631 both open on d, Chanel and \u0634\u0627\u0646\u064a\u0644 both on the
+ *  \u0634 sound, Samsung and \u0633\u0627\u0645\u0633\u0648\u0646\u062c both on s. Requiring it costs nothing real and
+ *  stops the one edit allowed above from being spent at the front, where it
+ *  turns one name into another \u2014 "mohamed" reaching "ahmed" by dropping the
+ *  m, which the typo budget above already refuses to do for the same
+ *  reason. */
+const sameOnset = (a: string, b: string): boolean => a[0] === b[0];
+
 /** Builds the test one search box runs against every row it is filtering.
  *
  *  Typing is imprecise, so the box is too. Three things make a query land:
@@ -294,12 +410,15 @@ export function searchMatcher(query: unknown): (hay: unknown) => boolean {
      there is a second strict pass with every separator taken out of both
      sides. It is exact, not fuzzy, so it adds reach without adding noise. */
   const tight = tokens.map((t) => t.replace(WORD_BREAK_G, ""));
+  /* One sound key per query word, worked out once rather than per row. */
+  const queryKeys = tokens.map(soundKey);
 
   return (raw: unknown) => {
     const hay = normSearch(raw);
     if (!hay) return false;
     let words: string[] | null = null;
     let squashed: string | null = null;
+    let hayKeys: string[] | null = null;
 
     for (let i = 0; i < tokens.length; i++) {
       const token = tokens[i];
@@ -310,15 +429,32 @@ export function searchMatcher(query: unknown): (hay: unknown) => boolean {
       }
       const bare = bareAr(token);
       const budget = Math.max(typoBudget(token.length), typoBudget(bare.length));
-      if (!budget) return false;
       if (!words) words = hay.split(WORD_BREAK).filter(Boolean);
       let hit = false;
-      for (const w of words) {
-        if (prefixDistance(token, w, budget) <= budget) { hit = true; break; }
-        const bw = bareAr(w);
-        if ((bare !== token || bw !== w) && prefixDistance(bare, bw, typoBudget(bare.length)) <= typoBudget(bare.length)) {
-          hit = true;
-          break;
+      /* A word too short to be allowed a typo skips straight to the sound
+         pass. It used to give up here, which is why a three-letter query like
+         "دور" could never reach the spelling it was looking for. */
+      if (budget) {
+        for (const w of words) {
+          if (prefixDistance(token, w, budget) <= budget) { hit = true; break; }
+          const bw = bareAr(w);
+          if ((bare !== token || bw !== w) && prefixDistance(bare, bw, typoBudget(bare.length)) <= typoBudget(bare.length)) {
+            hit = true;
+            break;
+          }
+        }
+      }
+      /* Last resort: the same word written in the other script, or with the
+         vowels a different way round. Costs nothing until the two stricter
+         passes above have already failed. */
+      if (!hit) {
+        const qk = queryKeys[i];
+        if (qk) {
+          if (!hayKeys) hayKeys = words.map(soundKey);
+          const budget = soundBudget(qk.length);
+          for (const hk of hayKeys) {
+            if (hk && sameOnset(qk, hk) && prefixDistance(qk, hk, budget) <= budget) { hit = true; break; }
+          }
         }
       }
       if (!hit) return false;
