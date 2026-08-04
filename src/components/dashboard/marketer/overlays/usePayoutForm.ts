@@ -8,12 +8,12 @@ import { loadPayoutDraft, savePayoutDraft, type PayoutDraft } from "../lib/stora
 import type { MarketerProfile } from "../lib/types";
 
 export type PayoutFields = {
-  country: string; method: string; bank: string; holder: string;
+  method: string; bank: string; holder: string;
   acct: string; phone: string; iban: string; swift: string; notes: string;
 };
 
 const EMPTY: PayoutFields = {
-  country: "", method: "", bank: "", holder: "", acct: "", phone: "", iban: "", swift: "", notes: "",
+  method: "", bank: "", holder: "", acct: "", phone: "", iban: "", swift: "", notes: "",
 };
 
 /** Credit methods take a phone number instead of bank/account details.
@@ -66,7 +66,6 @@ export function usePayoutForm(userId: string, profile: MarketerProfile | null) {
   useEffect(() => {
     if (hydrated) return;
     const fromProfile: PayoutFields = {
-      country: "",
       method: profile?.payout_method || "",
       bank: profile?.payout_bank_name || "",
       holder: profile?.payout_account_holder || "",

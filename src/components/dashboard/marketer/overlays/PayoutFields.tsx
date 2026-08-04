@@ -76,13 +76,11 @@ export function PayoutFieldsBlock({
 
   return (
     <>
-      <Picker
-        label="Country"
-        value={fields.country}
-        options={["Libya"]}
-        required={required}
-        onPick={(v) => set({ country: v })}
-      />
+      {/* The country picker is gone. It offered one option, was never saved,
+          and was required — so it came back empty on every visit and blocked
+          the withdrawal until it was picked again. Which country an account
+          trades in is on the account itself now, so the question had stopped
+          being the payout form's to ask. */}
       <Picker
         label="Method"
         value={fields.method}

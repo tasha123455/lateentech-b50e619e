@@ -1,4 +1,5 @@
 import { ADMIN_WHATSAPP_DISPLAY } from "../lib/constants";
+import { useScrollLock } from "@/lib/useScrollLock";
 import { codPaysParts } from "../lib/format";
 import { Money } from "../ui/Money";
 
@@ -12,6 +13,8 @@ const DiIcon = ({ stroke, children }: { stroke: string; children: React.ReactNod
 );
 
 export function DepositInfoOverlay({ open, onClose, cod }: { open: boolean; onClose: () => void; cod: CodInfo }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(open);
   const parts = cod ? codPaysParts(cod.delivery > 0, cod.shipping > 0) : null;
 
   return (

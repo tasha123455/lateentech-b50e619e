@@ -1,4 +1,5 @@
 import { platThreshold } from "../lib/constants";
+import { useScrollLock } from "@/lib/useScrollLock";
 import type { MarketerOrder } from "../lib/types";
 import { Money } from "../ui/Money";
 import { DepositAccountRows } from "./PayDetailsOverlay";
@@ -12,6 +13,8 @@ export function InstructionsOverlay({
   onUpload: () => void;
   onOpenDepositInfo: () => void;
 }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(true);
   const open = !!order;
   const qtyN = order?.qty || 1;
   const comm = (order?.commPerUnit || 0) * qtyN;

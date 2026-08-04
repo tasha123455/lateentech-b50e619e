@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr, tlbl, money, rawSym, ddmmyyyy } from "../lib/format";
+import { moneyS } from "@/components/dashboard/marketer/lib/format";
 import { piecesLabel } from "@/components/dashboard/marketer/lib/format";
 import type { Order, PendingActiveStub } from "../lib/types";
 import { MoneyH } from "../ui/Money";
@@ -400,7 +401,11 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
             grid: { color: "rgba(255,255,255,0.04)" },
             ticks: {
               font: { size: 10 }, color: "#5e5c58", maxTicksLimit: 5,
-              callback: (v: number) => currentMetric === "revenue" ? money(v, sel.sym || "£", walletCur) : v,
+              /* The number only — see the marketer chart: a canvas tick is
+                 one font size, so a symbol repeated down the axis cannot be
+                 made smaller than the figure beside it. The tooltip keeps
+                 the currency. */
+              callback: (v: number) => currentMetric === "revenue" ? moneyS(v, "", "") : v,
             },
           },
         },

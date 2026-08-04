@@ -102,6 +102,7 @@ export function dbToOrder(r: Row, products: Product[]): Order {
     date: d,
     notes: r.customer_notes || "",
     adminNotes: r.refund_note || r.admin_notes || "",
+    businessNotes: r.business_notes || "",
     refundedAt: r.refunded_at || null,
     /* Tells a refunded delivery apart from a failed one: both end up
        'cancelled', but mark_failed refuses to touch a delivered order and

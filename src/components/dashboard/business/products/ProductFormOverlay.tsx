@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { pickFile } from "@/lib/filePicker";
 import { FULFILMENTS, fulfilmentHint, fulfilmentLabel, type Fulfilment } from "@/lib/fulfilment";
@@ -90,6 +91,8 @@ function mpActiveMarketerCount(
 }
 
 export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; editing: Product | null; onClose: () => void }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(open);
   const { api, products, orders, pendingActiveStubs, profile, reloadProducts } = useBusinessData();
   const ar = isAr();
 

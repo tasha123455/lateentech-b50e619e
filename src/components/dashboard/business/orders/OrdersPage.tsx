@@ -388,6 +388,10 @@ function OrderCard({
         </div>
         {o.notes ? <div className="notes-box"><b>Marketer note:</b> <span data-no-i18n="">{o.notes}</span></div> : null}
         {o.adminNotes ? <div className="notes-box"><b>{ar ? "ملاحظات الأدمن" : "Admin notes"}:</b> <span data-no-i18n="">{o.adminNotes}</span></div> : null}
+        {/* The reason the owner gave when they marked it failed. It went to
+            the marketer and was never shown back to the person who wrote it,
+            so returning to an old order meant not knowing why it failed. */}
+        {o.businessNotes ? <div className="notes-box"><b>{ar ? "سبب الفشل" : "Reason it failed"}:</b> <span data-no-i18n="">{o.businessNotes}</span></div> : null}
         {actions}
       </div>
     </div>

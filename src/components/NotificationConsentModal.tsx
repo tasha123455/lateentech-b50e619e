@@ -7,6 +7,8 @@ import {
 
 const DISMISS_KEY = "wasla_push_prompt_dismissed_at";
 const DISMISS_VISITS_KEY = "wasla_push_prompt_visits_since_dismiss";
+/** Set the first time the app is opened from the home screen. */
+const INSTALLED_SEEN_KEY = "wasla_push_installed_seen";
 // After dismissing, the prompt comes back once the user has visited 20 more times.
 const VISITS_BEFORE_REASK = 20;
 function isIosLike(): boolean {
@@ -43,6 +45,19 @@ export function NotificationConsentModal() {
     // iOS only allows push from an installed (home-screen) app; elsewhere we can ask in-browser.
     if (isIosLike() && !isInstalledPWA()) return;
     try {
+      /* Installing the app is a fresh answer to the question. Someone may have
+         waved this away in the browser weeks ago — that dismissal then rode
+         into the installed app, because both are the same origin and share the
+         same storage, and suppressed the prompt for the next thirty visits.
+         Choosing to install is a stronger signal than that dismissal, so the
+         first standalone launch clears it and the prompt appears straight
+         away. Only the first: after that, a dismissal inside the app means
+         what it says. */
+      if (isInstalledPWA() && !localStorage.getItem(INSTALLED_SEEN_KEY)) {
+        localStorage.setItem(INSTALLED_SEEN_KEY, "1");
+        localStorage.removeItem(DISMISS_KEY);
+        localStorage.removeItem(DISMISS_VISITS_KEY);
+      }
       const dismissed = localStorage.getItem(DISMISS_KEY);
       if (dismissed) {
         // Dismissed before: count this visit and only re-ask every 30 visits.

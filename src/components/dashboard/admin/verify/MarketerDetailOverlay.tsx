@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
@@ -18,6 +19,8 @@ export function MarketerDetailOverlay({
   onReject: (id: string) => void;
   onRefund: (id: string) => void;
 }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(true);
   const [tab, setTab] = useState<"new" | "history">("new");
   const [search, setSearch] = useState("");
 

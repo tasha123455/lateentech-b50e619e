@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { CHART_VISIBLE } from "../lib/constants";
-import { money, piecesLabel, tlbl } from "../lib/format";
+import { money, moneyS, piecesLabel, tlbl } from "../lib/format";
 import type { ChartSeries, Metric, Period } from "../lib/types";
 import { useChartJs } from "../ui/useChartJs";
 
@@ -219,7 +219,13 @@ export function MainChart({
               font: { size: 10 },
               color: "#5e5c58",
               maxTicksLimit: 5,
-              callback: (v: number) => (metric === "earnings" ? money(v, selSym, walletCur) : v),
+              /* The number only. Everywhere else in the app the currency
+                 symbol is set smaller than the amount it belongs to, and a
+                 canvas cannot do that — one tick label is one font size. So
+                 rather than five full-size symbols stacked down the axis all
+                 saying the same thing, the axis carries the figures and the
+                 tooltip carries the currency, once, where it is read. */
+              callback: (v: number) => (metric === "earnings" ? moneyS(v, "", "") : v),
             },
           },
         },

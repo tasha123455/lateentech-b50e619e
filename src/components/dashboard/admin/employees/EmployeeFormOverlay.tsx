@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { useAdminData } from "../AdminDataProvider";
 import { empFmtDate } from "../lib/employees";
@@ -22,6 +23,8 @@ export function EmployeeFormOverlay({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(true);
   const { api } = useAdminData();
   const [f, setF] = useState<Fields>(EMPTY);
   const [busy, setBusy] = useState(false);

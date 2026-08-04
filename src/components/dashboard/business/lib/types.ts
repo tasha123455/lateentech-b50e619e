@@ -100,6 +100,8 @@ export type Order = {
   adminNotes: string;
   refundedAt: string | null;
   deliveredAt: string | null;
+  /** What the owner wrote when they marked this order failed. */
+  businessNotes: string;
   receiptUrl: string;
   /** Market this order was priced under. */
   market?: string | null;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 
 import { ReviewsList } from "@/components/dashboard/marketer/browse/Reviews";
@@ -97,6 +98,8 @@ export function ProductDetailOverlay({
   onToggleHidden?: (id: string, next: "active" | "hidden") => void;
   onDelete?: (id: string, name: string) => void;
 }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(true);
   const { api } = useAdminData();
   const lightbox = useLightbox();
   const galleryRef = useRef<HTMLDivElement>(null);

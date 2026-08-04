@@ -1,4 +1,5 @@
 import { empFmtDate, empPaydayFor } from "../lib/employees";
+import { useScrollLock } from "@/lib/useScrollLock";
 import type { Employee } from "../lib/types";
 import { Money } from "../ui/Money";
 
@@ -8,6 +9,8 @@ export function EmployeeHistoryOverlay({
   employee: Employee | null;
   onClose: () => void;
 }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(true);
   const open = !!employee;
 
   // Most recent cycle first.

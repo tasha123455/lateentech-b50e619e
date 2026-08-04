@@ -1,4 +1,8 @@
+import { useScrollLock } from "@/lib/useScrollLock";
+
 export function SupportOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  // Holds the page still behind the sheet.
+  useScrollLock(open);
   return (
     <div className={"overlay" + (open ? " open" : "")} id="support-overlay" style={{ zIndex: 150, alignItems: "center" }}>
       <div className="overlay-bg" onClick={onClose} />

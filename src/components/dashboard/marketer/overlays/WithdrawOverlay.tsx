@@ -39,7 +39,7 @@ export function WithdrawOverlay({
 
     if (isPhoneMethod) {
       const valid = new RegExp("^(" + meta!.prefixes.join("|") + ")\\d{7}$").test(fields.phone.trim());
-      if (!fields.country || !fields.method || !valid) {
+      if (!fields.method || !valid) {
         alert(
           t(
             "Please enter a valid phone number. " + meta!.hintEn + ".",
@@ -48,7 +48,7 @@ export function WithdrawOverlay({
         );
         return;
       }
-    } else if (!fields.country || !fields.method || !fields.holder.trim() || !fields.acct.trim() || (bankRequired && !fields.bank)) {
+    } else if (!fields.method || !fields.holder.trim() || !fields.acct.trim() || (bankRequired && !fields.bank)) {
       alert(
         isAr()
           ? "يرجى تعبئة طريقة الدفع، البنك، اسم صاحب الحساب، ورقم الحساب حتى يتمكن الأدمن من الدفع لك."

@@ -8,7 +8,30 @@ import { WordmarkSvg } from "@/components/brand/logoArt";
 
 type VariantItem = { val?: string; photo?: string; qty?: number | string | null } | string;
 type VariantGroup = { name?: string; items?: VariantItem[] };
-type DeliveryZone = { cities?: Record<string, { shipping?: number; delivery?: number }> };
+/** "2–4 days" / "يومين - 4 أيام", or "" when the shop never set one.
+ *
+ *  Arabic counts one and two differently from the rest, so a range that starts
+ *  at two cannot simply have a number dropped in front of a plural. */
+function etaText(eta: DeliveryZone["eta"], lang: string): string {
+  const min = eta && eta.min != null ? Number(eta.min) : NaN;
+  if (!Number.isFinite(min)) return "";
+  const maxRaw = eta && eta.max != null ? Number(eta.max) : NaN;
+  const max = Number.isFinite(maxRaw) && maxRaw > min ? maxRaw : null;
+  if (lang !== "ar") {
+    const n = max ? `${min}–${max}` : String(min);
+    return `${n} ${!max && min === 1 ? "day" : "days"}`;
+  }
+  const one = (n: number) => (n === 1 ? "يوم" : n === 2 ? "يومين" : `${n} أيام`);
+  return max ? `${min} - ${one(max)}` : one(min);
+}
+
+type DeliveryZone = {
+  cities?: Record<string, { shipping?: number; delivery?: number }>;
+  /** How long delivery takes to this country, in whole days. `max` is null
+   *  when the shop gave a single figure rather than a range, and the whole
+   *  object is absent for products listed before delivery times existed. */
+  eta?: { min?: number | null; max?: number | null } | null;
+};
 
 type PublicProduct = {
   id: string;
@@ -419,6 +442,15 @@ export function PublicProduct({ id }: { id: string }) {
                       >
                         <span className="text-sm text-text-1">{COUNTRY_NAMES[code] || code}</span>
                         <span className="flex items-center gap-2 text-xs text-text-2">
+                          {/* How long it takes, on the country's own row — the
+                              same place the marketer's sheet shows it, and the
+                              first thing a customer following this link wants
+                              to know. */}
+                          {etaText(z.eta, lang) && (
+                            <span className="rounded-full border border-border px-2 py-0.5" data-no-i18n>
+                              {etaText(z.eta, lang)}
+                            </span>
+                          )}
                           <span>Shipping: {maxShip ? `${maxShip} ${currencyLabel}` : <span data-no-i18n>{lang === "ar" ? "مجاني" : "Free"}</span>}</span>
                           <svg className={`transition-transform ${open ? "rotate-180" : ""}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="6 9 12 15 18 9" />
