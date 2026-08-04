@@ -13,6 +13,7 @@ export function VerifyPage({ active }: { active: boolean }) {
   const [search, setSearch] = useState("");
   const [detailId, setDetailId] = useState<string | null>(null);
   const [refundOrder, setRefundOrder] = useState<ReceiptOrder | null>(null);
+  const [refundError, setRefundError] = useState("");
 
   useEffect(() => {
     if (active) void loadVerify();
@@ -71,17 +72,25 @@ export function VerifyPage({ active }: { active: boolean }) {
     setRefundOrder(found);
   };
 
+  /* No second dialog. The refund sheet is the app's own; a native alert
+     stacked on top of it was a different-looking box saying "failed" about
+     something the admin had just been told was done — and the usual reason it
+     appeared at all is that the order had moved on since the list was loaded
+     (the business marked it failed), which is not the refund failing. The
+     reason is shown on the page instead, and the list is reloaded either way
+     so what it says is true again. */
   const finishRefund = async (comment: string | null) => {
     const order = refundOrder;
     setRefundOrder(null);
     if (comment === null || !order) return;
+    setRefundError("");
     try {
       await api.admin.refundOrder(order.id, comment);
-      void loadVerify();
-      void loadMetrics();
     } catch (e) {
-      alert("Refund failed: " + (e as Error).message);
+      setRefundError((e as Error).message || String(e));
     }
+    void loadVerify();
+    void loadMetrics();
   };
 
   let body: React.ReactNode;
@@ -143,6 +152,17 @@ export function VerifyPage({ active }: { active: boolean }) {
         onRefund={startRefund}
       />
 
+      {!!refundError && (
+        <div
+          className="adm-empty"
+          role="alert"
+          style={{ color: "var(--danger)", cursor: "pointer" }}
+          onClick={() => setRefundError("")}
+          data-no-i18n
+        >
+          {refundError}
+        </div>
+      )}
       {!!refundOrder && <RefundModal order={refundOrder} onDone={finishRefund} />}
     </>
   );

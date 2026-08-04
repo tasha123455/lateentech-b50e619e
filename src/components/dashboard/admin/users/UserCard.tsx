@@ -186,13 +186,18 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
               {isFrozen ? "Unfreeze" : "Freeze"}
             </button>
           )}
-          <button
-            className="adm-go-btn"
-            style={{ background: "#fee", color: "#c00", borderColor: "#fcc" }}
-            onClick={() => void removeUser()}
-          >
-            Remove
-          </button>
+          {/* Not on your own account. The master admin is the one signed in
+              here, and an irreversible "Remove" sitting on their own card is a
+              button whose only possible use is a mistake. */}
+          {u.id !== api.userId && (
+            <button
+              className="adm-go-btn"
+              style={{ background: "#fee", color: "#c00", borderColor: "#fcc" }}
+              onClick={() => void removeUser()}
+            >
+              Remove
+            </button>
+          )}
           <button
             className="adm-go-btn"
             style={{

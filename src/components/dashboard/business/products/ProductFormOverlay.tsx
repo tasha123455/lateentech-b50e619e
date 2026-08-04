@@ -127,7 +127,13 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   const dragRef = useRef<{ dragging: boolean; pid: number | null; startX: number; startY: number; startFx: number; startFy: number }>({ dragging: false, pid: null, startX: 0, startY: 0, startFx: 50, startFy: 50 });
 
   const editLockActiveCount = editing ? mpActiveMarketerCount(editing, orders, pendingActiveStubs) : 0;
-  const editLocked = editLockActiveCount > 0;
+  /* An admin hides a product because something about it is wrong. Letting its
+     owner keep editing it while hidden means editing their way around the
+     decision — and the fields would be saved against a listing nobody can
+     see. The same lock the active-marketer case uses, for the same reason:
+     this listing is not currently theirs to change. */
+  const adminHidden = editing?.status === "hidden";
+  const editLocked = editLockActiveCount > 0 || adminHidden;
 
   const ensureUniqueCode = (existing: string | null | undefined) => {
     let c = existing || genCode();
@@ -601,8 +607,12 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
           {editLocked && (
             <div style={{ display: "block", margin: "0 0 14px", padding: "10px 12px", borderRadius: 10, background: "rgba(148,163,184,0.10)", border: "0.5px solid rgba(148,163,184,0.35)", color: "var(--color-text-secondary)", fontSize: 12, fontWeight: 600, lineHeight: 1.5 }}>
               {ar
-                ? `🔒 هذا المنتج مقفل بالكامل — لديه ${editLockActiveCount === 1 ? "مسوّق نشط واحد" : editLockActiveCount === 2 ? "مسوّقين نشطين" : editLockActiveCount + " مسوّقين نشطين"} حالياً، لذلك لا يمكن تعديله أو حذفه حتى تكتمل طلباتهم.`
-                : `🔒 This product is fully locked — it has ${editLockActiveCount} active marketer${editLockActiveCount === 1 ? "" : "s"} right now, so it can't be edited or deleted until those orders complete.`}
+                ? adminHidden
+                  ? "🔒 تم إخفاء هذا المنتج من قبل الإدارة، لذلك لا يمكن تعديله. تواصل مع الدعم إذا كنت تعتقد أن هذا خطأ."
+                  : `🔒 هذا المنتج مقفل بالكامل — لديه ${editLockActiveCount === 1 ? "مسوّق نشط واحد" : editLockActiveCount === 2 ? "مسوّقين نشطين" : editLockActiveCount + " مسوّقين نشطين"} حالياً، لذلك لا يمكن تعديله أو حذفه حتى تكتمل طلباتهم.`
+                : adminHidden
+                  ? "🔒 This product has been hidden by an administrator, so it can't be edited. Contact support if you think that's a mistake."
+                  : `🔒 This product is fully locked — it has ${editLockActiveCount} active marketer${editLockActiveCount === 1 ? "" : "s"} right now, so it can't be edited or deleted until those orders complete.`}
             </div>
           )}
 

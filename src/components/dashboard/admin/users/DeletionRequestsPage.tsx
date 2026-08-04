@@ -55,7 +55,12 @@ function DeletionCard({
           <div className="del-head-name" data-no-i18n>{name}</div>
           <div className="del-head-sub">
             <span className="rpt-type-pill">{r.role === "business" ? "Business" : "Marketer"}</span>
-            {hasFunds && <span className="del-funds-dot" title="Wallet still has money">●</span>}
+            {/* Only where an answer is actually wanted. Accounts with no
+                activity schedule their own deletion, and a red dot on every
+                one of those is a queue that never empties — so the dot stops
+                meaning "look at this". It is kept for the requests held for
+                review, which are the ones that do need a decision. */}
+            {hasFunds && needsReview && <span className="del-funds-dot" title="Wallet still has money">●</span>}
           </div>
         </div>
         <span className="del-ago" data-no-i18n>{when(r.requested_at)}</span>

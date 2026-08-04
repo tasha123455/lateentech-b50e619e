@@ -8,12 +8,29 @@ import type { ReceiptOrder } from "../lib/types";
 import { Money } from "../ui/Money";
 import { useLightbox } from "../ui/Lightbox";
 
+/** What this list is a history of is *receipts*, not deliveries.
+ *
+ *  A receipt is approved or it is turned down, and once it is approved that is
+ *  the end of the matter — receipts are not refundable, and whether the parcel
+ *  later reached the customer is a different question with its own answer
+ *  elsewhere. Marking a delivery that failed as a failed *receipt* said the
+ *  admin had rejected money they had in fact accepted.
+ *
+ *  So a cancelled order reads by whether the receipt ever cleared, which
+ *  delivered_at and the review both attest to, rather than by the status the
+ *  failed delivery left behind. */
 function StatusPill({ o }: { o: ReceiptOrder }) {
   if (o.refunded_at) return <span className="adm-recpt-status adm-status-refunded">↺ Refunded</span>;
   if (o.status === "pending") return <span className="adm-recpt-status adm-status-pending">⏳ Pending verification</span>;
   if (o.status === "approved" || o.status === "confirmed") return <span className="adm-recpt-status adm-status-approved">✓ Approved</span>;
   if (o.status === "delivered") return <span className="adm-recpt-status adm-status-approved">✓ Delivered</span>;
-  if (o.status === "cancelled") return <span className="adm-recpt-status adm-status-rejected">✕ Failed</span>;
+  // Cancelled with a review behind it is a delivery that failed after the
+  // receipt was accepted. Cancelled with no review never got that far.
+  if (o.status === "cancelled") {
+    return o.reviewed_at
+      ? <span className="adm-recpt-status adm-status-approved">✓ Approved</span>
+      : <span className="adm-recpt-status adm-status-rejected">✕ Cancelled</span>;
+  }
   return <span className="adm-recpt-status adm-status-rejected">✕ Rejected</span>;
 }
 
