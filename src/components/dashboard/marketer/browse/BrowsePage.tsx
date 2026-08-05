@@ -31,6 +31,17 @@ export function BrowsePage({
     [products, orders, state],
   );
 
+  /* What is left once the picks above have been taken out. A product shown
+     twice is not two products — scrolling past the same shirt a second time
+     reads as a bug, and it costs the recommendation its meaning: singling
+     something out only says anything if the rest of the page does not repeat
+     it. Empty while a filter is on, so nothing is hidden from a search. */
+  const rest = useMemo(() => {
+    if (!recommended.list.length) return list;
+    const picked = new Set(recommended.list.map((p) => p.id));
+    return list.filter((p) => !picked.has(p.id));
+  }, [list, recommended.list]);
+
   const card = (p: BrowseProduct) => (
     <ProductCard key={p.id} p={p} onOpen={onOpenProduct} onToggleSave={(id) => void toggleFavorite(id)} />
   );
@@ -63,20 +74,27 @@ export function BrowsePage({
             {recommended.personal ? "Recommended for you" : "Good places to start"}
           </div>
           <div className="g">{recommended.list.map(card)}</div>
-          <div className="divider" />
-          <div className="sl" style={{ marginBottom: 10 }}>All products</div>
+          {/* Only when there is something under it. On a small catalogue the
+              picks can be the whole of it, and "All products" over an empty
+              grid is a heading for nothing. */}
+          {rest.length > 0 && (
+            <>
+              <div className="divider" />
+              <div className="sl" style={{ marginBottom: 10 }}>All products</div>
+            </>
+          )}
         </div>
       )}
 
-      <div className="g">
-        {list.length ? (
-          list.map(card)
-        ) : (
+      {rest.length > 0 ? (
+        <div className="g">{rest.map(card)}</div>
+      ) : recommended.list.length === 0 ? (
+        <div className="g">
           <div className="em" data-no-i18n>
             {ar ? "لا توجد منتجات مطابقة لبحثك" : "No products match your search."}
           </div>
-        )}
-      </div>
+        </div>
+      ) : null}
 
     </>
   );
