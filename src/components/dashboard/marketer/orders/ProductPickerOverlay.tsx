@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { searchMatcher } from "../lib/format";
@@ -33,15 +34,7 @@ export function ProductPickerOverlay({
     if (open) setQuery("");
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  useScrollLock(open);
 
   const inStock = favs.filter(productHasStock);
   /* Same matcher as the browse and saved pages. The fields are joined into one

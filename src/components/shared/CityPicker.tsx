@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { LIBYA_CITIES } from "@/components/dashboard/marketer/lib/constants";
 import { isArLang, searchMatcher, useLangTick } from "@/components/dashboard/marketer/lib/format";
@@ -47,16 +48,16 @@ export function CityPicker({
   const searchRef = useRef<HTMLInputElement>(null);
   const ar = isArLang();
 
+  useScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     setQ("");
-    document.body.style.overflow = "hidden";
     // Focus late enough that the panel exists; a phone opening its keyboard on
     // a field that is still animating in ends up scrolled somewhere strange.
     const h = window.setTimeout(() => searchRef.current?.focus(), 60);
     return () => {
       window.clearTimeout(h);
-      document.body.style.overflow = "";
     };
   }, [open]);
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { ClampedText } from "../ui/ClampedText";
 import { coverStyle } from "@/lib/coverFocus";
@@ -111,15 +112,7 @@ export function ProductDetailOverlay({
   }, [productId, api, loadReviews]);
 
   // The sheet is modal.
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  useScrollLock(open);
 
   if (!p) return <div className="ov"><div className="ob" /><div className="ds" /></div>;
 

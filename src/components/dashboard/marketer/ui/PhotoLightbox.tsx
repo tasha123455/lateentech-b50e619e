@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { PhotoDownloadButton } from "@/components/shared/PhotoDownloadButton";
 
@@ -39,13 +40,11 @@ export function PhotoLightboxProvider({ children }: { children: ReactNode }) {
 
   const isOpen = photos.length > 0;
 
-  // The viewer is fullscreen, so the page behind it must not scroll.
-  useEffect(() => {
-    if (!isOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, [isOpen]);
+  /* The viewer is fullscreen, so the page behind it must not scroll. Through
+     the counted lock: this opens over sheets that are already holding the page
+     still, and restoring whatever it found on the way in gets that wrong when
+     two of them overlap. */
+  useScrollLock(isOpen);
 
   return (
     <LightboxCtx.Provider value={{ open, openOne, close, isOpen }}>

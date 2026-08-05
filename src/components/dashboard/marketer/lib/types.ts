@@ -68,6 +68,11 @@ export type FormProduct = {
   id: string;
   bid: string;
   name: string;
+  /** Cover photo, so the order form can show what was picked rather than a
+   *  parcel emoji. Null when the listing has no photos. */
+  cover: string | null;
+  coverFocusX: number;
+  coverFocusY: number;
   price: number;
   /** Market this product is sold into — decides its fee rule. */
   market?: string | null;

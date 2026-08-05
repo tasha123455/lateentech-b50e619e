@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import { PhotoDownloadButton } from "@/components/shared/PhotoDownloadButton";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 type LightboxCtx = { open: (photos: string[], idx?: number) => void; close: () => void };
 
@@ -36,11 +37,8 @@ export function LightboxProvider({ children }: { children: ReactNode }) {
 
   const close = useCallback(() => setIsOpen(false), []);
 
-  useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
+  // Counted, so closing this does not free a page a sheet underneath still holds.
+  useScrollLock(isOpen);
 
   const go = (delta: number) => setIdx((i) => Math.min(Math.max(i + delta, 0), photos.length - 1));
 

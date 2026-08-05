@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { isAr } from "../lib/format";
@@ -16,15 +17,7 @@ export function MenuDrawer({
 }) {
   const { profile, avatarUrl } = useMarketerData();
 
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  useScrollLock(open);
 
   const ar = isAr();
   const name = profile?.full_name || "";

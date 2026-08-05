@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { LIBYA_CITIES } from "../lib/constants";
 import { isAr } from "../lib/format";
@@ -29,15 +30,7 @@ export function FilterOverlay({
   }, [open, filters]);
 
   // The sheet is modal, so lock the page behind it.
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  useScrollLock(open);
 
   const ar = isAr();
   const citiesFor = (c: string): string[] => {
