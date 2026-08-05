@@ -6,11 +6,12 @@
 -- is plainly a fraud check on a delivery that has just happened, which is what
 -- it is.
 --
--- Orders already delivered keep whatever window they were delivered under: the
--- notification carries `available_in_days` from the moment it was sent, and
 -- release_matured_commission() reads the market's current setting, so shrinking
--- the window only ever releases money sooner. Nobody waits longer than they
--- were told.
+-- the window only ever releases money sooner: nobody waits longer than they
+-- were told. Because the new window applies to orders already delivered as
+-- well, the app shows the market's current number everywhere rather than the
+-- `available_in_days` stamped onto each notification — an old card saying five
+-- would be describing a wait nobody is actually serving.
 
 ALTER TABLE public.markets
   ALTER COLUMN refund_window_days SET DEFAULT 2;

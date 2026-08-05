@@ -9,6 +9,7 @@ import { dbToBrowse } from "@/components/dashboard/marketer/lib/mappers";
 import { isAr, searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
 import { useAdminData } from "../AdminDataProvider";
+import type { ProductDetail } from "../lib/types";
 import { PageHeader } from "../ui/PageHeader";
 import { ProductDetailOverlay } from "./ProductDetailOverlay";
 
@@ -213,6 +214,10 @@ export function ProductsPage({ active, onBack }: { active: boolean; onBack: () =
 
       <ProductDetailOverlay
         productId={detailId}
+        /* The same row the sheet would fetch: both sides are `select("*")` on
+           products, so the sheet can open on what the grid already has instead
+           of on the word "Loading". */
+        seed={(detailProduct as unknown as ProductDetail["product"]) || null}
         onClose={() => setDetailId(null)}
         status={detailProduct?.status}
         onToggleHidden={(id, next) => void toggleProduct(id, next)}

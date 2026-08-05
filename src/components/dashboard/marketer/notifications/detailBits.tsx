@@ -83,8 +83,7 @@ export function NoteBlock({
  *  as the customer, and saying so is the difference between a rule and a
  *  reason.
  *
- *  The number comes from the notification, so a card sent under an older rule
- *  keeps saying what that marketer was actually told at the time. */
+ *  The number is the market's current window, matching the row above it. */
 function RefundProtection({ days }: { days: number }) {
   const ar = isAr();
   const d = daysPhrase(days, ar);
@@ -245,7 +244,7 @@ export function NotifDetailBox({
         </div>
       )}
       {leadRows}
-      {isDelivered && <RefundProtection days={Number(d.available_in_days) || LIBYA.money.refundWindowDays} />}
+      {isDelivered && <RefundProtection days={LIBYA.money.refundWindowDays} />}
       <DetailRow k={t("Order Code", "كود الطلبيه")} v={d.order_code} />
       {isReportReviewed && <DetailRow k={t("Report type", "نوع البلاغ")} v={reportTypeLbl} />}
       {/* The marketer's own words, read back to them beside the admin's

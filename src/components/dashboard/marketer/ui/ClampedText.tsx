@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { holdBottom, releaseHeldBottom } from "@/lib/holdScrollBottom";
+
 import { isAr } from "../lib/format";
 
 /** The dots that stand in for the rest of the text. Five rather than the
@@ -145,22 +147,24 @@ export function ClampedText({
   const clipped = !open && cut != null;
   const shown = clipped ? text.slice(0, cut).trimEnd() : text;
 
-  /* Collapsing gives the page back the height the text was using, and it used
-     to give it back in a single frame. Read to the end of a long description
-     and you are at the bottom of the page, so the document getting shorter
-     under you leaves the scroll position past the new bottom and the browser
-     drags the whole page up to meet it — measured at 54px on a phone, all in
-     one frame, which is the lurch.
+  /* Collapsing gives the page back the height the text was using, and two
+     separate things went wrong when it did.
 
-     It cannot be avoided: the page really is shorter, and the reader really is
-     at the bottom. What can be avoided is its happening all at once. Handing
-     the height back over a fifth of a second means the page slides instead of
-     jumping, and the movement reads as the consequence of the tap rather than
-     as something going wrong.
+     The box itself changed size in a single frame. That is fixed here, by
+     animating the height from the outside in JS: both ends are content — three
+     lines of text versus ten — and CSS cannot transition between two heights
+     it has never been told.
 
-     Height is animated from the outside in JS because both ends are content —
-     three lines of text versus ten — and CSS cannot transition between two
-     heights it has never been told. */
+     The page moved as well, which is the one that was actually complained
+     about. Read to the end of a long description and you are at the bottom, so
+     a shorter document leaves the scroll position past the new bottom, the
+     browser pulls it back, and everything above the description slides down
+     the screen. Animating only spread that over a fifth of a second; the page
+     still moved when nothing above it had changed. holdBottom takes the room
+     at the bottom before it is lost, so the scroll position stays valid and
+     the page stays where it was put. It is released once the collapse has
+     finished — not merely once React has rendered, because a box in the middle
+     of shrinking has not given the height back yet. */
   const boxRef = useRef<HTMLDivElement>(null);
   const fromH = useRef<number | null>(null);
 
@@ -168,10 +172,15 @@ export function ClampedText({
     const el = boxRef.current;
     const from = fromH.current;
     fromH.current = null;
-    if (!el || from == null) return;
-    const to = el.getBoundingClientRect().height;
-    if (Math.abs(to - from) < 1) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    if (from == null) return;
+
+    const to = el?.getBoundingClientRect().height;
+    const still = el == null || to == null || Math.abs(to - from) < 1;
+    if (still || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      // Nothing to wait for: the box is already the size it is going to be.
+      releaseHeldBottom();
+      return;
+    }
 
     el.style.overflow = "hidden";
     el.style.height = from + "px";
@@ -186,6 +195,7 @@ export function ClampedText({
       el.style.height = "";
       el.style.overflow = "";
       el.style.transition = "";
+      releaseHeldBottom();
     };
     el.addEventListener("transitionend", clear, { once: true });
     // A transition that never fires — an interrupted one, a hidden card —
@@ -219,7 +229,12 @@ export function ClampedText({
               e.stopPropagation();
               // Measured before the text changes; the effect above animates
               // from here to whatever the new text needs.
-              fromH.current = boxRef.current?.getBoundingClientRect().height ?? null;
+              const h = boxRef.current?.getBoundingClientRect().height ?? null;
+              fromH.current = h;
+              /* Only on the way in. Opening makes the page longer, which
+                 nothing has to be held against — it is losing the height that
+                 moves the page, not gaining it. */
+              if (open && boxRef.current && h != null) holdBottom(boxRef.current, h);
               setOpen((v) => !v);
             }}
           >

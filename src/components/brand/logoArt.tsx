@@ -31,10 +31,28 @@
  *
  * The mark supplied on its own needs none of that. It is already sharp, on
  * pure black, so it is thresholded and traced with corner smoothing off,
- * because this drawing is straight lines and nothing else. The result is 483
- * points and no curves at all, and it covers the artwork to 0.99 IoU against
- * 0.95 before, with the spill down from 5.25% to 0.98% — what is left is the
- * anti-aliased boundary itself.
+ * because this drawing is straight lines and nothing else.
+ *
+ * The trace still had to be cleaned, and this is what the nicks along the
+ * right-hand arm were. A tracer following an anti-aliased edge wanders a pixel
+ * either side of it, and where it wandered far enough it crossed itself or
+ * shed a fragment: three separate slivers three pixels across ended up as
+ * their own closed shapes, and under the even-odd rule a shape inside a shape
+ * is a hole, so each punched a bite out of the arm it sat in. Two more came
+ * from the outline doubling back on itself near the bottom right. Five holes
+ * in all, none of them more than a few thousandths of the mark across —
+ * invisible on a sign-in screen, plainly wrong on anything printed or zoomed.
+ *
+ * They are gone because the drawing is straight lines: the outline is reduced
+ * by perpendicular distance first, which flattens the wander, then by the area
+ * each remaining point is worth, which takes the doubling-back without
+ * touching the chamfers at the arrow tips — those cost real area and the
+ * wander costs almost none. Both thresholds were swept and chosen on the
+ * result: the mark now covers the supplied artwork more closely than the raw
+ * trace did (0.9566 IoU against 0.9557, spill 0.166% against 0.194%) with no
+ * enclosed holes at all, in 557 characters rather than 2292. The 4% that is
+ * still short of the artwork is its anti-aliased boundary, which a hard-edged
+ * shape cannot have.
  *
  * The gradient is sampled across the mark's width from the same file, using
  * the brightest ink in each column so anti-aliased edges do not drag the
@@ -53,7 +71,7 @@ type Piece = { w: number; h: number; t: string; d: string };
 const MARK: Piece = {
   w: 1112, h: 774,
   t: "translate(0.000000,774.000000) scale(0.100000,-0.100000)",
-  d: "M5277 7476l-257 -264l0 -14l-137 -142l-138 -141l-790 -796l0 -17l258 -262l258 -261l16 6l508 520l69 73l70 72l16 0l0 -1251l-135 -147l-100 -112l-183 -207l-83 -95l95 -133l138 -187l138 -188l0 -29l49 -56l228 227l228 228l20 0l455 -455l37 40l411 553l-353 382l-161 175l-4 1255l15 0l677 -675l264 269l264 270l-5 14l-1598 1612l-14 0zM2070 6122l66 -87l110 -155l111 -155l263 -365l-26 0l-159 29l-160 30l-1600 302l-181 34l-181 35l-43 0l0 -7l-70 -604l-71 -604l-38 -320l-46 -394l-45 -395l23 -14l102 -13l305 -55l304 -54l23 8l11 107l21 175l22 175l64 496l18 4l218 -300l652 -900l136 -190l196 -272l60 -82l12 -1l438 610l19 28l-51 67l-133 190l-134 190l-592 830l-216 306l8 8l879 -160l125 -22l9 9l61 341l60 341l0 22l16 0l151 -205l159 -219l159 -218l294 -402l294 -401l277 -380l276 -380l250 -340l208 -285l209 -285l87 -113l0 -27l370 -510l283 -385l202 -276l648 -884l1172 0l400 572l0 27l18 16l-14 -25l9 0l72 100l-1 15l-27 -36l-17 0l5 -26l-35 -28l25 32l-17 58l9 25l18 0l0 -30l51 4l96 131l195 270l194 270l300 420l44 63l-99 138l-98 139l-269 375l-270 375l-283 395l-284 395l-15 17l-222 -299l-239 -319l108 -150l492 -679l24 -1l-5 -25l252 -360l-31 -44l-479 -670l-283 -395l-207 0l-207 1l-394 539l-244 335l-294 400l-224 304l-224 305l-192 262l-72 99l-121 163l-120 163l0 24l-126 170l-116 160l-115 160l-576 800l-134 180l-243 335l-244 335l-448 620l-31 35l-917 0zM7630 3542l-30 -12l21 40l9 0zM7909 2165l-29 39l0 28l30 -24zM8082 879l-6 18l-7 18l25 -25zM7949 5903l-172 -238l-131 -178l-131 -179l-218 -302l-376 -511l-377 -510l-293 -405l-468 -645l-26 -42l60 -78l196 -270l103 -138l102 -138l208 286l145 198l204 281l294 402l234 319l232 310l231 310l249 337l218 291l218 292l17 30l10 -10l112 -676l0 -42l105 14l520 98l408 72l5 -6l-86 -120l-408 -576l-322 -456l-298 -418l-13 -21l204 -290l120 -172l120 -171l14 -1l102 143l103 142l662 910l81 110l108 150l109 150l109 146l6 -6l55 -450l56 -450l11 -65l44 0l350 62l350 61l14 12l-44 370l-45 370l-35 300l-36 300l-68 550l-42 370l-9 62l-195 -36l-720 -132l-960 -180l-210 -40l-220 -40l-34 6l62 85l477 665l0 24l-918 2zM3246 3475l-103 -140l-320 -445l-319 -445l-406 -568l-9 -25l385 -547l165 -231l166 -231l600 -842l1168 4l219 310l220 310l11 30l105 150l183 259l-10 26l-141 195l-140 195l0 22l-134 190l-41 -48l-324 -447l-325 -447l-401 0l-326 460l-196 275l-131 187l-131 188l173 245l380 540l306 424l0 11l-216 293l-216 292l-34 36z",
+  d: "M5069 3845l456 455l475 -455l448 593l-514 557l-4 1255l692 -675l528 539l-1617 1626l-1578 -1621l516 -540l679 671l0 -1251l-501 -561zM9020 1858l-1318 1834l-461 -618l871 -1215l-793 -1109l-414 1l-3918 5389l-917 0l550 -780l-2350 430l-270 -2324l757 -128l136 957l1274 -1745l457 638l-1126 1583l1012 -174l146 713l3867 -5310l1172 0zM10233 4301l128 -971l758 135l-279 2322l-2305 -428l505 780l-918 2l-2339 -3206l34 -120l401 -546l2250 3056l122 -728l1038 178l-1127 -1591l444 -633zM5301 1090l-415 602l-690 -942l-401 0l-784 1110l859 1209l-466 632l-1315 -1849l1316 -1851l1168 4z",
 };
 
 const WORD_EN: Piece = {
