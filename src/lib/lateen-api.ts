@@ -926,13 +926,17 @@ export function createLateenApi(userId: string) {
         });
         if (error) throw error;
       },
-      // Marks an already-approved order as refunded. Does not touch status,
-      // wallets, or stock — it only stamps refunded_at, which getMetrics()
-      // uses to stop counting that order's platform fee from that point on.
-      async refundOrder(id: string, comment?: string) {
+      /** Refunds an order. The reason is required and the database only
+       *  accepts the two it recognises — a refund is for a business that took
+       *  the money and did not do the deal, not for an order that simply went
+       *  badly. Delivered orders can only be refunded inside the market's
+       *  refund window; past it the server refuses, because the commission has
+       *  become withdrawable and taking it back would put the marketer in
+       *  debt. */
+      async refundOrder(id: string, comment: string, reason: "not_delivered" | "wrong_item") {
         const { error } = await supabase.rpc(
           "admin_refund_order" as never,
-          { _order_id: id, _comment: (comment ?? "") as string } as never,
+          { _order_id: id, _comment: comment ?? "", _reason: reason } as never,
         );
         if (error) throw error;
       },

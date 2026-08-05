@@ -3,6 +3,7 @@ import { changedTitle } from "@/lib/changedFields";
 import { isPdfUrl } from "@/lib/filePicker";
 import { coverStyle } from "@/lib/coverFocus";
 import { marketOf } from "@/lib/markets";
+import { LIBYA } from "@/lib/markets/libya";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { ago, isAr, isSafeUrl, parseData, t } from "../lib/format";
@@ -58,17 +59,26 @@ function localize(n: NotificationRow): { t: string; b: string } {
     };
   }
   if (n.kind === "order_delivered" || title === "Order Delivered") {
+    /* Delivery starts the refund window rather than releasing the money, so
+       saying only "the customer received it" would leave the marketer
+       wondering why their available balance did not move. The number comes
+       from the notification itself — it is the market's rule at the moment
+       the order was delivered, not whatever the rule happens to be today. */
+    const days = Number(d.available_in_days) || LIBYA.money.refundWindowDays;
     return {
       t: t("Order Delivered", "تم تسليم الطلب"),
-      b: t("The customer has received the product", "استلم الزبون المنتج"),
+      b: t(
+        `The customer has received the product. Your commission becomes available to withdraw in ${days} days.`,
+        `استلم الزبون المنتج. عمولتك تصبح متاحة للسحب بعد ${days} أيام.`,
+      ),
     };
   }
   if (n.kind === "receipt_verified" || title === "Receipt Verified") {
     return {
       t: t("Receipt Verified", "تم اعتماد الإيصال"),
       b: t(
-        "Your payment receipt has been verified. Your balance is now updated",
-        "تم اعتماد الإيصال، وأُضيف المبلغ إلى رصيدك.",
+        "Your payment receipt has been verified. Your commission is on the way, and becomes available once the order is delivered.",
+        "تم اعتماد الإيصال. عمولتك في الطريق، وتصبح متاحة بعد تسليم الطلبية.",
       ),
     };
   }

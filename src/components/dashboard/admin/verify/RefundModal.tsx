@@ -8,13 +8,21 @@ import type { ReceiptOrder } from "../lib/types";
     delivered to BOTH the marketer and the business owner with the refund.
     Post-delivery refunds also reverse stock, sales and every analytics counter
     server-side. Resolves with the note, or null if cancelled. */
+/** The only two things a refund can be for. Anything else — the customer
+ *  changed their mind, refused the parcel, could not be reached — is ordinary
+ *  trade risk, the fee stays earned, and the business marks the order failed
+ *  instead. The database enforces the same two values, so this list is the
+ *  policy rather than a suggestion. */
+export type RefundReason = "not_delivered" | "wrong_item";
+
 export function RefundModal({
   order, onDone,
 }: {
   order: ReceiptOrder | null;
-  onDone: (comment: string | null) => void;
+  onDone: (result: { comment: string; reason: RefundReason } | null) => void;
 }) {
   const [note, setNote] = useState("");
+  const [reason, setReason] = useState<RefundReason | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -38,6 +46,12 @@ export function RefundModal({
     body: ar
       ? "هذا يحذف عمولة المنصة الخاصة بالطلبية من إجمالياتك، ويخصم عمولة المسوّق من محفظته."
       : "This removes the order's platform fee from your totals and deducts the marketer's fee from their wallet.",
+    reasonLbl: ar ? "سبب الاسترجاع" : "Reason for the refund",
+    notDelivered: ar ? "لم يتم التسليم إطلاقاً" : "Nothing was ever delivered",
+    wrongItem: ar ? "تم تسليم منتج مختلف" : "A different product was delivered",
+    reasonHint: ar
+      ? "الاسترجاع للحالتين أعلاه فقط. الطلبية الفاشلة أو التي رفضها الزبون لا تُسترجع — الرسوم تبقى للمسوّق."
+      : "Refunds are only for these two cases. A failed or refused order is not refundable — the fee stays with the marketer.",
     noteLbl: ar ? "ملاحظة للمسوّق وصاحب العمل (اختياري)" : "Note to the marketer & business owner (optional)",
     notePh: ar ? "وضّح سبب استرجاع هذه الطلبية…" : "Explain why this order is being refunded…",
     cancel: ar ? "إلغاء" : "Cancel",
@@ -57,6 +71,27 @@ export function RefundModal({
         <div style={{ fontSize: 12.5, lineHeight: 1.7, color: "#9e9b97", marginBottom: 12 }} data-no-i18n>
           {delivered ? t.deliveredBody : t.body}
         </div>
+        <div style={{ fontSize: 12, color: "#9e9b97", marginBottom: 6 }} data-no-i18n>{t.reasonLbl}</div>
+        <div style={{ display: "grid", gap: 6, marginBottom: 6 }}>
+          {([["not_delivered", t.notDelivered], ["wrong_item", t.wrongItem]] as const).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setReason(key)}
+              data-no-i18n
+              style={{
+                textAlign: "start", padding: "10px 12px", borderRadius: 10, cursor: "pointer",
+                fontSize: 12.5, fontFamily: "inherit",
+                background: reason === key ? "rgba(124,156,240,0.16)" : "#161616",
+                border: "0.5px solid " + (reason === key ? "#7c9cf0" : "#262626"),
+                color: reason === key ? "#cddaff" : "#c9c8c4",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div style={{ fontSize: 11.5, lineHeight: 1.6, color: "#7d7a76", marginBottom: 12 }} data-no-i18n>{t.reasonHint}</div>
         <div style={{ fontSize: 12, color: "#9e9b97", marginBottom: 6 }} data-no-i18n>{t.noteLbl}</div>
         <textarea
           ref={taRef}
@@ -81,10 +116,13 @@ export function RefundModal({
             {t.cancel}
           </button>
           <button
-            onClick={() => onDone(note.trim())}
+            onClick={() => reason && onDone({ comment: note.trim(), reason })}
+            disabled={!reason}
             style={{
-              flex: 1, height: 38, borderRadius: 19, background: "#7c9cf0", border: "none",
-              color: "#0b0b0b", fontSize: 13, fontWeight: 600, cursor: "pointer",
+              flex: 1, height: 38, borderRadius: 19, border: "none",
+              background: reason ? "#7c9cf0" : "#2a2a2a",
+              color: reason ? "#0b0b0b" : "#6a6a6a", fontSize: 13, fontWeight: 600,
+              cursor: reason ? "pointer" : "not-allowed",
             }}
             data-no-i18n
           >

@@ -1,6 +1,7 @@
 import { ADMIN_WHATSAPP_DISPLAY } from "../lib/constants";
+import { LIBYA } from "@/lib/markets/libya";
 import { useScrollLock } from "@/lib/useScrollLock";
-import { codPaysParts } from "../lib/format";
+import { codPaysParts, isAr } from "../lib/format";
 import { Money } from "../ui/Money";
 
 /** What the customer still pays on delivery, once fees are taken out. */
@@ -16,6 +17,10 @@ export function DepositInfoOverlay({ open, onClose, cod }: { open: boolean; onCl
   // Holds the page still behind the sheet.
   useScrollLock(open);
   const parts = cod ? codPaysParts(cod.delivery > 0, cod.shipping > 0) : null;
+  const ar = isAr();
+  /* The same number the server enforces, so the promise on this card and the
+     rule in the database cannot drift apart. */
+  const days = LIBYA.money.refundWindowDays;
 
   return (
     <div className={"overlay" + (open ? " open" : "")} style={{ zIndex: 1250, position: "fixed", inset: 0 }}>
@@ -92,18 +97,39 @@ export function DepositInfoOverlay({ open, onClose, cod }: { open: boolean; onCl
               <line x1="12" y1="9" x2="12" y2="13" />
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </DiIcon>
-            <span style={{ color: "#f5b0b0", fontWeight: 500 }}>
-              <span data-i18n="This system protects the rights and responsibilities of both marketers and business owners. Upfront fees are non-refundable under all circumstances. Deposits cannot be reversed once made, except if the customer does not receive the product. In that case, contact the admin:">
-                This system protects the rights and responsibilities of both marketers and business owners. Upfront fees are
-                non-refundable under all circumstances. Deposits cannot be reversed once made, except if the customer does not
-                receive the product. In that case, contact the admin:
-              </span>{" "}
-              <bdi dir="ltr" data-no-i18n>{ADMIN_WHATSAPP_DISPLAY}</bdi>.{" "}
-              <span data-i18n="After verification, the upfront fee will be refunded and the business owner will be permanently banned. If the product has been delivered, any dispute is the business owner's responsibility. The admin may only hide or ban the business owner only.">
-                After verification, the upfront fee will be refunded and the business owner will be permanently banned. If the
-                product has been delivered, any dispute is the business owner's responsibility. The admin may only hide or ban
-                the business owner only.
-              </span>
+            {/* Written out in both languages rather than left to the
+                dictionary. The day count comes from the market rule, so the
+                sentence is built at render time and could never match a fixed
+                dictionary key — and a policy notice that silently disagrees
+                with what the server enforces is worse than no notice. */}
+            <span style={{ color: "#f5b0b0", fontWeight: 500 }} data-no-i18n>
+              {ar ? (
+                <>
+                  النظام هذا يحفظ حقوق والتزامات المسوق وصاحب النشاط. العربون غير قابل للاسترجاع —
+                  لا إذا الزبون رفض الطلبية، ولا إذا غيّر رأيه، ولا إذا ما قدرناش نوصلوله. حتى الطلبية
+                  الفاشلة ما تنسترجعش، والعمولة تبقى للمسوّق. في حالتين بس يصير استرجاع: ما وصل شي
+                  إطلاقاً، أو وصل منتج مختلف عن المطلوب. في هالحالتين تواصل مع الإدارة خلال{" "}
+                  {days} أيام من التسليم:{" "}
+                  <bdi dir="ltr">{ADMIN_WHATSAPP_DISPLAY}</bdi>.{" "}
+                  بعد التحقق يترجع العربون ويتحظر صاحب النشاط نهائياً. بعد مرور {days} أيام على
+                  التسليم ما عادش يصير استرجاع، والمسؤولية تبقى على صاحب النشاط، وإجراء الإدارة
+                  يقتصر على إخفاء أو حظر الحساب فقط.
+                </>
+              ) : (
+                <>
+                  This system protects the rights and responsibilities of both marketers and business
+                  owners. Upfront fees are non-refundable — not if the customer refuses the parcel, not
+                  if they change their mind, and not if they cannot be reached. Even a failed order is
+                  not refunded, and the fee stays with the marketer. There are only two exceptions:
+                  nothing was delivered at all, or a different product was delivered. In those two
+                  cases, contact the admin within {days} days of delivery:{" "}
+                  <bdi dir="ltr">{ADMIN_WHATSAPP_DISPLAY}</bdi>.{" "}
+                  After verification the upfront fee is refunded and the business owner is permanently
+                  banned. More than {days} days after delivery an order can no longer be refunded, any
+                  dispute is the business owner&apos;s responsibility, and the admin may only hide or
+                  ban the business owner.
+                </>
+              )}
             </span>
           </div>
 

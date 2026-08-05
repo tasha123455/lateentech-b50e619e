@@ -6,7 +6,7 @@ import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials } from "../lib/format";
 import type { ReceiptOrder, VerifyMarketer } from "../lib/types";
 import { MarketerDetailOverlay } from "./MarketerDetailOverlay";
-import { RefundModal } from "./RefundModal";
+import { RefundModal, type RefundReason } from "./RefundModal";
 
 export function VerifyPage({ active }: { active: boolean }) {
   const { verifyMarketers, loadVerify, loadMetrics, loading, failed, api } = useAdminData();
@@ -79,13 +79,13 @@ export function VerifyPage({ active }: { active: boolean }) {
      (the business marked it failed), which is not the refund failing. The
      reason is shown on the page instead, and the list is reloaded either way
      so what it says is true again. */
-  const finishRefund = async (comment: string | null) => {
+  const finishRefund = async (result: { comment: string; reason: RefundReason } | null) => {
     const order = refundOrder;
     setRefundOrder(null);
-    if (comment === null || !order) return;
+    if (result === null || !order) return;
     setRefundError("");
     try {
-      await api.admin.refundOrder(order.id, comment);
+      await api.admin.refundOrder(order.id, result.comment, result.reason);
     } catch (e) {
       setRefundError((e as Error).message || String(e));
     }

@@ -59,6 +59,12 @@ export type MarketSpec = {
     minWithdraw: number;
     /** Wait between withdrawals. Mirrors `payout_cycle_days`. */
     payoutCycleDays: number;
+    /** Days after delivery in which an order can still be refunded — and so
+     *  also the delay before its commission becomes withdrawable. The two are
+     *  the same number on purpose: while a refund can still reach the money it
+     *  must not be spendable, and once it is spendable no refund may reach it.
+     *  Mirrors `refund_window_days`. */
+    refundWindowDays: number;
   };
 
   contact: {
