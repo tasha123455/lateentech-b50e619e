@@ -27,6 +27,18 @@
 .lateen-marketer .wallet-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 6px; letter-spacing: 0.04em; }
 .lateen-marketer .wallet-amount { font-size: 34px; font-weight: 500; color: #fff; margin-bottom: 4px; }
 .lateen-marketer .wallet-pending { font-size: 11px; color: rgba(255,255,255,0.28); margin-bottom: 1.25rem; }
+
+/* The wallet before the server has answered. Sized to the text it stands in
+   for, so the card does not resize when the real figure lands — the point is
+   to remove a jump, not to move it somewhere else. It breathes rather than
+   sliding: a shimmer travelling across a balance reads as the number itself
+   doing something. */
+.lateen-marketer .wallet-skel-label { width: 96px; height: 9px; border-radius: 5px; background: rgba(255,255,255,0.10); animation: wallet-skel 1.4s ease-in-out infinite; }
+.lateen-marketer .wallet-skel-amount { width: 150px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.10); animation: wallet-skel 1.4s ease-in-out infinite; }
+@keyframes wallet-skel { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) {
+  .lateen-marketer .wallet-skel-label, .lateen-marketer .wallet-skel-amount { animation: none; }
+}
 .lateen-marketer .wallet-row { display: flex; align-items: center; justify-content: space-between; }
 .lateen-marketer .wallet-meta { font-size: 11px; color: rgba(255,255,255,0.3); }
 .lateen-marketer .wallet-meta span { color: rgba(255,255,255,0.65); font-weight: 500; }
