@@ -19,10 +19,43 @@ function isIosLike(): boolean {
   }
 }
 
+/** Whether asking is possible at all, before any question of when.
+ *
+ *  The browser only has an answer to give while permission is still
+ *  "default" — once it is granted or denied there is no prompt left to show,
+ *  and a modal offering one would lead nowhere. iOS only delivers push to an
+ *  installed app, so in Safari there is nothing to subscribe to yet. */
+function canAskNow(): boolean {
+  if (typeof window === "undefined") return false;
+  if (!("Notification" in window)) return false;
+  if (Notification.permission !== "default") return false;
+  if (isIosLike() && !isInstalledPWA()) return false;
+  return true;
+}
+
+/** Installing is a fresh answer to the question, so it clears an older no.
+ *
+ *  Someone may have waved this away in the browser weeks ago. That dismissal
+ *  otherwise rides into the installed app — both are the same origin and
+ *  share the same storage — and suppresses the prompt for the next twenty
+ *  visits. Choosing to install is a stronger signal than that dismissal.
+ *  Marked as spent, so a later dismissal made inside the app means what it
+ *  says. */
+function clearDismissalOnce(): void {
+  try {
+    if (localStorage.getItem(INSTALLED_SEEN_KEY)) return;
+    localStorage.setItem(INSTALLED_SEEN_KEY, "1");
+    localStorage.removeItem(DISMISS_KEY);
+    localStorage.removeItem(DISMISS_VISITS_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 
 /**
  * Custom in-app modal that offers to enable push notifications.
- * Only shows when:
+ * Shows the moment the app is installed, and otherwise when:
  *   - the app is running as an installed PWA (home-screen launch)
  *   - the user is signed in
  *   - the browser hasn't been asked yet (Notification.permission === "default")
@@ -37,36 +70,38 @@ export function NotificationConsentModal() {
       ? "ar"
       : "en";
 
+  /* The moment the app is installed, not the next time it happens to be
+     opened. Installing is the point at which someone has said they want this
+     on their phone, and it is the only moment we can be sure they are looking
+     — the installed app may not be opened for days, and until it is, nothing
+     has asked whether it may send anything. Android fires this in the tab
+     that did the installing; iOS has no such event and is served by the
+     standalone launch below. */
+  useEffect(() => {
+    if (!user || typeof window === "undefined") return;
+    const onInstalled = () => {
+      if (!canAskNow()) return;
+      clearDismissalOnce();
+      setOpen(true);
+    };
+    window.addEventListener("appinstalled", onInstalled);
+    return () => window.removeEventListener("appinstalled", onInstalled);
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
-    if (typeof window === "undefined") return;
-    if (!("Notification" in window)) return;
-    if (Notification.permission !== "default") return;
-    // iOS only allows push from an installed (home-screen) app; elsewhere we can ask in-browser.
-    if (isIosLike() && !isInstalledPWA()) return;
+    if (!canAskNow()) return;
     try {
-      /* Installing the app is a fresh answer to the question. Someone may have
-         waved this away in the browser weeks ago — that dismissal then rode
-         into the installed app, because both are the same origin and share the
-         same storage, and suppressed the prompt for the next thirty visits.
-         Choosing to install is a stronger signal than that dismissal, so the
-         first standalone launch clears it and the prompt appears straight
-         away. Only the first: after that, a dismissal inside the app means
-         what it says. */
-      if (isInstalledPWA() && !localStorage.getItem(INSTALLED_SEEN_KEY)) {
-        localStorage.setItem(INSTALLED_SEEN_KEY, "1");
-        localStorage.removeItem(DISMISS_KEY);
-        localStorage.removeItem(DISMISS_VISITS_KEY);
-      }
+      if (isInstalledPWA()) clearDismissalOnce();
       const dismissed = localStorage.getItem(DISMISS_KEY);
       if (dismissed) {
-        // Dismissed before: count this visit and only re-ask every 30 visits.
+        // Dismissed before: count this visit and only re-ask every 20 visits.
         const visits = Number(localStorage.getItem(DISMISS_VISITS_KEY) || "0") + 1;
         if (visits < VISITS_BEFORE_REASK) {
           localStorage.setItem(DISMISS_VISITS_KEY, String(visits));
           return;
         }
-        // Threshold reached — show again and restart the 30-visit countdown.
+        // Threshold reached — show again and restart the 20-visit countdown.
         localStorage.setItem(DISMISS_VISITS_KEY, "0");
       }
       // Never dismissed → show on the very first visit.
