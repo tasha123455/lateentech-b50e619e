@@ -35,6 +35,31 @@ function filterOrders(
   });
 }
 
+/** Was this order ever handed to the customer?
+ *
+ *  Not the same question as its status. A refund leaves the status as
+ *  'cancelled' — the very status a failed delivery uses — so going by status
+ *  turned every refunded sale into a delivery that had failed, and dropped its
+ *  money out of the day it actually sold. delivered_at is the only field that
+ *  still remembers, and nothing ever clears it. */
+const wasDelivered = (o: Order | PendingActiveStub) =>
+  !!(o as Order).deliveredAt;
+
+/** A delivery that failed, as opposed to a sale that was reversed afterwards. */
+const isFailedDelivery = (o: Order | PendingActiveStub) =>
+  o._status === "cancelled" && !(o as Order).deliveredAt;
+
+const matchesSel = (d: Date | null | undefined, sel: Sel): boolean => {
+  if (!d) return false;
+  if (sel.day && BD_DAYS[d.getDay()] !== sel.day) return false;
+  if (sel.month && BD_MONTHS[d.getMonth()] !== sel.month) return false;
+  if (sel.year && String(d.getFullYear()) !== sel.year) return false;
+  return true;
+};
+
+const netOf = (o: Order | PendingActiveStub): number =>
+  "price" in o ? o.price * o.qty - o.commission - o.platformFee : 0;
+
 function generateData(
   allTime: BdData,
   all: Array<Order | PendingActiveStub>,
@@ -45,15 +70,52 @@ function generateData(
   let earnings = 0, pieces = 0, succeeded = 0, failed = 0;
   const mset = new Set<string>();
   list.forEach((o) => {
-    if (o._status === "delivered" && "price" in o) {
-      earnings += o.price * o.qty - o.commission - o.platformFee;
+    if (wasDelivered(o) && "price" in o) {
+      earnings += netOf(o);
       pieces += o.qty;
       succeeded++;
     }
-    if (o._status === "cancelled") failed++;
+    if (isFailedDelivery(o)) failed++;
     if (o.marketerId && ACTIVE_MKT_STATUSES.has(o._status)) mset.add(o.marketerId);
   });
+
+  /* The reversal, dated to the day the money went back rather than the day
+     the order was taken. Filter to a day whose only event was a refund and
+     all three figures read negative — which is the honest answer: nothing was
+     sold that day, something was given back. */
+  all.forEach((o) => {
+    const rf = (o as Order).refundedAt ? new Date((o as Order).refundedAt as string) : null;
+    if (!rf || Number.isNaN(rf.getTime()) || !matchesSel(rf, sel)) return;
+    if (!wasDelivered(o) || !("price" in o)) return;
+    earnings -= netOf(o);
+    pieces -= o.qty;
+    succeeded--;
+  });
+
   return { earnings, pieces, marketers: mset.size, succeeded, failed };
+}
+
+/** The unfiltered figures — what the card shows with no day, month or year
+ *  picked. Module-level rather than inline in the component so it sits beside
+ *  generateData, which has to apply the same rules to a filtered slice. Two
+ *  copies of "what counts as sold" is how they drift apart. */
+function computeAllTime(allOrders: Array<Order | PendingActiveStub>): BdData {
+  let totGross = 0, totComm = 0, totPlat = 0, totOk = 0, totFail = 0, totPieces = 0;
+  const marketerSet = new Set<string>();
+  allOrders.forEach((o) => {
+    if (!o._createdAt) return;
+    if (wasDelivered(o) && "price" in o) {
+      totGross += o.price * o.qty; totPieces += o.qty;
+      totComm += o.commission; totPlat += o.platformFee; totOk++;
+    }
+    if (isFailedDelivery(o)) totFail++;
+    if ((o as Order).refundedAt && wasDelivered(o) && "price" in o) {
+      totGross -= o.price * o.qty; totPieces -= o.qty;
+      totComm -= o.commission; totPlat -= o.platformFee; totOk--;
+    }
+    if (o.marketerId && ACTIVE_MKT_STATUSES.has(o._status)) marketerSet.add(o.marketerId);
+  });
+  return { earnings: totGross - totComm - totPlat, pieces: totPieces, marketers: marketerSet.size, succeeded: totOk, failed: totFail };
 }
 
 const CMPL_ICONS = [
@@ -128,25 +190,7 @@ export function PayoutOverlay({ open, onClose }: { open: boolean; onClose: () =>
     [orders, pendingActiveStubs],
   );
 
-  const allTime = useMemo<BdData>(() => {
-    let totGross = 0, totComm = 0, totPlat = 0, totOk = 0, totFail = 0;
-    const marketerSet = new Set<string>();
-    let totPieces = 0;
-    allOrders.forEach((o) => {
-      const st = o._status;
-      if (!o._createdAt) return;
-      if (st === "delivered" && "price" in o) {
-        totGross += o.price * o.qty;
-        totPieces += o.qty;
-        totComm += o.commission;
-        totPlat += o.platformFee;
-        totOk++;
-      }
-      if (st === "cancelled") totFail++;
-      if (o.marketerId && ACTIVE_MKT_STATUSES.has(st)) marketerSet.add(o.marketerId);
-    });
-    return { earnings: totGross - totComm - totPlat, pieces: totPieces, marketers: marketerSet.size, succeeded: totOk, failed: totFail };
-  }, [allOrders]);
+  const allTime = useMemo<BdData>(() => computeAllTime(allOrders), [allOrders]);
 
   const byCur = useMemo(() => computeEarnByCur(orders), [orders]);
   const walletCur = pickWalletCur(byCur, null);
