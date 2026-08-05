@@ -49,6 +49,34 @@ function Row({ k, v, noTranslate }: { k: string; v: string; noTranslate?: boolea
   );
 }
 
+/** The mark on a report notification.
+ *
+ *  Drawn rather than an emoji: ⚠️ is a different picture on every phone, and
+ *  three of them in a row is the visual register of a scam text. One small
+ *  triangle in the same red the card already uses says the same thing without
+ *  shouting, and it inherits the line's own size so it never fights the title.
+ *
+ *  aria-hidden because the title says what this is; a screen reader announcing
+ *  "warning" before it would be reading the decoration aloud. */
+function WarnMark() {
+  return (
+    <svg
+      viewBox="0 0 24 24" aria-hidden="true" focusable="false"
+      style={{
+        width: "1.05em", height: "1.05em", flexShrink: 0,
+        marginInlineEnd: 6, verticalAlign: "-0.15em",
+      }}
+    >
+      <path
+        d="M12 3.6 22 20.4H2z"
+        fill="rgba(226,75,74,0.16)" stroke="#E24B4A" strokeWidth="1.7" strokeLinejoin="round"
+      />
+      <path d="M12 10v4.4" stroke="#E24B4A" strokeWidth="1.9" strokeLinecap="round" />
+      <circle cx="12" cy="17.4" r="1.05" fill="#E24B4A" />
+    </svg>
+  );
+}
+
 export function NotificationsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { api, notifications, reviews, reloadNotifications } = useBusinessData();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -139,6 +167,15 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               t = tr("Order refunded", "تم استرجاع الطلب");
               b = isAr() ? "تم استرجاع طلبية " + pn + " للزبون " + cn : "Order " + pn + " refunded for customer " + cn;
             }
+            /* A report against this shop's product. Serious enough to be
+               marked, but marked with a drawn triangle rather than a row of
+               emoji — three ⚠️ in a list of tidy rows reads as spam, and the
+               emoji renders differently on every phone. */
+            let warn = false;
+            if (kind === "product_reported") {
+              t = tr("A report about your product", "هناك بلاغ على منتجك");
+              warn = true;
+            }
             let author = "";
             let rating = 0;
             if (kind === "product_review") {
@@ -189,7 +226,9 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
             }
 
             const expandable = kind === "new_order" || kind === "order_refunded" || isAdminMsg;
-            const color = kind === "new_order" ? "#34c77b" : kind === "order_refunded" ? "#E24B4A" : kind === "product_review" ? "#e9b949" : "#7f77dd";
+            const color = kind === "new_order" ? "#34c77b"
+              : kind === "order_refunded" || kind === "product_reported" ? "#E24B4A"
+              : kind === "product_review" ? "#e9b949" : "#7f77dd";
 
             const iconD = d || {};
             const liveAv = kind === "product_review" && iconD.marketer_id ? avatarByMarketer[str(iconD.marketer_id)] : "";
@@ -284,7 +323,10 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                     ) : iconHtml}
                     <div className="notif-row-text">
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>{t}</div>
+                        <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>
+                    {warn && <WarnMark />}
+                    {t}
+                  </div>
                         {b ? <div className="notif-body">{b}</div> : null}
                         <div className="notif-time">{ago(n.created_at)}</div>
                       </div>
@@ -300,7 +342,10 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               <div className="notif-item" key={n.id}>
                 {iconHtml}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>{t}</div>
+                  <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>
+                    {warn && <WarnMark />}
+                    {t}
+                  </div>
                   {b ? <div className="notif-body">{b}</div> : null}
                   {reviewDetails}
                   <div className="notif-time">{ago(n.created_at)}</div>
