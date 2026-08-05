@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useBusinessData } from "../BusinessDataProvider";
-import { isAr, tlbl, money, rawSym, ddmmyyyy } from "../lib/format";
+import { isAr, tlbl, moneyParts, rawSym, ddmmyyyy } from "../lib/format";
 import { moneyS } from "@/components/dashboard/marketer/lib/format";
 import { piecesLabel } from "@/components/dashboard/marketer/lib/format";
 import type { Order, PendingActiveStub } from "../lib/types";
 import { MoneyH } from "../ui/Money";
 import { computeEarnByCur, pickWalletCur, type CurEarn } from "./currency";
+import { marketSymbol } from "@/lib/markets/symbol";
+import { esc, htmlTooltip, moneyHtml } from "@/lib/chartTooltip";
 
 /* ── Chart.js loading (same CDN URLs as LateenShell.tsx) ───────────────── */
 
@@ -372,22 +374,22 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
         plugins: Object.assign({
           legend: { display: false },
           decimation: { enabled: true, algorithm: "lttb", samples: 80 },
+          /* HTML rather than canvas, so the currency symbol is set smaller
+             than the amount the way it is everywhere else in the app. */
           tooltip: {
-            animation: false,
-            displayColors: false,
-            padding: 10,
-            titleFont: { size: 12, weight: "600" },
-            bodyFont: { size: 12 },
-            callbacks: {
-              title: (items: AnyChart[]) => {
-                if (!items || !items[0]) return "";
-                const i = items[0].dataIndex;
-                const lab = tlbl(d.labels[i] || "");
-                const s = subs[i] || "";
-                return s ? lab + " · " + s : lab;
-              },
-              label: (ctx: AnyChart) => currentMetric === "revenue" ? " " + money(ctx.raw, sel.sym || "£", walletCur) : " " + piecesLabel(Number(ctx.raw)),
-            },
+            enabled: false,
+            external: htmlTooltip((raw, i) => {
+              const lab = tlbl(d.labels[i] || "");
+              const sub = subs[i] || "";
+              const head = sub ? lab + " · " + sub : lab;
+              const body = currentMetric === "revenue"
+                ? (() => {
+                    const m = moneyParts(raw, sel.sym || marketSymbol(walletCur), walletCur);
+                    return moneyHtml(m.amount, m.symbol, m.symbolFirst, m.spaced);
+                  })()
+                : esc(piecesLabel(Number(raw)));
+              return `<div class="chart-tip-ttl">${esc(head)}</div><div class="chart-tip-val">${body}</div>`;
+            }),
           },
         }, zoomOpts),
         scales: {

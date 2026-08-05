@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { etaSpan, etaText } from "@/lib/eta";
+import { etaText } from "@/lib/eta";
 import { freeLbl, isAr } from "../lib/format";
 import { cityLabel, countryName } from "../lib/mappers";
 import type { Zone } from "../lib/types";
@@ -44,14 +44,6 @@ export function ZonesSection({
   const t = pdT();
   const [openZone, setOpenZone] = useState<string | null>(null);
   const zoneCodes = Object.keys(d || {});
-
-  /* One line for the whole product, so a marketer sees how long delivery takes
-     without opening anything. With several countries it is the span across all
-     of them — the exact figure per country is inside each card below. */
-  const overall = etaSpan([
-    ...zoneCodes.map((c) => d[c].eta),
-    ...zoneCodes.flatMap((c) => Object.values(d[c].c || {}).map((v) => v.eta)),
-  ]);
 
   return (
     <>
@@ -127,21 +119,6 @@ export function ZonesSection({
         </div>
       )}
 
-      {/* Below the zones, not above them. It used to sit between "Ships to"
-          and the list that row opens, so the list appeared to belong to the
-          delivery time rather than to the row that had just been tapped. */}
-      {!!overall && (
-        <div className="pd-row">
-          <div className="pd-row-ic">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="9" />
-              <polyline points="12 7 12 12 15.5 14" />
-            </svg>
-          </div>
-          <div className="pd-row-lbl">{t.etaLbl}</div>
-          <div className="pd-row-val" data-no-i18n>{etaText(overall, isAr())}</div>
-        </div>
-      )}
     </>
   );
 }

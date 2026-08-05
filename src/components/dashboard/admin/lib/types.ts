@@ -120,6 +120,8 @@ export type ProductDetail = {
     sizes?: string[] | null;
     colors?: string[] | null;
     variant_groups?: Array<{ name?: string; items?: unknown[] }> | null;
+    /** Reserve or instant delivery. NULL for products listed before the choice. */
+    fulfilment?: string | null;
     /** Zones carry a delivery time in whole days: the country's, which every
      *  product has, and optionally a city's, narrowing it for that one city. */
     delivery?: Record<string, {
@@ -139,6 +141,10 @@ export type AdminReport = {
   admin_comment?: string | null;
   created_at?: string | null;
   resolved_at?: string | null;
+  /** When each side was told. A report closes once both have been — or once
+   *  the marketer has, when there is no business attached. */
+  marketer_notified_at?: string | null;
+  business_notified_at?: string | null;
   reporter_id?: string | null;
   business_id?: string | null;
   product_id?: string | null;

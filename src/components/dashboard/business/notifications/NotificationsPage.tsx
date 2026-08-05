@@ -3,10 +3,10 @@ import { changedTitle } from "@/lib/changedFields";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { asFulfilment } from "@/lib/fulfilment";
 import { coverStyle } from "@/lib/coverFocus";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { bidiIsolate, isAr, splitCC } from "../lib/format";
-import { useLightbox } from "../ui/Lightbox";
 
 function tr(en: string, ar: string): string {
   return isAr() ? ar : en;
@@ -50,10 +50,37 @@ function Row({ k, v, noTranslate }: { k: string; v: string; noTranslate?: boolea
   );
 }
 
+/** The mark on a report notification.
+ *
+ *  Drawn rather than an emoji: ⚠️ is a different picture on every phone, and
+ *  three of them in a row is the visual register of a scam text. One small
+ *  triangle in the same red the card already uses says the same thing without
+ *  shouting, and it inherits the line's own size so it never fights the title.
+ *
+ *  aria-hidden because the title says what this is; a screen reader announcing
+ *  "warning" before it would be reading the decoration aloud. */
+function WarnMark() {
+  return (
+    <svg
+      viewBox="0 0 24 24" aria-hidden="true" focusable="false"
+      style={{
+        width: "1.05em", height: "1.05em", flexShrink: 0,
+        marginInlineEnd: 6, verticalAlign: "-0.15em",
+      }}
+    >
+      <path
+        d="M12 3.6 22 20.4H2z"
+        fill="rgba(226,75,74,0.16)" stroke="#E24B4A" strokeWidth="1.7" strokeLinejoin="round"
+      />
+      <path d="M12 10v4.4" stroke="#E24B4A" strokeWidth="1.9" strokeLinecap="round" />
+      <circle cx="12" cy="17.4" r="1.05" fill="#E24B4A" />
+    </svg>
+  );
+}
+
 export function NotificationsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { api, notifications, reviews, reloadNotifications } = useBusinessData();
-  const lightbox = useLightbox();
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const { isOpen: isNotifOpen, toggle: toggleNotif } = useAccordion();
   const [avatarByMarketer, setAvatarByMarketer] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -141,6 +168,15 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               t = tr("Order refunded", "تم استرجاع الطلب");
               b = isAr() ? "تم استرجاع طلبية " + pn + " للزبون " + cn : "Order " + pn + " refunded for customer " + cn;
             }
+            /* A report against this shop's product. Serious enough to be
+               marked, but marked with a drawn triangle rather than a row of
+               emoji — three ⚠️ in a list of tidy rows reads as spam, and the
+               emoji renders differently on every phone. */
+            let warn = false;
+            if (kind === "product_reported") {
+              t = tr("A report about your product", "هناك بلاغ على منتجك");
+              warn = true;
+            }
             let author = "";
             let rating = 0;
             if (kind === "product_review") {
@@ -167,10 +203,12 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                   <div style={{ marginTop: 6, padding: "8px 10px", borderRadius: 8, background: "#181818", border: "0.5px solid #232323", fontSize: 12, color: "var(--color-text-primary)" }}>
                     <div style={{ color: "#e9b949", letterSpacing: 2, marginBottom: 4 }}>{stars}</div>
                     <span data-no-i18n="">{text}</span>
+                    {/* Not a link to anything. A review's photo is context for
+                        the words next to it; opening it full screen was a tap
+                        people hit while trying to scroll. */}
                     {photoUrl ? (
                       <div
-                        style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: "1px solid var(--color-border-secondary)" }}
-                        onClick={(e) => { e.stopPropagation(); lightbox.open([photoUrl], 0); }}
+                        style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", border: "1px solid var(--color-border-secondary)" }}
                       >
                         <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", display: "block", ...coverStyle(d?.cover_focus_x, d?.cover_focus_y) }} />
                       </div>
@@ -180,8 +218,7 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               } else if (photoUrl) {
                 reviewDetails = (
                   <div
-                    style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: "1px solid var(--color-border-secondary)" }}
-                    onClick={(e) => { e.stopPropagation(); lightbox.open([photoUrl], 0); }}
+                    style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", border: "1px solid var(--color-border-secondary)" }}
                   >
                     <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", display: "block", ...coverStyle(d?.cover_focus_x, d?.cover_focus_y) }} />
                   </div>
@@ -190,7 +227,9 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
             }
 
             const expandable = kind === "new_order" || kind === "order_refunded" || isAdminMsg;
-            const color = kind === "new_order" ? "#34c77b" : kind === "order_refunded" ? "#E24B4A" : kind === "product_review" ? "#e9b949" : "#7f77dd";
+            const color = kind === "new_order" ? "#34c77b"
+              : kind === "order_refunded" || kind === "product_reported" ? "#E24B4A"
+              : kind === "product_review" ? "#e9b949" : "#7f77dd";
 
             const iconD = d || {};
             const liveAv = kind === "product_review" && iconD.marketer_id ? avatarByMarketer[str(iconD.marketer_id)] : "";
@@ -273,10 +312,10 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
             );
 
             if (expandable && detailsHtml) {
-              const isOpen = !!expanded[n.id];
+              const isOpen = isNotifOpen(n.id);
               return (
                 <div className={"notif-item expandable" + (isOpen ? " expanded" : "")} data-id={n.id} key={n.id}>
-                  <div className="notif-top" onClick={() => setExpanded((s) => ({ ...s, [n.id]: !s[n.id] }))}>
+                  <div className="notif-top" onClick={() => toggleNotif(n.id)}>
                     {hasPhoto ? (
                       <div className="notif-photo-wrap">
                         {/* Cropped small, so it keeps the owner's framing. */}
@@ -285,14 +324,32 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                     ) : iconHtml}
                     <div className="notif-row-text">
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>{t}</div>
+                        <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>
+                    {warn && <WarnMark />}
+                    {t}
+                  </div>
                         {b ? <div className="notif-body">{b}</div> : null}
                         <div className="notif-time">{ago(n.created_at)}</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>{rightDot}</div>
                     </div>
                   </div>
-                  <div className="notif-detail-body">{detailsHtml}</div>
+                  {/* Open, a tap anywhere shuts it again — the header it opened
+                      from is off the top of the screen by the time you have
+                      read to the bottom of a long one, and the detail is most
+                      of the card. Taps on something that does its own job —
+                      a photo that opens, a phone number that dials — are left
+                      alone. Same rule as the marketer's list. */}
+                  <div
+                    className="notif-detail-body"
+                    onClick={isOpen ? (e) => {
+                      const el = e.target as HTMLElement | null;
+                      if (el?.closest("a, button, img, textarea, input, iframe, [role='button']")) return;
+                      toggleNotif(n.id);
+                    } : undefined}
+                  >
+                    {detailsHtml}
+                  </div>
                 </div>
               );
             }
@@ -301,7 +358,10 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               <div className="notif-item" key={n.id}>
                 {iconHtml}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>{t}</div>
+                  <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>
+                    {warn && <WarnMark />}
+                    {t}
+                  </div>
                   {b ? <div className="notif-body">{b}</div> : null}
                   {reviewDetails}
                   <div className="notif-time">{ago(n.created_at)}</div>

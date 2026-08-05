@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { useAuth } from "@/auth/AuthContext";
 
@@ -21,19 +22,7 @@ export function MenuDrawer({
   const { signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
 
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  useScrollLock(open);
 
   const ar = isAr();
   // refreshProfile(): menu-sub is "<business name> · Business", not the bare

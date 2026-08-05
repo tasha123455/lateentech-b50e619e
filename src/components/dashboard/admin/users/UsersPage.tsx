@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { searchMatcher, t } from "@/components/dashboard/marketer/lib/format";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useAdminData } from "../AdminDataProvider";
 import { UserCard } from "./UserCard";
@@ -35,6 +36,7 @@ export function UsersPage({ active, onNotify }: { active: boolean; onNotify: () 
   const [statusFilter, setStatusFilter] = useState<StatusKey>("");
   const [statusOpen, setStatusOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const { isOpen, toggle, close } = useAccordion();
 
   useEffect(() => {
     if (active) void loadUsers();
@@ -100,7 +102,16 @@ export function UsersPage({ active, onNotify }: { active: boolean; onNotify: () 
   if (loading.users) body = <div className="adm-empty">Loading…</div>;
   else if (failed.users) body = <div className="adm-empty">Failed to load.</div>;
   else if (!filtered.length) body = <div className="adm-empty">No users found.</div>;
-  else body = filtered.map((u) => <UserCard key={u.id} u={u} onChanged={() => void loadUsers()} />);
+  else body = filtered.map((u) => (
+    <UserCard
+      key={u.id}
+      u={u}
+      onChanged={() => void loadUsers()}
+      open={isOpen(u.id)}
+      onToggle={() => toggle(u.id)}
+      onClose={close}
+    />
+  ));
 
   return (
     <>
@@ -113,7 +124,15 @@ export function UsersPage({ active, onNotify }: { active: boolean; onNotify: () 
           className={"adm-filter-chip adm-status-chip" + (statusFilter ? " on" : "") + (statusOpen ? " open" : "")}
           onClick={() => setStatusOpen((v) => !v)}
         >
-          <span>{statusFilter ? statusLabel(STATUS_FILTERS.find((s) => s.key === statusFilter)!) : t("Status", "الحاله")}</span>
+          {/* Carries its count once a status is picked, the way the role
+              chips beside it do. Shut, the chip was the only one in the row
+              that named a filter without saying how much of the list it had
+              left. */}
+          <span>
+            {statusFilter
+              ? statusLabel(STATUS_FILTERS.find((s) => s.key === statusFilter)!) + ` (${statusCounts[statusFilter] || 0})`
+              : t("Status", "الحاله")}
+          </span>
           <span className="adm-status-chev">▾</span>
         </button>
         {ROLE_FILTERS.map((f) => (

@@ -1,7 +1,8 @@
 import { coverStyle } from "@/lib/coverFocus";
 import { useEffect, useMemo, useState } from "react";
 
-import { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { isAr, normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, whenFull } from "../lib/format";
@@ -117,14 +118,15 @@ function FeedbackBox({
 }
 
 function ReportCard({
-  r, onOpenProduct, onResolve, onNotifyBusiness,
+  r, onOpenProduct, onResolve, onNotifyBusiness, open, onToggle,
 }: {
   r: AdminReport;
   onOpenProduct: (id: string) => void;
   onResolve: (id: string, comment: string) => Promise<void>;
-  onNotifyBusiness: (businessId: string, comment: string) => Promise<void>;
+  onNotifyBusiness: (reportId: string, comment: string) => Promise<void>;
+  open: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [openBell, setOpenBell] = useState<"" | "marketer" | "business">("");
   const [mkText, setMkText] = useState("");
   const [bizText, setBizText] = useState("");
@@ -147,21 +149,43 @@ function ReportCard({
     }
   };
 
-  const bellBtn = (which: "marketer" | "business") => (
-    <button
-      className={"rpt-bell" + (openBell === which ? " on" : "")}
-      onClick={(e) => { e.stopPropagation(); setOpenBell((v) => (v === which ? "" : which)); }}
-      aria-label="Feedback"
-      title="Feedback"
-    >
-      <Bell />
-    </button>
-  );
+  /* Which halves are already done. A report stays in the list until both are,
+     so the card has to say which one it is still waiting on — otherwise it
+     looks like the send failed. */
+  const mkDone = !!r.marketer_notified_at;
+  const bizDone = !!r.business_notified_at;
+
+  const bellBtn = (which: "marketer" | "business") => {
+    const done = which === "marketer" ? mkDone : bizDone;
+    if (done) {
+      return <span className="rpt-sent" data-no-i18n>{isAr() ? "تم الإرسال ✓" : "Sent ✓"}</span>;
+    }
+    return (
+      <button
+        className={"rpt-bell" + (openBell === which ? " on" : "")}
+        onClick={(e) => { e.stopPropagation(); setOpenBell((v) => (v === which ? "" : which)); }}
+        aria-label="Feedback"
+        title="Feedback"
+      >
+        <Bell />
+      </button>
+    );
+  };
+
+  /* Named plainly rather than as a status word: the admin wants to know what
+     is left to do, not what state a row is in. */
+  const waitingOn = (() => {
+    const left: string[] = [];
+    if (!mkDone) left.push(isAr() ? "المسوّق" : "the marketer");
+    if (!!r.business_id && !bizDone) left.push(isAr() ? "صاحب النشاط" : "the business");
+    if (!left.length) return "";
+    return (isAr() ? "في انتظار الإرسال إلى: " : "Still to send to: ") + left.join(isAr() ? " و" : " and");
+  })();
 
   return (
     <div className={"rpt-card" + (open ? " open" : "")}>
       {/* Collapsed, this row is the whole card: who, about what, when. */}
-      <button className="rpt-head" onClick={() => setOpen((v) => !v)}>
+      <button className="rpt-head" onClick={onToggle}>
         <div className="adm-user-av" data-no-i18n>
           {reporter.avatar_signed_url
             ? <img src={reporter.avatar_signed_url} alt="" loading="lazy" decoding="async" />
@@ -182,6 +206,9 @@ function ReportCard({
 
       {open && (
         <div className="rpt-body">
+          {!!waitingOn && (
+            <div className="rpt-waiting" data-no-i18n>{waitingOn}</div>
+          )}
           <div className="rpt-party-ttl">Marketer</div>
           <MoreInfo
             phone={reporter.phone}
@@ -190,7 +217,7 @@ function ReportCard({
             bell={bellBtn("marketer")}
           />
           <FeedbackBox
-            open={openBell === "marketer"}
+            open={openBell === "marketer" && !mkDone}
             value={mkText}
             onChange={setMkText}
             busy={busy}
@@ -275,14 +302,14 @@ function ReportCard({
                 {bellBtn("business")}
               </div>
               <FeedbackBox
-                open={openBell === "business"}
+                open={openBell === "business" && !bizDone}
                 value={bizText}
                 onChange={setBizText}
                 busy={busy}
                 placeholder="Write a note to the business about this report"
                 sendLabel="Send note to business"
                 onSend={() => void send(async () => {
-                  await onNotifyBusiness(r.business_id!, bizText);
+                  await onNotifyBusiness(r.id, bizText);
                   setBizText("");
                   setOpenBell("");
                 })}
@@ -314,6 +341,7 @@ export function ReportsTab({
   const { reports, loadReports, api } = useAdminData();
   const [loadedOnce, setLoadedOnce] = useState(false);
   const [search, setSearch] = useState("");
+  const { isOpen, toggle } = useAccordion();
 
   useEffect(() => {
     if (!active) return;
@@ -336,7 +364,7 @@ export function ReportsTab({
       alert("Write a comment before sending your review.");
       return;
     }
-    if (!confirm('Send this review to the marketer? They will be notified as "Report reviewed", and the report closes.')) return;
+    if (!confirm('Send this review to the marketer? They will be notified as "Report reviewed".')) return;
     try {
       await api.admin.resolveReport(id, text);
       await loadReports();
@@ -345,15 +373,17 @@ export function ReportsTab({
     }
   };
 
-  const notifyBusiness = async (businessId: string, comment: string) => {
+  /* Report-aware rather than a plain message to the shop: the report has to
+     record that this half is done, and close once both halves are. */
+  const notifyBusiness = async (reportId: string, comment: string) => {
     const text = comment.trim();
     if (!text) {
       alert("Write a note before sending it to the business.");
       return;
     }
     try {
-      await api.admin.sendUserNotification(businessId, "A report about your product", text, null);
-      alert("Note sent to the business.");
+      await api.admin.notifyReportBusiness(reportId, text);
+      await loadReports();
     } catch (e) {
       alert("Failed: " + (e as Error).message);
     }
@@ -372,6 +402,8 @@ export function ReportsTab({
         onOpenProduct={onOpenProduct}
         onResolve={resolve}
         onNotifyBusiness={notifyBusiness}
+        open={isOpen(r.id)}
+        onToggle={() => toggle(r.id)}
       />
     ));
   }

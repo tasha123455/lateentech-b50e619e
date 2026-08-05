@@ -44,6 +44,10 @@ export type MarketSpec = {
   money: {
     /** ISO 4217. Wallets, fees and payouts in this market are all in it. */
     currencyCode: string;
+    /** How the currency is written where it is spent — "د.ل" rather than
+     *  "LYD". Screens with no amount to take a symbol from ask for this
+     *  rather than guessing. */
+    currencySymbol: string;
     /**
      * What the platform keeps per unit sold.
      *

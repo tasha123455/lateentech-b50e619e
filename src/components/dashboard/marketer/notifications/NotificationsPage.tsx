@@ -1,15 +1,15 @@
-import { useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
 import { isPdfUrl } from "@/lib/filePicker";
 import { coverStyle } from "@/lib/coverFocus";
 import { marketOf } from "@/lib/markets";
 import { LIBYA } from "@/lib/markets/libya";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { ago, isAr, isSafeUrl, parseData, t } from "../lib/format";
 import type { NotificationRow } from "../lib/types";
 import { usePhotoLightbox } from "../ui/PhotoLightbox";
-import { DetailRow, NoteBlock, OrderDetailRows } from "./detailBits";
+import { NotifDetailBox } from "./detailBits";
 
 /** Maps a raw notification onto the title/body actually shown to the marketer. */
 function localize(n: NotificationRow): { t: string; b: string } {
@@ -118,16 +118,8 @@ function localize(n: NotificationRow): { t: string; b: string } {
 
 export function NotificationsPage({ onBack }: { onBack: () => void }) {
   const { notifications, newNotifIds } = useMarketerData();
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const { isOpen, toggle } = useAccordion();
   const lightbox = usePhotoLightbox();
-
-  const toggle = (id: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   return (
     <>
@@ -160,7 +152,7 @@ export function NotificationsPage({ onBack }: { onBack: () => void }) {
               key={n.id}
               n={n}
               isNew={newNotifIds.has(n.id)}
-              expanded={expanded.has(n.id)}
+              expanded={isOpen(n.id)}
               onToggle={() => toggle(n.id)}
               onPhoto={lightbox.openOne}
             />
@@ -210,6 +202,9 @@ export function NotifItem({
   // coloured dot and the document shows in the body instead.
   const iconPhotoUrl = isSafeUrl(iconRaw) && !isPdfUrl(iconRaw) ? (iconRaw as string) : "";
   const hasPhoto = !!iconPhotoUrl;
+  /* The one picture worth opening: the receipt the admin attaches to a paid
+     withdrawal. Everything else here is a product photo. */
+  const zoomable = isPaid && expanded;
 
   const icon = hasPhoto ? (
     <div className="notif-icon notif-icon-photo" style={{ backgroundImage: `url('${iconPhotoUrl}')` }} />
@@ -247,73 +242,6 @@ export function NotifItem({
     );
   }
 
-  const borderColor = isFailed || isRejected || isRefunded || isNote ? "#2a1a1a" : "#142a20";
-  const photoUrl = (d.product_photo || d.photo) as string | undefined;
-  // When the photo is already the row icon, don't repeat it inside the body.
-  const bodyPhoto =
-    !hasPhoto && isSafeUrl(photoUrl) ? (
-      <div style={{ margin: "-2px 0 10px 0" }}>
-        {isPdfUrl(photoUrl) ? (
-          <iframe
-            src={photoUrl}
-            title={t("Attachment", "المرفق")}
-            style={{ width: "100%", height: 220, border: "none", borderRadius: 10, display: "block", background: "#fff" }}
-          />
-        ) : (
-          <img
-            src={photoUrl}
-            alt=""
-            onClick={isPaid ? (e) => { e.stopPropagation(); onPhoto(photoUrl!); } : undefined}
-            style={{
-              width: "100%", maxHeight: 220, objectFit: "contain", background: "#0d0d0d",
-              borderRadius: 10, display: "block", ...(isPaid ? { cursor: "zoom-in" } : null),
-            }}
-          />
-        )}
-      </div>
-    ) : null;
-
-  const receiptImg =
-    isRejected && isSafeUrl(d.receipt_url) ? (
-      <div style={{ margin: "0 0 10px 0" }}>
-        <div style={{ fontSize: 11, color: "var(--color-text-secondary)", marginBottom: 4 }}>
-          {t("Receipt", "الإيصال")}
-        </div>
-        {/* The rejected receipt may be the PDF they uploaded. Inline it the
-            same way, in the browser's own viewer, so they can see what the
-            admin saw without leaving the notification. */}
-        {isPdfUrl(d.receipt_url as string) ? (
-          <iframe
-            src={d.receipt_url as string}
-            title={t("Receipt", "الإيصال")}
-            style={{ width: "100%", height: 240, border: "none", borderRadius: 10, display: "block", background: "#fff" }}
-          />
-        ) : (
-          <img
-            src={d.receipt_url as string}
-            alt=""
-            style={{ width: "100%", maxHeight: 240, objectFit: "contain", borderRadius: 10, display: "block", background: "#0f0f0f" }}
-          />
-        )}
-      </div>
-    ) : null;
-
-  const adminNoteText = isRejected
-    ? (d.admin_notes as string)
-    : isRefunded || isNote
-      ? ((d.admin_comment || d.admin_note || (isNote ? n.body || "" : "")) as string)
-      : "";
-
-  const reportTypeLbl = isReportReviewed
-    ? d.report_type === "product"
-      ? t("Product", "المنتج")
-      : d.report_type === "merchant"
-        ? t("Merchant", "التاجر")
-        : t("Other", "أخرى")
-    : "";
-
-  const adminMsgText = isAdminMsg ? ((d.message || n.body || "") as string) : "";
-
   return (
     <div className={"notif-item expandable" + (expanded ? " expanded" : "")} data-id={n.id}>
       <div className="notif-top" onClick={onToggle}>
@@ -322,19 +250,20 @@ export function NotifItem({
             {/* Cropped to a small square, so it is framed the way the owner
                 framed it rather than from the middle.
 
-                Open, this is the whole point of the notification — the receipt
-                the admin sent, or the product the order was for — so it opens
-                full screen. Shut, it is a 34px thumbnail in a row whose only
-                job is to open the card, and taking that tap away from the row
-                would be taking it from the row. */}
+                Only the receipt the admin sends for a paid withdrawal opens
+                full screen. For every other kind this is the product's own
+                photo, already shown at the size it is worth, and the tap did
+                nothing but interrupt someone scrolling the list. Shut, it is a
+                34px thumbnail in a row whose only job is to open the card. */}
             <img
               src={iconPhotoUrl}
               alt=""
               loading="lazy"
-              onClick={expanded ? (e) => { e.stopPropagation(); onPhoto(iconPhotoUrl); } : undefined}
+              onClick={zoomable ? (e) => { e.stopPropagation(); onPhoto(iconPhotoUrl); } : undefined}
               style={{
                 ...coverStyle(d.cover_focus_x, d.cover_focus_y),
-                ...(expanded ? { cursor: "zoom-in", objectFit: "contain" as const } : null),
+                ...(expanded ? { objectFit: "contain" as const } : null),
+                ...(zoomable ? { cursor: "zoom-in" } : null),
               }}
             />
           </div>
@@ -355,56 +284,8 @@ export function NotifItem({
           bottom of a long one. Taps on something that does its own job — a
           photo that opens, a phone number that dials — are left alone. */}
       <div className="notif-detail-body" onClick={expanded ? onInsideTap : undefined}>
-        <div className="notif-details-box" style={{ borderColor }}>
-          {bodyPhoto}
-          {receiptImg}
-          {!!adminMsgText && (
-            <div
-              style={{
-                padding: "8px 10px", borderRadius: 8, background: "#0f0f0f",
-                color: "var(--color-text-secondary)", fontSize: 12, whiteSpace: "pre-wrap",
-              }}
-              data-no-i18n
-            >
-              {adminMsgText}
-            </div>
-          )}
-          <DetailRow k={t("Order Code", "كود الطلبيه")} v={d.order_code} />
-          {isReportReviewed && <DetailRow k={t("Report type", "نوع البلاغ")} v={reportTypeLbl} />}
-          {/* The marketer's own words, read back to them beside the admin's
-              answer, so the reply has something to be a reply to. Italic
-              because it is a quotation of what they wrote, not app copy. */}
-          {isReportReviewed && (
-            <NoteBlock label={t("Your report", "بلاغك")} text={d.report_message as string} italic />
-          )}
-          <OrderDetailRowsWithoutCode d={d} />
-          <NoteBlock label={t("Notes", "ملاحظات")} text={d.customer_notes as string} />
-          <NoteBlock
-            label={t("Admin notes", "ملاحظات الأدمن")}
-            text={adminNoteText}
-            background="#2a1a1a"
-            color="#f0c0c0"
-            marginTop={8}
-          />
-          {isFailed && (
-            <NoteBlock
-              label={t("Business owner notes", "ملاحظات التاجر")}
-              text={d.business_notes as string}
-              background="#2a1a1a"
-              color="#f0c0c0"
-              marginTop={8}
-            />
-          )}
-        </div>
+        <NotifDetailBox n={n} hasRowPhoto={hasPhoto} onPhoto={onPhoto} />
       </div>
     </div>
   );
-}
-
-/** The order block minus the code row, which the caller renders earlier so the
-    report-type row can sit between them (matching the original ordering). */
-function OrderDetailRowsWithoutCode({ d }: { d: Record<string, unknown> }) {
-  const rest = { ...d };
-  delete rest.order_code;
-  return <OrderDetailRows d={rest} />;
 }

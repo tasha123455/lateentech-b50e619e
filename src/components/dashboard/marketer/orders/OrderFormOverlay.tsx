@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { coverStyle } from "@/lib/coverFocus";
+import { useScrollLock } from "@/lib/useScrollLock";
+
 import { useMarketerData } from "../MarketerDataProvider";
 import { COUNTRY_NAMES, PHONE_RE_LOCAL, platThreshold } from "../lib/constants";
 import { codPaysParts, genCode, isAr, pctTxt, stripCC, today2 } from "../lib/format";
@@ -150,16 +153,11 @@ export function OrderFormOverlay({
     if (waRequired) setWaOpen(true);
   }, [waRequired]);
 
-  // The sheet is modal.
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  /* The sheet is modal. Through the shared counted lock rather than setting
+     overflow directly: this sheet opens the picker and the photo viewer over
+     itself, and a private copy hands the page back when the first of them
+     closes, while this one is still covering it. */
+  useScrollLock(open);
 
   /* ── Derived money ── */
   const fee = currentProduct ? calcFee(currentProduct, qty) : null;
@@ -582,13 +580,28 @@ export function OrderFormOverlay({
                 gap: 10, minHeight: 48,
               }}
             >
+              {/* The product that was picked, not a parcel emoji. Framed the
+                  way its owner framed it, so it reads as the same photo the
+                  marketer chose it by. */}
               <div
                 style={{
                   width: 34, height: 34, borderRadius: 8, background: "#1a1a1a", display: "flex",
                   alignItems: "center", justifyContent: "center", fontSize: 18, overflow: "hidden", flexShrink: 0,
                 }}
               >
-                📦
+                {currentProduct?.cover ? (
+                  <img
+                    src={currentProduct.cover}
+                    alt=""
+                    loading="lazy"
+                    style={{
+                      width: "100%", height: "100%", display: "block",
+                      ...coverStyle(currentProduct.coverFocusX, currentProduct.coverFocusY),
+                    }}
+                  />
+                ) : (
+                  "📦"
+                )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div

@@ -1,13 +1,13 @@
 import type { ReactElement } from "react";
 import { Fragment, useMemo, useRef, useState } from "react";
 
-import { DeliveryEtaRow } from "@/components/shared/DeliveryEtaRow";
+import { EtaBadge } from "@/components/shared/EtaBadge";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { coverStyle } from "@/lib/coverFocus";
 import { useBusinessData } from "../BusinessDataProvider";
 import { useLightbox } from "../ui/Lightbox";
 import { MoneyH } from "../ui/Money";
-import { cityLbl, locSearchText } from "../lib/constants";
+import { locSearchText } from "../lib/constants";
 import {
   isAr, escH, freeLbl, isFreeVal, searchMatcher, splitCC,
   platThreshold,
@@ -203,6 +203,11 @@ function OrderCard({
   );
 
   const prod = products.find((p) => p.id === o.productId) || null;
+  /* The zone this order was placed into, and the city inside it. A city only
+     carries a time when the shop set one that differs from its country's. */
+  const zoneEta = (prod?.delivery as Record<string, { eta?: unknown }> | undefined)?.[o.country]?.eta;
+  const cityEta = (prod?.delivery as Record<string, { cities?: Record<string, { eta?: unknown }> }> | undefined)
+    ?.[o.country]?.cities?.[o.city]?.eta;
   const vgs = prod?.variantGroups || [];
   const findVariantName = (val: string): string => {
     for (const g of vgs) {
@@ -318,8 +323,22 @@ function OrderCard({
         <div className="box">
           <div className="r"><span className="k">Name</span><span className="v">{o.customerName}</span></div>
           <div className="r"><span className="k">Address</span><span className="v">{o.address}</span></div>
-          <div className="r"><span className="k">City</span><span className="v">{o.city}</span></div>
-          <div className="r"><span className="k">Country</span><span className="v">{o.country}</span></div>
+          {/* The delivery time rides the place it applies to: the country
+              always, the city only where the shop gave it one of its own. */}
+          <div className="r">
+            <span className="k">City</span>
+            <span className="v">
+              {o.city}
+              <EtaBadge eta={cityEta} ar={ar} />
+            </span>
+          </div>
+          <div className="r">
+            <span className="k">Country</span>
+            <span className="v">
+              {o.country}
+              <EtaBadge eta={zoneEta} ar={ar} />
+            </span>
+          </div>
           <PhoneRow label="Phone" value={o.customerPhone} />
           {o.customerWhatsapp ? (
             <PhoneRow label={ar ? "واتساب أو رقم هاتف إضافي" : "WhatsApp or additional phone number"} value={o.customerWhatsapp} />
@@ -337,16 +356,6 @@ function OrderCard({
               <span className="k">{ar ? "طريقة التسليم" : "Fulfilment"}</span>
               <span className="v"><FulfilmentBadge value={prod.fulfilment} ar={ar} size="sm" /></span>
             </div>
-          )}
-          {/* This order's delivery time, folded — its city's if the shop gave
-              one for that city, otherwise the country's. */}
-          {!!prod && (
-            <DeliveryEtaRow
-              cityEta={(prod.delivery as Record<string, { cities?: Record<string, { eta?: unknown }> }> | undefined)?.[o.country]?.cities?.[o.city]?.eta}
-              zoneEta={(prod.delivery as Record<string, { eta?: unknown }> | undefined)?.[o.country]?.eta}
-              city={cityLbl(o.city)}
-              ar={ar}
-            />
           )}
           <div className="r"><span className="k">Quantity</span><span className="v">{o.qty}</span></div>
           {variantRows}

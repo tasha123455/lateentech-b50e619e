@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { asEta } from "@/lib/eta";
+import { asFulfilment } from "@/lib/fulfilment";
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { isAr, piecesLabel } from "@/components/dashboard/marketer/lib/format";
 import { useScrollLock } from "@/lib/useScrollLock";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 
@@ -103,8 +106,10 @@ export function ProductDetailOverlay({
   onToggleHidden?: (id: string, next: "active" | "hidden") => void;
   onDelete?: (id: string, name: string) => void;
 }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
+  /* Only while the sheet is actually up. This component stays mounted
+     with a null prop when it is closed, so locking unconditionally held
+     the page still for the whole session. */
+  useScrollLock(!!productId);
   const { api } = useAdminData();
   const lightbox = useLightbox();
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -224,6 +229,8 @@ export function ProductDetailOverlay({
             <div className="pd-hd-name" data-no-i18n>{p.name}</div>
             <div className="pd-hd-code">
               <span className="pd-hd-code-lbl">Product code:</span> <span data-no-i18n>{p.code || "—"}</span>
+              {/* Beside the code, the same as the marketer's sheet. */}
+              {!!asFulfilment(p.fulfilment) && <FulfilmentBadge value={p.fulfilment} ar={isAr()} size="sm" />}
             </div>
           </div>
         </div>
@@ -372,7 +379,13 @@ export function ProductDetailOverlay({
           </RowIcon>
           <div className="pd-row-lbl">In stock</div>
           <div className={"pd-row-val" + (low || qty <= 0 ? " am" : "")}>
-            {qty <= 0 ? "Out of stock" : qty + " pcs"}
+            {/* Through the same helper the marketer's sheet uses. Arabic
+                counts one and two differently from the rest, so "1 قطع" and
+                "2 قطع" are both wrong — sticking a translated noun after the
+                digit does not survive contact with the language. */}
+            <span data-no-i18n>
+              {qty <= 0 ? (isAr() ? "غير متوفر" : "Out of stock") : piecesLabel(qty)}
+            </span>
             {vg.length ? <Chev open={stockOpen} /> : null}
           </div>
         </div>
@@ -384,7 +397,7 @@ export function ProductDetailOverlay({
                 {g.items.map((it) => (
                   <div className="pd-zone-city" key={it.val}>
                     <span data-no-i18n>{it.val}</span>
-                    <span>{it.qty === null ? "—" : it.qty + " pcs"}</span>
+                    <span data-no-i18n>{it.qty === null ? "—" : piecesLabel(Number(it.qty) || 0)}</span>
                   </div>
                 ))}
               </div>

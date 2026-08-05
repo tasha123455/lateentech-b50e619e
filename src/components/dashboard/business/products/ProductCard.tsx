@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { coverStyle } from "@/lib/coverFocus";
+import { useAccordion } from "@/lib/useAccordion";
 import { isAr, freeLbl, isFreeVal, moneyParts } from "../lib/format";
 import { cityLbl, categoryLabel, COUNTRY_FLAGS, COUNTRY_NAMES, COUNTRY_NAMES_AR } from "../lib/constants";
 import type { Order, PendingActiveStub, Product } from "../lib/types";
@@ -25,6 +26,7 @@ function countryLbl(code: string): string {
 
 export function ProductCard({
   p, orders, pendingActiveStubs, reviews, onEdit, onToggleStatus, onDelete, focused = false,
+  expanded, onToggle,
 }: {
   p: Product;
   orders: Order[];
@@ -33,13 +35,15 @@ export function ProductCard({
   onEdit: (p: Product) => void;
   onToggleStatus: (p: Product) => void;
   onDelete: (p: Product) => void;
-  /** Opened and scrolled to on mount — an admin followed a report here. */
+  /** Scrolled to on mount — an admin followed a report here. */
   focused?: boolean;
+  /* Owned by the list: opening one product folds the last one away. */
+  expanded: boolean;
+  onToggle: () => void;
 }) {
   const ar = isAr();
-  const [expanded, setExpanded] = useState(focused);
   const [photoIdx, setPhotoIdx] = useState(0);
-  const [openFolds, setOpenFolds] = useState<Record<string, boolean>>({});
+  const folds = useAccordion();
   const { open: openLightbox } = useLightbox();
   const an = useAnalyticsState();
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -57,7 +61,7 @@ export function ProductCard({
   const [slid, setSlid] = useState(false);
   const trackStyle = slid ? { transform: `translateX(${dir * photoIdx * 100}%)` } : undefined;
 
-  const toggleFold = (key: string) => setOpenFolds((s) => ({ ...s, [key]: !s[key] }));
+  const toggleFold = (key: string) => folds.toggle(key);
 
   const onTouchStart = (e: React.TouchEvent) => {
     touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, dragging: true };
@@ -91,7 +95,7 @@ export function ProductCard({
 
   return (
     <div className={"mp-product-card" + (expanded ? " expanded" : "")} data-id={p.id} ref={cardRef}>
-      <div className="mp-p-head" onClick={() => setExpanded((v) => !v)}>
+      <div className="mp-p-head" onClick={onToggle}>
         <div
           className="mp-p-thumb-wrap"
           id={"mp-thumb-wrap-" + p.id}
@@ -186,9 +190,9 @@ export function ProductCard({
           <div className="mp-fold-section mp-marketer-fold">
             <div className="mp-fold-head" onClick={(e) => { e.stopPropagation(); toggleFold("marketer"); }}>
               <div><div className="mp-fold-label">{ar ? "معلومات المسوّق" : "Marketer info"}</div></div>
-              <svg className={"mp-fold-chevron" + (openFolds.marketer ? " open" : "")} id={"mp-chev-marketer-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg className={"mp-fold-chevron" + (folds.isOpen("marketer") ? " open" : "")} id={"mp-chev-marketer-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-            <div className={"mp-fold-body" + (openFolds.marketer ? " open" : "")} id={"mp-fold-marketer-" + p.id}>
+            <div className={"mp-fold-body" + (folds.isOpen("marketer") ? " open" : "")} id={"mp-fold-marketer-" + p.id}>
               <div className="mp-fold-body-inner">
                 <div className="mp-mb-grid">
                   <div className="mp-mb-tile"><div className="l">{ar ? "عمولة المسوّق" : "Marketer fee"}</div><div className="v">{`${p.commPct || 0}%`}</div></div>
@@ -211,9 +215,9 @@ export function ProductCard({
                       : `${zoneCodes.length} ${zoneCodes.length === 1 ? "country" : "countries"}`}
                   </div>
                 </div>
-                <svg className={"mp-fold-chevron" + (openFolds.shipping ? " open" : "")} id={"mp-chev-shipping-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <svg className={"mp-fold-chevron" + (folds.isOpen("shipping") ? " open" : "")} id={"mp-chev-shipping-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <div className={"mp-fold-body" + (openFolds.shipping ? " open" : "")} id={"mp-fold-shipping-" + p.id}>
+              <div className={"mp-fold-body" + (folds.isOpen("shipping") ? " open" : "")} id={"mp-fold-shipping-" + p.id}>
                 <div className="mp-fold-body-inner">
                   {zoneCodes.map((code) => {
                     const z = p.delivery[code] || {};
@@ -254,9 +258,9 @@ export function ProductCard({
                     : (ar ? "لا توجد تقييمات بعد" : "No reviews yet")}
                 </div>
               </div>
-              <svg className={"mp-fold-chevron" + (openFolds.reviews ? " open" : "")} id={"mp-chev-reviews-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg className={"mp-fold-chevron" + (folds.isOpen("reviews") ? " open" : "")} id={"mp-chev-reviews-" + p.id} width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-            <div className={"mp-fold-body" + (openFolds.reviews ? " open" : "")} id={"mp-fold-reviews-" + p.id}>
+            <div className={"mp-fold-body" + (folds.isOpen("reviews") ? " open" : "")} id={"mp-fold-reviews-" + p.id}>
               <div className="mp-fold-body-inner">
                 {reviews.length ? reviews.map((r, i) => {
                   const stars = Math.max(0, Math.min(5, Number(r.rating) || 0));

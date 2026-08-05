@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useAdminData } from "../AdminDataProvider";
 import { PageHeader } from "../ui/PageHeader";
@@ -19,8 +20,7 @@ const FILTERS: Array<{ key: string; label: string }> = [
 
 /** Employee number, phones, email, employment date and notes, folded away —
  *  the card only shows what you need to decide whether to pay someone. */
-function MoreInfo({ e }: { e: Employee }) {
-  const [open, setOpen] = useState(false);
+function MoreInfo({ e, open, onToggle }: { e: Employee; open: boolean; onToggle: () => void }) {
   const phones = [e.phone, e.phone2].filter(Boolean).map((p) => dispPhone(p)).join("  /  ");
   const rows: Array<[string, string]> = [
     ["Employee number", e.employee_number || "—"],
@@ -31,7 +31,7 @@ function MoreInfo({ e }: { e: Employee }) {
   ];
   return (
     <div className="adm-emp-more">
-      <button className="adm-emp-more-hd" onClick={() => setOpen((v) => !v)}>
+      <button className="adm-emp-more-hd" onClick={onToggle}>
         <span>More info</span>
         <svg
           className={"adm-emp-more-chev" + (open ? " open" : "")}
@@ -61,6 +61,7 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
   const [search, setSearch] = useState("");
   const [formFor, setFormFor] = useState<{ employee: Employee | null } | null>(null);
   const [histFor, setHistFor] = useState<Employee | null>(null);
+  const { isOpen, toggle } = useAccordion();
 
   /* The whole list loads at boot for the payable badge, so searching happens
      in the browser: the server's ilike could not fold Arabic letter variants
@@ -175,7 +176,7 @@ export function EmployeesPage({ active, onBack }: { active: boolean; onBack: () 
               <span className="adm-emp-fact-v amt"><Money n={e.monthly_salary} /></span>
             </div>
           </div>
-          <MoreInfo e={e} />
+          <MoreInfo e={e} open={isOpen(e.id)} onToggle={() => toggle(e.id)} />
           <div className="adm-emp-actions">
             <button
               className={"adm-emp-pay-btn " + (paid ? "paid" : due ? "" : "not-due")}

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { ClampedText } from "../ui/ClampedText";
 import { coverStyle } from "@/lib/coverFocus";
 
@@ -110,15 +112,7 @@ export function ProductDetailOverlay({
   }, [productId, api, loadReviews]);
 
   // The sheet is modal.
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  useScrollLock(open);
 
   if (!p) return <div className="ov"><div className="ob" /><div className="ds" /></div>;
 
@@ -186,9 +180,14 @@ export function ProductDetailOverlay({
         <div className="pd-card">
           <div className="pd-hd-row">
             <div className="pd-hd-name" data-no-i18n>{p.n}</div>
-            {!!p.code && (
+            {(!!p.code || !!p.fulfilment) && (
               <div className="pd-hd-code">
-                <span className="pd-hd-code-lbl">{t.code}:</span> <span data-no-i18n>{p.code}</span>
+                {!!p.code && (
+                  <><span className="pd-hd-code-lbl">{t.code}:</span> <span data-no-i18n>{p.code}</span></>
+                )}
+                {/* Beside the code, because both answer "which product is
+                    this" — the code names it, the badge says how it is sold. */}
+                {!!p.fulfilment && <FulfilmentBadge value={p.fulfilment} ar={isAr()} size="sm" />}
               </div>
             )}
           </div>

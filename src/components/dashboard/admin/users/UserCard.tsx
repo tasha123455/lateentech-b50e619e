@@ -30,9 +30,18 @@ export function goToAccount(userId: string, role: string, name: string, productI
   }
 }
 
-export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void }) {
+export function UserCard({
+  u, onChanged, open, onToggle, onClose,
+}: {
+  u: AdminUser;
+  onChanged: () => void;
+  /* Which card is open is the list's business, not the card's — a card that
+     kept its own flag could not know another had been opened. */
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}) {
   const { api } = useAdminData();
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
@@ -53,6 +62,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
   const canImpersonate = role === "marketer" || role === "business";
   const isBanned = !!u.banned_at;
   const isFrozen = !!u.frozen_at;
+  const isSelf = u.id === api.userId;
 
   const removeUser = async () => {
     if (!confirm("Permanently delete " + name + "’s account?\n\nThe account and all their data will be removed from the database. They can register again with the same email. This cannot be undone.")) return;
@@ -135,7 +145,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
       setBody("");
       setPhoto(null);
       alert("Notification sent to " + name + ".");
-      setOpen(false);
+      onClose();
     } catch (e) {
       alert("Failed: " + (e as Error).message);
     }
@@ -144,7 +154,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
 
   return (
     <div className="adm-user-card">
-      <div className="adm-user-row" onClick={() => setOpen((v) => !v)}>
+      <div className="adm-user-row" onClick={onToggle}>
         <div className="adm-user-av" data-no-i18n>
           {u.avatar_signed_url
             ? <img src={u.avatar_signed_url} alt="" loading="lazy" decoding="async" />
@@ -192,10 +202,12 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
               {isFrozen ? "Unfreeze" : "Freeze"}
             </button>
           )}
-          {/* Not on your own account. The master admin is the one signed in
-              here, and an irreversible "Remove" sitting on their own card is a
-              button whose only possible use is a mistake. */}
-          {u.id !== api.userId && (
+          {/* Neither of these on your own account. The master admin is the one
+              signed in here, and a "Remove" or a "Ban Email" sitting on their
+              own card is a button whose only possible use is a mistake — Ban
+              signs you out on the spot and locks the only account that can
+              undo it, so there would be nobody left to press Unban. */}
+          {!isSelf && (
             <button
               className="adm-go-btn"
               style={{ background: "#fee", color: "#c00", borderColor: "#fcc" }}
@@ -204,17 +216,19 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
               Remove
             </button>
           )}
-          <button
-            className="adm-go-btn"
-            style={{
-              background: isBanned ? "#e2e3e5" : "#fff3cd",
-              color: isBanned ? "#495057" : "#856404",
-              borderColor: isBanned ? "#d6d8db" : "#ffeeba",
-            }}
-            onClick={() => void toggleBan()}
-          >
-            {isBanned ? "Unban" : "Ban Email"}
-          </button>
+          {!isSelf && (
+            <button
+              className="adm-go-btn"
+              style={{
+                background: isBanned ? "#e2e3e5" : "#fff3cd",
+                color: isBanned ? "#495057" : "#856404",
+                borderColor: isBanned ? "#d6d8db" : "#ffeeba",
+              }}
+              onClick={() => void toggleBan()}
+            >
+              {isBanned ? "Unban" : "Ban Email"}
+            </button>
+          )}
           {role === "admin" && (
             <button
               className="adm-go-btn"

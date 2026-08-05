@@ -8,6 +8,7 @@ import { Money } from "../ui/Money";
 import { AnalyticsBreakdown } from "./AnalyticsBreakdown";
 import { MainChart } from "./MainChart";
 import { RingChart } from "./RingChart";
+import { marketSymbol } from "@/lib/markets/symbol";
 
 export function HomePage({
   onOpenNotifications, onOpenProfile, onOpenSupport, onOpenWithdraw, unreadCount,
@@ -29,7 +30,7 @@ export function HomePage({
   const greet = (isAr() ? "هلا، " : "Hey, ") + first;
 
   const codes = Object.keys(analytics.earnByCur);
-  const curData = analytics.earnByCur[walletCur] || { sym: walletCur === "LYD" ? "د.ل" : "£", amount: 0 };
+  const curData = analytics.earnByCur[walletCur] || { sym: marketSymbol(walletCur), amount: 0 };
   const selSym = curData.sym || "د.ل";
 
   const ring = analytics.ring[period];

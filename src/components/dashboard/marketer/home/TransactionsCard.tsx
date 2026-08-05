@@ -1,10 +1,12 @@
 import { useState } from "react";
 
+import { useAccordion } from "@/lib/useAccordion";
+
 import { useMarketerData } from "../MarketerDataProvider";
 import { dateMatches, type BreakdownSelection } from "../lib/analytics";
-import { fmtDT, isSafeUrl, parseData, t } from "../lib/format";
+import { fmtDT, parseData, t } from "../lib/format";
 import type { NotificationRow } from "../lib/types";
-import { DetailRow, NoteBlock, OrderDetailRows } from "../notifications/detailBits";
+import { DetailRow, NotifDetailBox } from "../notifications/detailBits";
 import { Money } from "../ui/Money";
 import { usePhotoLightbox } from "../ui/PhotoLightbox";
 
@@ -20,7 +22,7 @@ const KINDS: Record<string, "add" | "subtract" | "withdraw" | "reject" | "failed
 export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
   const { notifications, orders, walletCur, analytics } = useMarketerData();
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const { isOpen, toggle } = useAccordion();
   const lightbox = usePhotoLightbox();
 
   /* This card lives inside the analytics card, under the boxes the range tabs
@@ -33,14 +35,6 @@ export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const rawSymbol = (analytics.earnByCur[walletCur] && analytics.earnByCur[walletCur].sym) || "د.ل";
-
-  const toggle = (id: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   return (
     <div className="mkbd-card" style={{ margin: "16px 0 0" }}>
@@ -77,7 +71,7 @@ export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
                     n={n}
                     sym={rawSymbol}
                     code={walletCur}
-                    expanded={expanded.has(n.id)}
+                    expanded={isOpen(n.id)}
                     onToggle={() => toggle(n.id)}
                     onPhoto={lightbox.openOne}
                     findOrderAmount={(orderId) => {
@@ -130,74 +124,24 @@ function TxnItem({
 
   const isX = type === "reject" || type === "failed";
   const color = type === "add" ? "#35c98f" : type === "withdraw" ? "#7f77dd" : "#e2685f";
-  /* The same green/red edge the notification for this event carries, so one
-     movement looks like one thing wherever it is read. */
-  const borderColor = type === "add" || type === "withdraw" ? "#142a20" : "#2a1a1a";
   const sign = type === "add" ? "+" : isX ? "" : "-";
   const amtStr =
     amount != null ? amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null;
 
-  const photoUrl = (d.product_photo || d.photo) as string | undefined;
-  const photoValid = isSafeUrl(photoUrl);
-  /* A paid withdrawal used to show the admin's receipt twice: once as the
-     row's own icon, and again inside the body. One of them stood alone with
-     nothing to say what it was — so the one that keeps the amount and the
-     status beside it is the one that stays. */
-
-  const bigPhoto = photoValid ? (
-    <div style={{ margin: "-2px 0 10px 0" }}>
-      <img
-        src={photoUrl}
-        alt=""
-        onClick={(e) => { e.stopPropagation(); onPhoto(photoUrl!); }}
-        style={{
-          width: "100%", maxHeight: 220, objectFit: "contain", background: "#0d0d0d",
-          borderRadius: 10, display: "block", cursor: "zoom-in",
-        }}
-      />
-    </div>
-  ) : null;
-
-  let detailRows: React.ReactNode;
-  if (type === "failed") {
-    detailRows = (
+  /* What only the wallet has to say. Everything below these two rows is the
+     notification for this same event, rendered by the same component — the
+     wallet is the second place one movement is read, not a second account
+     of it. */
+  const leadRows =
+    type === "withdraw" || type === "failed" ? (
       <>
-        {bigPhoto}
         <DetailRow k={t("Amount", "المبلغ")} v={<Money n={amount ?? 0} sym={sym} code={code} />} />
-        <DetailRow k={t("Status", "الحالة")} v={t("Failed", "فشل")} />
-        <NoteBlock
-          label={t("Note", "ملاحظة")}
-          text={(d.admin_comment || d.admin_note) as string}
-          background="#2a1a1a"
-          color="#f0c0c0"
-          marginTop={8}
+        <DetailRow
+          k={t("Status", "الحالة")}
+          v={type === "withdraw" ? t("Paid", "مدفوع") : t("Failed", "فشل")}
         />
       </>
-    );
-  } else if (type === "withdraw") {
-    detailRows = (
-      <>
-        {bigPhoto}
-        <DetailRow k={t("Amount", "المبلغ")} v={<Money n={amount ?? 0} sym={sym} code={code} />} />
-        <DetailRow k={t("Status", "الحالة")} v={t("Paid", "مدفوع")} />
-      </>
-    );
-  } else {
-    detailRows = (
-      <>
-        {bigPhoto}
-        <OrderDetailRows d={d} />
-        <NoteBlock label={t("Notes", "ملاحظات")} text={d.customer_notes as string} />
-        <NoteBlock
-          label={t("Note", "ملاحظة")}
-          text={(d.admin_notes || d.admin_comment || d.admin_note) as string}
-          background="#2a1a1a"
-          color="#f0c0c0"
-          marginTop={8}
-        />
-      </>
-    );
-  }
+    ) : null;
 
   return (
     <div className={"notif-item expandable" + (expanded ? " expanded" : "")} data-id={n.id}>
@@ -226,7 +170,7 @@ function TxnItem({
           onToggle();
         } : undefined}
       >
-        <div className="notif-details-box" style={{ borderColor }}>{detailRows}</div>
+        <NotifDetailBox n={n} onPhoto={onPhoto} leadRows={leadRows} />
       </div>
     </div>
   );

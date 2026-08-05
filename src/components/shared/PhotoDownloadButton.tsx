@@ -8,8 +8,9 @@ import { downloadPhoto } from "@/lib/photoDownload";
  *  different viewers — the marketer's, the business's and the admin's — each
  *  with its own CSS scope, and the button should look the same in all of them.
  *
- *  It reports back: a tick while the file is on its way, so a share sheet that
- *  takes a moment to appear does not read as a dead button. */
+ *  It reports back: a tick once the file is away. Nothing else says the save
+ *  happened — the photo goes straight to the gallery with no sheet in front of
+ *  it — so without the tick a tap would look like nothing at all. */
 export function PhotoDownloadButton({ url, style }: { url: string; style?: React.CSSProperties }) {
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
 

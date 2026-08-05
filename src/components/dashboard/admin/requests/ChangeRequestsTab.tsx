@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, whenFull } from "../lib/format";
@@ -29,21 +30,22 @@ function searchText(r: ChangeRequest): string {
  *  long ago. Their details, what they wrote and the way into their account
  *  open on tap. */
 function ChangeCard({
-  r, comment, onComment, onResolve,
+  r, comment, onComment, onResolve, open, onToggle,
 }: {
   r: ChangeRequest;
   comment: string;
   onComment: (v: string) => void;
   onResolve: (id: string) => Promise<void>;
+  open: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const person = r.person || {};
   const name = person.business_name || person.full_name || "Unknown user";
   const fields = r.fields || [];
 
   return (
     <div className={"del-card" + (open ? " open" : "")}>
-      <button className="del-head" onClick={() => setOpen((v) => !v)}>
+      <button className="del-head" onClick={onToggle}>
         <div className="adm-user-av" data-no-i18n>
           {person.avatar_signed_url
             ? <img src={person.avatar_signed_url} alt="" loading="lazy" decoding="async" />
@@ -121,6 +123,7 @@ export function ChangeRequestsTab({ active }: { active: boolean }) {
   const [search, setSearch] = useState("");
   const [comments, setComments] = useState<Record<string, string>>({});
   const [loadedOnce, setLoadedOnce] = useState(false);
+  const { isOpen, toggle } = useAccordion();
 
   useEffect(() => {
     if (!active) return;
@@ -157,6 +160,8 @@ export function ChangeRequestsTab({ active }: { active: boolean }) {
         comment={comments[r.id] || ""}
         onComment={(v) => setComments((prev) => ({ ...prev, [r.id]: v }))}
         onResolve={resolve}
+        open={isOpen(r.id)}
+        onToggle={() => toggle(r.id)}
       />
     ));
   }

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { isAr } from "../lib/format";
 
@@ -25,15 +26,7 @@ export function ListerIcon({ size = 22, stroke = "#e0637a" }: { size?: number; s
  *  will be and marks it Soon — the same shape as the marketer's points sheet,
  *  because a business owner who has used both should not have to learn two. */
 export function ProductListerOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
+  useScrollLock(open);
 
   if (!open) return null;
   const ar = isAr();

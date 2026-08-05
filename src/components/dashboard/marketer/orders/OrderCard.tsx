@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 
-import { DeliveryEtaRow } from "@/components/shared/DeliveryEtaRow";
+import { EtaBadge } from "@/components/shared/EtaBadge";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { coverStyle } from "@/lib/coverFocus";
 
 import { codPaysParts, dispPhone, fmtDT, isAr, isSafeUrl } from "../lib/format";
-import { cityLabel, orderVariants } from "../lib/mappers";
+import { orderVariants } from "../lib/mappers";
 import type { BrowseProduct, FormProduct, MarketerOrder } from "../lib/types";
 import { ProductCover } from "../browse/ProductCard";
 import { FreeOrMoney, Money } from "../ui/Money";
@@ -277,16 +277,6 @@ export function OrderCard({
               {/* Reserve or instant delivery, read off the live product — the
                   order does not carry it, and the answer is whatever the
                   listing says today. */}
-              {/* How long this order's city takes, folded. The city's own
-                  figure when the shop gave one, else the country's. */}
-              {!!product && (
-                <DeliveryEtaRow
-                  cityEta={product.d?.[o.countryCode]?.c?.[o.city]?.eta}
-                  zoneEta={product.d?.[o.countryCode]?.eta}
-                  city={cityLabel(o.city)}
-                  ar={isAr()}
-                />
-              )}
               {(product?.fulfilment || liveProduct?.fulfilment) && (
                 <div style={{ margin: "4px 0 2px" }}>
                   <FulfilmentBadge
@@ -342,8 +332,20 @@ export function OrderCard({
               <div className="addr-block">
                 <Pin />
                 <div className="addr-rows">
-                  {!!o.country && <div className="addr-row"><span className="addr-label">{T.country}:</span>{o.country}</div>}
-                  {!!o.city && <div className="addr-row"><span className="addr-label">{T.city}:</span>{o.city}</div>}
+                  {!!o.country && (
+                    <div className="addr-row">
+                      <span className="addr-label">{T.country}:</span>{o.country}
+                      <EtaBadge eta={product?.d?.[o.countryCode]?.eta} ar={isAr()} />
+                    </div>
+                  )}
+                  {!!o.city && (
+                    <div className="addr-row">
+                      <span className="addr-label">{T.city}:</span>{o.city}
+                      {/* Only where this city has a time of its own. Silence
+                          means it keeps the country's, on the line above. */}
+                      <EtaBadge eta={product?.d?.[o.countryCode]?.c?.[o.city]?.eta} ar={isAr()} />
+                    </div>
+                  )}
                   {!!o.address && (
                     <div className="addr-row">
                       <span className="addr-label">{T.address}:</span>

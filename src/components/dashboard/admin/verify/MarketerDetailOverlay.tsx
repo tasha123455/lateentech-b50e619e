@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useScrollLock } from "@/lib/useScrollLock";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { searchMatcher } from "@/components/dashboard/marketer/lib/format";
 
@@ -19,10 +20,13 @@ export function MarketerDetailOverlay({
   onReject: (id: string) => void;
   onRefund: (id: string) => void;
 }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
+  /* Only while the sheet is actually up. This component stays mounted
+     with a null prop when it is closed, so locking unconditionally held
+     the page still for the whole session. */
+  useScrollLock(!!marketer);
   const [tab, setTab] = useState<"new" | "history">("new");
   const [search, setSearch] = useState("");
+  const { isOpen, toggle, close } = useAccordion();
 
   // Opening a different marketer resets the view. Keyed on the id alone so a
   // background data refresh doesn't wipe a mid-typed search.
@@ -31,7 +35,8 @@ export function MarketerDetailOverlay({
     if (!marketerId) return;
     setTab("new");
     setSearch("");
-  }, [marketerId]);
+    close();
+  }, [marketerId, close]);
 
   const open = !!marketer;
   const q = search.trim();
@@ -98,7 +103,15 @@ export function MarketerDetailOverlay({
             </div>
           ) : (
             list.map((o) => (
-              <ReceiptCard key={o.id} o={o} onApprove={onApprove} onReject={onReject} onRefund={onRefund} />
+              <ReceiptCard
+                key={o.id}
+                o={o}
+                onApprove={onApprove}
+                onReject={onReject}
+                onRefund={onRefund}
+                open={isOpen(o.id)}
+                onToggle={() => toggle(o.id)}
+              />
             ))
           )}
         </div>

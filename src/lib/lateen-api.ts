@@ -1297,11 +1297,26 @@ export function createLateenApi(userId: string) {
           product: r.product_id ? (prodMap.get(r.product_id) ?? null) : null,
         }));
       },
+      /** Sends the admin's review to the marketer who filed the report. The
+       *  report only closes once the business has been told too — see
+       *  notifyReportBusiness. */
       async resolveReport(id: string, comment: string) {
         const { data, error } = await supabase.rpc("admin_resolve_report", {
           _report_id: id,
           _comment: comment,
         });
+        if (error) throw error;
+        return data;
+      },
+      /** Sends the admin's note to the business the report is about, and
+       *  closes the report if the marketer has already had their review.
+       *  Report-aware on purpose: sent through the generic notification call
+       *  the report would never learn that this half was done. */
+      async notifyReportBusiness(reportId: string, comment: string) {
+        const { data, error } = await supabase.rpc(
+          "admin_notify_report_business" as never,
+          { _report_id: reportId, _comment: comment } as never,
+        );
         if (error) throw error;
         return data;
       },

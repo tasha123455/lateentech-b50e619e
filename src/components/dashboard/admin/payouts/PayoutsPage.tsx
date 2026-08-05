@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { isAr, money as marketerMoney, moneyParts, searchMatcher } from "@/components/dashboard/marketer/lib/format";
 import { payoutLabel } from "@/components/dashboard/marketer/overlays/usePayoutForm";
 import { bankLabel } from "@/components/dashboard/marketer/lib/constants";
+import { useAccordion } from "@/lib/useAccordion";
 import { useAdminData, usePayoutsOpenRef } from "../AdminDataProvider";
 import { dispPhone, initials, money, whenOrDate } from "../lib/format";
 import type { PayoutRequest } from "../lib/types";
@@ -21,7 +22,7 @@ function WalletAmount({ n, sym, code }: { n: unknown; sym: string; code: string 
  *  plus the receipt, since the button will not fire without one. The bank
  *  details and the failure note fold away. */
 function PayoutCard({
-  p, receipt, onReceipt, note, onNote, onPaid, onSendNote,
+  p, receipt, onReceipt, note, onNote, onPaid, onSendNote, open, onToggle,
 }: {
   p: PayoutRequest;
   receipt: string | null;
@@ -30,8 +31,9 @@ function PayoutCard({
   onNote: (v: string) => void;
   onPaid: (p: PayoutRequest, liveBal: number, shown: string) => Promise<void>;
   onSendNote: (id: string) => Promise<void>;
+  open: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [failOpen, setFailOpen] = useState(false);
 
   const u = p.user || {};
@@ -55,7 +57,7 @@ function PayoutCard({
 
   return (
     <div className={"adm-payout-card" + (open ? " open" : "")}>
-      <button className="pay-head" onClick={() => setOpen((v) => !v)}>
+      <button className="pay-head" onClick={onToggle}>
         <div className="adm-user-av" data-no-i18n>
           {u.avatar_signed_url
             ? <img src={u.avatar_signed_url} alt="" loading="lazy" decoding="async" />
@@ -164,6 +166,7 @@ export function PayoutsPage({ active }: { active: boolean }) {
   const [receipts, setReceipts] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
+  const { isOpen, toggle } = useAccordion();
 
   // Only poll while this page is on screen.
   useEffect(() => {
@@ -249,6 +252,8 @@ export function PayoutsPage({ active }: { active: boolean }) {
         onNote={(v) => setNotes((prev) => ({ ...prev, [p.id]: v }))}
         onPaid={markPaid}
         onSendNote={sendNote}
+        open={isOpen(p.id)}
+        onToggle={() => toggle(p.id)}
       />
     ));
   }
