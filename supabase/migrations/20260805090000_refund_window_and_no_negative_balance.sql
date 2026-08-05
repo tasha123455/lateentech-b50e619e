@@ -40,7 +40,12 @@
 -- ============================================================================
 
 ALTER TABLE public.markets
-  ADD COLUMN IF NOT EXISTS refund_window_days integer NOT NULL DEFAULT 6;
+  ADD COLUMN IF NOT EXISTS refund_window_days integer NOT NULL DEFAULT 5;
+
+-- Seeded explicitly as well as defaulted: on a database where the column
+-- already exists the default alone would leave the existing row untouched.
+-- Scoped to Libya so a market added later keeps whatever it was given.
+UPDATE public.markets SET refund_window_days = 5 WHERE code = 'LY';
 
 COMMENT ON COLUMN public.markets.refund_window_days IS
   'Days after delivery during which an order can still be refunded, and therefore also the delay before its commission becomes withdrawable. The two must stay equal: a refund and a withdrawal must never be able to reach the same money.';

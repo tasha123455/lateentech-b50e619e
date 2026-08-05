@@ -139,7 +139,7 @@ export const LIBYA: MarketSpec = {
     fee: { pct: 0.05, fixed: 5, threshold: 100 },
     minWithdraw: 20,
     payoutCycleDays: 30,
-    refundWindowDays: 6,
+    refundWindowDays: 5,
   },
 
   contact: {
