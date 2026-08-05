@@ -2,17 +2,26 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { isAr } from "../lib/format";
 
-/** Text cut to `lines` lines, with the rest behind a "more…" toggle.
+/** The dots that stand in for the rest of the text. Five rather than the
+ *  single "…" a CSS clamp draws: at this size one ellipsis character barely
+ *  registers, and being noticed is the whole job. */
+const DOTS = ".....";
+
+/** Text cut to `lines` lines, ending "..... more" on the last one.
  *
- *  The toggle only appears when the text really is longer than the space, and
- *  that is measured rather than guessed: a line is however much fits at the
- *  reader's width and font size, so counting characters gets it wrong on one
- *  device or the other, and a "more…" that opens nothing is worse than no
- *  "more…" at all.
+ *  Where the cut falls is measured, not counted. A line is however much fits
+ *  at the reader's width and font size, so a character count is wrong on one
+ *  device or the other — and the sum has to include the dots and the word
+ *  after them, because those share the last line with the text they follow.
  *
- *  Measurement happens while the text is still clamped. Once it is open,
- *  scrollHeight and clientHeight agree and the question stops being askable,
- *  so the answer from the clamped state is the one that is kept. */
+ *  Measuring happens on a copy parked off-screen, never on the element React
+ *  is rendering. A binary search over the length means writing text into the
+ *  DOM a dozen times, and anything left behind in React's own tree would
+ *  survive until the next render.
+ *
+ *  CSS could do the clamping alone, but not with a control on the last line:
+ *  -webkit-line-clamp draws its own ellipsis and leaves nothing to sit beside,
+ *  and floating a button into the corner covers whatever text is under it. */
 export function ClampedText({
   text, lines = 3, className, style, moreClassName = "pd-desc-more",
 }: {
@@ -27,33 +36,115 @@ export function ClampedText({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [over, setOver] = useState(false);
+  /** Characters that survive the cut, or null while the whole text fits. */
+  const [cut, setCut] = useState<number | null>(null);
+  /** Stops the trim below from running away if it can never satisfy itself. */
+  const trims = useRef(0);
+
+  const ar = isAr();
+  const moreLabel = ar ? "المزيد" : "more";
+  const lessLabel = ar ? "أقل" : "less";
 
   useLayoutEffect(() => {
     if (open) return;
     const el = ref.current;
     if (!el) return;
-    const check = () => setOver(el.scrollHeight - el.clientHeight > 1);
-    check();
+
+    const measure = () => {
+      const width = el.clientWidth;
+      if (!width || typeof getComputedStyle !== "function") return;
+      const cs = getComputedStyle(el);
+      const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.5;
+      if (!lh) return;
+      // A hair over, so a line landing exactly on the boundary still counts.
+      const maxH = lh * lines + 1;
+
+      const probe = document.createElement("div");
+      probe.setAttribute("aria-hidden", "true");
+      probe.style.cssText =
+        `position:absolute;left:-99999px;top:0;visibility:hidden;pointer-events:none;width:${width}px;`;
+      // Everything that decides where a line breaks, taken from the real one.
+      [
+        "font-family", "font-size", "font-weight", "font-style", "letter-spacing",
+        "word-spacing", "line-height", "white-space", "word-break", "overflow-wrap",
+        "text-transform", "direction", "text-indent",
+      ].forEach((prop) => probe.style.setProperty(prop, cs.getPropertyValue(prop)));
+      document.body.appendChild(probe);
+
+      const fits = (s: string) => {
+        probe.textContent = s;
+        return probe.scrollHeight <= maxH;
+      };
+
+      if (fits(text)) {
+        probe.remove();
+        setCut(null);
+        return;
+      }
+
+      /* The dots and the word after them land on the last line, so the search
+         weighs the text against what will follow it rather than against the
+         text alone. Without that the toggle wraps onto a fourth line, which is
+         the thing this exists to avoid. */
+      const tail = DOTS + " " + moreLabel;
+      let lo = 0;
+      let hi = text.length;
+      let best = 0;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        if (fits(text.slice(0, mid).trimEnd() + tail)) {
+          best = mid;
+          lo = mid + 1;
+        } else {
+          hi = mid - 1;
+        }
+      }
+      probe.remove();
+      trims.current = 0;
+      setCut(best);
+    };
+
+    measure();
     if (typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(check);
+    const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [text, lines, open]);
+  }, [text, lines, open, moreLabel]);
 
-  // A font arriving after first paint changes what fits, so ask again once it has.
+  /* The probe weighs the toggle as plain text, but the real one is bolder and
+     carries a margin, so the guess can run a line long — it did in Arabic,
+     where the words are wide enough for the difference to matter. This trims
+     against the rendered element itself, which includes the real button, so
+     the answer stops being an estimate. It runs at most a step or two, because
+     the guess is already close. */
+  useLayoutEffect(() => {
+    if (open || cut == null) return;
+    const el = ref.current;
+    if (!el || typeof getComputedStyle !== "function") return;
+    const cs = getComputedStyle(el);
+    const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.5;
+    if (!lh || el.scrollHeight <= lh * lines + 1) return;
+    if (trims.current >= 40 || cut <= 0) return;
+    trims.current += 1;
+    setCut((c) => Math.max(0, (c ?? 0) - Math.max(1, Math.round(text.length * 0.01))));
+  }, [cut, open, lines, text]);
+
+  // A font arriving after first paint changes what fits, so ask again once it
+  // has. Nudging the box is enough: the observer above re-measures on resize,
+  // and a font swap resizes it.
   useEffect(() => {
     const fonts = (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts;
     if (!fonts?.ready) return;
     let live = true;
     void fonts.ready.then(() => {
-      const el = ref.current;
-      if (live && el && !open) setOver(el.scrollHeight - el.clientHeight > 1);
+      if (live) setCut((c) => c);
     });
     return () => { live = false; };
   }, [open]);
 
-  const ar = isAr();
+  const clipped = !open && cut != null;
+  const shown = clipped ? text.slice(0, cut).trimEnd() : text;
+
   /* The box, the text and the toggle are one thing.
      They used to be siblings: the caller's className painted a bordered box
      around the text only, and the button landed underneath it — outside the
@@ -62,35 +153,25 @@ export function ClampedText({
      is drawn as, which is how the business card has always read. */
   return (
     <div className={className} style={style}>
-      <div
-        ref={ref}
-        data-no-i18n
-        style={
-          open
-            ? undefined
-            : {
-                display: "-webkit-box",
-                WebkitBoxOrient: "vertical",
-                WebkitLineClamp: lines,
-                overflow: "hidden",
-              }
-        }
-      >
-        {text}
+      {/* One element, so the dots and the toggle carry straight on from the
+          last word rather than starting a line of their own. */}
+      <div ref={ref} data-no-i18n>
+        {shown}
+        {clipped && DOTS}
+        {(clipped || open) && (
+          /* The click stops here. Every card this sits in toggles when its
+             body is tapped, so without this, opening the description shut the
+             card around it — the two handlers fired on the same tap and the
+             outer one won. */
+          <button
+            type="button"
+            className={moreClassName}
+            onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+          >
+            {open ? lessLabel : moreLabel}
+          </button>
+        )}
       </div>
-      {over && (
-        /* The click stops here. Every card this sits in toggles when its body
-           is tapped, so without this, opening the description shut the card
-           around it — the two handlers fired on the same tap and the outer one
-           won. */
-        <button
-          type="button"
-          className={moreClassName}
-          onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-        >
-          {open ? (ar ? "أقل" : "less") : ar ? "المزيد..." : "more..."}
-        </button>
-      )}
     </div>
   );
 }

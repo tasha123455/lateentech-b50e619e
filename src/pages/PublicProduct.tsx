@@ -352,7 +352,7 @@ export function PublicProduct({ id }: { id: string }) {
             <ClampedText
               className="whitespace-pre-wrap text-sm leading-6 text-text-2"
               text={p.description}
-              moreClassName="mt-1 inline-block cursor-pointer border-0 bg-transparent p-0 text-xs font-medium text-primary"
+              moreClassName="ms-1 inline cursor-pointer border-0 bg-transparent p-0 align-baseline text-sm font-semibold leading-6 text-primary"
             />
           </div>
         )}

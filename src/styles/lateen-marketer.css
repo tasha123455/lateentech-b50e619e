@@ -96,6 +96,10 @@
 
 /* The "more…" under a clamped product description. A link, not a button —
    it reveals text that is already on the page rather than doing anything. */
-.pd-desc-more { display: inline-block; margin-top: 4px; padding: 0; border: 0; background: none;
-  color: #8b83e8; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+/* Inline, so it carries on from the dots at the end of the last line rather
+   than starting a line of its own. The size and line-height match the text
+   around it, or it would push that line taller than the ones above it. */
+.pd-desc-more { display: inline; margin: 0; margin-inline-start: 5px; padding: 0; border: 0; background: none;
+  color: #8b83e8; font-family: inherit; font-size: inherit; line-height: inherit; font-weight: 600; cursor: pointer;
+  vertical-align: baseline; }
 .pd-desc-more:hover { text-decoration: underline; }
