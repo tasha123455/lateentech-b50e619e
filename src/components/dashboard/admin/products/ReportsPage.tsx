@@ -172,16 +172,10 @@ function ReportCard({
     );
   };
 
-  /* Named plainly rather than as a status word: the admin wants to know what
-     is left to do, not what state a row is in. */
-  const waitingOn = (() => {
-    const left: string[] = [];
-    if (!mkDone) left.push(isAr() ? "المسوّق" : "the marketer");
-    if (!!r.business_id && !bizDone) left.push(isAr() ? "صاحب النشاط" : "the business");
-    if (!left.length) return "";
-    return (isAr() ? "في انتظار الإرسال إلى: " : "Still to send to: ") + left.join(isAr() ? " و" : " and");
-  })();
-
+  /* No summary line of who is still to be told. Each party's own bell says
+     it where the sending happens — a bell to press, or "Sent ✓" — so a banner
+     at the top of the card was repeating, one scroll earlier, what the row
+     itself already answers. */
   return (
     <div className={"rpt-card" + (open ? " open" : "")}>
       {/* Collapsed, this row is the whole card: who, about what, when. */}
@@ -206,9 +200,6 @@ function ReportCard({
 
       {open && (
         <div className="rpt-body">
-          {!!waitingOn && (
-            <div className="rpt-waiting" data-no-i18n>{waitingOn}</div>
-          )}
           <div className="rpt-party-ttl">Marketer</div>
           <MoreInfo
             phone={reporter.phone}
@@ -245,13 +236,18 @@ function ReportCard({
               {/* Folded away. The report is about a marketer's complaint; who
                   they are complaining about is reference material, so it opens
                   when it is wanted rather than filling the card by default. */}
+              {/* The title carries the class, not the button. The colon comes
+                  from ::after, and on a flex button that puts it after the
+                  last child — so it landed past the chevron, out on the right,
+                  reading "Business ▾ :". On the word itself it sits where the
+                  marketer's does. */}
               <button
                 type="button"
-                className="rpt-party-ttl rpt-party-toggle"
+                className="rpt-party-toggle"
                 aria-expanded={bizOpen}
                 onClick={() => setBizOpen((v) => !v)}
               >
-                Business
+                <span className="rpt-party-ttl">Business</span>
                 <span className={"rpt-party-chev" + (bizOpen ? " open" : "")}>▾</span>
               </button>
               {bizOpen && (

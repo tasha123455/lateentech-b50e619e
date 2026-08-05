@@ -361,7 +361,10 @@
 .lateen-admin .rpt-msg-box { display: flex; flex-direction: column; gap: 6px; }
 .lateen-admin .rpt-msg-type { padding-bottom: 6px; border-bottom: 0.5px solid var(--bd); }
 /* The business block folds; the title is the control that opens it. */
-.lateen-admin .rpt-party-toggle { display: flex; align-items: center; gap: 6px; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; font-family: inherit; text-align: inherit; }
+.lateen-admin .rpt-party-toggle { display: flex; align-items: center; gap: 6px; width: 100%; margin-bottom: 6px; padding: 0; border: 0; background: none; cursor: pointer; font-family: inherit; text-align: inherit; }
+/* The title inside the button owns the row's bottom margin, so it does not
+   also push the chevron down inside it. */
+.lateen-admin .rpt-party-toggle .rpt-party-ttl { margin-bottom: 0; }
 .lateen-admin .rpt-party-chev { margin-inline-start: auto; font-size: 11px; opacity: 0.7; transition: transform .15s; }
 .lateen-admin .rpt-party-chev.open { transform: rotate(180deg); }
 .lateen-admin .rpt-msg { font-size: 13px; color: var(--txt-1); line-height: 1.5; background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; white-space: pre-wrap; word-break: break-word; }
@@ -674,5 +677,4 @@
 /* A report now waits for both notifications, so the card has to say which one
    it is still holding for — without it, a card that stays put after a
    successful send reads as a failure. */
-.lateen-admin .rpt-waiting { font-size: 11.5px; color: #e0b070; background: rgba(224,176,112,0.10); border: 0.5px solid rgba(224,176,112,0.35); border-radius: 9px; padding: 7px 10px; margin-bottom: 10px; }
 .lateen-admin .rpt-sent { font-size: 11.5px; font-weight: 600; color: #34c77b; flex-shrink: 0; align-self: center; white-space: nowrap; }
