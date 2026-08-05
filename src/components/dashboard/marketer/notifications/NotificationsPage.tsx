@@ -61,10 +61,16 @@ function localize(n: NotificationRow): { t: string; b: string } {
   if (n.kind === "order_delivered" || title === "Order Delivered") {
     /* Delivery starts the refund window rather than releasing the money, so
        saying only "the customer received it" would leave the marketer
-       wondering why their available balance did not move. The number comes
-       from the notification itself — it is the market's rule at the moment
-       the order was delivered, not whatever the rule happens to be today. */
-    const days = Number(d.available_in_days) || LIBYA.money.refundWindowDays;
+       wondering why their available balance did not move.
+
+       The number is the market's rule as it stands now, not the one stamped
+       onto the notification when it was sent. Those two used to be the same
+       thing; they stopped being the same the day the window changed from five
+       days to two, and every card sent before that day carried on saying five
+       — which reads as the app contradicting itself rather than as a record of
+       an older rule. One window applies to everybody, so one number is shown
+       to everybody. */
+    const days = LIBYA.money.refundWindowDays;
     /* "Available to withdraw" was the wrong promise: withdrawals run on their
        own thirty-day cycle, so a marketer read two waiting periods here and
        could not tell which was which. What actually happens at the end of the

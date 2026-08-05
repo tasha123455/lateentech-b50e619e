@@ -58,13 +58,25 @@ function Row({ k, v, noTranslate }: { k: string; v: string; noTranslate?: boolea
  *  shouting, and it inherits the line's own size so it never fights the title.
  *
  *  aria-hidden because the title says what this is; a screen reader announcing
- *  "warning" before it would be reading the decoration aloud. */
+ *  "warning" before it would be reading the decoration aloud.
+ *
+ *  `display: inline-block` is the whole reason this sits beside the title and
+ *  not underneath it. The reset the app is built on makes every replaced
+ *  element — img, svg, video — `display: block`, which is right for an icon
+ *  that is the only thing in its box and wrong for one that belongs to a
+ *  sentence: a block svg takes a line of its own, so the mark landed under the
+ *  title rather than after its last word. Stated here, on the one svg that is
+ *  part of running text, rather than unpicked globally.
+ *
+ *  The -0.15em drop then centres the triangle on the text: the glyphs are
+ *  smaller than the mark's box, so sitting it flat on the baseline leaves it
+ *  riding high above them. */
 function WarnMark() {
   return (
     <svg
       viewBox="0 0 24 24" aria-hidden="true" focusable="false"
       style={{
-        width: "1.05em", height: "1.05em", flexShrink: 0,
+        width: "1.05em", height: "1.05em", display: "inline-block",
         marginInlineStart: 6, verticalAlign: "-0.15em",
       }}
     >

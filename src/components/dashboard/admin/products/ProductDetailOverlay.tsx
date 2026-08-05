@@ -96,9 +96,24 @@ const RowIcon = ({ children }: { children: React.ReactNode }) => (
 );
 
 export function ProductDetailOverlay({
-  productId, onClose, status, onToggleHidden, onDelete,
+  productId, seed, onClose, status, onToggleHidden, onDelete,
 }: {
   productId: string | null;
+  /** The grid's own row for this product, to open on.
+   *
+   *  The sheet used to open empty and say "Loading…", then replace that one
+   *  line with the whole product — a photo, a price, eight rows of detail —
+   *  which is a sheet changing height by several hundred pixels a moment after
+   *  it appeared. That is the jitter: not a slow request, but an admittedly
+   *  fast one arriving after the sheet had already committed to being empty.
+   *
+   *  It was never necessary. The grid lists products with `select("*")` and
+   *  the detail request fetches the same row with the same `select("*")`, so
+   *  the tile behind the sheet is already holding everything the sheet shows
+   *  about the product. Opening on it means the sheet is complete from its
+   *  first frame, and the request that follows only fills in the owner — which
+   *  lives inside a fold that starts closed, so it changes nothing on screen. */
+  seed?: ProductDetail["product"] | null;
   onClose: () => void;
   /** The row's status: "active", "paused" or "hidden". Shown on its own row and
    *  used for the Hide / Unhide label. */
@@ -124,9 +139,16 @@ export function ProductDetailOverlay({
   const [activeMarketers, setActiveMarketers] = useState("…");
   const [reviews, setReviews] = useState<ProductReview[]>([]);
 
+  /* Read rather than depended on: the grid hands back a fresh object every
+     time it reloads, and the sheet must not re-fetch because the list behind
+     it happened to refresh. */
+  const seedRef = useRef(seed);
+  seedRef.current = seed;
+
   useEffect(() => {
     if (!productId) return;
-    setDetail(null);
+    const from = seedRef.current;
+    setDetail(from && from.id === productId ? { product: from, owner: null } : null);
     setError("");
     setGalleryIdx(0);
     setZonesOpen(false);
@@ -194,7 +216,10 @@ export function ProductDetailOverlay({
   const paused = status === "paused";
 
   let body: React.ReactNode;
-  if (error) {
+  // Only when there is nothing else to show. Opened on the grid's own row, a
+  // failed request costs the owner's phone and email and nothing more — not a
+  // reason to take a sheet that is already readable away from the admin.
+  if (error && !detail) {
     body = <div className="adm-empty">Failed to load: {error}</div>;
   } else if (!detail) {
     body = <div className="adm-empty">Loading…</div>;
