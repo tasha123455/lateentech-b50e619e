@@ -120,6 +120,8 @@ export type ProductDetail = {
     sizes?: string[] | null;
     colors?: string[] | null;
     variant_groups?: Array<{ name?: string; items?: unknown[] }> | null;
+    /** Reserve or instant delivery. NULL for products listed before the choice. */
+    fulfilment?: string | null;
     /** Zones carry a delivery time in whole days: the country's, which every
      *  product has, and optionally a city's, narrowing it for that one city. */
     delivery?: Record<string, {

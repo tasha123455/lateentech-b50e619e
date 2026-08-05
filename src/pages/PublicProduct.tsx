@@ -2,6 +2,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { asFulfilment } from "@/lib/fulfilment";
 import { coverPosition } from "@/lib/coverFocus";
 import { etaTextOf } from "@/lib/eta";
 import { useAuth } from "@/auth/AuthContext";
@@ -44,6 +46,8 @@ type PublicProduct = {
   /** The owner's framing of the cover photo. */
   cover_focus_x: number | null;
   cover_focus_y: number | null;
+  /** Reserve or instant delivery. NULL for products listed before the choice. */
+  fulfilment: string | null;
 };
 
 type Review = {
@@ -146,14 +150,18 @@ export function PublicProduct({ id }: { id: string }) {
       try {
         const { data, error } = await supabase
           .from("products_public_view")
-          .select("id,business_id,name,code,category,description,price,currency,photos,sizes,colors,variant_groups,qty,reserved_qty,status,deleted_at,delivery,biz_name,cover_focus_x,cover_focus_y")
+          .select("id,business_id,name,code,category,description,price,currency,photos,sizes,colors,variant_groups,qty,reserved_qty,status,deleted_at,delivery,biz_name,cover_focus_x,cover_focus_y,fulfilment")
           .eq("id", id)
           .maybeSingle();
         if (!alive) return;
+        /* The generated Database types come from the live schema, and the
+           view gained `fulfilment` in a migration newer than the last
+           regeneration — the same escape the other recent columns here use. */
+        const row = data as unknown as PublicProduct | null;
         if (error) setErr(error.message);
-        else if (!data || (data as PublicProduct).status !== "active" || (data as PublicProduct).deleted_at)
+        else if (!row || row.status !== "active" || row.deleted_at)
           setErr("This product is no longer available.");
-        else setP(data as PublicProduct);
+        else setP(row);
       } catch (e) {
         if (!alive) return;
         console.error("[public product] failed to load", e);
@@ -333,7 +341,14 @@ export function PublicProduct({ id }: { id: string }) {
 
       <div className="px-5 pt-5">
         <h1 className="text-lg font-semibold text-text-1"><span data-no-i18n>{p.name}</span></h1>
-        {p.code && <div className="mt-0.5 text-xs text-text-3">Code: <span data-no-i18n>{p.code}</span></div>}
+        {(p.code || asFulfilment(p.fulfilment)) && (
+          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-text-3">
+            {p.code && <span>Code: <span data-no-i18n>{p.code}</span></span>}
+            {/* Beside the code, as on both dashboards — the code names the
+                product, the badge says how it reaches the customer. */}
+            {!!asFulfilment(p.fulfilment) && <FulfilmentBadge value={p.fulfilment} ar={lang === "ar"} size="sm" />}
+          </div>
+        )}
         <div className="mt-3 flex items-baseline gap-2">
           <div className="text-2xl font-bold text-text-1">
             {Number(p.price).toLocaleString()} <span className="text-sm font-medium" data-no-i18n>{currencyLabel}</span>

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { asEta } from "@/lib/eta";
+import { asFulfilment } from "@/lib/fulfilment";
+import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
+import { isAr } from "@/components/dashboard/marketer/lib/format";
 import { useScrollLock } from "@/lib/useScrollLock";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 
@@ -226,6 +229,8 @@ export function ProductDetailOverlay({
             <div className="pd-hd-name" data-no-i18n>{p.name}</div>
             <div className="pd-hd-code">
               <span className="pd-hd-code-lbl">Product code:</span> <span data-no-i18n>{p.code || "—"}</span>
+              {/* Beside the code, the same as the marketer's sheet. */}
+              {!!asFulfilment(p.fulfilment) && <FulfilmentBadge value={p.fulfilment} ar={isAr()} size="sm" />}
             </div>
           </div>
         </div>
