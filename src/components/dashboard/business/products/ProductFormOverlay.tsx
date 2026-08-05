@@ -988,37 +988,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                 ? (ar ? <>مبلغ ربح المسوق: <b>{moneyH(pctOf(priceNum, commPctNum), "د.ل", "LYD")}</b> لكل قطعه</> : <>Fixed equivalent at current price: <b>{pctOf(priceNum, commPctNum).toFixed(2)} {curCode}</b> per sale</>)
                 : (ar ? <>نسبه ربح المسوق : <b>{(priceNum ? (commFixedNum / priceNum) * 100 : 0).toFixed(1)}%</b> لكل قطعه</> : <>Percentage equivalent at current price: <b>{(priceNum ? (commFixedNum / priceNum) * 100 : 0).toFixed(1)}%</b> per sale</>)}
             </div>
-            {/* Reserve or instant — one or the other, never both. Picking one
-                clears the other by construction: there is a single value, so
-                the two buttons cannot both be on. */}
-            <div style={{ marginTop: 14 }}>
-              <div className="lp-comm-title" data-no-i18n>
-                {ar ? "طريقة التسليم" : "How it is fulfilled"}
-              </div>
-              <div className="lp-segmented" style={{ marginTop: 8, marginBottom: 6 }}>
-                {FULFILMENTS.map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    data-no-i18n
-                    className={fulfilment === f ? "active" : ""}
-                    disabled={editLocked}
-                    aria-pressed={fulfilment === f}
-                    onClick={() => setFulfilment(f)}
-                  >
-                    {fulfilmentLabel(f, ar)}
-                  </button>
-                ))}
-              </div>
-              <div className="lp-conversion-note" data-no-i18n style={{ marginTop: 0 }}>
-                {fulfilment
-                  ? fulfilmentHint(fulfilment, ar)
-                  : ar
-                    ? "اختر واحدة — تظهر للمسوقين مع المنتج."
-                    : "Pick one — marketers see it alongside the product."}
-              </div>
-            </div>
-
             <div className="lp-reqphone-row">
               <div className="lp-reqphone-label-wrap">
                 <span className="lp-reqphone-label">{ar ? "طلب رقم هاتف إضافي من الزبون" : "Require Additional Phone Number from customer"}</span>
@@ -1027,6 +996,48 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
               <button type="button" className={`mp-switch${reqPhone ? " on" : ""}`} role="switch" aria-checked={reqPhone} disabled={editLocked} onClick={() => setReqPhone((v) => !v)}>
                 <span className="mp-switch-knob" />
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* STEP 5: how it is fulfilled */}
+        <div className="lp-card">
+          <div className="lp-card-head">
+            <div className="lp-card-head-left">
+              <div className="lp-step-badge">5</div>
+              <div className="lp-card-title" data-no-i18n>
+                {ar ? "طريقة التسليم" : "How it is fulfilled"} <span className="lp-req">*</span>
+              </div>
+            </div>
+            <div className="lp-icon-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7zM7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM17.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </div>
+          </div>
+          <div className="lp-comm-card">
+            {/* Reserve or instant — one or the other, never both. Picking one
+                clears the other by construction: there is a single value, so
+                the two buttons cannot both be on. */}
+            <div className="lp-segmented" style={{ marginBottom: 6 }}>
+              {FULFILMENTS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  data-no-i18n
+                  className={fulfilment === f ? "active" : ""}
+                  disabled={editLocked}
+                  aria-pressed={fulfilment === f}
+                  onClick={() => setFulfilment(f)}
+                >
+                  {fulfilmentLabel(f, ar)}
+                </button>
+              ))}
+            </div>
+            <div className="lp-conversion-note" data-no-i18n style={{ marginTop: 0 }}>
+              {fulfilment
+                ? fulfilmentHint(fulfilment, ar)
+                : ar
+                  ? "اختر واحدة — تظهر للمسوقين مع المنتج."
+                  : "Pick one — marketers see it alongside the product."}
             </div>
           </div>
         </div>
