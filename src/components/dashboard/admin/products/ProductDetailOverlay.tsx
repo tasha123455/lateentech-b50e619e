@@ -103,8 +103,10 @@ export function ProductDetailOverlay({
   onToggleHidden?: (id: string, next: "active" | "hidden") => void;
   onDelete?: (id: string, name: string) => void;
 }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
+  /* Only while the sheet is actually up. This component stays mounted
+     with a null prop when it is closed, so locking unconditionally held
+     the page still for the whole session. */
+  useScrollLock(!!productId);
   const { api } = useAdminData();
   const lightbox = useLightbox();
   const galleryRef = useRef<HTMLDivElement>(null);

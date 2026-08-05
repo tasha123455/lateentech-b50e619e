@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { useScrollLock } from "@/lib/useScrollLock";
 
 import { DEPOSIT_ACCOUNT_NAME, DEPOSIT_ACCOUNT_NUMBER } from "../lib/constants";
 
 /** Copy button that flips to "Copied!" for two seconds. */
 export function CopyButton({ text }: { text: string }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
   const [done, setDone] = useState(false);
   return (
     <button

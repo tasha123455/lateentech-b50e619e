@@ -9,8 +9,10 @@ export function EmployeeHistoryOverlay({
   employee: Employee | null;
   onClose: () => void;
 }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
+  /* Only while the sheet is actually up. This component stays mounted
+     with a null prop when it is closed, so locking unconditionally held
+     the page still for the whole session. */
+  useScrollLock(!!employee);
   const open = !!employee;
 
   // Most recent cycle first.

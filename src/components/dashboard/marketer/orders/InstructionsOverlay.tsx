@@ -13,8 +13,10 @@ export function InstructionsOverlay({
   onUpload: () => void;
   onOpenDepositInfo: () => void;
 }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
+  /* Only while the sheet is actually up. This component stays mounted
+     with a null prop when it is closed, so locking unconditionally held
+     the page still for the whole session. */
+  useScrollLock(!!order);
   const open = !!order;
   const qtyN = order?.qty || 1;
   const comm = (order?.commPerUnit || 0) * qtyN;

@@ -19,8 +19,10 @@ export function MarketerDetailOverlay({
   onReject: (id: string) => void;
   onRefund: (id: string) => void;
 }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
+  /* Only while the sheet is actually up. This component stays mounted
+     with a null prop when it is closed, so locking unconditionally held
+     the page still for the whole session. */
+  useScrollLock(!!marketer);
   const [tab, setTab] = useState<"new" | "history">("new");
   const [search, setSearch] = useState("");
 

@@ -23,8 +23,10 @@ export function EmployeeFormOverlay({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  // Holds the page still behind the sheet.
-  useScrollLock(true);
+  /* Only while the sheet is actually up. This component stays mounted
+     with a null prop when it is closed, so locking unconditionally held
+     the page still for the whole session. */
+  useScrollLock(!!seed);
   const { api } = useAdminData();
   const [f, setF] = useState<Fields>(EMPTY);
   const [busy, setBusy] = useState(false);

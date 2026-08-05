@@ -1,21 +1,13 @@
-import { useEffect } from "react";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 import { ADMIN_WHATSAPP, ADMIN_WHATSAPP_DISPLAY } from "../lib/constants";
 import { isAr } from "../lib/format";
 import { pdT } from "../browse/pdText";
 
-/** Locks the page while a centred popup is showing. */
-function useScrollLock(active: boolean) {
-  useEffect(() => {
-    if (!active) return;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [active]);
-}
+/* These popups open over sheets that are themselves holding the page still,
+   so they share the counted lock rather than keeping a private copy. The copy
+   was a plain flag: closing one of these handed scrolling back to the page
+   while the sheet underneath was still covering it. */
 
 /** "Browse with pictures — soon" sheet from the camera button. */
 export function BrowseSoonOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
