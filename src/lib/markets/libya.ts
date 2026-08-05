@@ -134,6 +134,7 @@ export const LIBYA: MarketSpec = {
 
   money: {
     currencyCode: "LYD",
+    currencySymbol: "د.ل",
     // 5% of the unit price above 100 LYD, a flat 5 LYD at or below it.
     // Always based on the single-unit price, never on price × qty.
     fee: { pct: 0.05, fixed: 5, threshold: 100 },

@@ -7,6 +7,7 @@ import { computeAnalytics, type Analytics } from "./lib/analytics";
 import { MIN_WITHDRAW, PAYOUT_PERIOD_MS } from "./lib/constants";
 import { isAr, t } from "./lib/format";
 import { buildProductsMap, dbToBrowse, dbToOrder } from "./lib/mappers";
+import { marketSymbol } from "@/lib/markets/symbol";
 import {
   cacheAvatar, cacheWalletBalance, loadDrafts, readAvatar, readWalletBalance, saveDrafts,
 } from "./lib/storage";
@@ -117,7 +118,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
     if (walletCur !== selectedCur) setWalletCurState(selectedCur);
   }, [walletCur, selectedCur]);
 
-  const curData = analytics.earnByCur[selectedCur] || { sym: selectedCur === "LYD" ? "د.ل" : "£", amount: 0 };
+  const curData = analytics.earnByCur[selectedCur] || { sym: marketSymbol(selectedCur), amount: 0 };
   const walletBalance = dbBalance == null ? Number(curData.amount || 0) : dbBalance;
 
   /* ── Loaders ── */

@@ -1,6 +1,8 @@
 /* Formatting helpers ported verbatim (behaviour-identical) from
    src/components/dashboard/lateen/business.script.js */
 
+import { DEFAULT_MARKET_CODE, marketOf } from "@/lib/markets";
+
 export function isAr(): boolean {
   return typeof document !== "undefined" && document.documentElement.lang === "ar";
 }
@@ -72,10 +74,18 @@ export function escH(s: unknown): string {
 }
 
 /** Plain-text money string. */
+/** What to print when an amount arrives with no symbol on it.
+ *
+ *  It used to be a pound sign — a leftover from the template this started
+ *  from, and one of the ways a shop that has never seen sterling could end up
+ *  reading in it. The default market's own currency is the only sensible
+ *  guess, and it is right wherever the platform actually runs. */
+const fallbackSym = (): string => marketOf(DEFAULT_MARKET_CODE).money.currencyCode;
+
 export function money(n: unknown, sym?: string | null, code?: string | null): string {
   const a = (parseFloat(String(n ?? 0)) || 0).toFixed(2);
   const cc = (code || SYM2CODE[stripDirMarks(sym || "")] || "").toString().toUpperCase();
-  const r = stripDirMarks(rawSym(sym || "£", cc));
+  const r = stripDirMarks(rawSym(sym || fallbackSym(), cc));
   return isAr() ? a + r : cc ? `${a} ${cc}` : r + a;
 }
 
@@ -87,7 +97,7 @@ export function moneyParts(
 ): { amount: string; symbol: string; symbolFirst: boolean; spaced: boolean } {
   const a = (parseFloat(String(n ?? 0)) || 0).toFixed(2);
   const cc = (code || SYM2CODE[stripDirMarks(sym || "")] || "").toString().toUpperCase();
-  const r = stripDirMarks(rawSym(sym || "£", cc));
+  const r = stripDirMarks(rawSym(sym || fallbackSym(), cc));
   if (isAr()) return { amount: a, symbol: r, symbolFirst: false, spaced: false };
   if (cc) return { amount: a, symbol: cc, symbolFirst: false, spaced: true };
   return { amount: a, symbol: r, symbolFirst: true, spaced: false };

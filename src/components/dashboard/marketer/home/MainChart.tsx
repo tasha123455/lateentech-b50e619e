@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 
 import { CHART_VISIBLE } from "../lib/constants";
-import { money, moneyS, piecesLabel, tlbl } from "../lib/format";
+import { esc, htmlTooltip, moneyHtml } from "@/lib/chartTooltip";
+
+import { moneyParts, moneyS, piecesLabel, tlbl } from "../lib/format";
 import type { ChartSeries, Metric, Period } from "../lib/types";
 import { useChartJs } from "../ui/useChartJs";
 
@@ -183,23 +185,28 @@ export function MainChart({
           {
             legend: { display: false },
             decimation: { enabled: true, algorithm: "lttb", samples: 80 },
+            /* Drawn as HTML rather than onto the canvas, so the currency
+               symbol can be set smaller than the amount the way it is
+               everywhere else. A canvas label has one font size for the
+               whole string. */
             tooltip: {
-              animation: false,
-              displayColors: false,
-              padding: 10,
-              titleFont: { size: 12, weight: "600" },
-              bodyFont: { size: 12 },
-              callbacks: {
-                title: (items: Array<{ dataIndex: number }>) => {
-                  if (!items || !items[0]) return "";
-                  const i = items[0].dataIndex;
-                  const lab = tlbl(series.labels[i] || "");
-                  const s = subs[i] || "";
-                  return s ? lab + " · " + s : lab;
-                },
-                label: (ctx: { raw: number }) =>
-                  metric === "earnings" ? " " + money(ctx.raw, selSym, walletCur) : " " + piecesLabel(ctx.raw),
-              },
+              enabled: false,
+              external: htmlTooltip((raw, i) => {
+                const lab = tlbl(series.labels[i] || "");
+                const sub = subs[i] || "";
+                const head = sub ? lab + " · " + sub : lab;
+                let body: string;
+                if (metric === "earnings") {
+                  const m = moneyParts(raw, selSym, walletCur);
+                  // English prints the ISO code after the figure; Arabic the symbol.
+                  body = m.ar
+                    ? moneyHtml(m.amount, m.sym, false)
+                    : moneyHtml(m.amount, m.code || m.sym, !m.code, !!m.code);
+                } else {
+                  body = esc(piecesLabel(raw));
+                }
+                return `<div class="chart-tip-ttl">${esc(head)}</div><div class="chart-tip-val">${body}</div>`;
+              }),
             },
           },
           zoomOpts,

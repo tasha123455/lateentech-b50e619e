@@ -6,6 +6,7 @@ import { isAr, t } from "../lib/format";
 import { Money } from "../ui/Money";
 import { PayoutFieldsBlock } from "./PayoutFields";
 import { phoneMeta, type PayoutFields as Fields } from "./usePayoutForm";
+import { marketSymbol } from "@/lib/markets/symbol";
 
 export function WithdrawOverlay({
   open, onClose, fields, set, persist,
@@ -24,7 +25,7 @@ export function WithdrawOverlay({
     if (open) setRequested(false);
   }, [open]);
 
-  const curData = analytics.earnByCur[walletCur] || { sym: walletCur === "LYD" ? "د.ل" : "£", amount: 0 };
+  const curData = analytics.earnByCur[walletCur] || { sym: marketSymbol(walletCur), amount: 0 };
 
   const close = () => {
     persist();

@@ -1,4 +1,5 @@
 import { useEffect as useReactEffect, useState as useReactState } from "react";
+import { DEFAULT_MARKET_CODE, marketOf } from "@/lib/markets";
 
 /* Formatting helpers ported from marketer.script.js.
    Language is still read off <html lang> so these stay usable from plain
@@ -109,10 +110,18 @@ export function wrapArSym(s: string, code?: string): string {
 }
 
 /** Arabic renders the symbol after the amount; English uses the ISO code when known. */
+/** What to print when an amount arrives with no symbol on it.
+ *
+ *  It used to be a pound sign — a leftover from the template this started
+ *  from, and one of the ways a shop that has never seen sterling could end up
+ *  reading in it. The default market's own currency is the only sensible
+ *  guess, and it is right wherever the platform actually runs. */
+const fallbackSym = (): string => marketOf(DEFAULT_MARKET_CODE).money.currencyCode;
+
 export function money(n: unknown, sym?: string, code?: string): string {
   const a = parseFloat(String(n || 0)).toFixed(2);
   const cc = (code || SYM2CODE[stripDirMarks(sym || "")] || "").toString().toUpperCase();
-  const r = stripDirMarks(rawSym(sym || "£", cc));
+  const r = stripDirMarks(rawSym(sym || fallbackSym(), cc));
   return isAr() ? a + r : cc ? a + " " + cc : r + a;
 }
 
@@ -121,7 +130,7 @@ export function moneyS(n: unknown, sym?: string, code?: string): string {
   const num = parseFloat(String(n || 0));
   const a = Math.abs(num - Math.round(num)) < 1e-9 ? String(Math.round(num)) : num.toFixed(2);
   const cc = (code || SYM2CODE[stripDirMarks(sym || "")] || "").toString().toUpperCase();
-  const r = stripDirMarks(rawSym(sym || "£", cc));
+  const r = stripDirMarks(rawSym(sym || fallbackSym(), cc));
   return isAr() ? a + r : cc ? a + " " + cc : r + a;
 }
 
@@ -130,7 +139,7 @@ export function moneyParts(n: unknown, sym?: string, code?: string, shortZeros =
   const num = parseFloat(String(n || 0));
   const a = shortZeros && Math.abs(num - Math.round(num)) < 1e-9 ? String(Math.round(num)) : num.toFixed(2);
   const cc = (code || SYM2CODE[stripDirMarks(sym || "")] || "").toString().toUpperCase();
-  const r = stripDirMarks(rawSym(sym || "£", cc));
+  const r = stripDirMarks(rawSym(sym || fallbackSym(), cc));
   return { amount: a, sym: r, code: cc, ar: isAr() };
 }
 
