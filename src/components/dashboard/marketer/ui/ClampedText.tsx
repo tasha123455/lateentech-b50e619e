@@ -145,6 +145,55 @@ export function ClampedText({
   const clipped = !open && cut != null;
   const shown = clipped ? text.slice(0, cut).trimEnd() : text;
 
+  /* Collapsing gives the page back the height the text was using, and it used
+     to give it back in a single frame. Read to the end of a long description
+     and you are at the bottom of the page, so the document getting shorter
+     under you leaves the scroll position past the new bottom and the browser
+     drags the whole page up to meet it — measured at 54px on a phone, all in
+     one frame, which is the lurch.
+
+     It cannot be avoided: the page really is shorter, and the reader really is
+     at the bottom. What can be avoided is its happening all at once. Handing
+     the height back over a fifth of a second means the page slides instead of
+     jumping, and the movement reads as the consequence of the tap rather than
+     as something going wrong.
+
+     Height is animated from the outside in JS because both ends are content —
+     three lines of text versus ten — and CSS cannot transition between two
+     heights it has never been told. */
+  const boxRef = useRef<HTMLDivElement>(null);
+  const fromH = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    const from = fromH.current;
+    fromH.current = null;
+    if (!el || from == null) return;
+    const to = el.getBoundingClientRect().height;
+    if (Math.abs(to - from) < 1) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    el.style.overflow = "hidden";
+    el.style.height = from + "px";
+    void el.offsetHeight; // commit the start height before the transition
+    el.style.transition = "height .2s cubic-bezier(.4,0,.2,1)";
+    el.style.height = to + "px";
+
+    let done = false;
+    const clear = () => {
+      if (done) return;
+      done = true;
+      el.style.height = "";
+      el.style.overflow = "";
+      el.style.transition = "";
+    };
+    el.addEventListener("transitionend", clear, { once: true });
+    // A transition that never fires — an interrupted one, a hidden card —
+    // must not leave the box pinned to a fixed height for ever.
+    const bail = setTimeout(clear, 400);
+    return () => { clearTimeout(bail); clear(); };
+  }, [open]);
+
   /* The box, the text and the toggle are one thing.
      They used to be siblings: the caller's className painted a bordered box
      around the text only, and the button landed underneath it — outside the
@@ -152,7 +201,7 @@ export function ClampedText({
      own. Wrapping them means the toggle sits inside whatever the description
      is drawn as, which is how the business card has always read. */
   return (
-    <div className={className} style={style}>
+    <div className={className} style={style} ref={boxRef}>
       {/* One element, so the dots and the toggle carry straight on from the
           last word rather than starting a line of their own. */}
       <div ref={ref} data-no-i18n>
@@ -166,7 +215,13 @@ export function ClampedText({
           <button
             type="button"
             className={moreClassName}
-            onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              // Measured before the text changes; the effect above animates
+              // from here to whatever the new text needs.
+              fromH.current = boxRef.current?.getBoundingClientRect().height ?? null;
+              setOpen((v) => !v);
+            }}
           >
             {open ? lessLabel : moreLabel}
           </button>
