@@ -113,7 +113,15 @@ export function UsersPage({ active, onNotify }: { active: boolean; onNotify: () 
           className={"adm-filter-chip adm-status-chip" + (statusFilter ? " on" : "") + (statusOpen ? " open" : "")}
           onClick={() => setStatusOpen((v) => !v)}
         >
-          <span>{statusFilter ? statusLabel(STATUS_FILTERS.find((s) => s.key === statusFilter)!) : t("Status", "الحاله")}</span>
+          {/* Carries its count once a status is picked, the way the role
+              chips beside it do. Shut, the chip was the only one in the row
+              that named a filter without saying how much of the list it had
+              left. */}
+          <span>
+            {statusFilter
+              ? statusLabel(STATUS_FILTERS.find((s) => s.key === statusFilter)!) + ` (${statusCounts[statusFilter] || 0})`
+              : t("Status", "الحاله")}
+          </span>
           <span className="adm-status-chev">▾</span>
         </button>
         {ROLE_FILTERS.map((f) => (
