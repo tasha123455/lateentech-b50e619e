@@ -18,7 +18,6 @@ export const pdT = () => {
     code: ar ? "كود المنتج" : "Product code",
     ship: ar ? "الشحن" : "Shipping fee",
     deliv: ar ? "التوصيل" : "Delivery fee",
-    etaLbl: ar ? "مدة التوصيل" : "Delivery time",
     /* "Same day", "1 day", "2–4 days" — and their Arabic, which changes the
        noun for one and two rather than the number.
        The digits are wrapped in an isolate so a range keeps its order on an

@@ -46,12 +46,3 @@ export const etaTextOf = (v: unknown, ar: boolean): string => etaText(asEta(v), 
 
 /** The label these ranges sit behind, in either language. */
 export const etaLabel = (ar: boolean): string => (ar ? "مدة التوصيل" : "Delivery time");
-
-/** The span across several zones — what the product as a whole promises. */
-export function etaSpan(list: Array<unknown>): Eta | null {
-  const all = list.map(asEta).filter((e): e is Eta => !!e);
-  if (!all.length) return null;
-  const min = Math.min(...all.map((e) => e.min));
-  const max = Math.max(...all.map((e) => (e.max != null ? e.max : e.min)));
-  return { min, max: max > min ? max : null };
-}
