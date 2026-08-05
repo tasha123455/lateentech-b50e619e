@@ -139,6 +139,10 @@ export type AdminReport = {
   admin_comment?: string | null;
   created_at?: string | null;
   resolved_at?: string | null;
+  /** When each side was told. A report closes once both have been — or once
+   *  the marketer has, when there is no business attached. */
+  marketer_notified_at?: string | null;
+  business_notified_at?: string | null;
   reporter_id?: string | null;
   business_id?: string | null;
   product_id?: string | null;

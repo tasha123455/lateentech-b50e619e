@@ -652,3 +652,9 @@
 /* Country filter above the analytics. Only rendered when there is more than
    one country to choose between. */
 .lateen-admin .adm-market-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+
+/* A report now waits for both notifications, so the card has to say which one
+   it is still holding for — without it, a card that stays put after a
+   successful send reads as a failure. */
+.lateen-admin .rpt-waiting { font-size: 11.5px; color: #e0b070; background: rgba(224,176,112,0.10); border: 0.5px solid rgba(224,176,112,0.35); border-radius: 9px; padding: 7px 10px; margin-bottom: 10px; }
+.lateen-admin .rpt-sent { font-size: 11.5px; font-weight: 600; color: #34c77b; flex-shrink: 0; align-self: center; white-space: nowrap; }
