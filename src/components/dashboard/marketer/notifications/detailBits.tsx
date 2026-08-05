@@ -3,7 +3,8 @@ import { isValidElement, type ReactNode } from "react";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { asFulfilment } from "@/lib/fulfilment";
 import { isPdfUrl } from "@/lib/filePicker";
-import { isAr, isSafeUrl, parseData, splitCC, t } from "../lib/format";
+import { LIBYA } from "@/lib/markets/libya";
+import { daysPhrase, isAr, isSafeUrl, parseData, splitCC, t } from "../lib/format";
 import type { NotificationRow } from "../lib/types";
 
 /** One label/value line inside an expanded notification or transaction. */
@@ -74,6 +75,60 @@ export function NoteBlock({
   );
 }
 
+/** Why the money is not in the wallet yet, in full, when the card is opened.
+ *
+ *  The row above says the commission arrives in two days and invites a tap;
+ *  this is what the tap is for. It is written as reassurance rather than as
+ *  terms: the waiting period exists to protect the person reading it as much
+ *  as the customer, and saying so is the difference between a rule and a
+ *  reason.
+ *
+ *  The number comes from the notification, so a card sent under an older rule
+ *  keeps saying what that marketer was actually told at the time. */
+function RefundProtection({ days }: { days: number }) {
+  const ar = isAr();
+  const d = daysPhrase(days, ar);
+  /* English wants the hyphenated form in front of a noun — "a 2-day refund
+     period", not "a 2 days refund period". Arabic reads the same either way. */
+  const dAttr = ar ? d : Math.max(1, Math.round(days)) + "-day";
+  const paras = ar
+    ? [
+        `بيش نحافظوا على حق الزبون ونمنعوا أي عمليات نصب، كل طلب فيه فترة استرجاع مدتها ${d} من وقت ما يتسجل إنه تم التسليم.`,
+        `عمولتك ما تنزلش في محفظتك إلا بعد ما تكمل هالفترة. الإجراء هذه يحمي الزبون من أي عمليه نصب أو تاجر غير ملتزم، ويحميك انت حتى من ديون اضطرارك ترجع العمولة لو صار استرجاع خلال ${d}.`,
+        `بعد انتهاء فترة ${d}، العمولة توصل لمحفظتك و تعتبر نهائية وغير قابلة للاسترجاع بأي حال من الأحوال.`,
+      ]
+    : [
+        `To protect customers from fraud, every order includes a ${dAttr} refund period after it has been marked as delivered.`,
+        `Your commission will be credited to your wallet only after this ${dAttr} period ends. This policy protects customers from fraudulent sellers and protects you from having to repay commissions if an order is refunded.`,
+        `Once the ${dAttr} refund period has passed, your commission is final and non-refundable, regardless of any refund requests made afterward.`,
+      ];
+
+  return (
+    <div
+      data-no-i18n
+      style={{
+        margin: "0 0 10px", padding: "10px 12px", borderRadius: 8,
+        background: "#0f0f0f", border: "0.5px solid #1e2a22",
+      }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 700, color: "#35c98f", marginBottom: 6 }}>
+        {ar ? "فترة حماية الاسترجاع" : "Refund Protection Period"}
+      </div>
+      {paras.map((p, i) => (
+        <p
+          key={i}
+          style={{
+            margin: i === paras.length - 1 ? 0 : "0 0 7px",
+            fontSize: 11, lineHeight: 1.65, color: "var(--color-text-secondary)",
+          }}
+        >
+          {p}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 /** Everything inside an opened notification, for one event.
  *
  *  The wallet's transactions list is the same five events read a second time —
@@ -105,6 +160,7 @@ export function NotifDetailBox({
   const isNote = n.kind === "payout_note";
   const isAdminMsg = n.kind === "admin_message" || n.kind === "admin_broadcast";
   const isPaid = n.kind === "payout_paid";
+  const isDelivered = n.kind === "order_delivered";
 
   const borderColor = isFailed || isRejected || isRefunded || isNote ? "#2a1a1a" : "#142a20";
   const photoUrl = (d.product_photo || d.photo) as string | undefined;
@@ -189,6 +245,7 @@ export function NotifDetailBox({
         </div>
       )}
       {leadRows}
+      {isDelivered && <RefundProtection days={Number(d.available_in_days) || LIBYA.money.refundWindowDays} />}
       <DetailRow k={t("Order Code", "كود الطلبيه")} v={d.order_code} />
       {isReportReviewed && <DetailRow k={t("Report type", "نوع البلاغ")} v={reportTypeLbl} />}
       {/* The marketer's own words, read back to them beside the admin's

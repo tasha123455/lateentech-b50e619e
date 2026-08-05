@@ -539,3 +539,18 @@ export function parseData(d: unknown): Record<string, unknown> {
   }
   return (v as Record<string, unknown>) || {};
 }
+
+/** A count of days as a phrase: "2 days", "يومين".
+ *
+ *  Arabic has a dual, so two of a thing is a different word rather than the
+ *  number two in front of the plural — "2 أيام" is what a template produces
+ *  and not something anybody writes. Three to ten take the plural, and past
+ *  that the singular comes back. English only needs the one plural. */
+export function daysPhrase(n: number, ar: boolean): string {
+  const d = Math.max(0, Math.round(n));
+  if (!ar) return d === 1 ? "1 day" : d + " days";
+  if (d === 1) return "يوم واحد";
+  if (d === 2) return "يومين";
+  if (d <= 10) return d + " أيام";
+  return d + " يوم";
+}

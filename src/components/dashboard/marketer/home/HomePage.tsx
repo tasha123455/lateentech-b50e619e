@@ -19,7 +19,7 @@ export function HomePage({
   onOpenWithdraw: () => void;
   unreadCount: number;
 }) {
-  const { profile, avatarUrl, analytics, walletCur, setWalletCur, walletBalance, payout, orders, frozen } =
+  const { profile, avatarUrl, analytics, walletCur, setWalletCur, walletBalance, walletReady, payout, orders, frozen } =
     useMarketerData();
   const [metric, setMetric] = useState<Metric>("earnings");
   const [period, setPeriod] = useState<Period>("D");
@@ -84,16 +84,32 @@ export function HomePage({
             orders still in progress sits on the line below rather than being
             added in: a wallet that shows money the Withdraw button will not
             release is a wallet that has lied to them. */}
-        <div className="wallet-label">{payout.onTheWay > 0 ? "AVAILABLE TO WITHDRAW" : "WALLET BALANCE"}</div>
-        <div className="wallet-amount"><Money n={walletBalance} sym={selSym} code={walletCur} /></div>
-        {payout.onTheWay > 0 ? (
-          <div className="wallet-pending" data-no-i18n>
-            {isAr() ? "في الطريق: " : "On the way: "}
-            <Money n={payout.onTheWay} sym={selSym} code={walletCur} />
-            {isAr() ? " — تصبح متاحة عند التسليم" : " — available once delivered"}
-          </div>
+        {/* Held blank until the server has answered. Before that there are two
+            numbers to hand — the balance cached from the last visit, and the
+            sum of the orders list — and neither is the balance. Painting one
+            anyway is what made the card show an old figure for a third of a
+            second and then jump to the real one. A quiet placeholder for that
+            moment says "not yet" instead of saying something untrue. */}
+        {!walletReady ? (
+          <>
+            <div className="wallet-label wallet-skel-label" />
+            <div className="wallet-amount wallet-skel-amount" />
+            <div className="wallet-pending" />
+          </>
         ) : (
-          <div className="wallet-pending" />
+          <>
+            <div className="wallet-label">{payout.onTheWay > 0 ? "AVAILABLE TO WITHDRAW" : "WALLET BALANCE"}</div>
+            <div className="wallet-amount"><Money n={walletBalance} sym={selSym} code={walletCur} /></div>
+            {payout.onTheWay > 0 ? (
+              <div className="wallet-pending" data-no-i18n>
+                {isAr() ? "في الطريق: " : "On the way: "}
+                <Money n={payout.onTheWay} sym={selSym} code={walletCur} />
+                {isAr() ? " — تصبح متاحة عند التسليم" : " — available once delivered"}
+              </div>
+            ) : (
+              <div className="wallet-pending" />
+            )}
+          </>
         )}
         {frozen && (
           <div
@@ -106,7 +122,10 @@ export function HomePage({
             {frozenTxt}
           </div>
         )}
-        {codes.length > 1 && (
+        {/* Waits with the big number above it: the active currency's row shows
+            the same balance, so letting it in early would just move the stale
+            figure a few pixels down the card. */}
+        {walletReady && codes.length > 1 && (
           <div
             style={{
               margin: "-4px 0 14px 0", padding: "10px 12px", borderRadius: 12, background: "#141414",

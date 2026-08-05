@@ -1,7 +1,7 @@
 import { ADMIN_WHATSAPP_DISPLAY } from "../lib/constants";
 import { LIBYA } from "@/lib/markets/libya";
 import { useScrollLock } from "@/lib/useScrollLock";
-import { codPaysParts, isAr } from "../lib/format";
+import { codPaysParts, daysPhrase, isAr } from "../lib/format";
 import { Money } from "../ui/Money";
 
 /** What the customer still pays on delivery, once fees are taken out. */
@@ -105,29 +105,26 @@ export function DepositInfoOverlay({ open, onClose, cod }: { open: boolean; onCl
             <span style={{ color: "#f5b0b0", fontWeight: 500 }} data-no-i18n>
               {ar ? (
                 <>
-                  النظام هذا يحفظ حقوق والتزامات المسوق وصاحب النشاط. العربون غير قابل للاسترجاع —
-                  لا إذا الزبون رفض الطلبية، ولا إذا غيّر رأيه، ولا إذا ما قدرناش نوصلوله. حتى الطلبية
-                  الفاشلة ما تنسترجعش، والعمولة تبقى للمسوّق. في حالتين بس يصير استرجاع: ما وصل شي
-                  إطلاقاً، أو وصل منتج مختلف عن المطلوب. في هالحالتين تواصل مع الإدارة خلال{" "}
-                  {days} أيام من التسليم:{" "}
+                  النظام هذا يحفظ حقوق والتزامات المسوق وصاحب النشاط. العربون غير قابل للاسترجاع
+                  إطلاقاً في أي حال من الأحوال، والعمولة تبقى للمسوق، إلاّ في حالتين بس يصير
+                  استرجاع: ما وصل شي إطلاقاً، أو وصل منتج مختلف عن المطلوب. في هالحالتين تواصل مع
+                  الإدارة{" "}
                   <bdi dir="ltr">{ADMIN_WHATSAPP_DISPLAY}</bdi>.{" "}
-                  بعد التحقق يترجع العربون ويتحظر صاحب النشاط نهائياً. بعد مرور {days} أيام على
-                  التسليم ما عادش يصير استرجاع، والمسؤولية تبقى على صاحب النشاط، وإجراء الإدارة
-                  يقتصر على إخفاء أو حظر الحساب فقط.
+                  بعد التحقق يرجع العربون ويحظر صاحب النشاط نهائياً. بعد مرور {daysPhrase(days, true)} على
+                  التسليم لا يوجد استرجاع، والمسؤولية تبقى على صاحب النشاط، وإجراء الإدارة يقتصر على
+                  إخفاء أو حظر الحساب فقط.
                 </>
               ) : (
                 <>
                   This system protects the rights and responsibilities of both marketers and business
-                  owners. Upfront fees are non-refundable — not if the customer refuses the parcel, not
-                  if they change their mind, and not if they cannot be reached. Even a failed order is
-                  not refunded, and the fee stays with the marketer. There are only two exceptions:
-                  nothing was delivered at all, or a different product was delivered. In those two
-                  cases, contact the admin within {days} days of delivery:{" "}
+                  owners. The upfront fee is never refundable under any circumstances, and the
+                  commission stays with the marketer — except in two cases: nothing was delivered at
+                  all, or a different product was delivered. In those two cases contact the admin:{" "}
                   <bdi dir="ltr">{ADMIN_WHATSAPP_DISPLAY}</bdi>.{" "}
                   After verification the upfront fee is refunded and the business owner is permanently
-                  banned. More than {days} days after delivery an order can no longer be refunded, any
-                  dispute is the business owner&apos;s responsibility, and the admin may only hide or
-                  ban the business owner.
+                  banned. More than {daysPhrase(days, false)} after delivery there is no refund, the
+                  responsibility stays with the business owner, and the admin may only hide or ban
+                  the account.
                 </>
               )}
             </span>

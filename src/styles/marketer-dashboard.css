@@ -27,6 +27,18 @@
 .lateen-marketer .wallet-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 6px; letter-spacing: 0.04em; }
 .lateen-marketer .wallet-amount { font-size: 34px; font-weight: 500; color: #fff; margin-bottom: 4px; }
 .lateen-marketer .wallet-pending { font-size: 11px; color: rgba(255,255,255,0.28); margin-bottom: 1.25rem; }
+
+/* The wallet before the server has answered. Sized to the text it stands in
+   for, so the card does not resize when the real figure lands — the point is
+   to remove a jump, not to move it somewhere else. It breathes rather than
+   sliding: a shimmer travelling across a balance reads as the number itself
+   doing something. */
+.lateen-marketer .wallet-skel-label { width: 96px; height: 9px; border-radius: 5px; background: rgba(255,255,255,0.10); animation: wallet-skel 1.4s ease-in-out infinite; }
+.lateen-marketer .wallet-skel-amount { width: 150px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.10); animation: wallet-skel 1.4s ease-in-out infinite; }
+@keyframes wallet-skel { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) {
+  .lateen-marketer .wallet-skel-label, .lateen-marketer .wallet-skel-amount { animation: none; }
+}
 .lateen-marketer .wallet-row { display: flex; align-items: center; justify-content: space-between; }
 .lateen-marketer .wallet-meta { font-size: 11px; color: rgba(255,255,255,0.3); }
 .lateen-marketer .wallet-meta span { color: rgba(255,255,255,0.65); font-weight: 500; }
@@ -543,7 +555,7 @@ to {opacity:1;transform:scale(1);}
    as another city in the list. */
 /* The country's delivery time, on the country's own row rather than inside
    the body that row opens. */
-.lateen-marketer .pd-zone-eta-chip { display: inline-block; margin-inline-end: 8px; padding: 2px 8px 1px; border-radius: 999px; background: rgba(255,255,255,.06); border: 0.5px solid rgba(255,255,255,.12); color: rgba(255,255,255,.72); font-size: 10.5px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
+.lateen-marketer .pd-zone-eta-chip { display: inline-block; margin-inline-end: 8px; padding: 2px 8px 1px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,.72); font-size: 10.5px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
 .lateen-marketer .pd-zone-empty {font-size:12px;color:#9e9b97;padding:10px 14px;text-align:center;}
 .lateen-marketer .pd-rev-empty {font-size:13px;color:#9e9b97;text-align:center;padding:16px;background:#191919;border:0.5px solid #232323;border-radius:12px;margin:0 16px;}
 .lateen-marketer .pd-rev-list {display:flex;flex-direction:column;gap:8px;padding:0 16px;}
@@ -640,7 +652,13 @@ to {opacity:1;transform:scale(1);}
 /* The delivery time as a pill beside the place it applies to — the same
    shape the product sheet uses on a country and a city, so an order card and
    a listing read alike. */
-.eta-badge { display: inline-block; margin-inline-start: 8px; padding: 1px 7px; border-radius: 999px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); font-size: 10.5px; font-weight: 600; line-height: 1.6; white-space: nowrap; vertical-align: middle; }
+/* The border has to be visible against the badge's own fill, not just
+   present in the stylesheet. It was #333330 on a #2a2a2a lozenge — nine
+   points of difference, which is a border nobody can see, so the
+   duration read as a floating grey blob. A white wash at low alpha
+   reads against the fill and against the card behind it, and keeps
+   working if either changes. */
+.eta-badge { display: inline-block; margin-inline-start: 8px; padding: 1px 7px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.22); background: var(--color-background-secondary); color: var(--color-text-secondary); font-size: 10.5px; font-weight: 600; line-height: 1.6; white-space: nowrap; vertical-align: middle; }
 
 /* The money charts' tooltip, drawn as HTML so the currency symbol can be set
    smaller than the amount — the `.cur-sym` rule above reaches it here, which

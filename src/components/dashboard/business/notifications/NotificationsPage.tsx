@@ -65,7 +65,7 @@ function WarnMark() {
       viewBox="0 0 24 24" aria-hidden="true" focusable="false"
       style={{
         width: "1.05em", height: "1.05em", flexShrink: 0,
-        marginInlineEnd: 6, verticalAlign: "-0.15em",
+        marginInlineStart: 6, verticalAlign: "-0.15em",
       }}
     >
       <path
@@ -226,7 +226,14 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               }
             }
 
-            const expandable = kind === "new_order" || kind === "order_refunded" || isAdminMsg;
+            /* A report about this shop's product opens like the rest. It was
+               left off this list, so the card carried the one line of its
+               title and nothing else: tapping it did nothing, which reads as
+               a notification that is stuck. What the shop needs is inside —
+               which product, what kind of report, and what the admin said
+               about it. */
+            const isReport = kind === "product_reported";
+            const expandable = kind === "new_order" || kind === "order_refunded" || isAdminMsg || isReport;
             const color = kind === "new_order" ? "#34c77b"
               : kind === "order_refunded" || kind === "product_reported" ? "#E24B4A"
               : kind === "product_review" ? "#e9b949" : "#7f77dd";
@@ -244,7 +251,34 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               : <div style={{ width: 8, flexShrink: 0 }} />;
 
             let detailsHtml: React.ReactNode = null;
-            if (expandable && d) {
+            if (isReport && d) {
+              /* Its own shape. A report has no order behind it — no customer,
+                 no address, no quantity — so it cannot borrow the block below,
+                 which would come out as a column of empty rows. */
+              const rPhoto = str(d.product_photo);
+              const rType = str(d.report_type);
+              const typeLbl = rType === "product"
+                ? tr("Product", "المنتج")
+                : rType === "merchant" || rType === "business"
+                  ? tr("Merchant", "التاجر")
+                  : tr("Other", "أخرى");
+              detailsHtml = (
+                <div className="notif-details-box">
+                  {!hasPhoto && rPhoto && /^(https?:|data:|\/)/.test(rPhoto) ? (
+                    <div style={{ margin: "-2px 0 10px 0" }}>
+                      <img src={rPhoto} alt="" style={{ width: "100%", maxHeight: 220, objectFit: "contain", background: "#0d0d0d", borderRadius: 10, display: "block" }} />
+                    </div>
+                  ) : null}
+                  <Row k={tr("Product", "المنتج")} v={str(d.product_name)} noTranslate />
+                  <Row k={tr("Report type", "نوع البلاغ")} v={typeLbl} />
+                  {d.admin_comment ? (
+                    <div style={{ marginTop: 6, padding: "8px 10px", borderRadius: 8, background: "rgba(226,75,74,0.09)", border: "0.5px solid rgba(226,75,74,0.3)", color: "#f0a3a2", fontSize: 11.5 }}>
+                      <b>{tr("Admin notes", "ملاحظات الأدمن")}:</b> <span data-no-i18n="">{str(d.admin_comment)}</span>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            } else if (expandable && d) {
               const photoUrl = str(d.product_photo || d.photo);
               const photo = (!hasPhoto && photoUrl && /^(https?:|data:|\/)/.test(photoUrl)) ? (
                 <div style={{ margin: "-2px 0 10px 0" }}>
@@ -325,8 +359,8 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                     <div className="notif-row-text">
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>
-                    {warn && <WarnMark />}
                     {t}
+                    {warn && <WarnMark />}
                   </div>
                         {b ? <div className="notif-body">{b}</div> : null}
                         <div className="notif-time">{ago(n.created_at)}</div>
@@ -359,8 +393,8 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                 {iconHtml}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="notif-title" data-no-i18n={isAdminMsg ? "" : undefined}>
-                    {warn && <WarnMark />}
                     {t}
+                    {warn && <WarnMark />}
                   </div>
                   {b ? <div className="notif-body">{b}</div> : null}
                   {reviewDetails}

@@ -870,11 +870,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
                       </button>
                       {cityEtaOpenFor === code && (
                         <div className="lp-city-eta-body">
-                          <div className="lp-city-eta-note">
-                            {ar
-                              ? "اتركها فارغة وتأخذ المدينة مدة الدولة."
-                              : "Leave a city blank and it takes the country's time."}
-                          </div>
                           {ck.map((city) => (
                             <div className="lp-city-eta-row" key={city}>
                               <span className="city-name">{isLY ? cityLbl(city) : city}</span>

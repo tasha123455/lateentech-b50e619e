@@ -6,7 +6,7 @@ import { LIBYA } from "@/lib/markets/libya";
 import { useAccordion } from "@/lib/useAccordion";
 
 import { useMarketerData } from "../MarketerDataProvider";
-import { ago, isAr, isSafeUrl, parseData, t } from "../lib/format";
+import { ago, daysPhrase, isAr, isSafeUrl, parseData, t } from "../lib/format";
 import type { NotificationRow } from "../lib/types";
 import { usePhotoLightbox } from "../ui/PhotoLightbox";
 import { NotifDetailBox } from "./detailBits";
@@ -65,11 +65,17 @@ function localize(n: NotificationRow): { t: string; b: string } {
        from the notification itself — it is the market's rule at the moment
        the order was delivered, not whatever the rule happens to be today. */
     const days = Number(d.available_in_days) || LIBYA.money.refundWindowDays;
+    /* "Available to withdraw" was the wrong promise: withdrawals run on their
+       own thirty-day cycle, so a marketer read two waiting periods here and
+       could not tell which was which. What actually happens at the end of the
+       window is that the money stops being reversible — it becomes theirs.
+       The invitation is on the end because the sentence raises a question
+       ("why do I have to wait?") that the opened card answers. */
     return {
       t: t("Order Delivered", "تم تسليم الطلب"),
       b: t(
-        `The customer has received the product. Your commission becomes available to withdraw in ${days} days.`,
-        `استلم الزبون المنتج. عمولتك تصبح متاحة للسحب بعد ${days} أيام.`,
+        `The customer has received the product. Your commission becomes a guaranteed balance in your wallet in ${daysPhrase(days, false)}. Tap to know more`,
+        `استلم الزبون المنتج. عمولتك تصبح متاحة كرصيد مضمون في محفظتك بعد ${daysPhrase(days, true)}. انقر لمعرفة المزيد`,
       ),
     };
   }

@@ -458,7 +458,7 @@ export function PublicProduct({ id }: { id: string }) {
                               first thing a customer following this link wants
                               to know. */}
                           {!!etaTextOf(z.eta, lang === "ar") && (
-                            <span className="rounded-full border border-border px-2 py-0.5" data-no-i18n>
+                            <span className="rounded-full border border-white/20 px-2 py-0.5" data-no-i18n>
                               {etaTextOf(z.eta, lang === "ar")}
                             </span>
                           )}
@@ -482,7 +482,7 @@ export function PublicProduct({ id }: { id: string }) {
                                         different. Silence means it keeps the
                                         country's time, on the row above. */}
                                     {!!etaTextOf(v.eta, lang === "ar") && (
-                                      <span className="rounded-full border border-border px-2 py-0.5" data-no-i18n>
+                                      <span className="rounded-full border border-white/20 px-2 py-0.5" data-no-i18n>
                                         {etaTextOf(v.eta, lang === "ar")}
                                       </span>
                                     )}

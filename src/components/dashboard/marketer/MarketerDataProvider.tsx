@@ -47,6 +47,12 @@ type Ctx = {
   walletCur: string;
   setWalletCur: (c: string) => void;
   walletBalance: number;
+  /** False until this session's first wallet answer has come back.
+   *
+   *  Nothing that depends on the balance should be drawn before it flips: the
+   *  numbers available beforehand are a cached figure from the last visit and
+   *  a locally-summed one from the orders list, and neither is the balance. */
+  walletReady: boolean;
   payout: PayoutState;
 
   frozen: boolean;
@@ -92,6 +98,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
   const [payout, setPayout] = useState<PayoutState>({
     statusText: "", pending: false, canWithdraw: false, frozen: false, balance: 0, onTheWay: 0,
   });
+  const [walletReady, setWalletReady] = useState(false);
   const [langTick, setLangTick] = useState(0);
 
   const productsMap = useMemo(() => buildProductsMap(products), [products]);
@@ -265,10 +272,20 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
         setPayout(next);
         setDbBalance(next.balance);
         cacheWalletBalance(next.balance, userId);
+        /* Every exit below lands here, including the ones that gave up and
+           fell back to the last known figure. Answered badly is still
+           answered — the card must not sit on a placeholder forever because
+           the phone happened to be offline. */
+        setWalletReady(true);
       }
       return next;
     };
-    /** The balance to show when nothing came back: whatever is already up. */
+    /** The balance to show when nothing came back: whatever is already up.
+     *
+     *  This is what the cached figure is for, and the only thing it is for.
+     *  It is a fallback for an answer that never arrived, never the opening
+     *  guess — painting it before asking is what made the card show last
+     *  week's balance for a third of a second and then jump. */
     const lastKnown = () => dbBalanceRef.current ?? 0;
 
     let wallet: { balance?: number; pending?: number } | null = null;
@@ -485,7 +502,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
     () => ({
       api, userId,
       products, productsMap, favOrder, orders, profile, notifications, newNotifIds, avatarUrl,
-      analytics, walletCur: selectedCur, setWalletCur, walletBalance, payout,
+      analytics, walletCur: selectedCur, setWalletCur, walletBalance, walletReady, payout,
       frozen, blockIfFrozen,
       toggleFavorite, setOrders, markNotificationsRead,
       reloadBrowse, reloadOrders, reloadProfile, reloadNotifications, refreshWalletAndPayout,
@@ -493,7 +510,7 @@ export function MarketerDataProvider({ userId, children }: { userId: string; chi
     }),
     [
       api, userId, products, productsMap, favOrder, orders, profile, notifications, newNotifIds, avatarUrl,
-      analytics, selectedCur, setWalletCur, walletBalance, payout, frozen, blockIfFrozen,
+      analytics, selectedCur, setWalletCur, walletBalance, walletReady, payout, frozen, blockIfFrozen,
       toggleFavorite, setOrders, markNotificationsRead,
       reloadBrowse, reloadOrders, reloadProfile, reloadNotifications, refreshWalletAndPayout, langTick,
     ],
