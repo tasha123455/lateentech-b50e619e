@@ -23,59 +23,15 @@ COMMENT ON COLUMN public.markets.refund_window_days IS
   'commission sits in wallets.pending until it closes, then becomes '
   'withdrawable. Two days in Libya.';
 
--- The body the notification is stored with. The marketer's app rewrites this
--- line in their own language from `available_in_days`, so this text is what
--- anything reading the row directly sees — a push payload, an export, an admin
--- looking at the table. It said "available to withdraw", which described the
--- button rather than the money; "a guaranteed balance in your wallet" is what
--- actually happens at the end of the window.
-CREATE OR REPLACE FUNCTION public.business_mark_delivered(_order_id uuid)
-RETURNS public.orders
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $function$
-DECLARE
-  o public.orders;
-  p public.products;
-  photo text;
-  mk public.markets;
-BEGIN
-  SELECT * INTO o FROM public.orders WHERE id = _order_id;
-  IF o.id IS NULL THEN
-    RAISE EXCEPTION 'Order not found';
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM public.products WHERE id = o.product_id AND business_id = auth.uid()) THEN
-    RAISE EXCEPTION 'Not authorized';
-  END IF;
-  IF o.status <> 'approved' THEN
-    RAISE EXCEPTION 'Only an approved order can be marked delivered';
-  END IF;
-
-  UPDATE public.orders SET status = 'delivered', delivered_at = now() WHERE id = _order_id RETURNING * INTO o;
-  UPDATE public.products SET sold = sold + o.qty, revenue = revenue + (o.unit_price * o.qty) WHERE id = o.product_id;
-
-  -- The wallet is deliberately untouched. delivered_at is the start of the
-  -- refund window, and the commission stays in `pending` until it closes --
-  -- release_matured_commission() moves it, on the marketer's next wallet read.
-  mk := public.market_for_user(o.marketer_id);
-
-  SELECT * INTO p FROM public.products WHERE id = o.product_id;
-  photo := CASE WHEN p.photos IS NOT NULL AND array_length(p.photos,1) > 0 THEN p.photos[1] ELSE NULL END;
-  INSERT INTO public.notifications (user_id, kind, title, body, data)
-    VALUES (o.marketer_id, 'order_delivered', 'Order Delivered',
-      'The customer has received the product. Your commission becomes a guaranteed balance in your wallet in '
-        || mk.refund_window_days || ' days.',
-      jsonb_build_object('order_id', o.id, 'order_code', UPPER(SUBSTRING(o.id::text, 1, 8)),
-        'product_name', COALESCE(p.name, ''), 'product_photo', photo, 'cover_focus_x', p.cover_focus_x, 'cover_focus_y', p.cover_focus_y, 'fulfilment', p.fulfilment, 'qty', o.qty,
-        'size', o.size, 'color', o.color, 'selected_variants', o.selected_variants,
-        'available_in_days', mk.refund_window_days,
-        'customer_name', o.customer_name,
-        'customer_phone', o.customer_phone, 'customer_whatsapp', o.customer_whatsapp,
-        'customer_address', o.customer_address, 'customer_city', o.customer_city,
-        'customer_country', o.customer_country, 'customer_notes', o.customer_notes));
-  RETURN o;
-END;
-$function$;
+-- The delivered notification's stored wording is changed too, but not here:
+-- this file originally carried a CREATE OR REPLACE for `business_mark_delivered`,
+-- a function that exists nowhere in this schema. The one the app calls is
+-- `mark_delivered`. Running it as written would have created a second, dead
+-- function and left the live one untouched, so the block was removed and the
+-- wording moved to 20260806110000, against the real function and with its
+-- guards intact.
+--
+-- The change above stands on its own regardless: refund_window_days is a table
+-- value and mark_delivered reads it at call time.
 
 NOTIFY pgrst, 'reload schema';
