@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
+import { EtaBadge } from "@/components/shared/EtaBadge";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { coverStyle } from "@/lib/coverFocus";
 import { useAccordion } from "@/lib/useAccordion";
@@ -173,13 +174,16 @@ export function ProductCard({
         <div className="mp-p-details-inner">
           <div className="mp-divider" />
           <div className="mp-details-top-row">
-            {/* The code pill and, beside it, what the owner chose when listing
-                the product — the two facts about the listing, read together. */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", minWidth: 0 }}>
-              <div className="mp-details-code-pill">
-                <span className="mp-code-label">{ar ? "كود المنتج" : "Product code"}</span>
-                <span className="mp-code-val" data-no-i18n="">{p.code}</span>
-              </div>
+            {/* Inside the pill with the code, not beside it. Sitting outside,
+                the pair had the Analytics button for company on a row that
+                could not hold all three, so the badge dropped to a line of its
+                own underneath and read as a loose label attached to nothing.
+                In the pill it cannot come apart from the code: they are the
+                two facts about the listing — which product this is, and how
+                it reaches the customer. */}
+            <div className="mp-details-code-pill">
+              <span className="mp-code-label">{ar ? "كود المنتج" : "Product code"}</span>
+              <span className="mp-code-val" data-no-i18n="">{p.code}</span>
               <FulfilmentBadge value={p.fulfilment} ar={ar} size="sm" />
             </div>
             <AnalyticsButton pid={p.id} open={an.open} onToggle={() => an.setOpen((v) => !v)} />
@@ -224,8 +228,16 @@ export function ProductCard({
                     const cities = z.cities || {};
                     return (
                       <div className="mp-country-box" key={code}>
+                        {/* How long it takes rides the place it applies to,
+                            the way it does on an order card and on the public
+                            link: the country always, a city only where this
+                            shop gave that city a time of its own. Silence on a
+                            city row means it keeps the country's. */}
                         <div className="mp-country-head">
-                          <span className="mp-cname">{COUNTRY_FLAGS[code] || "🌐"} {countryLbl(code)}</span>
+                          <span className="mp-cname">
+                            {COUNTRY_FLAGS[code] || "🌐"} {countryLbl(code)}
+                            <EtaBadge eta={z.eta} ar={ar} />
+                          </span>
                           <span className="mp-cship">
                             {ar ? "الشحن" : "Shipping"}<br />
                             <b>{isFreeVal(z.shipping) ? <span data-no-i18n="">{freeLbl()}</span> : <Money p={p} n={Number(z.shipping || 0)} />}</b>
@@ -233,7 +245,10 @@ export function ProductCard({
                         </div>
                         {Object.entries(cities).map(([city, c]) => (
                           <div className="mp-city-row" key={city}>
-                            <span><b>{cityLbl(city)}</b></span>
+                            <span>
+                              <b>{cityLbl(city)}</b>
+                              <EtaBadge eta={(c as { eta?: unknown })?.eta} ar={ar} />
+                            </span>
                             <span className="mp-dfee">
                               {ar ? "التوصيل" : "Delivery"} <b>{isFreeVal(c?.delivery) ? <span data-no-i18n="">{freeLbl()}</span> : <Money p={p} n={Number(c?.delivery || 0)} />}</b>
                             </span>

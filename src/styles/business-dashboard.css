@@ -272,7 +272,12 @@
 .mp-product-card:not(.expanded) .mp-p-details-inner{padding-bottom:0;opacity:0;}
 .mp-divider{height:1px;background:var(--mp-border);margin:0 0 12px;}
 
-.mp-details-top-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;}
+/* Wraps rather than overflows. The code pill and the Analytics button both
+   want their natural width — the code has to stay readable and the button
+   has a label — so on a narrow phone there is no room for both on one
+   line and the button takes the next one, full width. It used to run off
+   the edge of the card instead. */
+.mp-details-top-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
 .mp-details-code-pill{display:flex;align-items:center;gap:5px;background:var(--mp-field);border:1px solid var(--mp-border);border-radius:99px;padding:4px 10px;flex-shrink:0;}
 .mp-details-code-pill .mp-code-label{font-size:8px;font-weight:700;color:var(--mp-text-faint);text-transform:uppercase;letter-spacing:0.3px;}
 .mp-details-code-pill .mp-code-val{font-size:9.5px;font-weight:700;color:var(--mp-text-dim);font-family:var(--font-mono),monospace;}
@@ -827,7 +832,13 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
    it came from open. Optional, so it never occupies more than one line until
    somebody asks. */
 /* Same pill as the marketer's, so one order reads the same to both sides. */
-.eta-badge { display: inline-block; margin-inline-start: 8px; padding: 1px 7px; border-radius: 999px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); font-size: 10.5px; font-weight: 600; line-height: 1.6; white-space: nowrap; vertical-align: middle; }
+/* The border has to be visible against the badge's own fill, not just
+   present in the stylesheet. It was #333330 on a #2a2a2a lozenge — nine
+   points of difference, which is a border nobody can see, so the
+   duration read as a floating grey blob. A white wash at low alpha
+   reads against the fill and against the card behind it, and keeps
+   working if either changes. */
+.eta-badge { display: inline-block; margin-inline-start: 8px; padding: 1px 7px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.22); background: var(--color-background-secondary); color: var(--color-text-secondary); font-size: 10.5px; font-weight: 600; line-height: 1.6; white-space: nowrap; vertical-align: middle; }
 
 /* The money charts' tooltip, drawn as HTML so the currency symbol can be set
    smaller than the amount — the `.cur-sym` rule above reaches it here, which
