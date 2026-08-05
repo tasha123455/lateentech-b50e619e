@@ -334,7 +334,22 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                       <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>{rightDot}</div>
                     </div>
                   </div>
-                  <div className="notif-detail-body">{detailsHtml}</div>
+                  {/* Open, a tap anywhere shuts it again — the header it opened
+                      from is off the top of the screen by the time you have
+                      read to the bottom of a long one, and the detail is most
+                      of the card. Taps on something that does its own job —
+                      a photo that opens, a phone number that dials — are left
+                      alone. Same rule as the marketer's list. */}
+                  <div
+                    className="notif-detail-body"
+                    onClick={isOpen ? (e) => {
+                      const el = e.target as HTMLElement | null;
+                      if (el?.closest("a, button, img, textarea, input, iframe, [role='button']")) return;
+                      toggleNotif(n.id);
+                    } : undefined}
+                  >
+                    {detailsHtml}
+                  </div>
                 </div>
               );
             }

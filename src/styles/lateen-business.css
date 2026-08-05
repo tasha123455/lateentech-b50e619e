@@ -177,7 +177,16 @@
 .lateen-business #pg-orders .btn-lock{ background:#1c2024; color:#6b7278; cursor:default; opacity:.6; }
 
 /* Notifications expand/collapse — mirrors the Orders page order-card transition */
-.lateen-business #pg-notif .notif-item.expandable{ display:flex; flex-direction:column; padding:0; overflow:hidden; cursor:pointer; }
+/* align-items comes from the collapsed row, where it holds the icon to the
+   top of the text beside it. Turned on its side for the open card it stopped
+   meaning that and started shrinking every row to the width of its own
+   longest line — so the detail box sat in a column down the left with a
+   third of the card dead beside it, and a tap that landed in the dead part
+   did nothing. Stretched, the card's own width is what its contents get.
+   The gap is the same story: 12px between the icon and the text of a row,
+   turned on its side it became 12px of unreachable card under the strip.
+   The row sets its own gap, so the card does not need one. */
+.lateen-business #pg-notif .notif-item.expandable{ display:flex; flex-direction:column; align-items:stretch; gap:0; padding:0; overflow:hidden; cursor:pointer; }
 .lateen-business #pg-notif .notif-top{ display:flex; align-items:flex-start; gap:12px; padding:14px; transition:gap .45s cubic-bezier(.4,0,.2,1), padding .45s cubic-bezier(.4,0,.2,1); }
 .lateen-business #pg-notif .notif-item.expanded .notif-top{ gap:0; padding:0; }
 .lateen-business #pg-notif .notif-photo-wrap{ position:relative; flex:0 0 34px; width:34px; height:34px; border-radius:50%; overflow:hidden; background:var(--color-background-secondary); transition:flex-basis .45s cubic-bezier(.4,0,.2,1), width .45s cubic-bezier(.4,0,.2,1), height .45s cubic-bezier(.4,0,.2,1), border-radius .45s cubic-bezier(.4,0,.2,1); }
