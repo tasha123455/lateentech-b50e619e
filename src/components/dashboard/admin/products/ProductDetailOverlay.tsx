@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { asEta } from "@/lib/eta";
 import { asFulfilment } from "@/lib/fulfilment";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
-import { isAr } from "@/components/dashboard/marketer/lib/format";
+import { isAr, piecesLabel } from "@/components/dashboard/marketer/lib/format";
 import { useScrollLock } from "@/lib/useScrollLock";
 import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 
@@ -379,7 +379,13 @@ export function ProductDetailOverlay({
           </RowIcon>
           <div className="pd-row-lbl">In stock</div>
           <div className={"pd-row-val" + (low || qty <= 0 ? " am" : "")}>
-            {qty <= 0 ? "Out of stock" : qty + " pcs"}
+            {/* Through the same helper the marketer's sheet uses. Arabic
+                counts one and two differently from the rest, so "1 قطع" and
+                "2 قطع" are both wrong — sticking a translated noun after the
+                digit does not survive contact with the language. */}
+            <span data-no-i18n>
+              {qty <= 0 ? (isAr() ? "غير متوفر" : "Out of stock") : piecesLabel(qty)}
+            </span>
             {vg.length ? <Chev open={stockOpen} /> : null}
           </div>
         </div>
@@ -391,7 +397,7 @@ export function ProductDetailOverlay({
                 {g.items.map((it) => (
                   <div className="pd-zone-city" key={it.val}>
                     <span data-no-i18n>{it.val}</span>
-                    <span>{it.qty === null ? "—" : it.qty + " pcs"}</span>
+                    <span data-no-i18n>{it.qty === null ? "—" : piecesLabel(Number(it.qty) || 0)}</span>
                   </div>
                 ))}
               </div>
