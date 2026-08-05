@@ -232,7 +232,12 @@ export function MainChart({
                  rather than five full-size symbols stacked down the axis all
                  saying the same thing, the axis carries the figures and the
                  tooltip carries the currency, once, where it is read. */
-              callback: (v: number) => (metric === "earnings" ? moneyS(v, "", "") : v),
+              /* The currency the amounts are in, so the axis can say it
+                 properly. Passing nothing fell through to the market's ISO
+                 code as a literal string: "LYD500" in English, with the code
+                 in front of the figure, and "500LYD" in Arabic, where it
+                 should read د.ل. */
+              callback: (v: number) => (metric === "earnings" ? moneyS(v, selSym, walletCur) : v),
             },
           },
         },

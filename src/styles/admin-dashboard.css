@@ -174,7 +174,14 @@
 .lateen-admin .adm-status-count { font-size: 11px; opacity: 0.6; font-variant-numeric: tabular-nums; }
 .lateen-admin .adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; align-items: flex-end; justify-content: center; }
 .lateen-admin .adm-pdetail.open { display: flex; }
-.lateen-admin .adm-pdetail-card { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; position: relative; padding: 18px 16px 32px; border-top: 0.5px solid var(--border); }
+/* A fixed height, not a maximum. The sheet's content is fetched after it
+   opens, so with max-height it came up 130px tall around the word
+   "Loading…", sat there for as long as the request took, and then jumped
+   to 736px when the product arrived — measured on a 800px viewport. A
+   panel that leaps to six times its height a third of a second after you
+   tap is the jitter. It opens at its full size now and fills in place;
+   the content already scrolls inside it. */
+.lateen-admin .adm-pdetail-card { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; height: 92vh; overflow-y: auto; position: relative; padding: 18px 16px 32px; border-top: 0.5px solid var(--border); }
 .lateen-admin .adm-pdetail-close { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.4); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 2; }
 .lateen-admin .adm-pd-owner { background: #191919; border: 0.5px solid #2a2a2a; border-radius: 14px; padding: 14px 16px; margin: 0 0 8px; }
 .lateen-admin .adm-pd-owner-name { font-size: 16px; font-weight: 600; color: #f0eeeb; margin-bottom: 6px; }

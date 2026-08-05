@@ -407,7 +407,13 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
                  one font size, so a symbol repeated down the axis cannot be
                  made smaller than the figure beside it. The tooltip keeps
                  the currency. */
-              callback: (v: number) => currentMetric === "revenue" ? moneyS(v, "", "") : v,
+              /* The currency the amounts are in, so the axis can say it
+                 properly. Passing nothing fell through to the market's ISO
+                 code as a literal string: "LYD500" in English, with the code
+                 in front of the figure, and "500LYD" in Arabic, where it
+                 should read د.ل. */
+              callback: (v: number) =>
+                currentMetric === "revenue" ? moneyS(v, sel.sym || marketSymbol(walletCur), walletCur) : v,
             },
           },
         },
