@@ -8,7 +8,7 @@ import { coverPosition } from "@/lib/coverFocus";
 import { etaTextOf } from "@/lib/eta";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { WordmarkSvg } from "@/components/brand/logoArt";
+import { MarkSvg, WordmarkSvg } from "@/components/brand/logoArt";
 
 type VariantItem = { val?: string; photo?: string; qty?: number | string | null } | string;
 type VariantGroup = { name?: string; items?: VariantItem[] };
@@ -284,7 +284,19 @@ export function PublicProduct({ id }: { id: string }) {
     <div className={`mx-auto min-h-screen max-w-[520px] bg-background ${isMarketer || user ? "pb-28" : "pb-40"}`}>
       <header className="flex items-center justify-between px-4 py-3">
         <Link to={withLang("/")} aria-label="Wasla" className="flex items-center gap-2">
-          <img src="/wasla-mark-64.png" alt="Wasla" width={28} height={28} className="h-7 w-auto" />
+          {/* The vector, like the lettering beside it. This was the one place
+              the two halves of the lockup came from different sources — a
+              64px raster next to drawn outlines — and it showed at this size
+              on a phone.
+
+              The square keeps the header exactly as it was: the PNG was a
+              64×64 canvas with the mark padded inside it, so `h-7 w-auto`
+              reserved 28×28 and drew the mark 18 tall in the middle of it.
+              The mark's own box is 26×18, so it is centred in the same 28
+              square rather than allowed to grow into it. */}
+          <span className="flex h-7 w-7 items-center justify-center">
+            <MarkSvg height={18} />
+          </span>
           <WordmarkSvg lang={lang === "ar" ? "ar" : "en"} height={16} style={{ color: "var(--color-text-1, #f0eeeb)" }} />
         </Link>
       </header>

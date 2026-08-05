@@ -5,8 +5,15 @@
    Without one the browser draws its own offline screen: the app icon in a
    frame, and "You're offline" in the browser's language rather than the app's.
    Caching one page lets us answer with our own — same logo, no box, and in
-   Arabic for somebody who reads Arabic. */
-const OFFLINE_CACHE = "wasla-offline-v2";
+   Arabic for somebody who reads Arabic.
+
+   The version in the name is how a changed offline.html reaches anybody who
+   already has one. install only runs when this file itself changes, and
+   activate keeps the cache whose name still matches — so editing the page
+   alone leaves every returning visitor on the copy they cached. Bumped to v3
+   because the mark drawn inside that page changed. Bump it whenever
+   offline.html does. */
+const OFFLINE_CACHE = "wasla-offline-v3";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
