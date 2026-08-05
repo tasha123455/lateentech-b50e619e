@@ -50,23 +50,27 @@ export function ClampedText({
   }, [open]);
 
   const ar = isAr();
+  /* The box, the text and the toggle are one thing.
+     They used to be siblings: the caller's className painted a bordered box
+     around the text only, and the button landed underneath it — outside the
+     border, and out of line with it wherever the box carried a margin of its
+     own. Wrapping them means the toggle sits inside whatever the description
+     is drawn as, which is how the business card has always read. */
   return (
-    <>
+    <div className={className} style={style}>
       <div
         ref={ref}
-        className={className}
         data-no-i18n
-        style={{
-          ...style,
-          ...(open
-            ? null
+        style={
+          open
+            ? undefined
             : {
                 display: "-webkit-box",
                 WebkitBoxOrient: "vertical",
                 WebkitLineClamp: lines,
                 overflow: "hidden",
-              }),
-        }}
+              }
+        }
       >
         {text}
       </div>
@@ -83,6 +87,6 @@ export function ClampedText({
           {open ? (ar ? "أقل" : "less") : ar ? "المزيد..." : "more..."}
         </button>
       )}
-    </>
+    </div>
   );
 }
