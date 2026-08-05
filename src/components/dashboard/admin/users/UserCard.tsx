@@ -62,6 +62,7 @@ export function UserCard({
   const canImpersonate = role === "marketer" || role === "business";
   const isBanned = !!u.banned_at;
   const isFrozen = !!u.frozen_at;
+  const isSelf = u.id === api.userId;
 
   const removeUser = async () => {
     if (!confirm("Permanently delete " + name + "’s account?\n\nThe account and all their data will be removed from the database. They can register again with the same email. This cannot be undone.")) return;
@@ -201,10 +202,12 @@ export function UserCard({
               {isFrozen ? "Unfreeze" : "Freeze"}
             </button>
           )}
-          {/* Not on your own account. The master admin is the one signed in
-              here, and an irreversible "Remove" sitting on their own card is a
-              button whose only possible use is a mistake. */}
-          {u.id !== api.userId && (
+          {/* Neither of these on your own account. The master admin is the one
+              signed in here, and a "Remove" or a "Ban Email" sitting on their
+              own card is a button whose only possible use is a mistake — Ban
+              signs you out on the spot and locks the only account that can
+              undo it, so there would be nobody left to press Unban. */}
+          {!isSelf && (
             <button
               className="adm-go-btn"
               style={{ background: "#fee", color: "#c00", borderColor: "#fcc" }}
@@ -213,17 +216,19 @@ export function UserCard({
               Remove
             </button>
           )}
-          <button
-            className="adm-go-btn"
-            style={{
-              background: isBanned ? "#e2e3e5" : "#fff3cd",
-              color: isBanned ? "#495057" : "#856404",
-              borderColor: isBanned ? "#d6d8db" : "#ffeeba",
-            }}
-            onClick={() => void toggleBan()}
-          >
-            {isBanned ? "Unban" : "Ban Email"}
-          </button>
+          {!isSelf && (
+            <button
+              className="adm-go-btn"
+              style={{
+                background: isBanned ? "#e2e3e5" : "#fff3cd",
+                color: isBanned ? "#495057" : "#856404",
+                borderColor: isBanned ? "#d6d8db" : "#ffeeba",
+              }}
+              onClick={() => void toggleBan()}
+            >
+              {isBanned ? "Unban" : "Ban Email"}
+            </button>
+          )}
           {role === "admin" && (
             <button
               className="adm-go-btn"
