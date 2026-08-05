@@ -637,11 +637,7 @@ to {opacity:1;transform:scale(1);}
 /* The delivery-time row on an order card: says the figure closed, says where
    it came from open. Optional, so it never occupies more than one line until
    somebody asks. */
-.eta-row { margin-top: 6px; }
-.eta-row-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: 10px; background: var(--color-background-secondary); color: var(--color-text-secondary); font-family: var(--font-sans); font-size: 12px; cursor: pointer; }
-.eta-row-lbl { flex: 0 0 auto; }
-.eta-row-val { margin-inline-start: auto; font-weight: 600; color: var(--color-text-primary); }
-.eta-row-chev { flex: 0 0 auto; opacity: .65; transition: transform .15s; }
-.eta-row-chev.open { transform: rotate(180deg); }
-.eta-row-body { padding: 7px 10px 0; font-size: 11.5px; color: var(--color-text-tertiary); line-height: 1.6; }
-.eta-row-sub { opacity: .85; }
+/* The delivery time as a pill beside the place it applies to — the same
+   shape the product sheet uses on a country and a city, so an order card and
+   a listing read alike. */
+.eta-badge { display: inline-block; margin-inline-start: 8px; padding: 1px 7px; border-radius: 999px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); font-size: 10.5px; font-weight: 600; line-height: 1.6; white-space: nowrap; vertical-align: middle; }
