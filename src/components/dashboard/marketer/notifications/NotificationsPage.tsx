@@ -210,6 +210,9 @@ export function NotifItem({
   // coloured dot and the document shows in the body instead.
   const iconPhotoUrl = isSafeUrl(iconRaw) && !isPdfUrl(iconRaw) ? (iconRaw as string) : "";
   const hasPhoto = !!iconPhotoUrl;
+  /* The one picture worth opening: the receipt the admin attaches to a paid
+     withdrawal. Everything else here is a product photo. */
+  const zoomable = isPaid && expanded;
 
   const icon = hasPhoto ? (
     <div className="notif-icon notif-icon-photo" style={{ backgroundImage: `url('${iconPhotoUrl}')` }} />
@@ -322,19 +325,20 @@ export function NotifItem({
             {/* Cropped to a small square, so it is framed the way the owner
                 framed it rather than from the middle.
 
-                Open, this is the whole point of the notification — the receipt
-                the admin sent, or the product the order was for — so it opens
-                full screen. Shut, it is a 34px thumbnail in a row whose only
-                job is to open the card, and taking that tap away from the row
-                would be taking it from the row. */}
+                Only the receipt the admin sends for a paid withdrawal opens
+                full screen. For every other kind this is the product's own
+                photo, already shown at the size it is worth, and the tap did
+                nothing but interrupt someone scrolling the list. Shut, it is a
+                34px thumbnail in a row whose only job is to open the card. */}
             <img
               src={iconPhotoUrl}
               alt=""
               loading="lazy"
-              onClick={expanded ? (e) => { e.stopPropagation(); onPhoto(iconPhotoUrl); } : undefined}
+              onClick={zoomable ? (e) => { e.stopPropagation(); onPhoto(iconPhotoUrl); } : undefined}
               style={{
                 ...coverStyle(d.cover_focus_x, d.cover_focus_y),
-                ...(expanded ? { cursor: "zoom-in", objectFit: "contain" as const } : null),
+                ...(expanded ? { objectFit: "contain" as const } : null),
+                ...(zoomable ? { cursor: "zoom-in" } : null),
               }}
             />
           </div>

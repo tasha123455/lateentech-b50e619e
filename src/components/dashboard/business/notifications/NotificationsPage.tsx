@@ -6,7 +6,6 @@ import { coverStyle } from "@/lib/coverFocus";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { bidiIsolate, isAr, splitCC } from "../lib/format";
-import { useLightbox } from "../ui/Lightbox";
 
 function tr(en: string, ar: string): string {
   return isAr() ? ar : en;
@@ -52,7 +51,6 @@ function Row({ k, v, noTranslate }: { k: string; v: string; noTranslate?: boolea
 
 export function NotificationsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { api, notifications, reviews, reloadNotifications } = useBusinessData();
-  const lightbox = useLightbox();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [avatarByMarketer, setAvatarByMarketer] = useState<Record<string, string>>({});
 
@@ -167,10 +165,12 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
                   <div style={{ marginTop: 6, padding: "8px 10px", borderRadius: 8, background: "#181818", border: "0.5px solid #232323", fontSize: 12, color: "var(--color-text-primary)" }}>
                     <div style={{ color: "#e9b949", letterSpacing: 2, marginBottom: 4 }}>{stars}</div>
                     <span data-no-i18n="">{text}</span>
+                    {/* Not a link to anything. A review's photo is context for
+                        the words next to it; opening it full screen was a tap
+                        people hit while trying to scroll. */}
                     {photoUrl ? (
                       <div
-                        style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: "1px solid var(--color-border-secondary)" }}
-                        onClick={(e) => { e.stopPropagation(); lightbox.open([photoUrl], 0); }}
+                        style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", border: "1px solid var(--color-border-secondary)" }}
                       >
                         <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", display: "block", ...coverStyle(d?.cover_focus_x, d?.cover_focus_y) }} />
                       </div>
@@ -180,8 +180,7 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
               } else if (photoUrl) {
                 reviewDetails = (
                   <div
-                    style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: "1px solid var(--color-border-secondary)" }}
-                    onClick={(e) => { e.stopPropagation(); lightbox.open([photoUrl], 0); }}
+                    style={{ marginTop: 8, width: 64, height: 64, borderRadius: 10, overflow: "hidden", border: "1px solid var(--color-border-secondary)" }}
                   >
                     <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", display: "block", ...coverStyle(d?.cover_focus_x, d?.cover_focus_y) }} />
                   </div>

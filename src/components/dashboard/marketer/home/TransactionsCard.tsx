@@ -144,15 +144,20 @@ function TxnItem({
      nothing to say what it was — so the one that keeps the amount and the
      status beside it is the one that stays. */
 
+  /* Only the receipt the admin sends for a completed withdrawal opens full
+     screen. Everywhere else the picture is the product's own photo, already
+     shown at the size it is worth — blowing that up is a gesture that leads
+     nowhere, and it fires on a card people are trying to scroll past. */
+  const zoomable = type === "withdraw";
   const bigPhoto = photoValid ? (
     <div style={{ margin: "-2px 0 10px 0" }}>
       <img
         src={photoUrl}
         alt=""
-        onClick={(e) => { e.stopPropagation(); onPhoto(photoUrl!); }}
+        onClick={zoomable ? (e) => { e.stopPropagation(); onPhoto(photoUrl!); } : undefined}
         style={{
           width: "100%", maxHeight: 220, objectFit: "contain", background: "#0d0d0d",
-          borderRadius: 10, display: "block", cursor: "zoom-in",
+          borderRadius: 10, display: "block", ...(zoomable ? { cursor: "zoom-in" } : null),
         }}
       />
     </div>
