@@ -2,6 +2,7 @@ import { coverStyle } from "@/lib/coverFocus";
 import { useEffect, useMemo, useState } from "react";
 
 import { isAr, normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, whenFull } from "../lib/format";
@@ -117,14 +118,15 @@ function FeedbackBox({
 }
 
 function ReportCard({
-  r, onOpenProduct, onResolve, onNotifyBusiness,
+  r, onOpenProduct, onResolve, onNotifyBusiness, open, onToggle,
 }: {
   r: AdminReport;
   onOpenProduct: (id: string) => void;
   onResolve: (id: string, comment: string) => Promise<void>;
   onNotifyBusiness: (reportId: string, comment: string) => Promise<void>;
+  open: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [openBell, setOpenBell] = useState<"" | "marketer" | "business">("");
   const [mkText, setMkText] = useState("");
   const [bizText, setBizText] = useState("");
@@ -183,7 +185,7 @@ function ReportCard({
   return (
     <div className={"rpt-card" + (open ? " open" : "")}>
       {/* Collapsed, this row is the whole card: who, about what, when. */}
-      <button className="rpt-head" onClick={() => setOpen((v) => !v)}>
+      <button className="rpt-head" onClick={onToggle}>
         <div className="adm-user-av" data-no-i18n>
           {reporter.avatar_signed_url
             ? <img src={reporter.avatar_signed_url} alt="" loading="lazy" decoding="async" />
@@ -339,6 +341,7 @@ export function ReportsTab({
   const { reports, loadReports, api } = useAdminData();
   const [loadedOnce, setLoadedOnce] = useState(false);
   const [search, setSearch] = useState("");
+  const { isOpen, toggle } = useAccordion();
 
   useEffect(() => {
     if (!active) return;
@@ -399,6 +402,8 @@ export function ReportsTab({
         onOpenProduct={onOpenProduct}
         onResolve={resolve}
         onNotifyBusiness={notifyBusiness}
+        open={isOpen(r.id)}
+        onToggle={() => toggle(r.id)}
       />
     ));
   }

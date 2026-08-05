@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { changedTitle } from "@/lib/changedFields";
 import { isPdfUrl } from "@/lib/filePicker";
 import { coverStyle } from "@/lib/coverFocus";
 import { marketOf } from "@/lib/markets";
 import { LIBYA } from "@/lib/markets/libya";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useMarketerData } from "../MarketerDataProvider";
 import { ago, isAr, isSafeUrl, parseData, t } from "../lib/format";
@@ -118,16 +118,8 @@ function localize(n: NotificationRow): { t: string; b: string } {
 
 export function NotificationsPage({ onBack }: { onBack: () => void }) {
   const { notifications, newNotifIds } = useMarketerData();
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const { isOpen, toggle } = useAccordion();
   const lightbox = usePhotoLightbox();
-
-  const toggle = (id: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   return (
     <>
@@ -160,7 +152,7 @@ export function NotificationsPage({ onBack }: { onBack: () => void }) {
               key={n.id}
               n={n}
               isNew={newNotifIds.has(n.id)}
-              expanded={expanded.has(n.id)}
+              expanded={isOpen(n.id)}
               onToggle={() => toggle(n.id)}
               onPhoto={lightbox.openOne}
             />

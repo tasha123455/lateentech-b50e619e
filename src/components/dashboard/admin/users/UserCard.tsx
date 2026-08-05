@@ -30,9 +30,18 @@ export function goToAccount(userId: string, role: string, name: string, productI
   }
 }
 
-export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void }) {
+export function UserCard({
+  u, onChanged, open, onToggle, onClose,
+}: {
+  u: AdminUser;
+  onChanged: () => void;
+  /* Which card is open is the list's business, not the card's — a card that
+     kept its own flag could not know another had been opened. */
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}) {
   const { api } = useAdminData();
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
@@ -135,7 +144,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
       setBody("");
       setPhoto(null);
       alert("Notification sent to " + name + ".");
-      setOpen(false);
+      onClose();
     } catch (e) {
       alert("Failed: " + (e as Error).message);
     }
@@ -144,7 +153,7 @@ export function UserCard({ u, onChanged }: { u: AdminUser; onChanged: () => void
 
   return (
     <div className="adm-user-card">
-      <div className="adm-user-row" onClick={() => setOpen((v) => !v)}>
+      <div className="adm-user-row" onClick={onToggle}>
         <div className="adm-user-av" data-no-i18n>
           {u.avatar_signed_url
             ? <img src={u.avatar_signed_url} alt="" loading="lazy" decoding="async" />

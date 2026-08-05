@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { normSearch, searchMatcher } from "@/components/dashboard/marketer/lib/format";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useAdminData } from "../AdminDataProvider";
 import { dispPhone, initials, money, when, whenFull } from "../lib/format";
@@ -27,14 +28,15 @@ function searchText(r: DeletionRequest): string {
 /** Collapsed, the head row is the whole card: who, which role, how long ago.
  *  Contact details, the wallet and the decision open on tap. */
 function DeletionCard({
-  r, comment, onComment, onResolve,
+  r, comment, onComment, onResolve, open, onToggle,
 }: {
   r: DeletionRequest;
   comment: string;
   onComment: (v: string) => void;
   onResolve: (id: string, action: "approve" | "reject") => Promise<void>;
+  open: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const person = r.person || {};
   const name = person.business_name || person.full_name || "Unknown user";
   const wallet = r.live_wallet || {};
@@ -45,7 +47,7 @@ function DeletionCard({
 
   return (
     <div className={"del-card" + (open ? " open" : "")}>
-      <button className="del-head" onClick={() => setOpen((v) => !v)}>
+      <button className="del-head" onClick={onToggle}>
         <div className="adm-user-av" data-no-i18n>
           {person.avatar_signed_url
             ? <img src={person.avatar_signed_url} alt="" loading="lazy" decoding="async" />
@@ -143,6 +145,7 @@ export function DeletionsTab({ active }: { active: boolean }) {
   const [search, setSearch] = useState("");
   const [comments, setComments] = useState<Record<string, string>>({});
   const [loadedOnce, setLoadedOnce] = useState(false);
+  const { isOpen, toggle } = useAccordion();
 
   useEffect(() => {
     if (!active) return;
@@ -189,7 +192,7 @@ export function DeletionsTab({ active }: { active: boolean }) {
   } else {
     body = list.map((r) => <DeletionCard key={r.id} r={r} comment={comments[r.id] || ""}
       onComment={(v) => setComments((prev) => ({ ...prev, [r.id]: v }))}
-      onResolve={resolve} />);
+      onResolve={resolve} open={isOpen(r.id)} onToggle={() => toggle(r.id)} />);
   }
 
   return (

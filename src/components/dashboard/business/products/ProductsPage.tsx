@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAccordion } from "@/lib/useAccordion";
 import { useBusinessData } from "../BusinessDataProvider";
 import { catSearchText, zoneSearchText } from "../lib/constants";
 import { isAr, searchMatcher } from "../lib/format";
@@ -51,6 +52,9 @@ export function ProductsPage({
   const [filter, setFilter] = useState<FilterKey>("all");
   const [pauseBlocked, setPauseBlocked] = useState(false);
   const [adminHidden, setAdminHidden] = useState(false);
+  /* Seeded with the reported product so arriving from a report still lands on
+     an open card — after that it is one open card at a time like every list. */
+  const { isOpen, toggle } = useAccordion(focusProductId ?? null);
 
   useEffect(() => {
     const h = () => { /* re-render on language change is handled by parent via context, no-op here */ };
@@ -254,6 +258,8 @@ export function ProductsPage({
               onToggleStatus={handleToggleStatus}
               onDelete={handleDelete}
               focused={p.id === focusProductId}
+              expanded={isOpen(p.id)}
+              onToggle={() => toggle(p.id)}
             />
           ))
         )}

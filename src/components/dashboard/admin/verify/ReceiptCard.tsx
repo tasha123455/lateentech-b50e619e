@@ -96,15 +96,16 @@ function OrderInfo({ o, onPhoto }: { o: ReceiptOrder; onPhoto: (url: string) => 
 }
 
 export function ReceiptCard({
-  o, onApprove, onReject, onRefund,
+  o, onApprove, onReject, onRefund, open, onToggle,
 }: {
   o: ReceiptOrder;
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onRefund: (id: string) => void;
+  open: boolean;
+  onToggle: () => void;
 }) {
   const lightbox = useLightbox();
-  const [open, setOpen] = useState(false);
 
   const qty = Number(o.qty || 0);
   const unitPrice = Number(o.unit_price || 0);
@@ -147,7 +148,7 @@ export function ReceiptCard({
           platform earns, what the marketer owes, and where it stands. */}
       {/* Small, in the corner — the state is a glance, not a headline. */}
       <StatusPill o={o} />
-      <button className="rcpt-head" onClick={() => setOpen((v) => !v)}>
+      <button className="rcpt-head" onClick={onToggle}>
         <span
           className="rcpt-head-thumb"
           onClick={(e) => { e.stopPropagation(); openReceipt(); }}

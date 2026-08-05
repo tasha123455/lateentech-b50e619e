@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useAccordion } from "@/lib/useAccordion";
+
 import { useMarketerData } from "../MarketerDataProvider";
 import { dateMatches, type BreakdownSelection } from "../lib/analytics";
 import { fmtDT, isSafeUrl, parseData, t } from "../lib/format";
@@ -20,7 +22,7 @@ const KINDS: Record<string, "add" | "subtract" | "withdraw" | "reject" | "failed
 export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
   const { notifications, orders, walletCur, analytics } = useMarketerData();
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const { isOpen, toggle } = useAccordion();
   const lightbox = usePhotoLightbox();
 
   /* This card lives inside the analytics card, under the boxes the range tabs
@@ -33,14 +35,6 @@ export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const rawSymbol = (analytics.earnByCur[walletCur] && analytics.earnByCur[walletCur].sym) || "د.ل";
-
-  const toggle = (id: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   return (
     <div className="mkbd-card" style={{ margin: "16px 0 0" }}>
@@ -77,7 +71,7 @@ export function TransactionsCard({ sel }: { sel: BreakdownSelection }) {
                     n={n}
                     sym={rawSymbol}
                     code={walletCur}
-                    expanded={expanded.has(n.id)}
+                    expanded={isOpen(n.id)}
                     onToggle={() => toggle(n.id)}
                     onPhoto={lightbox.openOne}
                     findOrderAmount={(orderId) => {

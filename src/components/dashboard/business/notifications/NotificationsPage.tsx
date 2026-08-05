@@ -3,6 +3,7 @@ import { changedTitle } from "@/lib/changedFields";
 import { FulfilmentBadge } from "@/components/shared/FulfilmentBadge";
 import { asFulfilment } from "@/lib/fulfilment";
 import { coverStyle } from "@/lib/coverFocus";
+import { useAccordion } from "@/lib/useAccordion";
 
 import { useBusinessData } from "../BusinessDataProvider";
 import { bidiIsolate, isAr, splitCC } from "../lib/format";
@@ -79,7 +80,7 @@ function WarnMark() {
 
 export function NotificationsPage({ active, onBack }: { active: boolean; onBack: () => void }) {
   const { api, notifications, reviews, reloadNotifications } = useBusinessData();
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const { isOpen: isNotifOpen, toggle: toggleNotif } = useAccordion();
   const [avatarByMarketer, setAvatarByMarketer] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -311,10 +312,10 @@ export function NotificationsPage({ active, onBack }: { active: boolean; onBack:
             );
 
             if (expandable && detailsHtml) {
-              const isOpen = !!expanded[n.id];
+              const isOpen = isNotifOpen(n.id);
               return (
                 <div className={"notif-item expandable" + (isOpen ? " expanded" : "")} data-id={n.id} key={n.id}>
-                  <div className="notif-top" onClick={() => setExpanded((s) => ({ ...s, [n.id]: !s[n.id] }))}>
+                  <div className="notif-top" onClick={() => toggleNotif(n.id)}>
                     {hasPhoto ? (
                       <div className="notif-photo-wrap">
                         {/* Cropped small, so it keeps the owner's framing. */}
