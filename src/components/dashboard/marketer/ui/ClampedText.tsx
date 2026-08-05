@@ -71,7 +71,15 @@ export function ClampedText({
         {text}
       </div>
       {over && (
-        <button type="button" className="pd-desc-more" onClick={() => setOpen((v) => !v)}>
+        /* The click stops here. Every card this sits in toggles when its body
+           is tapped, so without this, opening the description shut the card
+           around it — the two handlers fired on the same tap and the outer one
+           won. */
+        <button
+          type="button"
+          className="pd-desc-more"
+          onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        >
           {open ? (ar ? "أقل" : "less") : ar ? "المزيد..." : "more..."}
         </button>
       )}
