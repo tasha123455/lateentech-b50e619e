@@ -13,7 +13,7 @@ import {
   platThreshold, moneyParts, searchMatcher,
 } from "../lib/format";
 import {
-  CURRENCIES, COUNTRIES, COUNTRY_CUR_MAP, CATEGORY_DATA, CATEGORY_GROUP_AR,
+  CURRENCIES, COUNTRIES, CATEGORY_DATA, CATEGORY_GROUP_AR,
   CATEGORY_ITEM_AR, LIBYA_CITIES, cityLbl,
   type Currency,
 } from "../lib/constants";
@@ -112,7 +112,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   const [categorySearch, setCategorySearch] = useState("");
   const [categoryPanelOpen, setCategoryPanelOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
-  const [currDropdownOpen, setCurrDropdownOpen] = useState(false);
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [variantMode, setVariantMode] = useState<"none" | "variants">("none");
   const [simpleQty, setSimpleQty] = useState("0");
@@ -153,12 +152,17 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     return c;
   };
 
-  const defaultCurrencyForCountry = (): Currency | null => {
-    try {
-      const cc = profile?.country as string | undefined;
-      const curCode = cc && COUNTRY_CUR_MAP[cc];
-      return curCode ? (CURRENCIES.find((c) => c.code === curCode) || null) : null;
-    } catch { return null; }
+  /* The market's currency, not the owner's country's.
+     There is no currency field on this form any more: a product is priced in
+     the one currency its market trades in, the same currency the platform fee
+     and the wallet use. It used to default from profile.country, which is a
+     different question — a Libyan market seller whose profile country was set
+     to somewhere else would have shown one currency on the form and saved
+     another. */
+  const defaultCurrency = (): Currency => {
+    const code = marketOf((profile?.market as string) || DEFAULT_MARKET_CODE).money.currencyCode;
+    return CURRENCIES.find((c) => c.code === code)
+      || { code, name: code, symbol: "", flag: "" } as Currency;
   };
 
   // Open / reset when opening.
@@ -184,7 +188,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     });
     setZones(zz);
     setCommMode((p?.commMode as "pct" | "fixed") || "pct");
-    setSelectedCurrency(p?.currency || defaultCurrencyForCountry());
+    setSelectedCurrency(p?.currency || defaultCurrency());
     setCurrentCode(ensureUniqueCode(p?.code));
     setName(p?.name || "");
     setDesc(p?.desc || "");
@@ -199,7 +203,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     // Editing a product listed before this choice existed leaves it unset
     // rather than picking one on the owner's behalf.
     setFulfilment(p?.fulfilment ?? null);
-    setCurrDropdownOpen(false);
     setCountryDropdownOpen(false);
     setCityPanelOpenFor(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -328,11 +331,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
   };
 
   // ---- currency / country dropdowns ----
-  const selectCurrency = (code: string) => {
-    const c = CURRENCIES.find((x) => x.code === code) || null;
-    setSelectedCurrency(c);
-    setCurrDropdownOpen(false);
-  };
   const soonBadge = <span className="soon-badge">{ar ? "قريباً" : "soon"}</span>;
   const lyd = CURRENCIES.find((c) => c.code === "LYD");
   const eur = CURRENCIES.find((c) => c.code === "EUR");
@@ -345,28 +343,11 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
      and the dollar are named in Arabic and carry theirs. Name and symbol are
      separate elements rather than one string, so the reading direction puts
      them in the right order without a second set of labels for RTL. */
-  const CUR_CHOICE: Record<string, { label: string; sym: string }> = {
-    LYD: { label: ar ? "د.ل" : "LYD", sym: "" },
-    EUR: { label: ar ? "يورو" : "EUR", sym: "€" },
-    USD: { label: ar ? "دولار" : "USD", sym: "$" },
-  };
-  const curChoice = (code: string) => CUR_CHOICE[code] || { label: code, sym: "" };
-  const curRow = (c: { code: string; flag: string }) => (
-    <>
-      <span className="curr-flag">{c.flag}</span>
-      <span className="curr-label" data-no-i18n>{curChoice(c.code).label}</span>
-      {!!curChoice(c.code).sym && <span className="curr-sub" data-no-i18n>{curChoice(c.code).sym}</span>}
-    </>
-  );
   const ly = COUNTRIES.find((c) => c.code === "LY");
 
   const selectCountry = (code: string) => {
     setZones((z) => (z[code] ? z : { ...z, [code]: { cities: {}, shipping: "" } }));
     setCountryDropdownOpen(false);
-    if (!selectedCurrency && COUNTRY_CUR_MAP[code]) {
-      const match = CURRENCIES.find((c) => c.code === COUNTRY_CUR_MAP[code]);
-      if (match) setSelectedCurrency(match);
-    }
   };
   const removeZone = (code: string) => setZones((z) => { const n = { ...z }; delete n[code]; return n; });
 
@@ -476,7 +457,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
     if (!desc.trim()) { alert(ar ? "يرجى إدخال وصف المنتج." : "Please add a product description."); return; }
     if (!selectedCategory) { alert(ar ? "يرجى اختيار فئة للمنتج." : "Please select a category."); return; }
     if (!photos.length) { alert(ar ? "يرجى إضافة صورة واحدة على الأقل للمنتج." : "Please add at least one product photo."); return; }
-    if (!selectedCurrency) { alert(ar ? "يرجى اختيار عملة." : "Please select a currency."); return; }
     /* Required when listing something new, so everything from here on has an
        answer. Not required when editing: a product listed before this choice
        existed should not be held hostage by it to fix a typo. */
@@ -705,22 +685,6 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
 
           <label className="lp-field-label">Description <span className="lp-req">*</span></label>
           <textarea className="lp-input lp-textarea" value={desc} disabled={editLocked} onChange={(e) => setDesc(e.target.value)} placeholder={ar ? "ما الذي يميّز هذا المنتج؟ الخامة، المقاس، طريقة الاستخدام…" : "What makes this product worth selling? Materials, fit, use case…"} data-no-i18n="" />
-
-          <label className="lp-field-label">Currency <span className="lp-req">*</span></label>
-          {/* Not a choice any more. The price, the platform fee, the wallet it
-              lands in and the cash the customer hands over are all one
-              currency, and that currency belongs to the market — so this
-              states the answer instead of asking a question whose other
-              options were never selectable anyway. */}
-          <div className="lp-currency-static" style={{ pointerEvents: "none" }}>
-            <span style={{ fontSize: 18, lineHeight: 1 }}>{marketCurrency.flag}</span>
-            <span style={{ color: "var(--color-text-primary)" }} data-no-i18n>
-              {curChoice(marketCurrency.code).label}
-            </span>
-            <span style={{ fontSize: 11, color: "var(--color-text-secondary)", marginInlineStart: 4 }} data-no-i18n>
-              {curChoice(marketCurrency.code).sym}
-            </span>
-          </div>
 
           <label className="lp-field-label">Category <span className="lp-req">*</span></label>
           <div className="lp-category-picker">
