@@ -14,12 +14,16 @@ import { isAr } from "../lib/format";
  *  scrollHeight and clientHeight agree and the question stops being askable,
  *  so the answer from the clamped state is the one that is kept. */
 export function ClampedText({
-  text, lines = 3, className, style,
+  text, lines = 3, className, style, moreClassName = "pd-desc-more",
 }: {
   text: string;
   lines?: number;
   className?: string;
   style?: React.CSSProperties;
+  /** The toggle's class. Defaults to the dashboards' own, which is styled in
+   *  their stylesheets; the public product page loads none of those and passes
+   *  its own instead. */
+  moreClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -81,7 +85,7 @@ export function ClampedText({
            won. */
         <button
           type="button"
-          className="pd-desc-more"
+          className={moreClassName}
           onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
         >
           {open ? (ar ? "أقل" : "less") : ar ? "المزيد..." : "more..."}

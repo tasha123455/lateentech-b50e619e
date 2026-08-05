@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ClampedText } from "@/components/dashboard/marketer/ui/ClampedText";
 import { coverPosition } from "@/lib/coverFocus";
 import { etaTextOf } from "@/lib/eta";
 import { useAuth } from "@/auth/AuthContext";
@@ -345,7 +346,14 @@ export function PublicProduct({ id }: { id: string }) {
         {p.description && (
           <div className="mt-4">
             <div className="mb-1 text-xs font-medium text-text-2">Description</div>
-            <p className="whitespace-pre-wrap text-sm leading-6 text-text-2" data-no-i18n>{p.description}</p>
+            {/* Same three lines and the same measured toggle the dashboards
+                use. The classes are the page's own because none of the
+                dashboard stylesheets are loaded here. */}
+            <ClampedText
+              className="whitespace-pre-wrap text-sm leading-6 text-text-2"
+              text={p.description}
+              moreClassName="mt-1 inline-block cursor-pointer border-0 bg-transparent p-0 text-xs font-medium text-primary"
+            />
           </div>
         )}
 
