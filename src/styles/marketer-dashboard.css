@@ -591,9 +591,15 @@ to {opacity:1;transform:scale(1);}
 .lateen-marketer .wa-toggle svg {flex-shrink:0;pointer-events:none;}
 .lateen-marketer .wa-section {display:none;}
 .lateen-marketer .wa-section.open {display:block;}
-.lateen-marketer .pd-hd-row {display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.lateen-marketer .pd-hd-name {font-size:20px;font-weight:600;color:#fff;flex:1;min-width:0;overflow-wrap:anywhere;}
-.lateen-marketer .pd-hd-code {font-size:12px;font-weight:500;color:#c9c6c1;background:#0d0d0d;border:0.5px solid #2a2a2a;padding:5px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;letter-spacing:.3px;}
+/* The name keeps at least half the line, and the code drops below it rather
+   than squeezing it. The code pill cannot wrap and will not shrink — a part of
+   a product code is no use to anybody — so with nothing holding the name's
+   side, a long code took the width it wanted and left the name a column four
+   characters wide, which `overflow-wrap:anywhere` then broke down the page one
+   letter at a time. `min-width` is the floor that makes the row wrap instead. */
+.lateen-marketer .pd-hd-row {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.lateen-marketer .pd-hd-name {font-size:20px;font-weight:600;color:#fff;flex:1;min-width:50%;overflow-wrap:anywhere;}
+.lateen-marketer .pd-hd-code {font-size:12px;font-weight:500;color:#c9c6c1;background:#0d0d0d;border:0.5px solid #2a2a2a;padding:5px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;max-width:100%;letter-spacing:.3px;}
 .lateen-marketer .pd-hd-code-lbl {color:#8a8680;font-weight:400;margin-inline-end:4px;letter-spacing:0;}
 .lateen-marketer .pd-variant {display:flex;align-items:center;flex-wrap:wrap;background:#191919;border:0.5px solid #232323;border-radius:14px;padding:10px 16px;margin:0 16px 8px;gap:12px;}
 .lateen-marketer .pd-variant-lbl {font-size:14px;color:#f0eeeb;flex:1;min-width:0;font-weight:500;}

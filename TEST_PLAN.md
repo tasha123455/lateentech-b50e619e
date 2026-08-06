@@ -158,20 +158,25 @@ No account is needed for any of it. One bug found and fixed so far: the Arabic
 registration page failed to hydrate, which erased anything typed into it in its
 first half second.
 
-**Blocked on test accounts.** Everything behind a sign-in — sections 3 and 5 for
-the dashboards, section 7's product cross-check, section 8's sweep. The site
-signs in with Google only, which a robot cannot and should not drive, so the
-tests ask Supabase for a session with an email and a password instead. That
-needs a throwaway account per role with a password set on it in the Supabase
-dashboard. Details in `e2e/README.md`.
+**Running now, on demand, against the live site.** Everything behind a sign-in.
+The three test accounts exist and work: `e2e/specs/{marketer,business,admin}.spec.ts`
+walk the dashboards, and `e2e/specs/lifecycle.spec.ts` walks §1's whole state
+machine plus §6's freeze cascade. The site signs in with Google only, which a
+robot cannot and should not drive, so the tests ask Supabase for a session with
+an email and a password instead — details in `e2e/README.md`.
 
-**Blocked on somewhere safe to run it.** Sections 1, 4 and 6 — the order
-lifecycle, uploads, and account freezing — create real orders, real refunds,
-real uploads and real frozen accounts. There is one environment and it is the
-live one, with real businesses and real money in it. Running these against it
-is not a thing to do quietly. Either a staging project (a second Supabase
-project seeded with fake data) or a decision to accept the mess is needed
-first, and that decision is the owner's.
+**No longer blocked on somewhere safe to run it.** Sections 1 and 6 create real
+orders, refunds and frozen accounts, so they are behind `WASLA_WRITES=1` and
+skip unless it is set. The owner's decision was to accept the mess while the
+platform has not launched. `npm run tidy` clears up afterwards.
+
+**Findings so far.** One real defect, in `BUGS_FOUND.md`: an order could be
+rejected from any state, including after delivery, and going round that loop
+paid the marketer's commission again each time. Fixed in a migration that has
+not yet been applied. The matrix built in phase 1 is `TEST_MATRIX_GENERATED.md`.
+
+**Still to run.** Section 2's forms, section 4's uploads, and section 3 against
+the dashboards now that there is data in every order state to read in Arabic.
 
 **Not planned.** Section 0's Playwright MCP: `e2e/` is a Playwright suite
 already, it runs on GitHub's machines without a laptop, and it keeps its

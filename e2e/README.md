@@ -162,6 +162,17 @@ It is not a perfect mirror. Requests are re-issued by node, so connection
 reuse, HTTP/2 and anything measured in milliseconds are not what a real visitor
 would get. What it is good for is what the page does and what it draws.
 
+Such a sandbox usually also ships its own browser, at whatever version it was
+built with, and Playwright will refuse to start looking for the exact build its
+own version pins — `Executable doesn't exist at …chromium_headless_shell-1234`,
+with an invitation to download one that the sandbox has no way to accept. Point
+it at the one that is already there instead:
+
+```bash
+WASLA_CHROMIUM=/opt/pw-browsers/chromium WASLA_RELAY=1 \
+WASLA_URL=https://www.lateen.online npm test
+```
+
 ## Running it without a computer
 
 `.github/workflows/e2e.yml` runs all of this on GitHub's machines, so no
