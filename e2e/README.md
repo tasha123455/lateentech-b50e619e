@@ -75,17 +75,16 @@ a deliberate act rather than an accident.
 
 ## What it has found
 
-**The Arabic registration page fails to hydrate.** Confirmed against the live
-site. The city control reads the language off the browser, which the server does
-not have, so the server writes "Select city" into the Arabic page and the
-browser writes "اختر المدينة" over it. React calls that a hydration failure,
-discards the whole form and rebuilds it — which is also why typing into that
-page in its first half second is thrown away. English is unaffected, because
-there the server's guess happens to be right.
+**The Arabic registration page failed to hydrate.** Confirmed against the live
+site, and fixed. The city control read the language off the browser, which the
+server does not have, so the server wrote "Select city" into the Arabic page and
+the browser wrote "اختر المدينة" over it. React called that a hydration failure,
+threw the whole form away and rebuilt it — which is what erased a name typed in
+the page's first half second. It reads the route now, which the server and the
+browser can both see. English was never affected, because there the server's
+guess happened to be right.
 
-The test for it is marked expected-to-fail for Arabic, so a green run still
-means green. Fix it and that test starts failing, which is the reminder to come
-back and delete the marking.
+A test guards it in both languages, so it cannot come back quietly.
 
 Two things worth knowing that are *not* defects:
 

@@ -10,11 +10,6 @@ import { open, path, settled, watchForErrors } from "../lib/app";
 
 const langs = ["en", "ar"] as const;
 
-/* One known defect, let through the console-error checks below so that
- * everything else still fails loudly. It has its own failing test further
- * down, which is where the explanation lives and where the fix will show. */
-const KNOWN_AR_HYDRATION = /Hydration failed|hydrat(ed|ion)|Minified React error #(418|42[0-5])/i;
-const unexpected = (errors: string[]) => errors.filter((e) => !KNOWN_AR_HYDRATION.test(e));
 
 /* The one screen every visitor meets before anything else. It is deliberately
  * outside the loop below and does not use `open()`, because `open()` answers
@@ -62,7 +57,7 @@ for (const lang of langs) {
       await expect(page.locator(`a[href="/${lang}/marketer/signin"]`).first()).toBeVisible();
       await expect(page.locator(`a[href="/${lang}/business/signin"]`).first()).toBeVisible();
 
-      expect(unexpected(errors), "console errors on the landing page").toEqual([]);
+      expect(errors, "console errors on the landing page").toEqual([]);
     });
 
     for (const role of ["marketer", "business"] as const) {
@@ -83,7 +78,7 @@ for (const lang of langs) {
         // And a way to the other side, for somebody who has no account yet.
         await expect(page.locator(`a[href="/${lang}/${role}/register"]`).first()).toBeVisible();
 
-        expect(unexpected(errors), "console errors on the sign-in page").toEqual([]);
+        expect(errors, "console errors on the sign-in page").toEqual([]);
       });
 
       test(`${role} registration will not submit until it has what it needs`, async ({ page }) => {
@@ -137,20 +132,20 @@ for (const lang of langs) {
         // Now, and not before, it will go through.
         await expect(guard).toHaveAttribute("aria-disabled", "false");
 
-        expect(unexpected(errors), "console errors on the registration page").toEqual([]);
+        expect(errors, "console errors on the registration page").toEqual([]);
       });
 
-      /* The second bug this suite found, and the reason for the filter above.
+      /* The bug this suite found, now fixed and kept honest.
        *
-       * The city control decides its own wording by reading the language off
-       * the browser, which on the server there is none of — so the server
-       * writes "Select city" into the Arabic page and the browser writes
-       * "اختر المدينة" over it. React calls that a hydration failure and
-       * throws away the whole form to rebuild it, which is why typing into
-       * this page in its first half second is thrown away with it. English is
-       * unaffected, because there the server's guess happens to be right. */
+       * The city control used to decide its wording by reading the language
+       * off the browser, which on the server there is none of — so the server
+       * wrote "Select city" into the Arabic page and the browser wrote
+       * "اختر المدينة" over it. React called that a hydration failure and
+       * threw the whole form away to rebuild it, which is what erased a name
+       * typed in the page's first half second. It reads the route now, which
+       * both sides can see. Arabic is the case that was broken, so Arabic is
+       * the case worth guarding. */
       test(`${role} registration hydrates without React throwing`, async ({ page }) => {
-        test.fail(lang === "ar", "the city control renders English on the server");
         const errors = watchForErrors(page);
         await open(page, lang, `/${role}/register`);
         await expect(page.getByRole("button", { name: /City|المدينة/ })).toBeVisible();

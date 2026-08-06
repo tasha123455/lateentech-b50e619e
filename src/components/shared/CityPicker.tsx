@@ -2,15 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useScrollLock } from "@/lib/useScrollLock";
 
 import { LIBYA_CITIES } from "@/components/dashboard/marketer/lib/constants";
-import { isArLang, searchMatcher, useLangTick } from "@/components/dashboard/marketer/lib/format";
+import { searchMatcher, useLangTick } from "@/components/dashboard/marketer/lib/format";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 /** The city's name in the language being read. Stored values are always the
  *  English name, so this only affects what is shown. */
-function cityName(en: string): string {
+function cityName(en: string, ar: boolean): string {
   if (!en) return "";
   const m = LIBYA_CITIES.find((c) => c.en === en || c.ar === en);
   if (!m) return en;
-  return isArLang() ? m.ar : m.en;
+  return ar ? m.ar : m.en;
 }
 
 /**
@@ -46,7 +47,14 @@ export function CityPicker({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
-  const ar = isArLang();
+  /* From the route, not from <html dir>. The server has no document to read,
+     so asking the page which language it is gets "English" there and "Arabic"
+     in the browser a moment later — and React, finding the two versions of the
+     Arabic registration page disagree about the word in this control, throws
+     the whole form away and builds it again. That rebuild is what erases a
+     name typed in the first half second. The route knows the language on both
+     sides, so both sides now write the same word. */
+  const ar = useLanguage().lang === "ar";
 
   useScrollLock(open);
 
@@ -66,7 +74,7 @@ export function CityPicker({
     return LIBYA_CITIES.filter((c) => hit(c.en) || hit(c.ar));
   }, [q]);
 
-  const label = value ? cityName(value) : ar ? "اختر المدينة" : "Select city";
+  const label = value ? cityName(value, ar) : ar ? "اختر المدينة" : "Select city";
 
   return (
     <>
