@@ -73,24 +73,32 @@ something every time it runs fills a real shop with rubbish.
 themselves. Nothing uses it yet; it exists so that adding such a test later is
 a deliberate act rather than an accident.
 
-## Known defects it has already found
+## What it has found
 
-Two tests are marked expected-to-fail. They describe real bugs, are left in so
-the bugs stay described, and are counted as passes so that a green run still
-means green. Fix either one and its test starts failing — which is the reminder
-to come back and delete the marking.
+**The Arabic registration page fails to hydrate.** Confirmed against the live
+site. The city control reads the language off the browser, which the server does
+not have, so the server writes "Select city" into the Arabic page and the
+browser writes "اختر المدينة" over it. React calls that a hydration failure,
+discards the whole form and rebuilds it — which is also why typing into that
+page in its first half second is thrown away. English is unaffected, because
+there the server's guess happens to be right.
 
-- **Picking a city reopens the picker.** On the registration form the city sheet
-  is rendered inside the `<label>` that titles the field, and a browser treats a
-  click anywhere in a label as a click on its control. Choosing a city therefore
-  sends a second click to the button that opens the sheet: the choice is taken,
-  but the list is still on screen and looks like it was ignored. The two profile
-  screens use a `<div>` and are unaffected.
-- **The Arabic registration page fails to hydrate.** The city control reads the
-  language off the browser, which the server does not have, so the server writes
-  "Select city" into the Arabic page and the browser writes "اختر المدينة" over
-  it. React discards the whole form and rebuilds it — which is also why typing
-  into that page in its first half second is thrown away.
+The test for it is marked expected-to-fail for Arabic, so a green run still
+means green. Fix it and that test starts failing, which is the reminder to come
+back and delete the marking.
+
+Two things worth knowing that are *not* defects:
+
+- **The city picker behaves differently under `vite dev`.** There, choosing a
+  city — or pressing Cancel — closes the sheet and reopens it at once: the
+  `<label>` around the field hands a second click to the button that opens it.
+  On the deployed site it does not happen, on any of the four forms in either
+  language. The test asserts the deployed behaviour and skips itself against
+  the dev server, which it recognises by the `data-tsd-source` attributes that
+  only the dev tooling adds.
+- **Pages do not respond for their first half second.** They arrive from the
+  server as finished HTML and answer nothing until React takes them over. Every
+  test waits for that, which is what `settled()` in `lib/app.ts` is for.
 
 ## What it cannot cover
 
