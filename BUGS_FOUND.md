@@ -49,6 +49,37 @@ reproduced — nothing is listed on the strength of having read the code.
 
 ---
 
+### [Marketer, Admin] Product sheet — a long product code crushes the name into a vertical column
+
+- **Steps to reproduce:** open a product whose code is long — sixteen
+  characters is enough — on a phone. Either the marketer's browse sheet or the
+  admin's product review sheet.
+- **Expected:** the name reads as a name.
+- **Actual:** it is squeezed into a column a few characters wide and breaks
+  mid-word, one or two letters per line, running down the side of the card:
+  W A S / L A - / E 2 E / p r o d / u c t.
+- **Why:** the header is a flex row. The code pill is `white-space: nowrap`
+  and `flex-shrink: 0` — correctly, since half a product code is no use to
+  anybody — so it takes whatever width it needs. The name was `flex: 1;
+  min-width: 0`, so it absorbed the whole shortfall, and `overflow-wrap:
+  anywhere` then broke it apart rather than letting it overflow. Measured: the
+  name came out **59px wide** in the reported case, and 71px and 103px in two
+  others.
+- **Severity:** cosmetic, but it makes the most important text on the sheet
+  unreadable.
+- **Found by:** the owner, by accident, on test data. Real product codes are
+  short — `LT-ZPVJDQ` — so this needed a long one to show up, which is why it
+  had not been seen. A long *name* alone does not trigger it.
+- **Fixed:** `src/styles/marketer-dashboard.css` and
+  `src/styles/admin-dashboard.css`. The name now has `min-width: 50%` and the
+  row may wrap, so the code drops onto its own line rather than crushing the
+  name. Both sheets share the classes, so it is one fix in two places.
+- **Covered by:** `e2e/specs/product-header.spec.ts` — five cases across both
+  roles and both directions, measuring the rendered width. Confirmed to fail
+  on the old stylesheet and pass on the new one.
+
+---
+
 ### [Admin] Receipts — refunding an already-refunded order gives a misleading message
 
 - **Steps to reproduce:** refund a delivered order, then refund it again.
