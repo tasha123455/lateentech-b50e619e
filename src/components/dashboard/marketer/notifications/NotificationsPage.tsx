@@ -279,9 +279,18 @@ export function NotifItem({
               alt=""
               loading="lazy"
               onClick={zoomable ? (e) => { e.stopPropagation(); onPhoto(iconPhotoUrl); } : undefined}
+              /* No object-fit switch on open. It used to become `contain`
+                 while expanded so a tall photo was not cropped, and that is
+                 the jump: object-fit cannot be animated, so it flips in a
+                 single frame while the box around it is still travelling
+                 through its own .45s. Shutting the card fired it first — the
+                 picture snapped to filling the frame, and only then did the
+                 frame start shrinking, which reads as a zoom in before the
+                 collapse. The business list never did this, and it is the one
+                 that was asked for. Cropping is what the stylesheet already
+                 says, and the owner's own framing is respected either way. */
               style={{
                 ...coverStyle(d.cover_focus_x, d.cover_focus_y),
-                ...(expanded ? { objectFit: "contain" as const } : null),
                 ...(zoomable ? { cursor: "zoom-in" } : null),
               }}
             />

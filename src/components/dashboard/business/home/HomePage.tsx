@@ -429,23 +429,55 @@ export function HomePage({ onOpenNotifications, onOpenPayout, onOpenSupport, onO
     setRingShowFail(false);
   }, [currentPeriod]);
 
+  /* The ring is built once and updated in place.
+   *
+   * It used to be destroyed and constructed again on every change, and its
+   * dependencies included `analyticsData` — an object rebuilt whenever the
+   * figures are refetched. So the chart was thrown away and started over
+   * several times while the page was still loading, and a new doughnut sweeps
+   * itself in from nothing over half a second. That restarting sweep is the
+   * stutter. Handing the numbers to the chart already on screen lets it
+   * animate from where it is to where it belongs: once, and going somewhere.
+   *
+   * The dependencies below are the two percentages rather than the object
+   * they came from, so a refresh that recomputes the same figures does not
+   * redraw anything at all. */
+  const ringOk = analyticsData[currentPeriod].ok;
+  const ringFail = analyticsData[currentPeriod].fail;
+  const ringTotal = ringOk + ringFail;
+  const ringOkPct = ringTotal > 0 ? Math.round((ringOk / ringTotal) * 100) : 0;
+  const ringFailPct = ringTotal > 0 ? 100 - ringOkPct : 0;
+
+  const ringNow = useRef({ ringTotal, ringOkPct, ringFailPct });
+  ringNow.current = { ringTotal, ringOkPct, ringFailPct };
+
   useEffect(() => {
     if (!chartReady) return;
     const Chart = (window as unknown as { Chart?: AnyChart }).Chart;
     const canvas = ringRef.current;
     if (!Chart || !canvas) return;
-    if (ringChartRef.current) { try { ringChartRef.current.destroy(); } catch { /* ignore */ } ringChartRef.current = null; }
-    const a = analyticsData[currentPeriod];
-    const total = a.ok + a.fail;
-    const okPct = total > 0 ? Math.round((a.ok / total) * 100) : 0;
-    const failPct = total > 0 ? 100 - okPct : 0;
-    const ringColors = total > 0 ? ["#35c98f", "#e2685f"] : ["#2a2a2a", "#2a2a2a"];
+    const { ringTotal: t, ringOkPct: o, ringFailPct: f } = ringNow.current;
+    const colors = t > 0 ? ["#35c98f", "#e2685f"] : ["#2a2a2a", "#2a2a2a"];
     ringChartRef.current = new Chart(canvas, {
       type: "doughnut",
-      data: { datasets: [{ data: total > 0 ? [okPct, failPct] : [0, 100], backgroundColor: ringColors, hoverBackgroundColor: ringColors, borderWidth: 0, hoverOffset: 0, hoverBorderWidth: 0 }] },
+      data: { datasets: [{ data: t > 0 ? [o, f] : [0, 100], backgroundColor: colors, hoverBackgroundColor: colors, borderWidth: 0, hoverOffset: 0, hoverBorderWidth: 0 }] },
       options: { cutout: "72%", responsive: false, events: [], plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { duration: 500 } },
     });
-  }, [chartReady, analyticsData, currentPeriod]);
+    return () => {
+      if (ringChartRef.current) { try { ringChartRef.current.destroy(); } catch { /* ignore */ } ringChartRef.current = null; }
+    };
+  }, [chartReady]);
+
+  useEffect(() => {
+    const chart = ringChartRef.current;
+    if (!chart) return;
+    const colors = ringTotal > 0 ? ["#35c98f", "#e2685f"] : ["#2a2a2a", "#2a2a2a"];
+    const ds = chart.data.datasets[0];
+    ds.data = ringTotal > 0 ? [ringOkPct, ringFailPct] : [0, 100];
+    ds.backgroundColor = colors;
+    ds.hoverBackgroundColor = colors;
+    try { chart.update(); } catch { /* ignore */ }
+  }, [ringTotal, ringOkPct, ringFailPct]);
 
   const a = analyticsData[currentPeriod];
   const total = a.ok + a.fail;
