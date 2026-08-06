@@ -61,10 +61,27 @@ export function ClampedText({
       // A hair over, so a line landing exactly on the boundary still counts.
       const maxH = lh * lines + 1;
 
+      /* Fixed, not absolute at left:-99999px.
+       *
+       * Parking the probe far off to the left is the usual trick, and it is
+       * the reason the page jumped to the top every time a description was
+       * collapsed. This app reads right-to-left, and in a right-to-left
+       * document leftward is the direction the page scrolls: an absolutely
+       * positioned element 99999px to the left is not out of the way, it is
+       * a hundred thousand pixels of scrollable area suddenly appended to the
+       * document. Chrome on a phone answers a change that size by putting the
+       * scroll position back to the start, and since measuring only happens
+       * on the way in, only "less" ever did it.
+       *
+       * A fixed element is positioned against the viewport and contributes no
+       * scrollable overflow at all, so there is nothing to react to. It still
+       * lays out and still measures — visibility:hidden keeps layout, unlike
+       * display:none — and the width is given explicitly either way, which is
+       * all the measurement depends on. */
       const probe = document.createElement("div");
       probe.setAttribute("aria-hidden", "true");
       probe.style.cssText =
-        `position:absolute;left:-99999px;top:0;visibility:hidden;pointer-events:none;width:${width}px;`;
+        `position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;width:${width}px;`;
       // Everything that decides where a line breaks, taken from the real one.
       [
         "font-family", "font-size", "font-weight", "font-style", "letter-spacing",
