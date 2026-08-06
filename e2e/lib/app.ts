@@ -108,11 +108,42 @@ export async function signIn(page: Page, lang: "en" | "ar", role: RoleName): Pro
   const ref = new URL(url).hostname.split(".")[0];
   await rememberLanguage(page, lang);
   await page.addInitScript(
-    ([k, v]) => {
-      try { window.localStorage.setItem(k, v); } catch { /* ignore */ }
+    (pairs: readonly (readonly [string, string])[]) => {
+      for (const [k, v] of pairs) {
+        try { window.localStorage.setItem(k, v); } catch { /* ignore */ }
+      }
     },
-    [`sb-${ref}-auth-token`, JSON.stringify(session)] as const,
+    [
+      [`sb-${ref}-auth-token`, JSON.stringify(session)],
+      /* Answer the notifications question before it is asked.
+         Every dashboard offers to turn push on, a second after it opens, over
+         a full-screen backing that swallows taps — so a test that signs in and
+         then touches anything is racing a modal it never meant to test. This
+         is the same mark the modal writes when somebody taps "Not now", so the
+         test arrives as a returning user who has already answered rather than
+         as one the prompt is hidden from. The prompt itself is left alone; it
+         has its own test to write when it is worth one. */
+      ["wasla_push_prompt_dismissed_at", String(Date.now())],
+      ["wasla_push_prompt_visits_since_dismiss", "0"],
+    ] as const,
   );
+
+  /* A brand-new account has no role, and the dashboard has nothing to show
+     somebody who is neither a marketer nor a business. The site's own sign-up
+     grants it by calling this same function once Google hands the account back;
+     doing it here is the same call with the same account's own token, not a
+     short cut around one — the database still decides whether it is allowed.
+     Harmless to repeat: it is written to do nothing on a second call. */
+  if (role !== "admin") {
+    await page.request.post(`${url.replace(/\/$/, "")}/rest/v1/rpc/add_self_role`, {
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      data: { _role: role, _business_name: role === "business" ? "Wasla test shop" : null },
+    });
+  }
 
   await page.goto(path(lang, "/dashboard"));
   await settled(page);

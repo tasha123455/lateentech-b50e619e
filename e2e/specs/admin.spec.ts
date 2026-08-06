@@ -23,8 +23,15 @@ test.describe("admin", () => {
     expect(await signIn(page, "en", "admin")).toBe(true);
 
     // Reach product review through the menu rather than guessing a tab index.
-    await page.locator(".adm-menu-btn, [class*='menu']").first().click();
-    await page.getByText(/product review/i).first().click();
+    // By id: matching on the word "menu" also matched the drawer's own backing,
+    // which is in the page from the start and merely hidden, so the click waited
+    // out its timeout on something that was never going to become visible.
+    await page.locator("#adm-nav-menu").click();
+    /* Inside the drawer. Every admin page is in the document at once, hidden
+       rather than unmounted, so an unscoped search for the words also finds
+       the destination page's own heading — which is the thing this click is
+       supposed to bring into view, and cannot be clicked to get there. */
+    await page.locator(".adm-menu-drawer .adm-menu-item", { hasText: /product review/i }).first().click();
 
     const tiles = page.locator(".adm-prod-grid .c");
     test.skip(!(await haveAny(tiles)), "no products exist yet, so there is no grid to check");
@@ -34,24 +41,30 @@ test.describe("admin", () => {
 
     if ((await tiles.count()) < 2) test.skip(true, "need two products to test the swap");
 
+    /* The one that is open, not the first one written. Four overlays share
+       this class — products, employees, employee history, marketer detail —
+       and all four are in the document from the start, closed. Taking the
+       first meant watching a sheet that was never going to open. */
+    const OPEN = ".adm-pdetail.open";
+
     // Open the first, close it, then open the second and watch every frame.
     await tiles.nth(0).click();
-    const card = page.locator(".adm-pdetail-card").first();
+    const card = page.locator(`${OPEN} .adm-pdetail-card`).first();
     await expect(card).toBeVisible({ timeout: 20_000 });
     const firstName = (await card.innerText()).slice(0, 60);
-    await page.locator(".adm-pdetail-close").first().click();
+    await page.locator(`${OPEN} .adm-pdetail-close`).first().click();
     await page.waitForTimeout(500);
 
-    await page.evaluate(() => {
+    await page.evaluate((open) => {
       (window as unknown as { __f: string[] }).__f = [];
       const t = () => {
         const w = window as unknown as { __f: string[] };
-        const el = document.querySelector(".adm-pdetail-card");
+        const el = document.querySelector(`${open} .adm-pdetail-card`);
         w.__f.push(el ? (el as HTMLElement).innerText.replace(/\s+/g, " ").slice(0, 60) : "(closed)");
         if (w.__f.length < 50) requestAnimationFrame(t);
       };
       requestAnimationFrame(t);
-    });
+    }, OPEN);
     await tiles.nth(1).click();
     await page.waitForTimeout(1200);
     const frames = await page.evaluate(() => (window as unknown as { __f: string[] }).__f);
