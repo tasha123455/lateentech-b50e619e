@@ -1,0 +1,87 @@
+# Runs the browser tests on GitHub's machines.
+#
+# The point of this file is that nobody needs a laptop. The tests need a real
+# desktop browser, which a phone cannot give them and a sandboxed assistant
+# cannot always reach the internet from; a GitHub runner is an ordinary Linux
+# machine with an ordinary connection, so it can do both.
+#
+# Start it by hand from the Actions tab — or let it run on its own after every
+# change to the app, which is how you find out before anybody using it does.
+name: Browser tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Which tests to run"
+        type: choice
+        default: "public"
+        options:
+          - public        # no account needed — always safe to run
+          - all           # everything, needs the account secrets set
+      url:
+        description: "Site to test (blank = the live site)"
+        type: string
+        required: false
+
+  # Every push to main, so a change that breaks a screen is caught at once.
+  # Only the tests that need no account, so this stays safe to leave on.
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "e2e/**"
+      - ".github/workflows/e2e.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Install the test runner
+        working-directory: e2e
+        run: npm ci
+
+      - name: Install the browser
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the tests
+        working-directory: e2e
+        env:
+          WASLA_URL: ${{ inputs.url || 'https://www.lateen.online' }}
+          # Absent, every signed-in test skips itself and the run still
+          # reports honestly on everything that needs no account.
+          WASLA_MARKETER_EMAIL: ${{ secrets.WASLA_MARKETER_EMAIL }}
+          WASLA_MARKETER_PASSWORD: ${{ secrets.WASLA_MARKETER_PASSWORD }}
+          WASLA_BUSINESS_EMAIL: ${{ secrets.WASLA_BUSINESS_EMAIL }}
+          WASLA_BUSINESS_PASSWORD: ${{ secrets.WASLA_BUSINESS_PASSWORD }}
+          WASLA_ADMIN_EMAIL: ${{ secrets.WASLA_ADMIN_EMAIL }}
+          WASLA_ADMIN_PASSWORD: ${{ secrets.WASLA_ADMIN_PASSWORD }}
+        run: |
+          if [ "${{ inputs.suite }}" = "all" ]; then
+            npx playwright test
+          else
+            npx playwright test specs/public.spec.ts
+          fi
+
+      # Always — a failed run is exactly the one whose screenshots are wanted.
+      - name: Keep the report and the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: |
+            e2e/report
+            e2e/test-results
+          retention-days: 14
+          if-no-files-found: ignore

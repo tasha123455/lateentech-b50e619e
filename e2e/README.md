@@ -73,3 +73,25 @@ for weeks while three separate desktop harnesses reported it was fine — it
 needed a mobile layout viewport to happen at all. Everything here runs at
 412×830 with touch, and walks both `/en` and `/ar`, because right-to-left is
 where most of the rest have been.
+
+## Running it without a computer
+
+`.github/workflows/e2e.yml` runs all of this on GitHub's machines, so no
+laptop and no local setup is needed — the Actions tab has a **Run workflow**
+button, and it works from a phone browser.
+
+It runs the no-account tests on every push to `main`. To run the signed-in
+ones, add these under *Settings → Secrets and variables → Actions*:
+
+| Secret | What it is |
+| --- | --- |
+| `WASLA_MARKETER_EMAIL` / `WASLA_MARKETER_PASSWORD` | a throwaway marketer account |
+| `WASLA_BUSINESS_EMAIL` / `WASLA_BUSINESS_PASSWORD` | a throwaway business account |
+| `WASLA_ADMIN_EMAIL` / `WASLA_ADMIN_PASSWORD` | a throwaway admin, invited from the Admins page |
+
+Secrets are write-only: GitHub will not show them again, and they are masked
+in the logs. They are not in the repository and not in anyone's chat history.
+
+Every run keeps its report and screenshots as a downloadable artifact for two
+weeks, whether it passed or failed — a failed run is exactly the one whose
+screenshots you want.
