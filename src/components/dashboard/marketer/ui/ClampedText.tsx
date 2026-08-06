@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { holdBottom, releaseHeldBottom } from "@/lib/holdScrollBottom";
+import { holdBottom, pinScroll, releaseHeldBottom } from "@/lib/holdScrollBottom";
 
 import { isAr } from "../lib/format";
 
@@ -182,6 +182,14 @@ export function ClampedText({
       return;
     }
 
+    /* Off, for as long as the box is changing size. Scroll anchoring is the
+       browser watching for content shifting around the reader and correcting
+       the offset to compensate; a box that is deliberately animating its own
+       height is exactly the shift it is built to react to, and its correction
+       lands on top of the one being made here. Two parties adjusting the same
+       scroll offset in the same frame is how a fifty-pixel collapse turns into
+       a jump the length of the screen. */
+    el.style.overflowAnchor = "none";
     el.style.overflow = "hidden";
     el.style.height = from + "px";
     void el.offsetHeight; // commit the start height before the transition
@@ -194,6 +202,7 @@ export function ClampedText({
       done = true;
       el.style.height = "";
       el.style.overflow = "";
+      el.style.overflowAnchor = "";
       el.style.transition = "";
       releaseHeldBottom();
     };
@@ -231,10 +240,17 @@ export function ClampedText({
               // from here to whatever the new text needs.
               const h = boxRef.current?.getBoundingClientRect().height ?? null;
               fromH.current = h;
-              /* Only on the way in. Opening makes the page longer, which
-                 nothing has to be held against — it is losing the height that
-                 moves the page, not gaining it. */
-              if (open && boxRef.current && h != null) holdBottom(boxRef.current, h);
+              /* Both, and only on the way in: opening makes the page longer,
+                 and it is losing the height that moves it, not gaining it.
+                 holdBottom keeps the offset legal by not letting the page get
+                 shorter underneath it; pinScroll keeps it *unchanged*,
+                 whichever of the browser's own corrections would otherwise
+                 have moved it. The first is the reason the second usually has
+                 nothing to do. */
+              if (open && boxRef.current && h != null) {
+                holdBottom(boxRef.current, h);
+                pinScroll(boxRef.current);
+              }
               setOpen((v) => !v);
             }}
           >

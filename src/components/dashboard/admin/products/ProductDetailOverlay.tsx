@@ -129,7 +129,10 @@ export function ProductDetailOverlay({
   const lightbox = useLightbox();
   const galleryRef = useRef<HTMLDivElement>(null);
 
-  const [detail, setDetail] = useState<ProductDetail | null>(null);
+  /* Tagged with the product it answers for. Without the id there is no way to
+     tell a resolved "this product does not exist" from a reply that simply has
+     not arrived yet, and the two have to read differently on screen. */
+  const [detail, setDetail] = useState<{ id: string; data: ProductDetail } | null>(null);
   const [error, setError] = useState("");
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [zonesOpen, setZonesOpen] = useState(false);
@@ -139,16 +142,12 @@ export function ProductDetailOverlay({
   const [activeMarketers, setActiveMarketers] = useState("…");
   const [reviews, setReviews] = useState<ProductReview[]>([]);
 
-  /* Read rather than depended on: the grid hands back a fresh object every
-     time it reloads, and the sheet must not re-fetch because the list behind
-     it happened to refresh. */
-  const seedRef = useRef(seed);
-  seedRef.current = seed;
-
   useEffect(() => {
     if (!productId) return;
-    const from = seedRef.current;
-    setDetail(from && from.id === productId ? { product: from, owner: null } : null);
+    /* No seeding here. The render below already falls back to the grid's row
+       for as long as no reply has arrived, and doing it in an effect instead
+       would leave the first frame drawn from whatever was in state before. */
+    setDetail(null);
     setError("");
     setGalleryIdx(0);
     setZonesOpen(false);
@@ -163,7 +162,7 @@ export function ProductDetailOverlay({
       try {
         const res = (await api.admin.getProductDetail(productId)) as ProductDetail;
         if (cancelled) return;
-        setDetail(res);
+        setDetail({ id: productId, data: res });
       } catch (e) {
         console.error("[admin] product detail", e);
         if (!cancelled) setError((e as Error)?.message || "");
@@ -210,8 +209,26 @@ export function ProductDetailOverlay({
   }, [productId, api]);
 
   const open = !!productId;
-  const p = detail?.product || null;
-  const owner = detail?.owner || {};
+
+  /* What the sheet shows is worked out here, during the render, and not left
+     to the effect above.
+
+     The effect is where `detail` gets replaced when a different product is
+     tapped, and effects run after the browser has painted. So the first frame
+     of the new sheet was drawn from the previous product's `detail` — still in
+     state, because nothing had reset it yet. That is the flash of somebody
+     else's product: not a slow request, a frame painted from state belonging
+     to the tile you tapped last time.
+
+     Deciding it from `productId` instead means a stale `detail` can never be
+     shown at all: it counts only while it is the detail of the product being
+     asked for, and until the request lands the grid's own row stands in. */
+  const fetched = detail && detail.id === productId ? detail.data : null;
+  const opened = seed && seed.id === productId ? { product: seed, owner: null } : null;
+  const shown = fetched || opened;
+
+  const p = shown?.product || null;
+  const owner = shown?.owner || {};
   const hidden = status === "hidden";
   const paused = status === "paused";
 
@@ -219,9 +236,9 @@ export function ProductDetailOverlay({
   // Only when there is nothing else to show. Opened on the grid's own row, a
   // failed request costs the owner's phone and email and nothing more — not a
   // reason to take a sheet that is already readable away from the admin.
-  if (error && !detail) {
+  if (error && !shown) {
     body = <div className="adm-empty">Failed to load: {error}</div>;
-  } else if (!detail) {
+  } else if (!shown) {
     body = <div className="adm-empty">Loading…</div>;
   } else if (!p) {
     body = <div className="adm-empty">Product not found.</div>;
