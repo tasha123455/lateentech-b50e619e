@@ -134,6 +134,37 @@
   }
   .auth-input:focus { border-color: var(--color-border-strong); }
   .auth-input::placeholder { color: var(--color-text-3); }
+
+  /* The backing behind anything that opens over the page: menus, sheets,
+     pickers, dialogs, the photo viewer.
+     Blurred rather than blacked out. A heavy dim hides the page and the sheet
+     reads as a different screen; softening it instead keeps the page there,
+     recognisable but plainly not the thing being asked about, so a sheet feels
+     like it is resting on the app rather than replacing it. The dim that
+     remains is slight, and only there so that pale text on the sheet's edge
+     still has something to sit against.
+     `saturate` because blurring alone greys what is behind it, and this app's
+     screens are mostly colour.
+     Where the blur cannot be drawn — an old browser, or a phone that has
+     turned effects off to save battery — the colour underneath is all that is
+     left, so it is dark enough to be a scrim on its own. */
+  .wasla-scrim {
+    background: rgba(0, 0, 0, 0.32);
+    -webkit-backdrop-filter: blur(16px) saturate(125%);
+    backdrop-filter: blur(16px) saturate(125%);
+  }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .wasla-scrim { background: rgba(0, 0, 0, 0.22); }
+  }
+  /* Some devices drop backdrop-filter under reduced motion / power saving; the
+     colour above already covers that. Honour the preference for the blur only. */
+  @media (prefers-reduced-transparency: reduce) {
+    .wasla-scrim {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: rgba(0, 0, 0, 0.62);
+    }
+  }
 }
 
 /* RTL support for translated app */

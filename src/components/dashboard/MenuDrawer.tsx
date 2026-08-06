@@ -7,7 +7,7 @@ export function MenuDrawer({ open, onClose, name, subtitle }: Props) {
   if (!open) return null;
   return (
     <div className="absolute inset-0 z-30 flex">
-      <button onClick={onClose} className="absolute inset-0 bg-black/60" aria-label="Close menu" />
+      <button onClick={onClose} className="absolute inset-0 wasla-scrim" aria-label="Close menu" />
       <aside className="absolute right-0 top-0 bottom-0 flex w-[78%] flex-col rounded-l-2xl border-l border-border-strong bg-surface p-6">
         <button onClick={onClose} className="self-end text-text-2">✕</button>
         <div className="mb-8 mt-2 flex items-center gap-2.5 border-b border-border pb-5">

@@ -140,7 +140,7 @@ function FailNoteModal({ onCancel, onConfirm }: { onCancel: () => void; onConfir
   const [text, setText] = useState("");
   return (
     <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.22)", backdropFilter: "blur(16px) saturate(125%)", WebkitBackdropFilter: "blur(16px) saturate(125%)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
       <div style={{ background: "#1a2030", borderRadius: 16, padding: 18, width: "100%", maxWidth: 380, boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }}>

@@ -154,10 +154,12 @@ export function RegisterForm({ role }: { role: Role }) {
         </Field>
       )}
 
-      <Field label="Phone number" required>
+      <Field label="Phone number" required htmlFor="reg-phone">
         <div className="flex gap-2">
-          <CountryCodePicker />
+          <CountryCodePicker ariaLabel={ar ? "رمز الدولة" : "Country code"} />
           <input
+            id="reg-phone"
+            aria-label={ar ? "رقم الهاتف" : "Phone number"}
             type="tel"
             required
             inputMode="numeric"
@@ -174,10 +176,15 @@ export function RegisterForm({ role }: { role: Role }) {
         )}
       </Field>
 
-      <Field label={ar ? "واتساب او رقم هاتف إضافي (اختياري)" : "WhatsApp or additional phone number (optional)"}>
+      <Field
+        label={ar ? "واتساب او رقم هاتف إضافي (اختياري)" : "WhatsApp or additional phone number (optional)"}
+        htmlFor="reg-alt-phone"
+      >
         <div className="flex gap-2">
-          <CountryCodePicker />
+          <CountryCodePicker ariaLabel={ar ? "رمز الدولة" : "Country code"} />
           <input
+            id="reg-alt-phone"
+            aria-label={ar ? "واتساب او رقم هاتف إضافي" : "WhatsApp or additional phone number"}
             type="tel"
             inputMode="numeric"
             value={altPhone}
@@ -202,14 +209,19 @@ export function RegisterForm({ role }: { role: Role }) {
         )}
       </Field>
 
-      <Field label="Country" required>
-        <CountryPicker />
+      <Field label="Country" required group>
+        <CountryPicker ariaLabel={ar ? "الدولة" : "Country"} />
       </Field>
 
       {/* Under the country, because it answers the same question at the next
           level down — and it is the level that actually varies. */}
-      <Field label={ar ? "المدينة" : "City"} required>
-        <CityPicker value={city} onChange={setCity} className="auth-input" />
+      <Field label={ar ? "المدينة" : "City"} required group>
+        <CityPicker
+          value={city}
+          onChange={setCity}
+          className="auth-input"
+          ariaLabel={ar ? "المدينة" : "City"}
+        />
       </Field>
 
       <Collapsible className="rounded-xl border border-border bg-surface-2">

@@ -172,7 +172,7 @@
 .lateen-admin .bd-dd-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .lateen-admin .bd-dd-item.on { border-color: var(--accent); color: var(--txt-1); }
 .lateen-admin .adm-status-count { font-size: 11px; opacity: 0.6; font-variant-numeric: tabular-nums; }
-.lateen-admin .adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; align-items: flex-end; justify-content: center; }
+.lateen-admin .adm-pdetail { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.22); -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%); z-index: 110; align-items: flex-end; justify-content: center; }
 .lateen-admin .adm-pdetail.open { display: flex; }
 /* A fixed height, not a maximum. The sheet's content is fetched after it
    opens, so with max-height it came up 130px tall around the word
@@ -398,7 +398,7 @@
    menus, rather than a short bottom sheet. */
 .lateen-admin .adm-menu-overlay { display: none; position: fixed; inset: 0; z-index: 130; }
 .lateen-admin .adm-menu-overlay.open { display: block; }
-.lateen-admin .adm-menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+.lateen-admin .adm-menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.22); -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%); }
 .lateen-admin .adm-menu-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(80%, 340px); height: 100dvh; background: var(--surface); padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; border-radius: 20px 0 0 0; border-left: 0.5px solid var(--border); overflow-y: auto; overscroll-behavior: contain; font-family: var(--font); }
 .lateen-admin .adm-menu-close { align-self: flex-end; background: none; border: none; cursor: pointer; color: var(--txt-2); padding: 0; margin-bottom: 1rem; }
 .lateen-admin .adm-menu-head { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; margin-bottom: 0.85rem; border-bottom: 0.5px solid var(--border-2); }
@@ -476,7 +476,7 @@
 /* Filter & sort sheet. */
 .lateen-admin .ov { display: none; position: fixed; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
 .lateen-admin .ov.open { display: flex; }
-.lateen-admin .ob { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+.lateen-admin .ob { position: absolute; inset: 0; background: rgba(0,0,0,.22); -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%); }
 .lateen-admin .sh { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2.5rem; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--border); }
 .lateen-admin .shh { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 1.25rem; }
 .lateen-admin .sht { font-size: 17px; font-weight: 500; color: var(--txt-1); margin-bottom: 1.5rem; }
@@ -665,7 +665,7 @@
 /* The add/edit sheet. */
 .lateen-admin .adm-sheet-overlay { display: none; position: fixed; inset: 0; z-index: 140; align-items: flex-end; justify-content: center; }
 .lateen-admin .adm-sheet-overlay.open { display: flex; }
-.lateen-admin .adm-sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.7); }
+.lateen-admin .adm-sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.22); -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%); }
 .lateen-admin .adm-sheet { position: relative; z-index: 1; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto; background: var(--surface); border-radius: 20px 20px 0 0; border-top: 0.5px solid var(--border-2); padding: 18px 16px calc(18px + env(safe-area-inset-bottom,0px)); }
 .lateen-admin .adm-sheet-title { font-size: 16px; font-weight: 600; color: var(--txt-1); margin-bottom: 14px; }
 .lateen-admin .adm-lbl { display: block; font-size: 11px; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 6px; }

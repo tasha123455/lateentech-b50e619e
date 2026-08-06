@@ -105,12 +105,42 @@ export function AuthError({ children }: { children?: React.ReactNode }) {
   );
 }
 
-export function Field({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
+/**
+ * A titled row of the sign-up form.
+ *
+ * A `<label>` wrapped around a control names it, which is what a screen reader
+ * reads out when somebody lands on it. That only works while there is exactly
+ * one control inside: where a field holds two — the dialling code beside the
+ * phone box — the name goes to the first, and the box a person actually types
+ * into is left with nothing but its own faint example text to announce it.
+ * `htmlFor` says which one is meant, and settles it.
+ *
+ * `group` is for a field whose control is not a form control at all but a
+ * button that opens a list. A label around one of those is worse than none: a
+ * browser treats a click anywhere inside a label as a click on its control, so
+ * choosing from a list rendered inside it clicks the button that opened it.
+ * Those get a plain box and name their own control.
+ */
+export function Field({ label, children, required, htmlFor, group }: {
+  label: string;
+  children: React.ReactNode;
+  required?: boolean;
+  /** id of the control this titles, when the field holds more than one. */
+  htmlFor?: string;
+  /** Render as a box rather than a label — see above. */
+  group?: boolean;
+}) {
+  const title = (
+    <span className="mb-1.5 block text-xs text-text-2">
+      {label}{required && <span className="ms-1 text-destructive">*</span>}
+    </span>
+  );
+  if (group) {
+    return <div className="block">{title}{children}</div>;
+  }
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs text-text-2">
-        {label}{required && <span className="ms-1 text-destructive">*</span>}
-      </span>
+    <label className="block" htmlFor={htmlFor}>
+      {title}
       {children}
     </label>
   );

@@ -68,7 +68,7 @@ export function ReportModal({
   return (
     <div
       style={{
-        position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999,
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.22)", backdropFilter: "blur(16px) saturate(125%)", WebkitBackdropFilter: "blur(16px) saturate(125%)", zIndex: 9999,
         display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}

@@ -61,10 +61,14 @@ export function CountryCodePicker({
   variant = "auth",
   className,
   width = 82,
+  ariaLabel,
 }: {
   variant?: Variant;
   className?: string;
   width?: number;
+  /** Read aloud in place of the "+218" on its face, which on its own says
+   *  nothing about what the button is for. */
+  ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useOutsideClose(open, () => setOpen(false));
@@ -73,7 +77,7 @@ export function CountryCodePicker({
 
   return (
     <div ref={ref} className={sheet ? "cpk" : "relative shrink-0"} style={sheet ? { width } : undefined}>
-      <button type="button" onClick={() => setOpen((v) => !v)} className={trigger} style={sheet ? undefined : { width }}>
+      <button type="button" aria-label={ariaLabel} onClick={() => setOpen((v) => !v)} className={trigger} style={sheet ? undefined : { width }}>
         <span>{LIBYA_CC}</span>
         {sheet ? <PickerChevron /> : <span className="text-text-3">▾</span>}
       </button>
@@ -101,9 +105,14 @@ export function CountryCodePicker({
 export function CountryPicker({
   variant = "auth",
   className,
+  ariaLabel,
 }: {
   variant?: Variant;
   className?: string;
+  /** What a screen reader should call this. A button is not a form control, so
+   *  the field's title cannot be attached to it the way a label is attached to
+   *  an input; without this it is announced as its own contents, "Libya". */
+  ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useOutsideClose(open, () => setOpen(false));
@@ -112,7 +121,7 @@ export function CountryPicker({
 
   return (
     <div ref={ref} className={sheet ? "cpk cpk-full" : "relative"}>
-      <button type="button" onClick={() => setOpen((v) => !v)} className={trigger}>
+      <button type="button" aria-label={ariaLabel} onClick={() => setOpen((v) => !v)} className={trigger}>
         <span className={sheet ? "cpk-val" : undefined}>🇱🇾 <span>Libya</span></span>
         {sheet ? <PickerChevron /> : <span className="text-text-3">▾</span>}
       </button>

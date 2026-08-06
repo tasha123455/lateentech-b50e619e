@@ -1061,7 +1061,7 @@ export function ProductFormOverlay({ open, editing, onClose }: { open: boolean; 
       </div>
 
       {reqPhoneInfoOpen && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setReqPhoneInfoOpen(false)}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.22)", backdropFilter: "blur(16px) saturate(125%)", WebkitBackdropFilter: "blur(16px) saturate(125%)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setReqPhoneInfoOpen(false)}>
           <div style={{ background: "#1a2030", borderRadius: 16, padding: 18, width: "100%", maxWidth: 380, boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 8 }}>{ar ? "طلب رقم هاتف إضافي من الزبون" : "Require Additional Phone Number from customer"}</div>
             <div style={{ fontSize: 13, color: "#c7ccd6", lineHeight: 1.6 }}>

@@ -165,7 +165,9 @@ export function NotificationConsentModal() {
         display: "flex",
         alignItems: "flex-end",
         justifyContent: "center",
-        background: "rgba(0,0,0,0.55)",
+        background: "rgba(0,0,0,0.22)",
+        backdropFilter: "blur(16px) saturate(125%)",
+        WebkitBackdropFilter: "blur(16px) saturate(125%)",
         padding: "16px",
       }}
       onClick={dismiss}

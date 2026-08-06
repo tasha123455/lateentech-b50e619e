@@ -33,11 +33,17 @@ export function CityPicker({
   disabled = false,
   id,
   className,
+  ariaLabel,
 }: {
   value: string;
   onChange: (city: string) => void;
   disabled?: boolean;
   id?: string;
+  /** What a screen reader should call this. A button is not a form control, so
+   *  the field's title cannot be attached to it the way a label is attached to
+   *  an input; without this it is announced as the words on its face, which
+   *  before a city is chosen are "Select city". */
+  ariaLabel?: string;
   /** The field class of the page it sits on — `auth-input` on the register
    *  form, `pd-inp` in a dashboard sheet — so it matches its neighbours
    *  instead of approximating them. */
@@ -81,6 +87,7 @@ export function CityPicker({
       <button
         type="button"
         id={id}
+        aria-label={ariaLabel}
         disabled={disabled}
         onClick={() => setOpen(true)}
         data-no-i18n
@@ -117,7 +124,7 @@ export function CityPicker({
             fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
           }}
         >
-          <div onClick={() => setOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.72)", backdropFilter: "blur(3px)" }} />
+          <div className="wasla-scrim" onClick={() => setOpen(false)} style={{ position: "absolute", inset: 0 }} />
           <div
             style={{
               position: "relative", zIndex: 1, width: "100%", maxWidth: 380, maxHeight: "78vh",

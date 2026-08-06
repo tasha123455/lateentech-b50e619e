@@ -49,7 +49,7 @@ export function Landing() {
       </div>
       {shopperSoonOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setShopperSoonOpen(false)} />
+          <div className="absolute inset-0 wasla-scrim" onClick={() => setShopperSoonOpen(false)} />
           <div className="relative z-10 w-full max-w-[340px] rounded-2xl border border-border bg-surface p-6 text-center shadow-xl">
             <p className="text-[15px] text-text-1">
               Where can I find it?{" "}

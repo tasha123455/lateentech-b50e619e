@@ -97,7 +97,7 @@
 .nav-item.active .nav-label { color: #34c77b; font-weight: 500; }
 .menu-overlay { display: none; position: fixed; inset: 0; z-index: 30; }
 .menu-overlay.open { display: flex; }
-.menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+.menu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.22); -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%); }
 .menu-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(78%, 340px); height: 100dvh; background: #1e1e1e; padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom)); display: flex; flex-direction: column; border-radius: 20px 0 0 0; border-left: 0.5px solid var(--color-border-secondary); overflow: hidden; overscroll-behavior: contain; }
 .menu-drawer .menu-user { margin-bottom: 1rem; padding-bottom: 0.85rem; }
 .menu-drawer .menu-item { padding: 11px 0; }
@@ -388,7 +388,7 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 /* Form overlay */
 .overlay { display: none; position: absolute; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
 .overlay.open { display: flex; }
-.overlay-bg { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+.overlay-bg { position: absolute; inset: 0; background: rgba(0,0,0,.22); -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%); }
 .sheet { position: relative; background: #1e1e1e; border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2rem; width: 100%; max-width: 420px; max-height: 94vh; overflow-y: auto; z-index: 1; border-top: 0.5px solid var(--color-border-secondary); }
 .sheet-handle { width: 36px; height: 4px; background: var(--color-border-secondary); border-radius: 2px; margin: 0 auto 1.25rem; }
 .sheet-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1.5rem; }
@@ -539,7 +539,7 @@ body.lateen-frozen .mp-icon-btn,body.lateen-frozen .btn-confirm,body.lateen-froz
 .cmpl-alert-btn:active { transform: scale(0.94); }
 .cmpl-overlay { position: fixed; inset: 0; z-index: 1400; display: none; align-items: center; justify-content: center; padding: 20px; }
 .cmpl-overlay.open { display: flex; }
-.cmpl-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(3px); }
+.cmpl-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.22); -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%); }
 .cmpl-sheet { position: relative; width: 100%; max-width: 420px; max-height: 82vh; overflow-y: auto; background: #101010; border: 0.5px solid #262626; border-radius: 18px; padding: 18px 16px 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
 .cmpl-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
 .cmpl-head-icon { width: 34px; height: 34px; border-radius: 50%; background: rgba(239,68,68,0.14); border: 1px solid rgba(239,68,68,0.35); color: #ef4444; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }

@@ -33,7 +33,7 @@ export function ProductListerOverlay({ open, onClose }: { open: boolean; onClose
 
   return (
     <div style={{ display: "flex", position: "fixed", inset: 0, zIndex: 1000, alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.75)", backdropFilter: "blur(4px)" }} />
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.22)", backdropFilter: "blur(16px) saturate(125%)", WebkitBackdropFilter: "blur(16px) saturate(125%)" }} />
       <div
         style={{
           position: "relative", background: "#1e1e1e", border: "0.5px solid #333330", borderRadius: 20,
