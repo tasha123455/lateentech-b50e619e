@@ -1,5 +1,5 @@
 import { request } from "@playwright/test";
-import { canProvision, removeAccounts } from "../lib/provision";
+import { canProvision, removeAccounts } from "../lib/provision.ts";
 
 /* Deletes the three accounts the suite makes for itself, and everything the
  * database hangs off them.

@@ -1,5 +1,5 @@
 import type { APIRequestContext } from "@playwright/test";
-import { backend, serviceKey, type RoleName } from "./accounts";
+import { backend, serviceKey, type RoleName } from "./accounts.ts";
 
 /* Making the accounts the signed-in tests need, instead of asking a person to.
  *
