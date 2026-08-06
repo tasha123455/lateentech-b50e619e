@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../lib/test";
 import { open, path, settled, watchForErrors } from "../lib/app";
 
 /* Everything reachable without an account.

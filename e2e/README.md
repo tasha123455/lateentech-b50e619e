@@ -144,6 +144,24 @@ needed a mobile layout viewport to happen at all. Everything here runs at
 412×830 with touch, and walks both `/en` and `/ar`, because right-to-left is
 where most of the rest have been.
 
+## When the browser cannot reach the internet
+
+Some sandboxes let a program reach the internet but not a browser — curl and
+git work, and every browser gets its connection cut whatever proxy it is
+pointed at. `WASLA_RELAY=1` fetches the page's requests from node and hands
+them to the browser, which is enough to drive the live site from inside one:
+
+```bash
+WASLA_RELAY=1 WASLA_URL=https://www.lateen.online npm test
+```
+
+Off unless asked for. On a laptop, or on a CI runner, the browser has its own
+connection and this would only add a hop and a chance to get something wrong.
+
+It is not a perfect mirror. Requests are re-issued by node, so connection
+reuse, HTTP/2 and anything measured in milliseconds are not what a real visitor
+would get. What it is good for is what the page does and what it draws.
+
 ## Running it without a computer
 
 `.github/workflows/e2e.yml` runs all of this on GitHub's machines, so no
