@@ -27,20 +27,43 @@ The public tests — landing page, sign-in and registration forms, the offline
 page, the manifest and every icon it promises — need no account and run for
 anybody.
 
-The rest need credentials, and skip themselves cleanly without them. **Use
-throwaway accounts you can delete, not accounts you rely on.**
+The rest need an account, and skip themselves cleanly without one.
 
-There is a wrinkle worth knowing before making one. This site has no password
-box: the only way in through the interface is Google, and a robot cannot drive
-Google's sign-in — nor should it try, since that is exactly the behaviour
-Google blocks accounts for. So the tests ask Supabase for a session directly,
-with an email and a password, and hand it to the app the same way the app's own
-code would. Nothing is added to the site to allow it and nothing is left behind
-afterwards; it needs a real account that has a real password set on it, which
-is done in the Supabase dashboard under *Authentication → Users*. An account
-created through Google has no password until one is set.
+There is a wrinkle worth knowing first. This site has no password box: the only
+way in through the interface is Google, and a robot cannot drive Google's
+sign-in — nor should it try, since that is exactly the behaviour Google blocks
+accounts for. So the tests ask Supabase for a session directly, with an email
+and a password, and hand it to the app the same way the app's own code would.
+Nothing is added to the site to allow it and nothing is left behind. But it
+needs an account that has a password, and an account made through Google has
+none.
 
-Put the credentials in `e2e/.env.local`, which git is told to ignore:
+### The short way: one secret
+
+Give the suite a Supabase **service_role** key and it makes its own accounts —
+one marketer, one business, one admin — on `example.com`, which is reserved by
+the RFCs and can never receive mail. It reuses them on every later run, so the
+products and orders they build up survive.
+
+*Supabase dashboard → Project settings → API → service_role → copy.* Then either
+`WASLA_SUPABASE_SERVICE_KEY=… npm test`, or put it in `e2e/.env.local`, or add
+it as a repository secret of that name to run it from the Actions tab.
+
+**That key reads and changes everything in the database and obeys none of the
+rules that protect a row.** It is the right tool before launch and the wrong one
+after. When the site goes live: `npm run accounts:remove`, then delete the
+secret. Both steps are the whole of the clearing up.
+
+### The long way: accounts you make yourself
+
+No service key needed, and nothing powerful is stored anywhere.
+
+1. *Supabase dashboard → Authentication → Users → Add user.* Give an email and
+   a password and tick auto-confirm. Do it three times.
+2. The marketer and business accounts need their role. Sign in to the site once
+   as each — the roles are granted the way any sign-up grants them.
+3. Invite the third from the app's own Admins page, using the same email.
+4. Put the six values in `e2e/.env.local`, which git is told to ignore:
 
 ```
 WASLA_MARKETER_EMAIL=...
@@ -51,27 +74,31 @@ WASLA_ADMIN_EMAIL=...
 WASLA_ADMIN_PASSWORD=...
 ```
 
-Then `set -a; . ./.env.local; set +a; npm test`.
+Then `set -a; . ./.env.local; set +a; npm test`. Accounts named this way are
+used in preference to any the suite would make for itself.
 
-Do not put them in the repository's own `.env` — that file is tracked by git,
-so anything in it is published.
+Do not put credentials in the repository's own `.env` — that file is tracked by
+git, and this repository is public.
 
-The address of the backend and its publishable key are read from that same
-tracked `.env` when they are not in the environment, so there is nothing to
-configure: both are public values that ship inside every copy of the site.
+The address of the backend and its publishable key are read from that tracked
+`.env` when they are not in the environment, so there is nothing to configure:
+both are public values that ship inside every copy of the site.
 `WASLA_SUPABASE_URL` and `WASLA_SUPABASE_ANON_KEY` override them when the tests
 are pointed at a different project.
 
 ## What it will and will not touch
 
-Everything here reads. It signs in, opens pages, expands cards, and checks what
-is drawn. It does not place orders, upload receipts, approve payouts or delete
-anything, because it runs against the live database and a robot that orders
-something every time it runs fills a real shop with rubbish.
+By default everything here only reads. It signs in, opens pages, expands cards,
+and checks what is drawn. It does not place orders, upload receipts, approve
+payouts or delete anything, because a robot that orders something every time it
+runs is a robot filling a real shop with rubbish.
 
-`WASLA_WRITES=1` is reserved for tests that create and clean up after
-themselves. Nothing uses it yet; it exists so that adding such a test later is
-a deliberate act rather than an accident.
+`WASLA_WRITES=1` turns that off, and it is off unless asked for, every time —
+the Actions tab has a tick box for it. Turn it on before launch, while the
+database holds nothing that matters, to cover the parts of `TEST_PLAN.md` that
+cannot be reached by looking: the order lifecycle, uploads, refunds, and what
+freezing an account does and does not stop. Turn it off before the site has
+customers.
 
 ## What it has found
 
@@ -123,17 +150,20 @@ where most of the rest have been.
 laptop and no local setup is needed — the Actions tab has a **Run workflow**
 button, and it works from a phone browser.
 
-It runs the no-account tests on every push to `main`. To run the signed-in
-ones, add these under *Settings → Secrets and variables → Actions*:
+It runs the no-account tests on every push to `main`. To run the signed-in ones,
+add **one** secret under *Settings → Secrets and variables → Actions*:
 
 | Secret | What it is |
 | --- | --- |
-| `WASLA_MARKETER_EMAIL` / `WASLA_MARKETER_PASSWORD` | a throwaway marketer account |
-| `WASLA_BUSINESS_EMAIL` / `WASLA_BUSINESS_PASSWORD` | a throwaway business account |
-| `WASLA_ADMIN_EMAIL` / `WASLA_ADMIN_PASSWORD` | a throwaway admin, invited from the Admins page |
+| `WASLA_SUPABASE_SERVICE_KEY` | the Supabase service_role key — the run makes its own accounts with it |
 
-Each of those accounts needs a password set on it in the Supabase dashboard —
-see *Signing in* above for why.
+Accounts you would rather name yourself go in as `WASLA_MARKETER_EMAIL` and
+`WASLA_MARKETER_PASSWORD`, and the same pair for `BUSINESS` and `ADMIN`; those
+win over anything a run would make. Either way, see *Signing in* above — and
+take the service key back out before the site goes live.
+
+The **Run workflow** button also has a tick box for letting the tests create and
+change things. Leave it off once there are real orders in the database.
 
 Secrets are write-only: GitHub will not show them again, and they are masked
 in the logs. They are not in the repository and not in anyone's chat history.

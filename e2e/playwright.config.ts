@@ -17,6 +17,9 @@ const phone = {
 
 export default defineConfig({
   testDir: "./specs",
+  /* Makes the signed-in tests' accounts when a service key is present, and does
+     nothing when it is not. See global-setup.ts. */
+  globalSetup: "./global-setup.ts",
   /* One at a time. These share a live database, and a second worker adding
      products while the first counts them is a test failing for reasons that
      have nothing to do with the app. */

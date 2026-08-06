@@ -5,7 +5,8 @@
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "accounts:remove": "node --experimental-strip-types scripts/remove-test-accounts.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1"

@@ -21,6 +21,17 @@ export function account(role: RoleName): Account | null {
   return { email, password };
 }
 
+/** The key that lets a run make its own test accounts, if one was given.
+ *
+ *  This one *is* a secret, and a total one: it reads and writes everything in
+ *  the database and ignores every rule that protects a row. It belongs in
+ *  GitHub's secret store or in `e2e/.env.local`, never in a file git tracks and
+ *  never in a message. Without it every signed-in test skips itself, which is
+ *  the right thing to happen once the site is live and the key is taken away. */
+export function serviceKey(): string | undefined {
+  return process.env.WASLA_SUPABASE_SERVICE_KEY || undefined;
+}
+
 /** Where the app's own browser client points.
  *
  *  Taken from the environment when it is set, and otherwise from the .env this

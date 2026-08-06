@@ -18,11 +18,15 @@ on:
         default: "public"
         options:
           - public        # no account needed — always safe to run
-          - all           # everything, needs the account secrets set
+          - all           # everything, needs an account to sign in with
       url:
         description: "Site to test (blank = the live site)"
         type: string
         required: false
+      writes:
+        description: "Let the tests create and change things (pre-launch only)"
+        type: boolean
+        default: false
 
   # Every push to main, so a change that breaks a screen is caught at once.
   # Only the tests that need no account, so this stays safe to leave on.
@@ -59,14 +63,24 @@ jobs:
         working-directory: e2e
         env:
           WASLA_URL: ${{ inputs.url || 'https://www.lateen.online' }}
-          # Absent, every signed-in test skips itself and the run still
-          # reports honestly on everything that needs no account.
+          # One secret is enough: with it the run makes its own three accounts
+          # before testing (see e2e/global-setup.ts). Absent, every signed-in
+          # test skips itself and the run still reports honestly on everything
+          # that needs no account — which is what should happen once the site is
+          # live and this key has been taken away again.
+          WASLA_SUPABASE_SERVICE_KEY: ${{ secrets.WASLA_SUPABASE_SERVICE_KEY }}
+          # Named accounts, if you would rather provide them yourself. These win
+          # over the ones a run would make.
           WASLA_MARKETER_EMAIL: ${{ secrets.WASLA_MARKETER_EMAIL }}
           WASLA_MARKETER_PASSWORD: ${{ secrets.WASLA_MARKETER_PASSWORD }}
           WASLA_BUSINESS_EMAIL: ${{ secrets.WASLA_BUSINESS_EMAIL }}
           WASLA_BUSINESS_PASSWORD: ${{ secrets.WASLA_BUSINESS_PASSWORD }}
           WASLA_ADMIN_EMAIL: ${{ secrets.WASLA_ADMIN_EMAIL }}
           WASLA_ADMIN_PASSWORD: ${{ secrets.WASLA_ADMIN_PASSWORD }}
+          # Off unless asked for, every time. A robot that places an order on
+          # every run is a robot filling a real shop with rubbish, and the day
+          # this site has customers that must not happen by default.
+          WASLA_WRITES: ${{ inputs.writes && '1' || '' }}
         run: |
           if [ "${{ inputs.suite }}" = "all" ]; then
             npx playwright test
