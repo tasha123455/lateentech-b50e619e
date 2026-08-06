@@ -33,7 +33,19 @@ export function Landing() {
      dropped the moment it turns out nobody is coming — a stale token, or a
      visitor who simply opened the site. Removed on the way out too, so that
      leaving this page never leaves the rest of the app hidden. */
-  const waiting = (arriving && loading) || !!(user && role);
+  /* A wait has to end. If the answer never comes — a dead connection, a token
+     the server will not answer about — the mark would otherwise be the whole
+     site, forever, for somebody who could have been using it. After this it
+     gives up and shows the page; if the session turns up later it redirects
+     from there, which costs nothing. */
+  const [waitedLongEnough, setWaitedLongEnough] = useState(false);
+  useEffect(() => {
+    if (!loading) return;
+    const id = window.setTimeout(() => setWaitedLongEnough(true), 6000);
+    return () => window.clearTimeout(id);
+  }, [loading]);
+
+  const waiting = (arriving && loading && !waitedLongEnough) || !!(user && role);
   useEffect(() => {
     const html = document.documentElement;
     html.classList.toggle("auth-pending", waiting);
