@@ -12,6 +12,18 @@ type Props = {
   logoSize?: number;
 };
 
+/* Sized in `svh`, not `dvh`.
+ *
+ * On a phone the address bar is showing when a page loads and slides away a
+ * moment later. `dvh` follows it, so this box grew by the height of the bar
+ * just after arriving — and a card centred in it slid down half of that. On a
+ * desktop, and in every emulator, nothing moves and there is nothing to see;
+ * on a real phone it reads as the logo jumping and then settling, on every
+ * refresh. Measured at 35px on a 412×760 screen.
+ *
+ * `svh` is the height with the bar still there. It does not change when the
+ * bar goes, so nothing moves. The cost is a strip of unused space at the
+ * bottom once the bar has gone — a still page instead of a moving one. */
 export function AuthCard({ role, children, backTo, logoSize = 120 }: Props) {
   const tint = role === "marketer" ? "bg-marketer-tint text-marketer-foreground" : "bg-business-tint text-business";
   const label = role === "marketer" ? "Marketer" : "Business";
@@ -20,7 +32,7 @@ export function AuthCard({ role, children, backTo, logoSize = 120 }: Props) {
   const effectiveBack = backTo ?? withLang("/");
 
   return (
-    <div className="flex min-h-dvh items-center justify-center overflow-x-hidden bg-background px-4 py-10">
+    <div className="flex min-h-[100svh] items-center justify-center overflow-x-hidden bg-background px-4 py-10">
       {/* The back button sits above the card rather than inside it. The header
           row already carries the language switch and the role badge, and a
           third control turned it into a toolbar.
