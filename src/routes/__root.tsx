@@ -127,6 +127,29 @@ function RootShell({ children }: { children: React.ReactNode }) {
               "(function(){try{var s=localStorage.getItem('lateen_lang');if(s!=='ar'&&s!=='en'){document.documentElement.classList.add('lang-pending');}}catch(e){}})();",
           }}
         />
+        {/* Somebody arriving already signed in, or coming back from Google
+            mid-sign-in, lands on the front page — that is where Google returns
+            people. Until React has hydrated and worked out who they are, the
+            front page's "who are you?" is the wrong thing to show them, and
+            React cannot decide it any earlier: its first render has to match
+            the one the server sent, and the server has neither their storage
+            nor their address bar. This runs before the first paint, which is
+            the only moment early enough, and marks the document so the CSS can
+            show the mark instead. React takes the mark down again the moment
+            it knows nobody is coming. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var h=document.documentElement;var s=location.search||'';var f=location.hash||'';" +
+              "if(/[?&]code=/.test(s)||/access_token=|error_description=/.test(f)){h.classList.add('auth-pending');return;}" +
+              "try{if(sessionStorage.getItem('signin_intent')||sessionStorage.getItem('pending_signup')){h.classList.add('auth-pending');return;}}catch(e){}" +
+              "for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);" +
+              "if(k&&k.indexOf('sb-')===0&&k.indexOf('-auth-token')>0){var v=localStorage.getItem(k);" +
+              "if(v&&v!=='null'&&v.length>2){h.classList.add('auth-pending');return;}}}}catch(e){}})();",
+          }}
+        />
+
         <AuthProvider>{children}</AuthProvider>
 
         {/* Chrome fires `beforeinstallprompt` very early — often before React

@@ -190,3 +190,13 @@ body.lang-ar .lang-label-en { display: none !important; }
    removed once the visitor picks (or if a choice is already stored). */
 html.lang-pending body { visibility: hidden; overflow: hidden; }
 html.lang-pending .lang-gate { visibility: visible; }
+
+/* Arriving signed in, or halfway through signing in. `auth-pending` is put on
+   the document before the first paint by the shell script, and taken off by
+   the front page the moment it knows nobody is on their way — so the mark
+   shows for exactly as long as the wait lasts and never a frame longer.
+   Both halves are always in the page so that neither has to wait for React to
+   appear; this only chooses between them. */
+.landing-splash { display: none; }
+html.auth-pending .landing-splash { display: flex; }
+html.auth-pending .landing-page { display: none; }

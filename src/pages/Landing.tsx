@@ -27,6 +27,19 @@ export function Landing() {
   const [arriving, setArriving] = useState(false);
   useEffect(() => { setArriving(hasStoredSession() || isFinishingSignIn()); }, []);
 
+  /* The shell script put `auth-pending` on the document before this page was
+     painted, guessing from storage and the address that somebody is on their
+     way in. This is where that guess is settled: kept while the wait is real,
+     dropped the moment it turns out nobody is coming — a stale token, or a
+     visitor who simply opened the site. Removed on the way out too, so that
+     leaving this page never leaves the rest of the app hidden. */
+  const waiting = (arriving && loading) || !!(user && role);
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.toggle("auth-pending", waiting);
+    return () => html.classList.remove("auth-pending");
+  }, [waiting]);
+
   /* The mark alone, for somebody on their way to a dashboard.
    *
    * Not while the session is merely being checked. This page is served as
@@ -34,18 +47,18 @@ export function Landing() {
    * front page arrived as a full-screen logo every single time and turned into
    * itself a moment later — which is what the flicker was. A visitor with no
    * session sees the page it says it is, immediately, and never sees this. */
-  if ((arriving && loading) || (user && role)) {
-    return (
-      <main className="flex min-h-[100svh] items-center justify-center overflow-x-hidden bg-background px-6">
-        <LateenLogo variant="mark" size={280} glow />
-      </main>
-    );
-  }
-
   const isAr = lang === "ar";
 
+  /* Both are rendered, always, and the stylesheet shows one of them. Choosing
+     in JavaScript instead would mean choosing after React has arrived, and the
+     half second before that is the whole of what this page kept getting wrong. */
   return (
-    <main className="relative flex min-h-[100svh] w-full items-center justify-center overflow-x-hidden bg-background px-6 py-8">
+    <>
+      <main className="landing-splash min-h-[100svh] items-center justify-center overflow-x-hidden bg-background px-6">
+        <LateenLogo variant="mark" size={280} glow />
+      </main>
+
+      <main className="landing-page relative flex min-h-[100svh] w-full items-center justify-center overflow-x-hidden bg-background px-6 py-8">
       <div className="flex w-full max-w-[420px] flex-col items-center">
       <LateenLogo variant="wordmark" lang={isAr ? "ar" : "en"} size={150} glow />
       <div className="my-7 h-px w-7 bg-border" />
@@ -100,7 +113,8 @@ export function Landing() {
           </div>
         </div>
       )}
-    </main>
+      </main>
+    </>
   );
 }
 
