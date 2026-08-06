@@ -14,93 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_accounts: {
-        Row: {
-          active: boolean
-          created_at: string
-          created_by: string | null
-          email: string
-          full_name: string | null
-          is_master: boolean
-          markets: string[] | null
-          pages: string[]
-          phone: string | null
-          user_id: string | null
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          created_by?: string | null
-          email: string
-          full_name?: string | null
-          is_master?: boolean
-          markets?: string[] | null
-          pages?: string[]
-          phone?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          created_by?: string | null
-          email?: string
-          full_name?: string | null
-          is_master?: boolean
-          markets?: string[] | null
-          pages?: string[]
-          phone?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      admin_pages: {
-        Row: { id: string; label: string; sort: number }
-        Insert: { id: string; label: string; sort?: number }
-        Update: { id?: string; label?: string; sort?: number }
-        Relationships: []
-      }
-      markets: {
-        Row: {
-          active: boolean
-          code: string
-          created_at: string
-          currency_code: string
-          fee_fixed: number
-          fee_pct: number
-          fee_threshold: number
-          min_withdraw: number
-          name_ar: string
-          name_en: string
-          payout_cycle_days: number
-        }
-        Insert: {
-          active?: boolean
-          code: string
-          created_at?: string
-          currency_code: string
-          fee_fixed: number
-          fee_pct: number
-          fee_threshold: number
-          min_withdraw: number
-          name_ar: string
-          name_en: string
-          payout_cycle_days: number
-        }
-        Update: {
-          active?: boolean
-          code?: string
-          created_at?: string
-          currency_code?: string
-          fee_fixed?: number
-          fee_pct?: number
-          fee_threshold?: number
-          min_withdraw?: number
-          name_ar?: string
-          name_en?: string
-          payout_cycle_days?: number
-        }
-        Relationships: []
-      }
       account_deletion_requests: {
         Row: {
           admin_comment: string | null
@@ -143,6 +56,102 @@ export type Database = {
           user_id?: string
           wallet_balance?: number
           wallet_pending?: number
+        }
+        Relationships: []
+      }
+      admin_accounts: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string | null
+          is_master: boolean
+          markets: string[] | null
+          pages: string[]
+          phone: string | null
+          phone2: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email: string
+          full_name?: string | null
+          is_master?: boolean
+          markets?: string[] | null
+          pages?: string[]
+          phone?: string | null
+          phone2?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          full_name?: string | null
+          is_master?: boolean
+          markets?: string[] | null
+          pages?: string[]
+          phone?: string | null
+          phone2?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_pages: {
+        Row: {
+          id: string
+          label: string
+          sort: number
+        }
+        Insert: {
+          id: string
+          label: string
+          sort?: number
+        }
+        Update: {
+          id?: string
+          label?: string
+          sort?: number
+        }
+        Relationships: []
+      }
+      change_requests: {
+        Row: {
+          admin_comment: string | null
+          created_at: string
+          fields: string[]
+          id: string
+          note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_comment?: string | null
+          created_at?: string
+          fields?: string[]
+          id?: string
+          note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_comment?: string | null
+          created_at?: string
+          fields?: string[]
+          id?: string
+          note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -386,6 +395,51 @@ export type Database = {
           },
         ]
       }
+      markets: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          currency_code: string
+          fee_fixed: number
+          fee_pct: number
+          fee_threshold: number
+          min_withdraw: number
+          name_ar: string
+          name_en: string
+          payout_cycle_days: number
+          refund_window_days: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          currency_code: string
+          fee_fixed: number
+          fee_pct: number
+          fee_threshold: number
+          min_withdraw: number
+          name_ar: string
+          name_en: string
+          payout_cycle_days: number
+          refund_window_days?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          currency_code?: string
+          fee_fixed?: number
+          fee_pct?: number
+          fee_threshold?: number
+          min_withdraw?: number
+          name_ar?: string
+          name_en?: string
+          payout_cycle_days?: number
+          refund_window_days?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -426,6 +480,8 @@ export type Database = {
           business_notes: string | null
           color: string | null
           commission: number
+          commission_pending: boolean
+          commission_released_at: string | null
           confirmed_at: string | null
           created_at: string
           currency: Json | null
@@ -440,6 +496,7 @@ export type Database = {
           delivered_at: string | null
           delivery_fee: number
           id: string
+          market: string
           marketer_confirmed_at: string | null
           marketer_id: string
           order_number: string | null
@@ -450,6 +507,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           refund_note: string | null
+          refund_reason: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -466,6 +524,8 @@ export type Database = {
           business_notes?: string | null
           color?: string | null
           commission?: number
+          commission_pending?: boolean
+          commission_released_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           currency?: Json | null
@@ -480,6 +540,7 @@ export type Database = {
           delivered_at?: string | null
           delivery_fee?: number
           id?: string
+          market?: string
           marketer_confirmed_at?: string | null
           marketer_id: string
           order_number?: string | null
@@ -490,6 +551,7 @@ export type Database = {
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
           refund_note?: string | null
+          refund_reason?: string | null
           refunded_at?: string | null
           reviewed_at?: string | null
           selected_variants?: Json
@@ -506,6 +568,8 @@ export type Database = {
           business_notes?: string | null
           color?: string | null
           commission?: number
+          commission_pending?: boolean
+          commission_released_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           currency?: Json | null
@@ -520,6 +584,7 @@ export type Database = {
           delivered_at?: string | null
           delivery_fee?: number
           id?: string
+          market?: string
           marketer_confirmed_at?: string | null
           marketer_id?: string
           order_number?: string | null
@@ -530,6 +595,7 @@ export type Database = {
           receipt_uploaded_at?: string | null
           receipt_url?: string | null
           refund_note?: string | null
+          refund_reason?: string | null
           refunded_at?: string | null
           reviewed_at?: string | null
           selected_variants?: Json
@@ -541,6 +607,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_market_fkey"
+            columns: ["market"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "orders_product_id_fkey"
             columns: ["product_id"]
@@ -692,6 +765,7 @@ export type Database = {
           delivery: Json
           description: string | null
           frozen_paused: boolean
+          fulfilment: string | null
           id: string
           market: string
           name: string
@@ -728,6 +802,7 @@ export type Database = {
           delivery?: Json
           description?: string | null
           frozen_paused?: boolean
+          fulfilment?: string | null
           id?: string
           market?: string
           name: string
@@ -764,6 +839,7 @@ export type Database = {
           delivery?: Json
           description?: string | null
           frozen_paused?: boolean
+          fulfilment?: string | null
           id?: string
           market?: string
           name?: string
@@ -782,7 +858,15 @@ export type Database = {
           updated_at?: string
           variant_groups?: Json
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_market_fkey"
+            columns: ["market"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -791,12 +875,12 @@ export type Database = {
           banned_at: string | null
           business_name: string | null
           city: string | null
-          market: string
           country: string | null
           created_at: string
           frozen_at: string | null
           full_name: string | null
           id: string
+          market: string
           payout_account_holder: string | null
           payout_account_number: string | null
           payout_bank_name: string | null
@@ -815,12 +899,12 @@ export type Database = {
           banned_at?: string | null
           business_name?: string | null
           city?: string | null
-          market?: string
           country?: string | null
           created_at?: string
           frozen_at?: string | null
           full_name?: string | null
           id: string
+          market?: string
           payout_account_holder?: string | null
           payout_account_number?: string | null
           payout_bank_name?: string | null
@@ -839,12 +923,12 @@ export type Database = {
           banned_at?: string | null
           business_name?: string | null
           city?: string | null
-          market?: string
           country?: string | null
           created_at?: string
           frozen_at?: string | null
           full_name?: string | null
           id?: string
+          market?: string
           payout_account_holder?: string | null
           payout_account_number?: string | null
           payout_bank_name?: string | null
@@ -857,7 +941,15 @@ export type Database = {
           updated_at?: string
           whatsapp?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_market_fkey"
+            columns: ["market"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       push_subscriptions: {
         Row: {
@@ -899,8 +991,10 @@ export type Database = {
         Row: {
           admin_comment: string | null
           business_id: string | null
+          business_notified_at: string | null
           created_at: string
           id: string
+          marketer_notified_at: string | null
           message: string
           product_id: string | null
           report_type: string
@@ -912,8 +1006,10 @@ export type Database = {
         Insert: {
           admin_comment?: string | null
           business_id?: string | null
+          business_notified_at?: string | null
           created_at?: string
           id?: string
+          marketer_notified_at?: string | null
           message: string
           product_id?: string | null
           report_type: string
@@ -925,8 +1021,10 @@ export type Database = {
         Update: {
           admin_comment?: string | null
           business_id?: string | null
+          business_notified_at?: string | null
           created_at?: string
           id?: string
+          marketer_notified_at?: string | null
           message?: string
           product_id?: string | null
           report_type?: string
@@ -1065,6 +1163,7 @@ export type Database = {
           deleted_at: string | null
           delivery: Json | null
           description: string | null
+          fulfilment: string | null
           id: string | null
           name: string | null
           photos: string[] | null
@@ -1093,6 +1192,7 @@ export type Database = {
           deleted_at?: string | null
           delivery?: Json | null
           description?: string | null
+          fulfilment?: string | null
           id?: string | null
           name?: string | null
           photos?: string[] | null
@@ -1121,6 +1221,7 @@ export type Database = {
           deleted_at?: string | null
           delivery?: Json | null
           description?: string | null
+          fulfilment?: string | null
           id?: string | null
           name?: string | null
           photos?: string[] | null
@@ -1148,6 +1249,7 @@ export type Database = {
           deleted_at: string | null
           delivery: Json | null
           description: string | null
+          fulfilment: string | null
           id: string | null
           name: string | null
           photos: string[] | null
@@ -1170,6 +1272,7 @@ export type Database = {
           deleted_at?: string | null
           delivery?: Json | null
           description?: string | null
+          fulfilment?: string | null
           id?: string | null
           name?: string | null
           photos?: string[] | null
@@ -1192,6 +1295,7 @@ export type Database = {
           deleted_at?: string | null
           delivery?: Json | null
           description?: string | null
+          fulfilment?: string | null
           id?: string | null
           name?: string | null
           photos?: string[] | null
@@ -1206,54 +1310,6 @@ export type Database = {
       }
     }
     Functions: {
-      admin_metrics_active_users: { Args: { _market?: string | null }; Returns: number }
-      admin_metrics_daily: {
-        Args: { _market?: string | null; _tz?: string }
-        Returns: {
-          d: string
-          fee_earned: number
-          fee_refunded: number
-          pieces_added: number
-          pieces_confirmed: number
-          pieces_removed: number
-          products_created: number
-          approved_added: number
-          approved_removed: number
-          salary_paid: number
-          users_created: number
-        }[]
-      }
-      admin_can: { Args: { _page: string }; Returns: boolean }
-      admin_can_market: { Args: { _market: string }; Returns: boolean }
-      admin_claim_invite: { Args: Record<string, never>; Returns: boolean }
-      admin_is_master: { Args: Record<string, never>; Returns: boolean }
-      admin_list_admins: {
-        Args: Record<string, never>
-        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"][]
-      }
-      admin_market_codes: { Args: Record<string, never>; Returns: string[] }
-      admin_set_admin_active: {
-        Args: { _active: boolean; _email: string }
-        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"]
-      }
-      admin_set_master: {
-        Args: { _email: string; _is_master: boolean }
-        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"]
-      }
-      admin_upsert: {
-        Args: {
-          _email: string
-          _full_name?: string | null
-          _markets?: string[] | null
-          _pages?: string[]
-          _phone?: string | null
-        }
-        Returns: Database["public"]["Tables"]["admin_accounts"]["Row"]
-      }
-      market_for_user: {
-        Args: { _user_id: string }
-        Returns: Database["public"]["Tables"]["markets"]["Row"]
-      }
       _adjust_variant_qty: {
         Args: { _delta: number; _match: string; _product_id: string }
         Returns: undefined
@@ -1289,6 +1345,8 @@ export type Database = {
           business_notes: string | null
           color: string | null
           commission: number
+          commission_pending: boolean
+          commission_released_at: string | null
           confirmed_at: string | null
           created_at: string
           currency: Json | null
@@ -1303,6 +1361,7 @@ export type Database = {
           delivered_at: string | null
           delivery_fee: number
           id: string
+          market: string
           marketer_confirmed_at: string | null
           marketer_id: string
           order_number: string | null
@@ -1313,6 +1372,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           refund_note: string | null
+          refund_reason: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1366,6 +1426,10 @@ export type Database = {
         Args: { _body: string; _photo?: string; _title: string }
         Returns: number
       }
+      admin_can: { Args: { _page: string }; Returns: boolean }
+      admin_can_market: { Args: { _market: string }; Returns: boolean }
+      admin_claim_invite: { Args: never; Returns: boolean }
+      admin_delete: { Args: { _email: string }; Returns: boolean }
       admin_delete_product: {
         Args: { _product_id: string }
         Returns: {
@@ -1386,7 +1450,9 @@ export type Database = {
           delivery: Json
           description: string | null
           frozen_paused: boolean
+          fulfilment: string | null
           id: string
+          market: string
           name: string
           pause_requested: boolean
           photos: string[]
@@ -1412,6 +1478,45 @@ export type Database = {
       }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_get_user_email: { Args: { _user_id: string }; Returns: string }
+      admin_is_master: { Args: never; Returns: boolean }
+      admin_list_admins: {
+        Args: never
+        Returns: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string | null
+          is_master: boolean
+          markets: string[] | null
+          pages: string[]
+          phone: string | null
+          phone2: string | null
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "admin_accounts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_list_favorites: {
+        Args: { _limit?: number; _marketer_id: string }
+        Returns: {
+          biz_name: string
+          code: string
+          cover_focus_x: number
+          cover_focus_y: number
+          currency: Json
+          name: string
+          photos: string[]
+          price: number
+          product_id: string
+          saved_at: string
+          status: string
+        }[]
+      }
       admin_list_user_emails: {
         Args: { _user_ids: string[] }
         Returns: {
@@ -1439,6 +1544,27 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_market_codes: { Args: never; Returns: string[] }
+      admin_metrics_active_users: {
+        Args: { _market?: string }
+        Returns: number
+      }
+      admin_metrics_daily: {
+        Args: { _market?: string; _tz?: string }
+        Returns: {
+          approved_added: number
+          approved_removed: number
+          d: string
+          fee_earned: number
+          fee_refunded: number
+          pieces_added: number
+          pieces_confirmed: number
+          pieces_removed: number
+          products_created: number
+          salary_paid: number
+          users_created: number
+        }[]
+      }
       admin_note_payout: {
         Args: { _note: string; _payout_id: string }
         Returns: {
@@ -1459,15 +1585,41 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_notify_report_business: {
+        Args: { _comment: string; _report_id: string }
+        Returns: {
+          admin_comment: string | null
+          business_id: string | null
+          business_notified_at: string | null
+          created_at: string
+          id: string
+          marketer_notified_at: string | null
+          message: string
+          product_id: string | null
+          report_type: string
+          reporter_id: string
+          resolved_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reports"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_presence_stats: { Args: { _day?: string }; Returns: number }
       admin_refund_order: {
-        Args: { _comment?: string; _order_id: string }
+        Args: { _comment?: string; _order_id: string; _reason?: string }
         Returns: {
           admin_notes: string | null
           business_id: string
           business_notes: string | null
           color: string | null
           commission: number
+          commission_pending: boolean
+          commission_released_at: string | null
           confirmed_at: string | null
           created_at: string
           currency: Json | null
@@ -1482,6 +1634,7 @@ export type Database = {
           delivered_at: string | null
           delivery_fee: number
           id: string
+          market: string
           marketer_confirmed_at: string | null
           marketer_id: string
           order_number: string | null
@@ -1492,6 +1645,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           refund_note: string | null
+          refund_reason: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1517,6 +1671,8 @@ export type Database = {
           business_notes: string | null
           color: string | null
           commission: number
+          commission_pending: boolean
+          commission_released_at: string | null
           confirmed_at: string | null
           created_at: string
           currency: Json | null
@@ -1531,6 +1687,7 @@ export type Database = {
           delivered_at: string | null
           delivery_fee: number
           id: string
+          market: string
           marketer_confirmed_at: string | null
           marketer_id: string
           order_number: string | null
@@ -1541,6 +1698,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           refund_note: string | null
+          refund_reason: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1566,6 +1724,8 @@ export type Database = {
           business_notes: string | null
           color: string | null
           commission: number
+          commission_pending: boolean
+          commission_released_at: string | null
           confirmed_at: string | null
           created_at: string
           currency: Json | null
@@ -1580,6 +1740,7 @@ export type Database = {
           delivered_at: string | null
           delivery_fee: number
           id: string
+          market: string
           marketer_confirmed_at: string | null
           marketer_id: string
           order_number: string | null
@@ -1590,6 +1751,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           refund_note: string | null
+          refund_reason: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1613,6 +1775,27 @@ export type Database = {
           _user_id: string
         }
         Returns: undefined
+      }
+      admin_reset_account_access: { Args: { _user_id: string }; Returns: Json }
+      admin_resolve_change_request: {
+        Args: { _comment: string; _id: string }
+        Returns: {
+          admin_comment: string | null
+          created_at: string
+          fields: string[]
+          id: string
+          note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_resolve_deletion_request: {
         Args: { _action: string; _comment: string; _id: string }
@@ -1642,8 +1825,10 @@ export type Database = {
         Returns: {
           admin_comment: string | null
           business_id: string | null
+          business_notified_at: string | null
           created_at: string
           id: string
+          marketer_notified_at: string | null
           message: string
           product_id: string | null
           report_type: string
@@ -1659,6 +1844,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_sees_user: { Args: { _user_id: string }; Returns: boolean }
       admin_send_notification: {
         Args: {
           _body: string
@@ -1667,6 +1853,50 @@ export type Database = {
           _user_id: string
         }
         Returns: undefined
+      }
+      admin_set_admin_active: {
+        Args: { _active: boolean; _email: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string | null
+          is_master: boolean
+          markets: string[] | null
+          pages: string[]
+          phone: string | null
+          phone2: string | null
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "admin_accounts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_master: {
+        Args: { _email: string; _is_master: boolean }
+        Returns: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string | null
+          is_master: boolean
+          markets: string[] | null
+          pages: string[]
+          phone: string | null
+          phone2: string | null
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "admin_accounts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_set_product_status: {
         Args: { _product_id: string; _status: string }
@@ -1688,7 +1918,9 @@ export type Database = {
           delivery: Json
           description: string | null
           frozen_paused: boolean
+          fulfilment: string | null
           id: string
+          market: string
           name: string
           pause_requested: boolean
           photos: string[]
@@ -1721,6 +1953,64 @@ export type Database = {
         Returns: undefined
       }
       admin_unban_email: { Args: { _email: string }; Returns: undefined }
+      admin_upsert:
+        | {
+            Args: {
+              _email: string
+              _full_name?: string
+              _markets?: string[]
+              _pages?: string[]
+              _phone?: string
+            }
+            Returns: {
+              active: boolean
+              created_at: string
+              created_by: string | null
+              email: string
+              full_name: string | null
+              is_master: boolean
+              markets: string[] | null
+              pages: string[]
+              phone: string | null
+              phone2: string | null
+              user_id: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "admin_accounts"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              _email: string
+              _full_name?: string
+              _markets?: string[]
+              _pages?: string[]
+              _phone?: string
+              _phone2?: string
+            }
+            Returns: {
+              active: boolean
+              created_at: string
+              created_by: string | null
+              email: string
+              full_name: string | null
+              is_master: boolean
+              markets: string[] | null
+              pages: string[]
+              phone: string | null
+              phone2: string | null
+              user_id: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "admin_accounts"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       admin_wipe_all_data: { Args: never; Returns: Json }
       business_active_marketers_total: {
         Args: { _business_id: string }
@@ -1757,6 +2047,8 @@ export type Database = {
           business_notes: string | null
           color: string | null
           commission: number
+          commission_pending: boolean
+          commission_released_at: string | null
           confirmed_at: string | null
           created_at: string
           currency: Json | null
@@ -1771,6 +2063,7 @@ export type Database = {
           delivered_at: string | null
           delivery_fee: number
           id: string
+          market: string
           marketer_confirmed_at: string | null
           marketer_id: string
           order_number: string | null
@@ -1781,6 +2074,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           refund_note: string | null
+          refund_reason: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1874,6 +2168,8 @@ export type Database = {
           business_notes: string | null
           color: string | null
           commission: number
+          commission_pending: boolean
+          commission_released_at: string | null
           confirmed_at: string | null
           created_at: string
           currency: Json | null
@@ -1888,6 +2184,7 @@ export type Database = {
           delivered_at: string | null
           delivery_fee: number
           id: string
+          market: string
           marketer_confirmed_at: string | null
           marketer_id: string
           order_number: string | null
@@ -1898,6 +2195,7 @@ export type Database = {
           receipt_uploaded_at: string | null
           receipt_url: string | null
           refund_note: string | null
+          refund_reason: string | null
           refunded_at: string | null
           reviewed_at: string | null
           selected_variants: Json
@@ -1924,6 +2222,8 @@ export type Database = {
               business_notes: string | null
               color: string | null
               commission: number
+              commission_pending: boolean
+              commission_released_at: string | null
               confirmed_at: string | null
               created_at: string
               currency: Json | null
@@ -1938,6 +2238,7 @@ export type Database = {
               delivered_at: string | null
               delivery_fee: number
               id: string
+              market: string
               marketer_confirmed_at: string | null
               marketer_id: string
               order_number: string | null
@@ -1948,6 +2249,7 @@ export type Database = {
               receipt_uploaded_at: string | null
               receipt_url: string | null
               refund_note: string | null
+              refund_reason: string | null
               refunded_at: string | null
               reviewed_at: string | null
               selected_variants: Json
@@ -1973,6 +2275,8 @@ export type Database = {
               business_notes: string | null
               color: string | null
               commission: number
+              commission_pending: boolean
+              commission_released_at: string | null
               confirmed_at: string | null
               created_at: string
               currency: Json | null
@@ -1987,6 +2291,7 @@ export type Database = {
               delivered_at: string | null
               delivery_fee: number
               id: string
+              market: string
               marketer_confirmed_at: string | null
               marketer_id: string
               order_number: string | null
@@ -1997,6 +2302,7 @@ export type Database = {
               receipt_uploaded_at: string | null
               receipt_url: string | null
               refund_note: string | null
+              refund_reason: string | null
               refunded_at: string | null
               reviewed_at: string | null
               selected_variants: Json
@@ -2017,6 +2323,29 @@ export type Database = {
       mark_user_account_deleted: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      market_for_user: {
+        Args: { _user_id: string }
+        Returns: {
+          active: boolean
+          code: string
+          created_at: string
+          currency_code: string
+          fee_fixed: number
+          fee_pct: number
+          fee_threshold: number
+          min_withdraw: number
+          name_ar: string
+          name_en: string
+          payout_cycle_days: number
+          refund_window_days: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "markets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       marketer_reupload_receipt: {
         Args: { _order_id: string; _receipt_url: string }
@@ -2057,6 +2386,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      release_matured_commission: { Args: { _uid: string }; Returns: number }
       request_account_deletion: {
         Args: { _role: string }
         Returns: {
@@ -2096,6 +2426,26 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_change_request: {
+        Args: { _fields: string[]; _note?: string }
+        Returns: {
+          admin_comment: string | null
+          created_at: string
+          fields: string[]
+          id: string
+          note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "change_requests"
           isOneToOne: true
           isSetofReturn: false
         }
