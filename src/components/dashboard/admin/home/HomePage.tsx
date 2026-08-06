@@ -75,17 +75,22 @@ export function HomePage() {
         <div className="adm-h1" style={{ marginBottom: 0 }}>Global Analytics</div>
       </div>
 
-      <MarketFilter />
-
-      <DateFilterTabs
-        selected={selected}
-        onChange={setSelected}
-        classes={USERS_CLASSES}
-        labels={EN_LABELS}
-        dayItems={dayItems}
-        monthItems={monthItems}
-        yearItems={buildYearItems()}
-      />
+      {/* One row of filters: which country, and which dates. They answer the
+          same question — "these figures, but narrower" — so they sit together
+          and wrap onto a second line when a phone is too narrow to hold both,
+          rather than being two separate bands of controls. */}
+      <div className="adm-analytics-filters">
+        <MarketFilter />
+        <DateFilterTabs
+          selected={selected}
+          onChange={setSelected}
+          classes={USERS_CLASSES}
+          labels={EN_LABELS}
+          dayItems={dayItems}
+          monthItems={monthItems}
+          yearItems={buildYearItems()}
+        />
+      </div>
 
       <div className="adm-stat-grid adm-stat-stack">
         <div className="adm-stat full">

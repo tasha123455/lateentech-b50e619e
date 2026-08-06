@@ -1,32 +1,41 @@
 import { useEffect, useState } from "react";
 
+import { isArLang, useLangTick } from "../../marketer/lib/format";
 import { useAdminData } from "../AdminDataProvider";
 
 /**
  * Which country's numbers the Analytics page is showing.
  *
- * Absent while there is one market, because a filter with a single option is
- * a control that cannot do anything. It appears by itself the moment a second
- * country exists.
+ * It lists only the countries this admin is allowed. That is a convenience and
+ * not a permission: the database answers for the caller's countries whatever
+ * this sends, refuses a country that is not theirs, and reads "no country in
+ * particular" as "all of theirs" rather than as "the platform". So the worst a
+ * tampered-with console can do here is ask a question it gets an error to.
  *
- * An admin scoped to one market does not get the row either: they have no
- * choice to make, and offering "All" to somebody who is not allowed all of it
- * would be a button that returns less than it promises.
+ * The all-chip is worded for whoever is reading it. To a master it offers the
+ * platform; to an admin holding two countries out of five it offers their two,
+ * and says so, because a chip that said "All countries" and returned a fifth
+ * of them would be a lie in the one place figures have to be trusted.
+ *
+ * An admin with a single country gets no row at all: there is nothing to
+ * choose, their figures are that country's either way, and a control with one
+ * option is a control that cannot do anything.
  */
 export function MarketFilter() {
+  useLangTick();
   const { api, access, metricsMarket, setMetricsMarket, loadMetrics } = useAdminData();
-  const [markets, setMarkets] = useState<Array<{ code: string; name_en: string }>>([]);
+  const [markets, setMarkets] = useState<Array<{ code: string; en: string; ar: string }>>([]);
+  const ar = isArLang();
 
   useEffect(() => {
     let alive = true;
     api.admin.listMarkets()
       .then((rows) => {
         if (!alive) return;
-        // Only the markets this admin may actually see.
         const mine = access.markets
           ? rows.filter((r) => access.markets!.includes(r.code))
           : rows;
-        setMarkets(mine.map((r) => ({ code: r.code, name_en: r.name_en })));
+        setMarkets(mine.map((r) => ({ code: r.code, en: r.name_en, ar: r.name_ar })));
       })
       .catch(() => { if (alive) setMarkets([]); });
     return () => { alive = false; };
@@ -35,26 +44,35 @@ export function MarketFilter() {
   // Re-pull the numbers whenever the country changes.
   useEffect(() => { void loadMetrics(); }, [metricsMarket, loadMetrics]);
 
-  if (markets.length < 2) return null;
+  /* Scoped to exactly one country: nothing to choose. Scoped to none — a
+     master, or an admin left unrestricted — always gets the row, because the
+     platform-wide view is a choice they hold even while there is one country
+     to hold it over. */
+  const scoped = !!access.markets && !access.isMaster;
+  if (scoped && markets.length < 2) return null;
+  if (markets.length === 0) return null;
 
-  const pick = (code: string | null) => setMetricsMarket(code);
+  const allLabel = scoped
+    ? (ar ? "كل دولي" : "All my countries")
+    : (ar ? "كل الدول" : "All countries");
 
   return (
-    <div className="adm-market-filter">
+    <div className="adm-market-filter" role="group" aria-label={ar ? "الدولة" : "Country"}>
       <button
         className={"adm-filter-chip" + (metricsMarket === null ? " on" : "")}
-        onClick={() => pick(null)}
+        onClick={() => setMetricsMarket(null)}
+        data-no-i18n
       >
-        All countries
+        {allLabel}
       </button>
       {markets.map((m) => (
         <button
           key={m.code}
           className={"adm-filter-chip" + (metricsMarket === m.code ? " on" : "")}
-          onClick={() => pick(m.code)}
+          onClick={() => setMetricsMarket(m.code)}
           data-no-i18n
         >
-          {m.name_en}
+          {ar ? m.ar : m.en}
         </button>
       ))}
     </div>

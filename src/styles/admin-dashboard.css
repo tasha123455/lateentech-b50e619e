@@ -679,7 +679,11 @@
 .lateen-admin .adm-market-pill { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--surface-2); color: var(--txt-2); border-radius: 6px; padding: 3px 6px 2px; flex-shrink: 0; }
 /* Country filter above the analytics. Only rendered when there is more than
    one country to choose between. */
-.lateen-admin .adm-market-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.lateen-admin .adm-market-filter { display: flex; gap: 6px; flex-wrap: wrap; }
+/* Country and date, side by side while there is room and stacked when there
+   is not. Each keeps its own wrapping, so neither is ever cut off. */
+.lateen-admin .adm-analytics-filters { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 14px; margin-bottom: 12px; }
+.lateen-admin .adm-analytics-filters > .bd-range-tabs { margin-bottom: 0; }
 
 /* A report now waits for both notifications, so the card has to say which one
    it is still holding for — without it, a card that stays put after a
