@@ -189,5 +189,50 @@ export function recommendProducts(
      reshuffles itself on every keystroke is not a recommendation. */
   scored.sort((a, b) => b.score - a.score || a.p.id.localeCompare(b.p.id));
 
-  return { list: scored.slice(0, limit).map((s) => s.p), personal: engaged > 0 };
+  return { list: spread(scored, limit).map((s) => s.p), personal: engaged > 0 };
+}
+
+/** A second shirt is worth less than the first, and a fourth is worth less
+ *  again. Not zero: a marketer who only sells shirts should still be shown
+ *  shirts, and a shop with the best four products in the catalogue should not
+ *  be cut down to one on principle. */
+const CAT_REPEAT = 0.55;
+const SHOP_REPEAT = 0.7;
+
+/**
+ * The four picks, chosen so they are not four of the same thing.
+ *
+ * Taking the top four by score alone gives a marketer who sells phone cases
+ * four phone cases from one shop, which answers a question they did not ask:
+ * they can already find more of what they have. What a suggestion is for is
+ * the thing they would not have looked for. Every feed built to be browsed
+ * rather than searched does some version of this, for the same reason.
+ *
+ * Greedy rather than clever: take the best, then discount everything sharing
+ * its category or its shop and take the best of what is left. Two knobs, both
+ * gentle — a strong enough product still wins its second and third place, so
+ * this reorders the shortlist without overruling the ranking that built it.
+ */
+function spread<T extends { p: BrowseProduct; score: number }>(scored: T[], limit: number): T[] {
+  const left = scored.slice();
+  const out: T[] = [];
+  const cats = new Map<string, number>();
+  const shops = new Map<string, number>();
+
+  while (out.length < limit && left.length) {
+    let bestAt = 0;
+    let bestVal = -Infinity;
+    left.forEach((c, i) => {
+      const seenCat = cats.get(c.p.cat) || 0;
+      const seenShop = shops.get(c.p.bid) || 0;
+      const v = c.score * CAT_REPEAT ** seenCat * SHOP_REPEAT ** seenShop;
+      // `>` and not `>=`, so equal values keep the score order they arrived in.
+      if (v > bestVal) { bestVal = v; bestAt = i; }
+    });
+    const [taken] = left.splice(bestAt, 1);
+    out.push(taken);
+    if (taken.p.cat) cats.set(taken.p.cat, (cats.get(taken.p.cat) || 0) + 1);
+    if (taken.p.bid) shops.set(taken.p.bid, (shops.get(taken.p.bid) || 0) + 1);
+  }
+  return out;
 }
