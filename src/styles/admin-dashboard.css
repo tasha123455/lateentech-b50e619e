@@ -689,3 +689,10 @@
    it is still holding for — without it, a card that stays put after a
    successful send reads as a failure. */
 .lateen-admin .rpt-sent { font-size: 11.5px; font-weight: 600; color: #34c77b; flex-shrink: 0; align-self: center; white-space: nowrap; }
+
+/* The console before it knows which pages this admin may open — only ever on a
+   first visit, because the answer is remembered afterwards. A mark and a line,
+   rather than the empty background this used to be: a blank screen reads as an
+   app that has broken, not one that is still asking. */
+.lateen-admin .adm-waiting { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; gap: 18px; }
+.lateen-admin .adm-waiting-text { font-size: 12.5px; color: var(--txt-2); font-family: var(--font); }

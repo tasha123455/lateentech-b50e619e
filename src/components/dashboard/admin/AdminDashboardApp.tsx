@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/auth/AuthContext";
+import { LateenLogo } from "@/components/brand/LateenLogo";
 import "@/styles/lateen-admin.css";
 import "@/styles/admin-dashboard.css";
 
@@ -120,6 +121,7 @@ function Shell() {
      meantime is the console's own background, for as long as one query takes,
      rather than a page belonging to somebody else. */
   const settled = !accessLoading || remembered.current !== null;
+  const ar = typeof document !== "undefined" && document.documentElement.lang === "ar";
 
   const onSignOut = () => {
     if (signingOut) return;
@@ -133,7 +135,18 @@ function Shell() {
     });
   };
 
-  if (!settled) return <div className="adm-app" />;
+  /* Only reachable on a console that has never been opened by this account on
+     this phone; every later visit knows its pages before it draws. An empty
+     background was what this used to be, and an empty screen for a second
+     reads as an app that has failed rather than one that is asking. */
+  if (!settled) {
+    return (
+      <div className="adm-app adm-waiting" data-no-i18n>
+        <LateenLogo variant="mark" size={92} glow />
+        <div className="adm-waiting-text">{ar ? "جارٍ فتح لوحة التحكم…" : "Opening the console…"}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="adm-app">

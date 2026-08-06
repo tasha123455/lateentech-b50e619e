@@ -66,6 +66,49 @@ export function useAdminData(): Ctx {
   return v;
 }
 
+/* What this console was allowed the last time it was opened, kept per account.
+ *
+ * Never a permission — the database decides that, refuses the work regardless,
+ * and filters every list on its own side. This exists so that an admin who has
+ * been here before opens on a page instead of on an empty screen while a query
+ * that has already been answered once is answered again.
+ *
+ * Keyed by account so one person's console can never open on another's. Any
+ * shape that is not what was written is ignored rather than trusted.
+ *
+ * Deliberately named outside the prefixes that user-scope.ts purges on sign-out.
+ * That purge exists so nothing personal survives for the next account, and this
+ * key honours it by being unreadable to any other account — while surviving the
+ * one thing that matters here, which is signing out and back in. Purging it
+ * would put the wait back on exactly the visit this is meant to fix, since an
+ * admin arriving through Google has just signed in. It holds a list of page
+ * names and nothing else: no customer, no money, no name. */
+const ACCESS_KEY = (uid: string) => `wasla_admin_access_${uid}`;
+
+function rememberedAccess(uid: string): AdminAccess | null {
+  try {
+    if (typeof window === "undefined" || !uid) return null;
+    const raw = window.localStorage.getItem(ACCESS_KEY(uid));
+    if (!raw) return null;
+    const a = JSON.parse(raw) as Partial<AdminAccess>;
+    if (typeof a.isMaster !== "boolean" || !Array.isArray(a.pages)) return null;
+    return {
+      isMaster: a.isMaster,
+      pages: a.pages.filter((p): p is string => typeof p === "string"),
+      markets: Array.isArray(a.markets) ? a.markets.filter((m): m is string => typeof m === "string") : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function rememberAccess(uid: string, a: AdminAccess): void {
+  try {
+    if (typeof window === "undefined" || !uid) return;
+    window.localStorage.setItem(ACCESS_KEY(uid), JSON.stringify(a));
+  } catch { /* storage full or turned off — the console simply waits next time */ }
+}
+
 export function AdminDataProvider({ userId, children }: { userId: string; children: ReactNode }) {
   const api = useMemo(() => createLateenApi(userId), [userId]);
   const admin = api.admin;
@@ -260,16 +303,30 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
   }, [loadPayouts]);
 
   /* Assume nothing until the database answers. Starting from "master" would
-     flash the whole console at somebody who is only allowed one page of it. */
-  const [access, setAccess] = useState<AdminAccess>({ isMaster: false, pages: [], markets: null });
-  const [accessLoading, setAccessLoading] = useState(true);
+     flash the whole console at somebody who is only allowed one page of it.
+
+     But "nothing" was its own problem: the console had no page it was allowed
+     to draw, so an admin signing in watched an empty screen for as long as one
+     query took. Waiting on an answer this console was given the last time it
+     opened is a wait for something already known.
+
+     So the last answer is kept, per account, and used to open on. The fresh
+     one replaces it the moment it lands — within the same second, and before
+     anything can be done with the console. Nothing here is a permission: the
+     database refuses the work regardless of what this says, and every list is
+     filtered there too. This only decides which page is drawn first. */
+  const [access, setAccess] = useState<AdminAccess>(() => rememberedAccess(userId) ?? { isMaster: false, pages: [], markets: null });
+  const [accessLoading, setAccessLoading] = useState(() => rememberedAccess(userId) === null);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const a = await api.admin.myAdminAccess();
-        if (alive) setAccess({ isMaster: a.isMaster, pages: a.pages, markets: a.markets });
+        if (!alive) return;
+        const fresh = { isMaster: a.isMaster, pages: a.pages, markets: a.markets };
+        setAccess(fresh);
+        rememberAccess(userId, fresh);
       } catch (e) {
         console.error("[admin] access", e);
       } finally {
@@ -277,7 +334,7 @@ export function AdminDataProvider({ userId, children }: { userId: string; childr
       }
     })();
     return () => { alive = false; };
-  }, [api]);
+  }, [api, userId]);
 
   // The payouts page flips this so the poll and realtime handlers stay cheap.
   const value = useMemo<Ctx>(
