@@ -29,7 +29,11 @@ function Shell() {
   const counts = useAdminCounts();
   const { signOut } = useAuth();
 
-  const [page, setPage] = useState<AdminPageId>(() => readPage(userId) || "adm-home");
+  /* The page this admin left off on, or nothing if they have never been here.
+     Read once: what matters is whether there was one when the console opened,
+     not what it becomes afterwards. */
+  const remembered = useRef<AdminPageId | null>(readPage(userId));
+  const [page, setPage] = useState<AdminPageId>(() => remembered.current || "adm-home");
   const [signingOut, setSigningOut] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -105,6 +109,18 @@ function Shell() {
     };
   }, [userId]);
 
+  /* An admin may be allowed only some of these pages, and which ones is a
+     question for the database. An admin arriving for the first time therefore
+     had the analytics home drawn in full — and its figures fetched — before
+     the answer came back and moved them to the page that is actually theirs.
+     That was the flicker on a new admin's first visit.
+
+     So: with a remembered page there is nothing to wait for, because it was
+     allowed the last time they used it. Without one, wait. What shows in the
+     meantime is the console's own background, for as long as one query takes,
+     rather than a page belonging to somebody else. */
+  const settled = !accessLoading || remembered.current !== null;
+
   const onSignOut = () => {
     if (signingOut) return;
     setSigningOut(true);
@@ -116,6 +132,8 @@ function Shell() {
       } catch { /* ignore */ }
     });
   };
+
+  if (!settled) return <div className="adm-app" />;
 
   return (
     <div className="adm-app">

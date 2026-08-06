@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { LateenLogo } from "@/components/brand/LateenLogo";
 import { useAuth } from "@/auth/AuthContext";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { hasStoredSession } from "@/lib/storedSession";
 
 export function Landing() {
   const { user, role, loading } = useAuth();
@@ -14,7 +15,23 @@ export function Landing() {
     if (!loading && user && role) nav({ to: withLang("/dashboard") });
   }, [loading, user, role, nav, withLang]);
 
-  if (loading || (user && role)) {
+  /* Whether this browser is holding a session, which decides whether the wait
+     for the real answer is worth showing anything for.
+     Read after the first render on purpose. The server has no localStorage, so
+     a first render that consulted it would disagree with the server's and
+     React would throw the page away and build it again — the very flash this
+     is here to remove. */
+  const [returning, setReturning] = useState(false);
+  useEffect(() => { setReturning(hasStoredSession()); }, []);
+
+  /* The mark alone, for somebody on their way to a dashboard.
+   *
+   * Not while the session is merely being checked. This page is served as
+   * finished HTML before any of that has happened, so waiting on it meant the
+   * front page arrived as a full-screen logo every single time and turned into
+   * itself a moment later — which is what the flicker was. A visitor with no
+   * session sees the page it says it is, immediately, and never sees this. */
+  if ((returning && loading) || (user && role)) {
     return (
       <main className="flex min-h-[100svh] items-center justify-center overflow-x-hidden bg-background px-6">
         <LateenLogo variant="mark" size={280} glow />

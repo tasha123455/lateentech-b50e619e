@@ -169,7 +169,16 @@ export function MenuDrawer({
             </svg>
           </span>
           <span className="adm-menu-text">
-            <span className="adm-menu-label">{signingOut ? "Signing out…" : "Sign out"}</span>
+            {/* Written out in both languages rather than left to the page-wide
+                translator. That walker rewrites text nodes it finds when it
+                runs; "Signing out…" only exists for the second between the tap
+                and the page going, which is not long enough to be found — so an
+                admin reading Arabic was told in English that they were being
+                signed out. The business and marketer menus already say it this
+                way. */}
+            <span className="adm-menu-label" data-no-i18n>
+              {signingOut ? (ar ? "جارٍ تسجيل الخروج…" : "Signing out…") : ar ? "تسجيل الخروج" : "Sign out"}
+            </span>
           </span>
         </button>
       </div>
