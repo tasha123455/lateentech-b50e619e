@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 /* The brand art, as vector.
  *
  * Traced from the artwork supplied for the brand — the full-size English and
@@ -100,11 +102,18 @@ const TAG_AR: Piece = {
 
 /** A unique gradient id per instance: two marks on one page is not a thing
  *  that happens, but a shared id breaks the second copy when the first
- *  unmounts, and that is a bug nobody would think to look for. */
-let gradSeq = 0;
-
+ *  unmounts, and that is a bug nobody would think to look for.
+ *
+ *  It has to be React's own id and not a counter. A module-level counter
+ *  starts at zero once per process: the server renders the page and counts up,
+ *  the browser hydrates the same page and counts up again from its own zero,
+ *  and the two disagree. React notices the mismatch, says so, and — its own
+ *  words — will not patch it up, which leaves the fill pointing at a gradient
+ *  that may not be under that name on this side. useId is built for exactly
+ *  this and gives the same answer on both. The colons it contains are legal in
+ *  an id and in url(#…), but not in a CSS selector, so they come out. */
 export function MarkSvg({ height, style }: { height: number; style?: React.CSSProperties }) {
-  const id = "wg" + (gradSeq++);
+  const id = "wg" + useId().replace(/:/g, "");
   const w = Math.round((height * MARK.w) / MARK.h);
   const h = Math.round(height);
   return (

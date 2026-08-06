@@ -1,0 +1,13 @@
+{
+  "name": "wasla-e2e",
+  "private": true,
+  "description": "Browser tests that drive the real app the way a person does. Deliberately separate from the app's own package.json so installing them can never affect the build.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}

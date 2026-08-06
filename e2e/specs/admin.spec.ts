@@ -1,0 +1,63 @@
+import { expect, test } from "@playwright/test";
+import { account } from "../lib/accounts";
+import { signIn, watchForErrors } from "../lib/app";
+
+test.describe("admin", () => {
+  test.skip(!account("admin"), "set WASLA_ADMIN_EMAIL / _PASSWORD to run this");
+
+  test("every admin page opens without an error", async ({ page }) => {
+    const errors = watchForErrors(page);
+    expect(await signIn(page, "en", "admin")).toBe(true);
+
+    const tabs = page.locator(".adm-nav-item");
+    const n = await tabs.count();
+    expect(n, "the admin bottom bar did not render").toBeGreaterThan(2);
+    for (let i = 0; i < n; i++) {
+      await tabs.nth(i).click();
+      await page.waitForTimeout(1000);
+    }
+    expect(errors, "console errors while moving between admin pages").toEqual([]);
+  });
+
+  test("the product grid shows no fulfilment badge, and the sheet never shows the wrong product", async ({ page }) => {
+    expect(await signIn(page, "en", "admin")).toBe(true);
+
+    // Reach product review through the menu rather than guessing a tab index.
+    await page.locator(".adm-menu-btn, [class*='menu']").first().click();
+    await page.getByText(/product review/i).first().click();
+
+    const tiles = page.locator(".adm-prod-grid .c");
+    await expect(tiles.first()).toBeVisible({ timeout: 30_000 });
+    // A tile is a thumbnail, a name and a price.
+    await expect(tiles.first().locator("[class*='fulfil']")).toHaveCount(0);
+
+    if ((await tiles.count()) < 2) test.skip(true, "need two products to test the swap");
+
+    // Open the first, close it, then open the second and watch every frame.
+    await tiles.nth(0).click();
+    const card = page.locator(".adm-pdetail-card").first();
+    await expect(card).toBeVisible({ timeout: 20_000 });
+    const firstName = (await card.innerText()).slice(0, 60);
+    await page.locator(".adm-pdetail-close").first().click();
+    await page.waitForTimeout(500);
+
+    await page.evaluate(() => {
+      (window as unknown as { __f: string[] }).__f = [];
+      const t = () => {
+        const w = window as unknown as { __f: string[] };
+        const el = document.querySelector(".adm-pdetail-card");
+        w.__f.push(el ? (el as HTMLElement).innerText.replace(/\s+/g, " ").slice(0, 60) : "(closed)");
+        if (w.__f.length < 50) requestAnimationFrame(t);
+      };
+      requestAnimationFrame(t);
+    });
+    await tiles.nth(1).click();
+    await page.waitForTimeout(1200);
+    const frames = await page.evaluate(() => (window as unknown as { __f: string[] }).__f);
+
+    /* Not one painted frame may come from the product opened before. The
+       sheet used to draw its first frame from whatever was left in state. */
+    const stale = frames.filter((f) => f !== "(closed)" && f.slice(0, 30) === firstName.slice(0, 30));
+    expect(stale.length, "the sheet showed the previous product first").toBe(0);
+  });
+});
