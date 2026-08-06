@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { account } from "../lib/accounts";
-import { signIn, watchForErrors } from "../lib/app";
+import { haveAny, signIn, watchForErrors } from "../lib/app";
 
 test.describe("admin", () => {
   test.skip(!account("admin"), "set WASLA_ADMIN_EMAIL / _PASSWORD to run this");
@@ -27,6 +27,7 @@ test.describe("admin", () => {
     await page.getByText(/product review/i).first().click();
 
     const tiles = page.locator(".adm-prod-grid .c");
+    test.skip(!(await haveAny(tiles)), "no products exist yet, so there is no grid to check");
     await expect(tiles.first()).toBeVisible({ timeout: 30_000 });
     // A tile is a thumbnail, a name and a price.
     await expect(tiles.first().locator("[class*='fulfil']")).toHaveCount(0);

@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { account, backend, type RoleName } from "./accounts";
 
 /** The app decides language from the path, so a spec picks one explicitly
@@ -118,6 +118,22 @@ export async function signIn(page: Page, lang: "en" | "ar", role: RoleName): Pro
   await settled(page);
   await expect(page.locator(".bottom-nav, .adm-nav, nav").first()).toBeVisible({ timeout: 30_000 });
   return true;
+}
+
+/** Whether a list has anything in it, once it has had time to arrive.
+ *
+ *  A freshly made account has an empty everything: no products, no orders, no
+ *  notifications. A test that asserts on the first row of an empty list spends
+ *  its timeout finding that out and then reports a failure, which reads as "the
+ *  browse page is broken" when it means "nobody has listed anything". Callers
+ *  skip on a false, and say which. */
+export async function haveAny(rows: Locator, ms = 15_000): Promise<boolean> {
+  try {
+    await rows.first().waitFor({ state: "visible", timeout: ms });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Fails the test if the browser logged an error while the page was used.

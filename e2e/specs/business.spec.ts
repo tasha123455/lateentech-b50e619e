@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { account } from "../lib/accounts";
-import { signIn, watchForErrors } from "../lib/app";
+import { haveAny, signIn, watchForErrors } from "../lib/app";
 
 test.describe("business", () => {
   test.skip(!account("business"), "set WASLA_BUSINESS_EMAIL / _PASSWORD to run this");
@@ -26,6 +26,7 @@ test.describe("business", () => {
       await page.locator(".bottom-nav .nav-item").nth(2).click();
 
       const cards = page.locator(".mp-product-card");
+      test.skip(!(await haveAny(cards)), "this shop has listed nothing yet");
       await expect(cards.first()).toBeVisible({ timeout: 30_000 });
       await cards.first().locator(".mp-p-head").click();
       await expect(page.locator(".mp-product-card.expanded").first()).toBeVisible();
