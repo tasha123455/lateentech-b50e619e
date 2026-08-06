@@ -37,14 +37,14 @@ export function LanguageChooser({
   };
 
   if (!ready) {
-    return <div className="flex min-h-dvh items-center justify-center bg-background" />;
+    return <div className="flex min-h-[100svh] items-center justify-center bg-background" />;
   }
 
   const guess = detectLang();
 
   return (
     <div
-      className="flex min-h-dvh flex-col items-center justify-center overflow-x-hidden bg-background px-6 py-10"
+      className="flex min-h-[100svh] flex-col items-center justify-center overflow-x-hidden bg-background px-6 py-10"
       dir="ltr"
     >
       <div className="mb-10">

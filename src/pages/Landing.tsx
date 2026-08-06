@@ -16,7 +16,7 @@ export function Landing() {
 
   if (loading || (user && role)) {
     return (
-      <main className="flex min-h-[100dvh] items-center justify-center overflow-x-hidden bg-background px-6">
+      <main className="flex min-h-[100svh] items-center justify-center overflow-x-hidden bg-background px-6">
         <LateenLogo variant="mark" size={280} glow />
       </main>
     );
@@ -25,7 +25,7 @@ export function Landing() {
   const isAr = lang === "ar";
 
   return (
-    <main className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-x-hidden bg-background px-6 py-8">
+    <main className="relative flex min-h-[100svh] w-full items-center justify-center overflow-x-hidden bg-background px-6 py-8">
       <div className="flex w-full max-w-[420px] flex-col items-center">
       <LateenLogo variant="wordmark" lang={isAr ? "ar" : "en"} size={150} glow />
       <div className="my-7 h-px w-7 bg-border" />

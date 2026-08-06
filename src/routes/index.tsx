@@ -16,5 +16,5 @@ function RootRedirect() {
     navigate({ to: withLang(lang, ""), replace: true });
   }, [navigate]);
 
-  return <div className="flex min-h-dvh items-center justify-center bg-background" />;
+  return <div className="flex min-h-[100svh] items-center justify-center bg-background" />;
 }
