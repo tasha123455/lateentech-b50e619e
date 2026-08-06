@@ -848,17 +848,24 @@ export function createLateenApi(userId: string) {
       },
 
       async upsertAdmin(a: {
-        email: string; fullName?: string; phone?: string;
+        email: string; fullName?: string; phone?: string; phone2?: string;
         markets: string[] | null; pages: string[];
       }) {
         const { error } = await supabase.rpc("admin_upsert" as never, {
           _email: a.email,
           _full_name: a.fullName ?? null,
           _phone: a.phone ?? null,
+          _phone2: a.phone2 ?? null,
           // null is the "every market" choice, not an empty list.
           _markets: a.markets && a.markets.length ? a.markets : null,
           _pages: a.pages,
         } as never);
+        if (error) throw error;
+      },
+
+      /** Takes an admin off the list for good, role row and all. */
+      async deleteAdmin(email: string) {
+        const { error } = await supabase.rpc("admin_delete" as never, { _email: email } as never);
         if (error) throw error;
       },
 

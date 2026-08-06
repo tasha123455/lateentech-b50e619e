@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -44,13 +45,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /* Invites already claimed this session, so the attempt below happens once
+     per account rather than on every foreground wake. */
+  const claimTried = useRef<Set<string>>(new Set());
+
   const loadRole = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    if (error) throw error;
-    const roles = (data ?? []).map((r) => r.role as Role);
+    const readRoles = async (): Promise<Role[]> => {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      if (error) throw error;
+      return (data ?? []).map((r) => r.role as Role);
+    };
+
+    let roles = await readRoles();
+
+    /* An invited admin has no role row until the invite is claimed, and the
+       claim used to happen inside the admin console — which is behind the
+       role it was supposed to grant. So an admin added by email signed in
+       perfectly well and arrived nowhere: no admin role, so no admin
+       dashboard, so nothing ever ran the claim. The two ends could not reach
+       each other.
+
+       Asking here breaks the circle, because this runs before anything has
+       decided who they are. It is one call, only for accounts that are not
+       already admins, and it answers false for everybody who was never
+       invited — which is almost everybody, exactly once each. */
+    if (!roles.includes("admin") && !claimTried.current.has(userId)) {
+      claimTried.current.add(userId);
+      try {
+        const { data: claimed } = await supabase.rpc("admin_claim_invite" as never);
+        if (claimed) roles = await readRoles();
+      } catch { /* never invited, or offline — stay with the roles we have */ }
+    }
+
     let preferred: Role | null = null;
     try {
       const stored = localStorage.getItem("active_role") as Role | null;

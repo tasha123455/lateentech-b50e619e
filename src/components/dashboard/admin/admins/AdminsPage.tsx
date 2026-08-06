@@ -8,6 +8,7 @@ type AdminRow = {
   user_id: string | null;
   full_name: string | null;
   phone: string | null;
+  phone2: string | null;
   is_master: boolean;
   markets: string[] | null;
   pages: string[];
@@ -54,12 +55,18 @@ export function AdminsPage({ onBack }: { onBack: () => void }) {
 
   useEffect(() => { void load(); }, [load]);
 
-  const setActive = async (row: AdminRow, active: boolean) => {
+  /* Removing takes the row away rather than deactivating it. Suspending left
+     the admin sitting in the list behind a Restore button, which is a
+     different thing from taking somebody off it. The confirm names them,
+     because the row is gone afterwards and there is nothing to undo from. */
+  const remove = async (row: AdminRow) => {
+    const who = row.full_name || row.email;
+    if (!confirm(`Remove ${who} from the admins?\n\nThey lose access to the console immediately. This cannot be undone — adding them again means inviting them again.`)) return;
     try {
-      await api.admin.setAdminActive(row.email, active);
+      await api.admin.deleteAdmin(row.email);
       await load();
     } catch (e) {
-      setErr((e as Error)?.message || "Could not change that admin");
+      setErr((e as Error)?.message || "Could not remove that admin");
     }
   };
 
@@ -91,6 +98,7 @@ export function AdminsPage({ onBack }: { onBack: () => void }) {
                   </div>
                   <div className="adm-admin-email" dir="ltr" data-no-i18n>{r.email}</div>
                   {!!r.phone && <div className="adm-admin-phone" dir="ltr" data-no-i18n>{r.phone}</div>}
+                  {!!r.phone2 && <div className="adm-admin-phone" dir="ltr" data-no-i18n>{r.phone2}</div>}
                 </div>
                 {!r.is_master && (
                   <button
@@ -126,11 +134,8 @@ export function AdminsPage({ onBack }: { onBack: () => void }) {
               </div>
 
               {!r.is_master && (
-                <button
-                  className={"adm-btn " + (r.active ? "adm-btn-rej" : "adm-btn-acc")}
-                  onClick={() => void setActive(r, !r.active)}
-                >
-                  {r.active ? "Suspend" : "Restore"}
+                <button className="adm-btn adm-btn-rej" onClick={() => void remove(r)}>
+                  Remove
                 </button>
               )}
             </div>
@@ -167,6 +172,7 @@ function AdminForm({
   const [email, setEmail] = useState(row?.email ?? "");
   const [name, setName] = useState(row?.full_name ?? "");
   const [phone, setPhone] = useState(row?.phone ?? "");
+  const [phone2, setPhone2] = useState(row?.phone2 ?? "");
   const [allMarkets, setAllMarkets] = useState(row ? row.markets === null : true);
   const [picked, setPicked] = useState<string[]>(row?.markets ?? []);
   const [pagePick, setPagePick] = useState<string[]>(row?.pages ?? []);
@@ -176,14 +182,31 @@ function AdminForm({
   const toggle = (list: string[], set: (v: string[]) => void, v: string) =>
     set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
+  /* Everything an admin row needs to be usable. None of these are convenience
+     checks — the database refuses the same things, and this only says so
+     before the round trip and names the field rather than the rule.
+
+     "All countries" counts as a country having been chosen: it is the widest
+     answer, not the absence of one. */
+  const missing =
+    !email.trim() ? "An email is required"
+      : !name.trim() ? "A name is required"
+        : !phone.trim() || !phone2.trim() ? "Both phone numbers are required"
+          : phone.trim() === phone2.trim() ? "The two phone numbers must be different"
+            : !allMarkets && !picked.length ? "Choose at least one country"
+              : !pagePick.length ? "Choose at least one page"
+                : "";
+
   const save = async () => {
+    if (missing) { setErr(missing); return; }
     setBusy(true);
     setErr("");
     try {
       await api.admin.upsertAdmin({
         email: email.trim(),
-        fullName: name.trim() || undefined,
-        phone: phone.trim() || undefined,
+        fullName: name.trim(),
+        phone: phone.trim(),
+        phone2: phone2.trim(),
         // Null is the "every country" answer, which is not the same as
         // picking none — the database reads them differently.
         markets: allMarkets ? null : picked,
@@ -216,8 +239,13 @@ function AdminForm({
         <label className="adm-lbl">Name</label>
         <input className="adm-inp" value={name} placeholder="Full name" onChange={(e) => setName(e.target.value)} />
 
+        {/* Two numbers, both wanted. One is a single point of failure for the
+            only way of reaching somebody who can act on the platform. */}
         <label className="adm-lbl">Phone (so you can reach them)</label>
         <input className="adm-inp" dir="ltr" value={phone} placeholder="091xxxxxxx" onChange={(e) => setPhone(e.target.value)} />
+
+        <label className="adm-lbl">Second phone</label>
+        <input className="adm-inp" dir="ltr" value={phone2} placeholder="092xxxxxxx" onChange={(e) => setPhone2(e.target.value)} />
 
         <label className="adm-lbl">Which countries do they see?</label>
         <label className="adm-check">
@@ -247,11 +275,13 @@ function AdminForm({
           </label>
         ))}
 
-        {!!err && <div className="adm-admins-err">{err}</div>}
+        {/* What is still missing, rather than a dead button with no reason
+            given. The error from a failed save replaces it. */}
+        {!!(err || missing) && <div className="adm-admins-err">{err || missing}</div>}
 
         <div className="adm-sheet-actions">
           <button className="adm-btn adm-btn-ghost" onClick={onClose} disabled={busy}>Cancel</button>
-          <button className="adm-btn adm-btn-acc" onClick={() => void save()} disabled={busy || !email.trim()}>
+          <button className="adm-btn adm-btn-acc" onClick={() => void save()} disabled={busy || !!missing}>
             {busy ? "Saving…" : "Save"}
           </button>
         </div>
