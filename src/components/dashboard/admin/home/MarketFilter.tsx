@@ -23,7 +23,7 @@ import { useAdminData } from "../AdminDataProvider";
  */
 export function MarketFilter() {
   useLangTick();
-  const { api, access, metricsMarket, setMetricsMarket, loadMetrics } = useAdminData();
+  const { api, access, metricsMarket, setMetricsMarket, loadMetrics, metrics, metricsError } = useAdminData();
   const [markets, setMarkets] = useState<Array<{ code: string; en: string; ar: string }>>([]);
   const ar = isArLang();
 
@@ -56,6 +56,29 @@ export function MarketFilter() {
     ? (ar ? "كل دولي" : "All my countries")
     : (ar ? "كل الدول" : "All countries");
 
+  /* How many accounts the chosen country holds, on the chip that chose it.
+   *
+   * Only on that one, the way the Users page badges the role it is filtered by:
+   * a number on every chip would be a number for a country whose figures are
+   * not the ones on screen, which reads as a second opinion about the page.
+   *
+   * It is the same total the "Total Users" stat shows below, taken from the
+   * same answer rather than counted again, so the two can never disagree — and
+   * it costs no request, because the numbers for the chosen country are already
+   * here. While they are still arriving, or if they failed to, there is simply
+   * no count rather than a nought that would read as an empty country. */
+  const count = metricsError ? null : metrics?.totalUsers;
+  const withCount = (on: boolean, label: string) =>
+    on && typeof count === "number" ? (
+      <>
+        {label}{" "}
+        {/* <bdi> so an Arabic chip does not reorder "(12)" into "12)(" */}
+        <bdi>({count.toLocaleString()})</bdi>
+      </>
+    ) : (
+      label
+    );
+
   return (
     <div className="adm-market-filter" role="group" aria-label={ar ? "الدولة" : "Country"}>
       <button
@@ -63,7 +86,7 @@ export function MarketFilter() {
         onClick={() => setMetricsMarket(null)}
         data-no-i18n
       >
-        {allLabel}
+        {withCount(metricsMarket === null, allLabel)}
       </button>
       {markets.map((m) => (
         <button
@@ -72,7 +95,7 @@ export function MarketFilter() {
           onClick={() => setMetricsMarket(m.code)}
           data-no-i18n
         >
-          {ar ? m.ar : m.en}
+          {withCount(metricsMarket === m.code, ar ? m.ar : m.en)}
         </button>
       ))}
     </div>
