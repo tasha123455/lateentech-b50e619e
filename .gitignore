@@ -36,3 +36,4 @@ e2e/node_modules
 e2e/.env.local
 e2e/report
 e2e/test-results
+test-results

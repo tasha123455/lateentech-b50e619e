@@ -28,8 +28,19 @@ page, the manifest and every icon it promises — need no account and run for
 anybody.
 
 The rest need credentials, and skip themselves cleanly without them. **Use
-throwaway accounts you can delete, not accounts you rely on.** Put them in
-`e2e/.env.local`, which git is told to ignore:
+throwaway accounts you can delete, not accounts you rely on.**
+
+There is a wrinkle worth knowing before making one. This site has no password
+box: the only way in through the interface is Google, and a robot cannot drive
+Google's sign-in — nor should it try, since that is exactly the behaviour
+Google blocks accounts for. So the tests ask Supabase for a session directly,
+with an email and a password, and hand it to the app the same way the app's own
+code would. Nothing is added to the site to allow it and nothing is left behind
+afterwards; it needs a real account that has a real password set on it, which
+is done in the Supabase dashboard under *Authentication → Users*. An account
+created through Google has no password until one is set.
+
+Put the credentials in `e2e/.env.local`, which git is told to ignore:
 
 ```
 WASLA_MARKETER_EMAIL=...
@@ -45,6 +56,12 @@ Then `set -a; . ./.env.local; set +a; npm test`.
 Do not put them in the repository's own `.env` — that file is tracked by git,
 so anything in it is published.
 
+The address of the backend and its publishable key are read from that same
+tracked `.env` when they are not in the environment, so there is nothing to
+configure: both are public values that ship inside every copy of the site.
+`WASLA_SUPABASE_URL` and `WASLA_SUPABASE_ANON_KEY` override them when the tests
+are pointed at a different project.
+
 ## What it will and will not touch
 
 Everything here reads. It signs in, opens pages, expands cards, and checks what
@@ -55,6 +72,25 @@ something every time it runs fills a real shop with rubbish.
 `WASLA_WRITES=1` is reserved for tests that create and clean up after
 themselves. Nothing uses it yet; it exists so that adding such a test later is
 a deliberate act rather than an accident.
+
+## Known defects it has already found
+
+Two tests are marked expected-to-fail. They describe real bugs, are left in so
+the bugs stay described, and are counted as passes so that a green run still
+means green. Fix either one and its test starts failing — which is the reminder
+to come back and delete the marking.
+
+- **Picking a city reopens the picker.** On the registration form the city sheet
+  is rendered inside the `<label>` that titles the field, and a browser treats a
+  click anywhere in a label as a click on its control. Choosing a city therefore
+  sends a second click to the button that opens the sheet: the choice is taken,
+  but the list is still on screen and looks like it was ignored. The two profile
+  screens use a `<div>` and are unaffected.
+- **The Arabic registration page fails to hydrate.** The city control reads the
+  language off the browser, which the server does not have, so the server writes
+  "Select city" into the Arabic page and the browser writes "اختر المدينة" over
+  it. React discards the whole form and rebuilds it — which is also why typing
+  into that page in its first half second is thrown away.
 
 ## What it cannot cover
 
@@ -88,6 +124,9 @@ ones, add these under *Settings → Secrets and variables → Actions*:
 | `WASLA_MARKETER_EMAIL` / `WASLA_MARKETER_PASSWORD` | a throwaway marketer account |
 | `WASLA_BUSINESS_EMAIL` / `WASLA_BUSINESS_PASSWORD` | a throwaway business account |
 | `WASLA_ADMIN_EMAIL` / `WASLA_ADMIN_PASSWORD` | a throwaway admin, invited from the Admins page |
+
+Each of those accounts needs a password set on it in the Supabase dashboard —
+see *Signing in* above for why.
 
 Secrets are write-only: GitHub will not show them again, and they are masked
 in the logs. They are not in the repository and not in anyone's chat history.
