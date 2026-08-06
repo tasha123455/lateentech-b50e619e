@@ -24,3 +24,30 @@ export function hasStoredSession(): boolean {
   } catch { /* private mode, or storage turned off — treat as signed out */ }
   return false;
 }
+
+/** Whether this page is the far side of a sign-in that is still finishing.
+ *
+ *  Google sends people back to the site's root, which is the front page — so
+ *  everybody who signs in arrives, for a second or two, at the screen that asks
+ *  who they are. They have just answered that. Showing it to them again while
+ *  the session is worked out is the flicker between tapping "Sign in with
+ *  Google" and arriving at a dashboard.
+ *
+ *  Three things say a sign-in is in flight, and any of them is enough:
+ *  the handoff Google puts in the address, and the two notes the sign-in and
+ *  registration forms leave behind before handing over. Both notes are cleared
+ *  once the account has been settled, so neither outlives the trip.
+ *  `intended_role` is deliberately not among them: nothing ever clears it, so
+ *  it would report a sign-in in progress for the rest of the visit.
+ *
+ *  Always false on the server. */
+export function isFinishingSignIn(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    const { search, hash } = window.location;
+    if (/[?&]code=/.test(search) || /access_token=|error_description=/.test(hash)) return true;
+    return !!(sessionStorage.getItem("signin_intent") || sessionStorage.getItem("pending_signup"));
+  } catch {
+    return false;
+  }
+}
