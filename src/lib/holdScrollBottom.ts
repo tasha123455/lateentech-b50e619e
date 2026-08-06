@@ -125,3 +125,59 @@ export function holdBottom(node: HTMLElement, slack: number): void {
     watching.set(el, () => s.target.removeEventListener("scroll", onScroll));
   }
 }
+
+/** Holds a scroll position across a change, whatever tries to move it.
+ *
+ *  holdBottom above answers the one reason the page is *known* to move when a
+ *  block shrinks: the scroll offset ending up past the new bottom. It cannot
+ *  answer the others. A collapse is a layout change in the middle of a live
+ *  page, and layout changes are exactly when a browser second-guesses where
+ *  the reader should be — scroll anchoring picking a new anchor and correcting
+ *  to it, a focused control being brought into view, a restoration pass firing
+ *  on a re-render. Each is a different mechanism with the same symptom, and
+ *  none of them is the component's to negotiate with.
+ *
+ *  So this states the requirement instead of arguing about the cause: for a
+ *  short window after the tap, the offset is what it was. Anything that moves
+ *  it is put back on the next frame.
+ *
+ *  It yields immediately to the reader. The first touch, wheel or key ends the
+ *  window, because past that point moving the page is what they asked for, and
+ *  a guard that outlives its reason is a bug of its own. It also never asks for
+ *  an offset that no longer exists: a genuinely shorter page is clamped to its
+ *  own end rather than fought frame after frame.
+ *
+ *  Bounded in time, cancelled by intent, and correct if it never fires. */
+export function pinScroll(node: HTMLElement, ms = 500): () => void {
+  if (typeof window === "undefined") return () => {};
+  const s = scrollerOf(node);
+  const start = s.top();
+  let alive = true;
+  let raf = 0;
+  let timer: ReturnType<typeof setTimeout>;
+
+  const stop = () => {
+    if (!alive) return;
+    alive = false;
+    cancelAnimationFrame(raf);
+    clearTimeout(timer);
+    for (const ev of GIVE_UP) window.removeEventListener(ev, stop, true);
+  };
+
+  const tick = () => {
+    if (!alive) return;
+    const want = Math.max(0, Math.min(start, s.full() - s.view()));
+    if (Math.abs(s.top() - want) > 1) {
+      if (s.target === window) window.scrollTo(0, want);
+      else (s.pad as HTMLElement).scrollTop = want;
+    }
+    raf = requestAnimationFrame(tick);
+  };
+
+  raf = requestAnimationFrame(tick);
+  timer = setTimeout(stop, ms);
+  for (const ev of GIVE_UP) window.addEventListener(ev, stop, true);
+  return stop;
+}
+
+const GIVE_UP = ["touchstart", "wheel", "keydown", "pointerdown"] as const;
