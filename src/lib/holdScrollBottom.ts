@@ -156,9 +156,30 @@ export function pinScroll(node: HTMLElement, ms = 500): () => void {
   let raf = 0;
   let timer: ReturnType<typeof setTimeout>;
 
+  /* Scroll anchoring, off on the scrolling box itself for the duration.
+   *
+   * Anchoring is the browser keeping the reader in place when content around
+   * them changes size: it picks a node, and after layout it moves the scroll
+   * offset so that node stays put. A collapsing description is precisely that
+   * kind of change, so it runs — and it runs inside layout, after script for
+   * the frame has finished. That is why the correction below was always one
+   * paint late: by the time a frame callback can read the offset, a frame has
+   * already been drawn at wherever anchoring decided to put it.
+   *
+   * Saying `none` on the element being collapsed is not enough. That only
+   * excludes it from being *chosen* as the anchor, which leaves the browser
+   * free to choose something further down and correct to that instead — a
+   * bigger jump, from a node further away. Anchoring is a property of the
+   * scrolling box, and turning it off there turns it off. */
+  const anchorHost: HTMLElement =
+    s.target === window ? document.documentElement : (s.pad as HTMLElement);
+  const priorAnchor = anchorHost.style.overflowAnchor;
+  anchorHost.style.overflowAnchor = "none";
+
   const stop = () => {
     if (!alive) return;
     alive = false;
+    anchorHost.style.overflowAnchor = priorAnchor;
     cancelAnimationFrame(raf);
     clearTimeout(timer);
     for (const ev of GIVE_UP) window.removeEventListener(ev, stop, true);

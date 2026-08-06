@@ -92,8 +92,8 @@ function RefundProtection({ days }: { days: number }) {
   const dAttr = ar ? d : Math.max(1, Math.round(days)) + "-day";
   const paras = ar
     ? [
-        `بيش نحافظوا على حق الزبون ونمنعوا أي عمليات نصب، كل طلب فيه فترة استرجاع مدتها ${d} من وقت ما يتسجل إنه تم التسليم.`,
-        `عمولتك ما تنزلش في محفظتك إلا بعد ما تكمل هالفترة. الإجراء هذه يحمي الزبون من أي عمليه نصب أو تاجر غير ملتزم، ويحميك انت حتى من ديون اضطرارك ترجع العمولة لو صار استرجاع خلال ${d}.`,
+        `بيش نحافظوا على حق الزبون ونمنعوا أي عمليات نصب كل طلب فيه فترة استرجاع مدتها ${d} من وقت ما يسجل إنه تم التسليم.`,
+        `عمولتك ما تنزلش في محفظتك إلا بعد ما تكمل الفترة هذه، الإجراء هذه يحمي الزبون من أي عمليه نصب أو تاجر غير ملتزم، ويحميك انت حتى من ديون و اضطرارك ترجع العمولة لو صار استرجاع خلال ${d}.`,
         `بعد انتهاء فترة ${d}، العمولة توصل لمحفظتك و تعتبر نهائية وغير قابلة للاسترجاع بأي حال من الأحوال.`,
       ]
     : [
@@ -160,6 +160,11 @@ export function NotifDetailBox({
   const isAdminMsg = n.kind === "admin_message" || n.kind === "admin_broadcast";
   const isPaid = n.kind === "payout_paid";
   const isDelivered = n.kind === "order_delivered";
+  /* The receipt notice opens onto the same panel. It is the first time the
+     waiting period is mentioned to a marketer — the commission is on its way
+     but will not land for two days after delivery — so the explanation of why
+     belongs behind that card as much as behind the delivered one. */
+  const isVerified = n.kind === "receipt_verified";
 
   const borderColor = isFailed || isRejected || isRefunded || isNote ? "#2a1a1a" : "#142a20";
   const photoUrl = (d.product_photo || d.photo) as string | undefined;
@@ -244,7 +249,7 @@ export function NotifDetailBox({
         </div>
       )}
       {leadRows}
-      {isDelivered && <RefundProtection days={LIBYA.money.refundWindowDays} />}
+      {(isDelivered || isVerified) && <RefundProtection days={LIBYA.money.refundWindowDays} />}
       <DetailRow k={t("Order Code", "كود الطلبيه")} v={d.order_code} />
       {isReportReviewed && <DetailRow k={t("Report type", "نوع البلاغ")} v={reportTypeLbl} />}
       {/* The marketer's own words, read back to them beside the admin's

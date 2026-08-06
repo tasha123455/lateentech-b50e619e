@@ -86,11 +86,18 @@ function localize(n: NotificationRow): { t: string; b: string } {
     };
   }
   if (n.kind === "receipt_verified" || title === "Receipt Verified") {
+    /* Named the wait here rather than leaving it at "once the order is
+       delivered". Delivery is the start of the refund window, not the end of
+       it, so a marketer reading only that line expected the money on the day
+       it arrived and found it was not there yet. Saying how long, and offering
+       the same invitation the delivered card carries, means the two notices
+       tell one story instead of two. */
+    const days = LIBYA.money.refundWindowDays;
     return {
       t: t("Receipt Verified", "تم اعتماد الإيصال"),
       b: t(
-        "Your payment receipt has been verified. Your commission is on the way, and becomes available once the order is delivered.",
-        "تم اعتماد الإيصال. عمولتك في الطريق، وتصبح متاحة بعد تسليم الطلبية.",
+        `Your commission is on the way, and becomes available in your wallet ${daysPhrase(days, false)} after the order is delivered. Tap to know more`,
+        `عمولتك في الطريق، وتصبح متاحة في محفظتك بعد تسليم الطلبية ب${daysPhrase(days, true)}، انقر لمعرفه المزيد`,
       ),
     };
   }
