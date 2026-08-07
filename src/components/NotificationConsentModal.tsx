@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import {
+  enablePush,
   isInstalledPWA,
-  requestPushPermissionAndSubscribe,
+  pushFailureText,
+  type PushFailure,
 } from "@/lib/push-client";
 
 const DISMISS_KEY = "wasla_push_prompt_dismissed_at";
@@ -65,6 +67,9 @@ export function NotificationConsentModal() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  /* Shown in place of closing. A refusal that closes the sheet is a
+     refusal nobody can report. */
+  const [failure, setFailure] = useState<{ reason: PushFailure; detail?: string } | null>(null);
   const lang =
     typeof document !== "undefined" && document.documentElement.lang === "ar"
       ? "ar"
@@ -126,17 +131,23 @@ export function NotificationConsentModal() {
 
   const enable = async () => {
     setBusy(true);
+    setFailure(null);
     try {
-      await requestPushPermissionAndSubscribe(user.id);
+      const outcome = await enablePush(user.id);
+      if (!outcome.ok) {
+        /* Stays open, saying why. The whole point of this rewrite. */
+        setFailure({ reason: outcome.reason, detail: outcome.detail });
+        return;
+      }
       try {
         localStorage.removeItem(DISMISS_KEY);
         localStorage.removeItem(DISMISS_VISITS_KEY);
       } catch {
         /* ignore */
       }
+      setOpen(false);
     } finally {
       setBusy(false);
-      setOpen(false);
     }
   };
 
@@ -198,6 +209,30 @@ export function NotificationConsentModal() {
         <p style={{ margin: "6px 0 18px", fontSize: 14, opacity: 0.85, lineHeight: 1.45 }}>
           {t.body}
         </p>
+        {/* The reason, on the sheet, in the reader's language — plus the
+            browser's own words underneath, which are what identifies the
+            fault when somebody reports it. */}
+        {failure && (
+          <div
+            style={{
+              margin: "0 0 14px", padding: "10px 12px", borderRadius: 12,
+              background: "rgba(224,112,112,0.12)", border: "1px solid rgba(224,112,112,0.35)",
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.45 }}>
+              {pushFailureText(failure.reason, lang === "ar")}
+            </p>
+            {failure.detail && (
+              <p
+                data-no-i18n
+                style={{ margin: "6px 0 0", fontSize: 11, opacity: 0.65, wordBreak: "break-word", direction: "ltr", textAlign: "left" }}
+              >
+                {failure.reason}: {failure.detail}
+              </p>
+            )}
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: 10 }}>
           <button
             onClick={dismiss}
