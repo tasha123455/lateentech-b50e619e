@@ -30,11 +30,21 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
-// Configuration
+/* Configuration
+ *
+ * The site moved to wassla.online and these followed it, but they are not the
+ * same kind of setting as the site's address: mail is only delivered from a
+ * domain the mail provider has been shown DNS records for. Changing the words
+ * here does not create those records. Until the new domain is verified — and
+ * `notify.` under it — sending will fail however this reads, which is why each
+ * one can be overridden from the environment without a deploy.
+ *
+ * Sign-in is Google-only, so nothing here is on the critical path for getting
+ * into the app; it is address changes, recovery and the like. */
 const SITE_NAME = "Wasla"
-const SENDER_DOMAIN = "notify.www.lateen.online"
-const ROOT_DOMAIN = "www.lateen.online"
-const FROM_DOMAIN = "www.lateen.online"
+const SENDER_DOMAIN = process.env.MAIL_SENDER_DOMAIN || "notify.wassla.online"
+const ROOT_DOMAIN = process.env.SITE_DOMAIN || "wassla.online"
+const FROM_DOMAIN = process.env.MAIL_FROM_DOMAIN || "wassla.online"
 
 function redactEmail(email: string | null | undefined): string {
   if (!email) return '***'

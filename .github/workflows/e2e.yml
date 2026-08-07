@@ -62,7 +62,7 @@ jobs:
       - name: Run the tests
         working-directory: e2e
         env:
-          WASLA_URL: ${{ inputs.url || 'https://www.lateen.online' }}
+          WASLA_URL: ${{ inputs.url || 'https://wassla.online' }}
           # One secret is enough: with it the run makes its own three accounts
           # before testing (see e2e/global-setup.ts). Absent, every signed-in
           # test skips itself and the run still reports honestly on everything

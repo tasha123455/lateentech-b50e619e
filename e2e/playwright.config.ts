@@ -30,7 +30,7 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   reporter: [["html", { open: "never", outputFolder: "report" }], ["list"]],
   use: {
-    baseURL: process.env.WASLA_URL || "https://www.lateen.online",
+    baseURL: process.env.WASLA_URL || "https://wassla.online",
     /* Containers and CI images often ship a browser already. Point at it with
        WASLA_CHROMIUM rather than downloading a second copy; unset, Playwright
        uses whatever `npx playwright install` put in place, which is what a
