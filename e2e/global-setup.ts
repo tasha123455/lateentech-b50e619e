@@ -24,6 +24,14 @@ export default async function globalSetup() {
       if (!process.env[`WASLA_${key}_PASSWORD`]) process.env[`WASLA_${key}_PASSWORD`] = who.password;
       console.log(`[accounts] ${role}: ${who.email}`);
     }
+  } catch (e) {
+    /* Not fatal. Throwing here ends the whole run before a single test starts,
+       which is how a run asking only "can this browser subscribe to push" —
+       a question needing no account at all — died in setup with nothing to
+       show for it. Not being able to make accounts should cost exactly the
+       tests that need accounts, and those skip themselves when the
+       credentials are absent. */
+    console.warn(`[accounts] could not be prepared, so the signed-in tests will skip: ${String(e)}`);
   } finally {
     await api.dispose();
   }
