@@ -19,6 +19,7 @@ on:
         options:
           - public        # no account needed — always safe to run
           - all           # everything, needs an account to sign in with
+          - push          # only: can this browser subscribe to push, and if not, why
       url:
         description: "Site to test (blank = the live site)"
         type: string
@@ -82,11 +83,12 @@ jobs:
           # this site has customers that must not happen by default.
           WASLA_WRITES: ${{ inputs.writes && '1' || '' }}
         run: |
-          if [ "${{ inputs.suite }}" = "all" ]; then
-            npx playwright test
-          else
-            npx playwright test specs/public.spec.ts
-          fi
+          case "${{ inputs.suite }}" in
+            all)  npx playwright test ;;
+            # Printed rather than asserted: the message is the answer.
+            push) npx playwright test specs/push-subscribe.spec.ts --reporter=list ;;
+            *)    npx playwright test specs/public.spec.ts ;;
+          esac
 
       # Always — a failed run is exactly the one whose screenshots are wanted.
       - name: Keep the report and the screenshots
