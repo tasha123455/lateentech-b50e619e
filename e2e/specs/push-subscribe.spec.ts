@@ -21,28 +21,17 @@
  */
 
 import { expect, test } from "../lib/test";
-import { account, backend } from "../lib/accounts";
 
 test("what happens when this browser subscribes to push", async ({ page, context }) => {
-  test.skip(!account("marketer"), "set WASLA_MARKETER_EMAIL / _PASSWORD to run this");
+  /* No account. Subscribing is a conversation between the browser and the push
+     service — being signed in only matters for the row that gets written
+     afterwards, and the row is not the part that is failing. Requiring an
+     account is why the first run of this skipped and answered nothing. */
   test.skip(!!process.env.WASLA_RELAY, "needs a browser with its own connection — the relay cannot carry a push subscription");
 
   await context.grantPermissions(["notifications"]);
 
-  /* Signed in, because persistSubscription writes the row as the user. */
-  const be = backend()!;
-  const who = account("marketer")!;
-  const res = await page.request.post(`${be.url}/auth/v1/token?grant_type=password`, {
-    headers: { apikey: be.key, "Content-Type": "application/json" },
-    data: { email: who.email, password: who.password },
-  });
-  const session = await res.json();
-  const ref = new URL(be.url).hostname.split(".")[0];
-  await page.addInitScript(([k, v]) => {
-    try { localStorage.setItem(k, v); localStorage.setItem("lateen_lang", "en"); } catch { /* ignore */ }
-  }, [`sb-${ref}-auth-token`, JSON.stringify(session)] as const);
-
-  await page.goto("/en/dashboard");
+  await page.goto("/en");
   await page.waitForTimeout(4000);
 
   const report = await page.evaluate(async () => {
@@ -84,9 +73,6 @@ test("what happens when this browser subscribes to push", async ({ page, context
       step.endpointHost = json.endpoint ? new URL(json.endpoint).host : null;
       step.hasKeys = !!(json.keys?.p256dh && json.keys?.auth);
 
-      // And the part that writes it down, which is what the server reads.
-      const { supabase } = await import("/src/integrations/supabase/client.ts").catch(() => ({ supabase: null })) as { supabase: unknown };
-      step.couldImportClient = !!supabase;
     } catch (e) {
       step.threw = String(e);
       step.name = (e as Error)?.name;
