@@ -84,6 +84,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "theme-color", content: "#080808" },
+      // iOS ignores the manifest's "display": "standalone" unless this is
+      // also present — without it, "Add to Home Screen" just bookmarks the
+      // page instead of installing it as a standalone app. That's also why
+      // the home screen icon and the OS app badge weren't showing: iOS only
+      // grants either once it recognizes the site as an installed app.
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black" },
+      { name: "apple-mobile-web-app-title", content: "Wasla" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
