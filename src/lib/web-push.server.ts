@@ -188,7 +188,7 @@ export async function sendWebPush(
 export function readVapidKeysFromEnv(): VapidKeys | null {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateJwkRaw = process.env.VAPID_PRIVATE_KEY_JWK;
-  const subject = process.env.VAPID_SUBJECT || "mailto:support@lateen.online";
+  const subject = process.env.VAPID_SUBJECT || "mailto:support@wassla.online";
   if (!publicKey || !privateJwkRaw) return null;
   try {
     const privateKeyJwk = JSON.parse(privateJwkRaw) as JsonWebKey;
