@@ -140,6 +140,7 @@ export function MenuDrawer({
           className="adm-menu-item"
           labelClassName="adm-menu-label"
           subClassName="adm-menu-sub"
+          iconTint="adm-menu-icon"
         />
 
         {/* Same switch the business and marketer menus carry, driven by the
