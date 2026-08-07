@@ -6,7 +6,6 @@ import { useAuth } from "@/auth/AuthContext";
 import { useBusinessData } from "../BusinessDataProvider";
 import { isAr } from "../lib/format";
 import { ListerIcon } from "./ProductListerOverlay";
-import { NotificationsMenuRow } from "@/components/NotificationsMenuRow";
 
 export function MenuDrawer({
   open,
@@ -92,8 +91,6 @@ export function MenuDrawer({
             says so on its face. The subtitle is what the service does, not what
             it is called, because the name alone does not tell a shop owner why
             they would want it. */}
-        <NotificationsMenuRow ar={ar} />
-
         <div className="menu-item" onClick={onOpenLister} role="button" tabIndex={0}>
           <div className="menu-icon-wrap mi-rose">
             <ListerIcon size={18} />
