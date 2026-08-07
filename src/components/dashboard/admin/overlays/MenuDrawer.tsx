@@ -1,6 +1,7 @@
 import { useAdminData } from "../AdminDataProvider";
 import { canOpen } from "../lib/access";
 import { empPayableCount } from "../lib/employees";
+import { NotificationsMenuRow } from "@/components/NotificationsMenuRow";
 
 /** Everything waiting anywhere in the admin, in one place: the Requests slot
  *  in the nav badges its own two lists, and the Menu slot badges the total of
@@ -133,6 +134,13 @@ export function MenuDrawer({
             </svg>
           </button>
         ))}
+
+        <NotificationsMenuRow
+          ar={ar}
+          className="adm-menu-item"
+          labelClassName="adm-menu-label"
+          subClassName="adm-menu-sub"
+        />
 
         {/* Same switch the business and marketer menus carry, driven by the
             same global toggle the language layout installs. */}

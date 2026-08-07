@@ -4,6 +4,7 @@ import { useScrollLock } from "@/lib/useScrollLock";
 import { useMarketerData } from "../MarketerDataProvider";
 import { isAr } from "../lib/format";
 import { Avatar } from "../ui/Avatar";
+import { NotificationsMenuRow } from "@/components/NotificationsMenuRow";
 
 export function MenuDrawer({
   open, onClose, onOpenProfile, onOpenPointsSoon, onSignOut, signingOut,
@@ -66,6 +67,8 @@ export function MenuDrawer({
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </div>
+
+        <NotificationsMenuRow ar={ar} />
 
         <div className="menu-item" onClick={onOpenPointsSoon} role="button" tabIndex={0}>
           <div className="menu-icon-wrap mi-amber">
