@@ -43,8 +43,8 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
  * into the app; it is address changes, recovery and the like. */
 const SITE_NAME = "Wasla"
 const SENDER_DOMAIN = process.env.MAIL_SENDER_DOMAIN || "notify.wassla.online"
-const ROOT_DOMAIN = process.env.SITE_DOMAIN || "wassla.online"
-const FROM_DOMAIN = process.env.MAIL_FROM_DOMAIN || "wassla.online"
+const ROOT_DOMAIN = process.env.SITE_DOMAIN || "www.wassla.online"
+const FROM_DOMAIN = process.env.MAIL_FROM_DOMAIN || "www.wassla.online"
 
 function redactEmail(email: string | null | undefined): string {
   if (!email) return '***'

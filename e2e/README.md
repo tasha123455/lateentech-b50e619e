@@ -18,7 +18,7 @@ npm test                          # against the live site
 npm run report                    # opens the HTML report with screenshots
 ```
 
-By default it points at `https://wassla.online`. Point it somewhere else
+By default it points at `https://www.wassla.online`. Point it somewhere else
 with `WASLA_URL=http://127.0.0.1:5199 npm test`.
 
 ## Signing in
@@ -152,7 +152,7 @@ pointed at. `WASLA_RELAY=1` fetches the page's requests from node and hands
 them to the browser, which is enough to drive the live site from inside one:
 
 ```bash
-WASLA_RELAY=1 WASLA_URL=https://wassla.online npm test
+WASLA_RELAY=1 WASLA_URL=https://www.wassla.online npm test
 ```
 
 Off unless asked for. On a laptop, or on a CI runner, the browser has its own
@@ -170,7 +170,7 @@ it at the one that is already there instead:
 
 ```bash
 WASLA_CHROMIUM=/opt/pw-browsers/chromium WASLA_RELAY=1 \
-WASLA_URL=https://wassla.online npm test
+WASLA_URL=https://www.wassla.online npm test
 ```
 
 ## Running it without a computer
